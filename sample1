@@ -1,2 +1,256 @@
+import { CommonModule } from '@angular/common';
+import { Component } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { faPen, faRectangleList } from '@fortawesome/free-solid-svg-icons';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { Store } from '@ngrx/store';
+import { SetAllBnCodingData } from 'src/app/ngrx/actions/bn-coding.action';
+import { RootReducerState } from 'src/app/ngrx/reducers';
+import { BNCoding } from 'src/app/shared/models/bnCoding.interface';
+import { TableSettings } from 'src/app/shared/models/table.interface';
+import { BnCodingService } from 'src/app/shared/services/bnCoding/bnCoding.service';
+import { SpinnerService } from 'src/app/shared/services/spinner.service';
+import { ToastService } from 'src/app/shared/services/toast.service';
+import { SharedModule } from 'src/app/shared/shared.module';
+import { BNCodingModalComponent } from './bn-coding-modal/bn-coding-modal.component';
 
-console.log(selectedRows)
+@Component({
+    selector: 'app-bn-coding',
+    templateUrl: './bn-coding.component.html',
+    standalone: true,
+    imports: [CommonModule, FontAwesomeModule, SharedModule, FormsModule],
+  })
+  export class BNCodingComponent  {
+    faPen = faPen;
+    bnCodingList: BNCoding[] = [];
+    tableSettings: TableSettings = {
+    tableClass: ['table', 'table-striped', 'caption-top'],
+    headerClass: ['table-light'],
+    column: [
+      {
+        primaryKey: 'category',
+        header: 'Category'
+      },
+      {
+        primaryKey: 'groupSelection',
+        header: 'Group Selection'
+      },
+      {
+        primaryKey: 'scrTypeCode',
+        header: 'SCR_TYPE_CODE '
+      },
+      {
+        primaryKey: 'screenerCoding',
+        header: 'Screener Coding',
+        // subColumns:[
+        //   {subKey:'calc',subHeader:'Calc'},
+        //   {subKey:'scrLimit',subHeader:'SCR_Limit'}
+        // ]
+      },
+      {
+        primaryKey: 'bnCoding',
+        header: 'BN Coding'
+      }
+    ],
+    // showSubSections:true,
+  action:[
+    {
+      title: 'Edit',
+      icon: faPen,
+      class: ['btn', 'btn-sm', 'btn-outline-primary', 'float-right', 'me-2'],
+      params: ['bnCodingTableID', 'category', 'groupSelection', 'scrTypeCode','screenerCoding','bnCoding','effectiveDate','termDate'],
+      func: (bnCodingTableID: number, category: string, groupSelection: string, scrTypeCode: string,screenerCoding:object,bnCoding:object) => {
+        this.openBnCodingModal(bnCodingTableID, category, groupSelection, scrTypeCode,screenerCoding, bnCoding);
+      }
+    },
+  ]
+}
+
+constructor(
+ public bnCodingService: BnCodingService,
+  public modalService: NgbModal,
+  private spinnerService: SpinnerService,
+  private toastService: ToastService,
+  private store: Store<RootReducerState>,
+  private router: Router
+) {
+}
+ngOnInit() {
+      this.mapToBnCoding();
+   }
+    mapToBnCoding() {
+      this.bnCodingService.getAllBnCoding().subscribe((result:any) => {
+        if(result){
+          this.bnCodingList = result
+          this.store.dispatch(new SetAllBnCodingData({ data: result }))
+          this.spinnerService.hideSpinner();
+        }
+      });
+    }
+openBnCodingModal(bnCodingTableID?: number, category?: string, groupSelection?: string, scrTypeCode?: string,screenerCoding?: object,bnCoding?:object) {
+  const modalRef = this.modalService.open(BNCodingModalComponent);
+  if (bnCodingTableID) {
+    const bnCodingTable =  {
+      bnCodingTableID,
+      category,
+      groupSelection,
+      scrTypeCode,
+      screenerCoding,
+      bnCoding
+    }
+    modalRef.componentInstance.setForm(bnCodingTable);
+  }
+  modalRef.result.then(result => {
+    if (result?.isGetApiCallNeeded) {
+      this.mapToBnCoding();
+    }
+  });
+}
+}
+
+
+
+html for ts file above
+
+<div>
+    <div class="row">
+        <div class="button-container mb-2">
+            <button class="btn btn-outline-success btn-sm float-end" (click)="openBnCodingModal()">Add BN Coding</button>
+        </div>
+    </div>
+    
+    <div class="row">
+        <app-table
+            [title]="'BN Coding'"
+            [records]="bnCodingList"
+            [table]="tableSettings"
+            [showTitle]="true"
+            [editable]="false"
+            [paginate]="true"
+        ></app-table>
+    </div>
+</div>
+
+
+html for app- table component
+
+<h3 class="d-inline-block" *ngIf="showTitle">{{title}}</h3>
+<span *ngIf="paginate" class="float-end mb-3">
+    <table-management-page
+        [(page)]="page"
+        [pageSize]="pageSize"
+        [listSize]="records.length"
+        >
+    </table-management-page>
+</span>
+
+<table class="{{table.tableClass}}">
+    <thead class="{{table.headerClass}}">
+        <tr>
+            <th *ngFor="let map of columnMaps">{{map.header}}</th>
+            <th *ngIf="editable" [appStyleCell]="title">Actions</th>
+            <th *ngIf="table.action!.length" [appStyleCell]="title">{{actionHeader}}</th>
+        </tr>
+    </thead>
+    <tbody>
+        <ng-container *ngIf="!editable">
+            <tr *ngFor="let record of records | slice : (page - 1) * pageSize : page * pageSize let i = index;">
+                <td *ngFor="let column of table.column">
+                    <span *ngIf="!column.pipe">
+                        {{ record[column.primaryKey] }}
+                    </span>
+                    <span *ngIf="column.pipe">
+                        {{format(record[column.primaryKey], column.pipe) }}
+                    </span>
+                </td>
+                <td *ngIf="table.action!.length">
+                    <ng-container *ngFor="let action of table.action">
+                        <button
+                            (click)="actionClick(record, action.func, action.params)"
+                            class="{{action.class}}"
+                        >
+                            <fa-icon [icon]="action.icon" *ngIf="action.icon"></fa-icon>
+                            <span *ngIf="action.title && action.showTitle">{{action.title}}</span>
+                        </button>
+                    </ng-container>
+                </td>
+            </tr>
+        </ng-container>
+        
+        <ng-container *ngIf="editable">
+            <tr *ngFor="let record of records | slice : (page - 1) * pageSize : page * pageSize; let i = index; "
+                app-table-row 
+                [record]="record" 
+                [index]="i" 
+                [columnMaps]="columnMaps"
+                [editable]="editable"
+                (saveValue)="saveRecord($event)"
+                (deleteValue)="deleteRecord($event)"
+            >
+            </tr>
+        </ng-container>
+    </tbody>
+</table>
+<span *ngIf="paginate" class="float-end mb-3">
+    <table-management-page
+        [(page)]="page"
+        [pageSize]="pageSize"
+        [listSize]="records.length"
+    >
+    </table-management-page>
+</span>
+
+
+html for app-table-row
+
+    <td 
+        *ngFor="let map of columnMaps"
+        id="{{map.header}}-{{index}}"
+        [appStyleCell]="record[map.primaryKey]"
+        [key]="map.primaryKey"
+    >
+        <div class="input-group" *ngIf="!map.subColumns">
+            <input 
+                [ngClass]="{'form-control-plaintext': !editingRow, 'form-control': editingRow}"
+                [(ngModel)]="record[map.primaryKey]"
+                type="text"
+                name="{{record[map.primaryKey]}}" 
+                id="{{map.header}}-{{index}}" 
+                [value]="record[map.primaryKey]" 
+                [disabled]="!editingRow"
+            >
+        </div>
+        <!-- <div class="input-group" *ngIf="map.subColumns">
+            <div *ngFor="let subColumn of map.subColumns" class="input-group">
+                <span class="subHeader">{{subColumn.subHeader}}</span>
+            <input 
+                [ngClass]="{'form-control-plaintext': !editingRow, 'form-control': editingRow}"
+                [(ngModel)]="record[map.primaryKey][subColumn.subKey]"
+                type="text"
+                name="{{record[map.primaryKey][subColumn.subKey]}}" 
+                [value]="record[map.primaryKey][subColumn.subKey]" 
+                [disabled]="!editingRow"
+            >
+            </div>
+        </div> -->
+    </td>
+    <td *ngIf="editable">
+        <div class="button-container" *ngIf="!editingRow">
+            <button class="btn btn-outline-primary btn-sm me-2" (click)="toggleEditable()">
+                <fa-icon [icon]="faPenToSquare"></fa-icon>
+            </button>
+            <button class="btn btn-outline-danger btn-sm me-2" (click)="deleteRecord()">
+                <fa-icon [icon]="faTrashCan"></fa-icon>
+            </button>
+        </div>
+        <div class="button-container" *ngIf="editingRow">
+            <button class="btn btn-outline-success btn-sm me-2" (click)="saveRecord()">
+                <fa-icon [icon]="faCheck"></fa-icon>
+            </button>
+            <button class="btn btn-outline-danger btn-sm me-2" (click)="cancelEditing()">
+                <fa-icon [icon]="faX"></fa-icon>
+            </button>
+        </div>
+    </td>
