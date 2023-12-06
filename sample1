@@ -1,47 +1,69 @@
-import { IconProp } from "@fortawesome/fontawesome-svg-core";
-
-export interface TableSettings {
-    column: ColumnSetings[];
-    action?: ActionSettings[];
-    tableClass?: string[]
-    headerClass?: string[];
-    // showSubSections?:boolean;
-}
-
-export interface ColumnSetings {
-    primaryKey: string;
-    header?: string;
-    format?: PipeFormatNum;
-    pipe?: any;
-    // subColumns?: SubColumnSettings[] ;
-}
-// export interface SubColumnSettings{
-//     subKey:string;
-//     subHeader?:string;
-//     subFormat?: PipeFormatNum;
-//     subPipe?:any;
-// }
-
-export interface ActionSettings {
-    title: string;
-    showTitle?: boolean;
-    icon?: IconProp;
-    func: any;
-    class?: string[];
-    params: object;
-    editingRow?: boolean;
-}
-
-export enum PipeFormatNum {
-    DEFAULT, //0
-    CURRENCY, //1
-    DATE, //2
-    PERCENTAGE, //3
-    YESNO, //3
-}
-
-export enum Actions {
-    ADD,
-    EDIT,
-    DELETE,
-}
+<app-spinner *ngIf="showSpinner"></app-spinner>
+<app-toast-container class="d-flex justify-content-center align-items-center w-100" aria-live="polite"
+    aria-atomic="true">
+</app-toast-container>
+<div class="field-management-page">
+    <app-header></app-header>
+    <div class="text-primary" style="margin: 2em">
+            <h1 class="col-12">
+                <fa-icon [icon]="faRectangleList"></fa-icon> Field Management
+            </h1>
+        </div>
+        <div class="shadow-lg p-3 mb-5 bg-white rounded" style="margin: 2em; position: relative">
+            <div class="row" style="padding-top: 1em">
+                <div class="col">
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-success btn-sm" type="button" data-bs-toggle="modal"
+                            (click)="onAdd()">
+                            <fa-icon [icon]="faPlusCircle"></fa-icon> Create
+                        </button>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-primary btn-sm" role="button" [disabled]="disabledButtonEdit"
+                            (click)="onEdit()">
+                            <fa-icon [icon]="faPenToSquare"></fa-icon> Edit
+                        </button>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-danger btn-sm" type="button" [disabled]="disabledButtonDelete"
+                            (click)="openDeleteConfirmationModal()">
+                            <fa-icon [icon]="faTrash"></fa-icon>
+                            Delete
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <input type="text" class="form-control" style="width: 30%; margin-top: 0.5em" id="searchField"
+                placeholder="Search..." (input)="onSearchChange($event)" />
+            <div class="row">
+                <div id="datatable" style="margin-top: 1em">
+                    <style></style>
+                </div>
+            </div>
+        </div>
+        <button class="btn btn-primary btn-md position-fixed bottom-0 start-0 rounded-circle" type="button" data-bs-toggle="offcanvas"
+   data-bs-target="#offcanvasExample" aria-controls="offcanvasExample">
+<fa-icon [icon]="faArrowRight" class="text-white"></fa-icon>
+</button>
+        <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasExample"
+            aria-labelledby="offcanvasExampleLabel">
+            <div class="offcanvas-header">
+                <h5 class="offcanvas-title visually-hidden" id="offcanvasExampleLabel">Navigation Menu</h5>
+                <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"
+                    aria-label="Close"></button>
+            </div>
+            <div class="offcanvas-body">
+                <ul class="list-group">
+                    <li class="list-group-item"><a [routerLink]="['/buildYourOwnForm']" class="nav-link">Dashboard</a></li>
+                    <li class="list-group-item"><a [routerLink]="['/buildYourOwnForm/fieldManagement']" class="nav-link">Field
+                            Management</a></li>
+                    <li class="list-group-item"><a [routerLink]="['/buildYourOwnForm/templateManagement']" class="nav-link">Template
+                            Management</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
