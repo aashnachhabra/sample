@@ -1,416 +1,510 @@
-this.is the array of object i am getting in bncoding list
-[{
-        "id": "656efcc12cc36262e02b5669",
-        "bnCodingTableID": 5,
-        "category": "abcd4",
-        "groupSelection": "groupSelection",
-        "scrTypeCode": "S",
-        "screenerCoding": {
-            "calc": "calc",
-            "scrLimit": "scrLimit",
-            "spec": "spec",
-            "tier": "tier",
-            "posTos": "posTos",
-            "tod": "tod",
-            "age": "age",
-            "prcd": "prcd",
-            "diag": "diag",
-            "prvd": "prvd",
-            "dsg": "dsg"
-        },
-        "bnCoding": {
-            "bn": "bn",
-            "calc": "calc",
-            "bnLimit1": "bnLimit1",
-            "bnLimit2": "bnLimit2",
-            "spec": "spec",
-            "participation": "participation",
-            "tier": "tier",
-            "posTos": "posTos",
-            "tod": "tod",
-            "apCode": "apCode",
-            "age": "age",
-            "inDivLim": "inDivLim",
-            "dollarPerUnit": "dollarPerUnit",
-            "brn": "brn",
-            "prcd": "prcd",
-            "diag": "diag",
-            "prvd": "prvd",
-            "dsg": "dsg"
-        },
-        "isCurrent": true,
-        "updatedBy": null,
-        "createdOn": "2023-12-05T16:04:40.977",
-        "modifiedOn": null
-    }
-]
-
-this is my ts and html file
-
-import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Component, Input, OnInit, NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { SharedModule } from 'src/app/shared/shared.module';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { faPen, faRectangleList } from '@fortawesome/free-solid-svg-icons';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { Store } from '@ngrx/store';
-import { SetAllBnCodingData } from 'src/app/ngrx/actions/bn-coding.action';
-import { RootReducerState } from 'src/app/ngrx/reducers';
-import { BNCoding } from 'src/app/shared/models/bnCoding.interface';
-import { TableSettings } from 'src/app/shared/models/table.interface';
-import { BnCodingService } from 'src/app/shared/services/table-management/bn-coding/bnCoding.service';
+import { FieldManagementService } from 'src/app/shared/services/field-management/field-management.service';
+import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { SpinnerService } from 'src/app/shared/services/spinner.service';
 import { ToastService } from 'src/app/shared/services/toast.service';
-import { SharedModule } from 'src/app/shared/shared.module';
-import { BNCodingModalComponent } from './bn-coding-modal/bn-coding-modal.component';
+import { Subscription } from 'rxjs';
+import { Store } from '@ngrx/store';
+import { getSelectedFieldDetails, RootReducerState } from 'src/app/ngrx/reducers';
+import { faMinusSquare } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
-    selector: 'app-bn-coding',
-    templateUrl: './bn-coding.component.html',
-    standalone: true,
-    imports: [CommonModule, FontAwesomeModule, SharedModule, FormsModule],
-  })
-  export class BNCodingComponent  {
-    faPen = faPen;
-    bnCodingList: BNCoding[] = [];
-    tableSettings: TableSettings = {
-    tableClass: ['table', 'table-striped', 'caption-top'],
-    headerClass: ['table-light'],
-    column: [
-      {
-        primaryKey: 'category',
-        header: 'Category'
-      },
-      {
-        primaryKey: 'groupSelection',
-        header: 'Group Selection'
-      },
-      {
-        primaryKey: 'scrTypeCode',
-        header: 'SCR_TYPE_CODE '
-      },
-      {
-        primaryKey: 'screenerCoding.calc',
-        header: 'SCR_Calc',
-      },
-      {
-        primaryKey: 'screenerCoding.scrLimit',
-        header: 'SCR_Limit',
-      },
-      {
-        primaryKey: 'bnCoding.bn',
-        header: 'BN'
-      },
-      {
-        primaryKey: 'bnCoding.calc',
-        header: 'BN_Calc'
-      },
-      {
-        primaryKey: 'bnCoding.bnLimit1',
-        header: 'BN Limit 1'
-      }
-    ],
-  action:[
-    {
-      title: 'Edit',
-      icon: faPen,
-      class: ['btn', 'btn-sm', 'btn-outline-primary', 'float-right', 'me-2'],
-      params: ['bnCodingTableID', 'category', 'groupSelection', 'scrTypeCode','screenerCoding','bnCoding'],
-      func: (bnCodingTableID: number, category: string, groupSelection: string, scrTypeCode: string,screenerCoding:object,bnCoding:object) => {
-        this.openBnCodingModal(bnCodingTableID, category, groupSelection, scrTypeCode,screenerCoding, bnCoding);
-      }
-    },
-  ]
-}
-
-constructor(
- public bnCodingService: BnCodingService,
-  public modalService: NgbModal,
-  private spinnerService: SpinnerService,
-  private toastService: ToastService,
-  private store: Store<RootReducerState>,
-  private router: Router
-) {
-}
-ngOnInit() {
-      this.mapToBnCoding();
-   }
-    mapToBnCoding() {
-      this.bnCodingService.getAllBnCoding().subscribe((result:any) => {
-        if(result){
-          this.bnCodingList = result
-          this.store.dispatch(new SetAllBnCodingData({ data: result }))
-          this.spinnerService.hideSpinner();
+  selector: 'app-edit-field-management',
+  templateUrl: './edit-field-management.component.html',
+  standalone: true,
+  imports: [SharedModule, FontAwesomeModule, CommonModule, FormsModule],
+})
+export class EditFieldManagementComponent implements OnInit {
+  @Input() fieldData: any;
+  selectedFieldId: any;
+  isSubmitted = false;
+  fieldDetailSub!: Subscription;
+  allFieldDetailSub!: Subscription
+  allFieldData: any;
+  filteredSelectedFieldData: any
+  fieldName: any
+  sectionHeader: any
+  questionHeader: any
+  productHeader: any
+  selectedInputFieldType: any;
+  fieldHelpText: any
+  selectedFields: any
+  textBoxOptionName: any
+  modifiedBy: any;
+  modifiedOn: any;
+  dropDownOptions = false;
+  checkBoxOptions = false;
+  radioButtonOptions = false;
+  updatedFieldManagement: any = {}
+  selectedFieldType = '';
+  display = false;
+  faMinusSquare = faMinusSquare;
+  constructor(public activeModal: NgbActiveModal,
+    private spinnerService: SpinnerService,
+    private toastService: ToastService,
+    public fieldManagementService: FieldManagementService,
+    private store: Store<RootReducerState>
+  ) { }
+  selectedField = ''
+  ngOnInit(): void {
+    this.fieldDetailSub = this.store
+      .select(getSelectedFieldDetails)
+      .subscribe((data: any) => {
+        if (data) {
+          this.filteredSelectedFieldData = data
         }
       });
+    this.fieldData = this.filteredSelectedFieldData
+    this.fieldHelpText = this.filteredSelectedFieldData.fieldHelpText
+    this.fieldName = this.filteredSelectedFieldData.fieldName
+    this.sectionHeader = this.filteredSelectedFieldData.sectionHeader
+    this.productHeader = this.filteredSelectedFieldData.productHeader
+    this.questionHeader = this.filteredSelectedFieldData.questionHeader
+    this.selectedInputFieldType = this.filteredSelectedFieldData.textBoxOptions?.textBoxOptionName
+    if (this.fieldData.isTextBox == true)
+      this.selectedFieldType = 'Textbox';
+    else if (this.fieldData.isTextArea == true)
+      this.selectedFieldType = 'Textarea';
+    else if (this.fieldData.isCheckBox == true) {
+      this.selectedFieldType = 'Checkbox'
+      this.checkBoxOptions = true
+      this.optionsArray = [...this.filteredSelectedFieldData.checkBoxOptionsList]
     }
-openBnCodingModal(bnCodingTableID?: number, category?: string, groupSelection?: string, scrTypeCode?: string,screenerCoding?: object,bnCoding?:object) {
-  const modalRef = this.modalService.open(BNCodingModalComponent);
-  if (bnCodingTableID) {
-    const bnCodingTable =  {
-      bnCodingTableID,
-      category,
-      groupSelection,
-      scrTypeCode,
-      screenerCoding,
-      bnCoding
+    else if (this.fieldData.isRadioButton == true) {
+      this.selectedFieldType = 'Radio Button'
+      this.radioButtonOptions = true
+      this.optionsArray = [...this.filteredSelectedFieldData.radioButtonOptionsList]
     }
-    modalRef.componentInstance.setForm(bnCodingTable);
+    else if (this.fieldData.isDropDown == true) {
+      this.selectedFieldType = 'Dropdown'
+      this.dropDownOptions = true
+      this.optionsArray = [...this.filteredSelectedFieldData.dropDownOptionsList]
+    }
+
   }
-  modalRef.result.then(result => {
-    if (result?.isGetApiCallNeeded) {
-      this.mapToBnCoding();
+  ngOnDestroy() {
+    if (this.fieldDetailSub) this.fieldDetailSub.unsubscribe();
+  }
+  options: string[] = [
+    'Textbox',
+    'Textarea',
+    'Dropdown',
+    'Checkbox',
+    'Radio Button',
+  ];
+  boxOptions: string[] = [
+    'Text',
+    'Date',
+    'Email',
+    'URL',
+    'Number',
+    'Range',
+    'Password',
+    'Telephone Number',
+    'Time',
+    'File',
+    'Currency'
+  ]
+
+  onSelectedFieldType(value: string): void {
+    this.selectedFieldType = value;
+    if (this.selectedFieldType == 'Textbox') {
+      this.fieldData = { ...this.fieldData, isTextBox: true }
+      this.fieldData = { ...this.fieldData, isTextArea: false }
+      this.fieldData = { ...this.fieldData, isDropDown: false }
+      this.fieldData = { ...this.fieldData, isCheckBox: false }
+      this.fieldData = { ...this.fieldData, isRadioButton: false }
+      this.fieldData = { ...this.fieldData, textBoxOptions: { textBoxOptionName: '' } }
+      this.display = true;
+      this.dropDownOptions = false;
+      this.checkBoxOptions = false;
+      this.radioButtonOptions = false;
     }
-  });
-}
+    else if (this.selectedFieldType == 'Textarea') {
+      this.fieldData = { ...this.fieldData, isTextBox: false }
+      this.fieldData = { ...this.fieldData, isTextArea: true }
+      this.fieldData = { ...this.fieldData, isDropDown: false }
+      this.fieldData = { ...this.fieldData, isCheckBox: false }
+      this.fieldData = { ...this.fieldData, isRadioButton: false }
+      this.display = false;
+      this.dropDownOptions = false;
+      this.checkBoxOptions = false;
+      this.radioButtonOptions = false;
+    }
+    else if (this.selectedFieldType == 'Dropdown') {
+      if (this.dropDownOptions == false)
+        this.optionsArray.splice(0, this.optionsArray.length)
+      this.fieldData = { ...this.fieldData, isTextBox: false }
+      this.fieldData = { ...this.fieldData, isTextArea: false }
+      this.fieldData = { ...this.fieldData, isDropDown: true }
+      this.fieldData = { ...this.fieldData, isCheckBox: false }
+      this.fieldData = { ...this.fieldData, isRadioButton: false }
+      this.display = false;
+      this.dropDownOptions = true;
+      this.checkBoxOptions = false;
+      this.radioButtonOptions = false;
+    }
+    else if (this.selectedFieldType == 'Checkbox') {
+      if (this.checkBoxOptions == false)
+        this.optionsArray.splice(0, this.optionsArray.length)
+      this.fieldData = { ...this.fieldData, isTextBox: false }
+      this.fieldData = { ...this.fieldData, isTextArea: false }
+      this.fieldData = { ...this.fieldData, isDropDown: false }
+      this.fieldData = { ...this.fieldData, isCheckBox: true }
+      this.fieldData = { ...this.fieldData, isRadioButton: false }
+      this.display = false;
+      this.checkBoxOptions = true;
+      this.radioButtonOptions = false;
+      this.dropDownOptions = false;
+    }
+    else if (this.selectedFieldType == 'Radio Button') {
+      if (this.radioButtonOptions == false)
+        this.optionsArray.splice(0, this.optionsArray.length)
+      this.fieldData = { ...this.fieldData, isTextBox: false }
+      this.fieldData = { ...this.fieldData, isTextArea: false }
+      this.fieldData = { ...this.fieldData, isDropDown: false }
+      this.fieldData = { ...this.fieldData, isCheckBox: false }
+      this.fieldData = { ...this.fieldData, isRadioButton: true }
+      this.display = false;
+      this.radioButtonOptions = true;
+      this.dropDownOptions = false;
+      this.checkBoxOptions = false;
+    }
+  }
+  onSelectedInputFieldOption(value: string): void {
+    this.selectedInputFieldType = value;
+    if (this.selectedFieldType == 'Textbox') {
+      this.fieldData = { ...this.fieldData, textBoxOptions: { textBoxOptionName: this.selectedInputFieldType } }
+    }
+    else if (this.selectedFieldType == 'Dropdown') {
+      this.fieldData = { ...this.fieldData, dropdownOptionsList: [...this.optionsArray] }
+    }
+    else if (this.selectedFieldType == 'Checkbox') {
+      this.fieldData = { ...this.fieldData, checkBoxOptionsList: [...this.optionsArray] }
+    }
+    else if (this.selectedFieldType == 'Radio Button') {
+      this.fieldData = { ...this.fieldData, radioButtonOptionsList: [...this.optionsArray] }
+    }
+  }
+  public optionsArray: Array<any> = [];
+  public deletedOptionsArray: Array<any> = [];
+  addedDropdownOptions = {
+    dropDownOptionName: '',
+    isCurrent: true
+  }
+  addedCheckboxOptions = {
+    checkBoxOptionName: '',
+    isCurrent: true
+  }
+  addedRadiobuttonOptions = {
+    radioButtonOptionName: '',
+    isCurrent: true
+  }
+  addFieldValue() {
+    if (this.dropDownOptions) {
+      this.optionsArray.push(this.addedDropdownOptions)
+      this.addedDropdownOptions = {
+        dropDownOptionName: '',
+        isCurrent: true
+      }
+    }
+    else if (this.checkBoxOptions) {
+      this.optionsArray.push(this.addedCheckboxOptions)
+      this.addedCheckboxOptions = {
+        checkBoxOptionName: '',
+        isCurrent: true
+      }
+    }
+    else if (this.radioButtonOptions) {
+      this.optionsArray.push(this.addedRadiobuttonOptions)
+      this.addedRadiobuttonOptions = {
+        radioButtonOptionName: '',
+        isCurrent: true
+      }
+    }
+  }
+  deleteFieldValue(index: number) {
+    const updatedOption = { ...this.optionsArray[index], isCurrent: false };
+    this.deletedOptionsArray.push(updatedOption);
+    this.optionsArray[index] = updatedOption;
+    this.optionsArray.splice(index, 1);
+  }
+  updateField() {
+    if (!this.isValidForm()) {
+      return;
+    }
+    this.spinnerService.showSpinner();
+    if (this.selectedFieldType == 'Textbox')
+      this.updatedFieldManagement = { ...this.fieldData, textBoxOptions: { textBoxOptionName: this.fieldData.textBoxOptions.textBoxOptionName }, fieldHelpText: this.fieldHelpText, fieldName: this.fieldName, sectionHeader: this.sectionHeader, questionHeader: this.questionHeader, productHeader: this.productHeader }
+    else if (this.selectedFieldType == 'Checkbox')
+      this.updatedFieldManagement = { ...this.fieldData, checkBoxOptionsList: [...this.optionsArray, ...this.deletedOptionsArray], fieldHelpText: this.fieldHelpText, fieldName: this.fieldName, sectionHeader: this.sectionHeader, questionHeader: this.questionHeader, productHeader: this.productHeader }
+    else if (this.selectedFieldType == 'Dropdown')
+      this.updatedFieldManagement = { ...this.fieldData, dropDownOptionsList: [...this.optionsArray, ...this.deletedOptionsArray], fieldHelpText: this.fieldHelpText, fieldName: this.fieldName, sectionHeader: this.sectionHeader, questionHeader: this.questionHeader, productHeader: this.productHeader }
+    else if (this.selectedFieldType == 'Radio Button')
+      this.updatedFieldManagement = { ...this.fieldData, radioButtonOptionsList: [...this.optionsArray, ...this.deletedOptionsArray], fieldHelpText: this.fieldHelpText, fieldName: this.fieldName, sectionHeader: this.sectionHeader, questionHeader: this.questionHeader, productHeader: this.productHeader }
+    else
+      this.updatedFieldManagement = { ...this.fieldData, fieldHelpText: this.fieldHelpText, fieldName: this.fieldName, sectionHeader: this.sectionHeader, questionHeader: this.questionHeader, productHeader: this.productHeader }
+    this.fieldManagementService.updateField(this.fieldData.fieldID, this.updatedFieldManagement)
+      .subscribe(() => {
+        this.toastService.showSuccess(`"${this.fieldData.fieldName}" was modified successfully.`);
+        this.activeModal.close({ isGetApiCallNeeded: true, fieldName: this.fieldData.fieldName });
+      })
+    this.isSubmitted = true
+  }
+  isValidForm(): boolean {
+    if (this.fieldName &&
+      this.fieldHelpText &&
+      this.sectionHeader &&
+      this.questionHeader &&
+      this.productHeader &&
+      (this.fieldData.isTextArea || this.fieldData.isTextBox || this.optionsArray.length) &&
+      ((this.fieldData.isTextBox && this.fieldData.textBoxOptions.textBoxOptionName) ||
+        !this.fieldData.isTextBox)) {
+      return true;
+    }
+    else {
+      return false;
+    }
+
+  }
 }
 
 
-<div>
+
+<div class="modal-content">
+    <div class="modal-header">
+        <h5 class="modal-title">Edit Field</h5>
+        <button type="button" class="btn-close" aria-label="Close" (click)="activeModal.dismiss()"></button>
+    </div>
+    <div class="modal-body">
+        <div class="row">
+            <div class="col">
+                <div class="form-floating mb-3">
+                    <input type="text" class="form-control" #fieldNameModel="ngModel" id="fieldName" placeholder="Enter Field Name Here..." [(ngModel)]="fieldName" name="fieldName" required />
+                    <label for="fieldName">Field Name <span class="text-danger">*</span></label
+          >
+          <div
+            *ngIf="
+              fieldNameModel.invalid && (fieldNameModel.touched || isSubmitted)
+            "
+            class="error-message text-danger"
+          >
+            <div *ngIf="fieldHelpTextModel.errors?.['required']">
+              Field Name is required
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
     <div class="row">
-        <div class="button-container mb-2">
-            <button class="btn btn-outline-success btn-sm float-end" (click)="openBnCodingModal()">Add BN Coding</button>
+      <div class="col">
+        <div class="form-floating mb-3">
+          <textarea
+            class="form-control"
+            placeholder="Enter Field Help Text Here..."
+            id="fieldHelpText"
+            style="height: 100px"
+            [(ngModel)]="fieldHelpText"
+            #fieldHelpTextModel="ngModel"
+            name="fieldHelpText"
+            title="Required"
+            required
+          ></textarea>
+          <label for="fieldHelpText"
+            >Field Help Text <span class="text-danger">*</span></label
+          >
+          <div
+            *ngIf="
+              fieldHelpTextModel.invalid &&
+              (fieldHelpTextModel.touched || isSubmitted)
+            "
+            class="error-message text-danger"
+          >
+            <div *ngIf="fieldHelpTextModel.errors?.['required']">
+              Field Help Text is required
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col">
+        <div class="form-floating mb-3">
+          <input
+            type="text"
+            class="form-control"
+            #sectionHeaderModel="ngModel"
+            id="sectionHeader"
+            placeholder="Enter Section Header Here..."
+            [(ngModel)]="sectionHeader"
+            name="sectionHeader"
+            required
+          />
+          <label for="sectionHeader"
+            >Section Header <span class="text-danger">*</span></label
+          >
+          <div
+            *ngIf="
+              sectionHeaderModel.invalid &&
+              (sectionHeaderModel.touched || isSubmitted)
+            "
+            class="error-message text-danger"
+          >
+            <div *ngIf="sectionHeaderModel.errors?.['required']">
+              Section Header is required
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col">
+        <div class="form-floating mb-3">
+          <input
+            type="text"
+            class="form-control"
+            id="questionHeader"
+            placeholder="Enter Question Header Here..."
+            [(ngModel)]="questionHeader"
+            #questionHeaderModel="ngModel"
+            name="questionHeader"
+            required
+          />
+          <label for="questionHeader"
+            >Question Header <span class="text-danger">*</span></label
+          >
+          <div
+            *ngIf="
+              questionHeaderModel.invalid &&
+              (questionHeaderModel.touched || isSubmitted)
+            "
+            class="error-message text-danger"
+          >
+            <div *ngIf="questionHeaderModel.errors?.['required']">
+              Question Header is required
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col">
+        <div class="form-floating">
+          <input
+            type="text"
+            class="form-control"
+            id="productHeader"
+            placeholder="Enter Product Header Here..."
+            [(ngModel)]="productHeader"
+            #productHeaderModel="ngModel"
+            name="productHeader"
+            required
+          />
+          <label for="productHeader"
+            >Product Header <span class="text-danger">*</span></label
+          >
+          <div
+            *ngIf="
+              productHeaderModel.invalid &&
+              (productHeaderModel.touched || isSubmitted)
+            "
+            class="error-message text-danger"
+          >
+            <div *ngIf="productHeaderModel.errors?.['required']">
+              Product Header is required
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row" style="padding-top: 1em">
+      <div class="col">
+        <div class="form-floating">
+          <select
+            #fieldType
+            (change)="onSelectedFieldType(selectedFieldType)"
+            class="form-select"
+            id="fieldType"
+            aria-label="Field Type"
+            [(ngModel)]="selectedFieldType"
+          >
+            <option value="" disabled>Select...</option>
+            <option *ngFor="let option of options" [value]="option">
+              {{ option }}
+            </option>
+          </select>
+          <label for="fieldType">Field Type</label>
+                </div>
+            </div>
+        </div>
+        <div class="row" style="padding-top: 1em" *ngIf="selectedFieldType == 'Textbox'">
+            <div class="col">
+                <div class="form-floating">
+                    <select #textBoxOptionName class="form-select" id="textBoxOptionName" aria-label="Field Type" name="textBoxType" title="Required" required [(ngModel)]="selectedInputFieldType" (change)="onSelectedInputFieldOption(selectedInputFieldType)">
+            <option value="" disabled>Select...</option>
+            <option *ngFor="let option of boxOptions" [value]="option">
+              {{ option }}
+            </option>
+          </select>
+                    <label for="textBoxOptionName">Textbox Type</label>
+                </div>
+            </div>
+        </div>
+        <div *ngIf="dropDownOptions" class="row" >
+          <div class="col">
+              <div class="form-floating">
+                  <div *ngFor="let option of optionsArray; let i = index" style="margin-top: 1em; margin-bottom: -25px" class="optionDiv">
+                      <input type="text" class="form-control" [(ngModel)]="option.dropDownOptionName" #dropDownOptionModel="ngModel" style="width: 30em;" placeholder="Enter DropDown Option Here...">
+                      <button type="button" class="btn" (click)="deleteFieldValue(i)" style="margin-top:-65px;margin-left: 475px ;color: red;" ><fa-icon [icon]="faMinusSquare"  ></fa-icon></button>
+                  </div>
+                  <button class="btn" type="button"  (click)="addFieldValue()" style="margin-top: 1em; color:white; background-color: rgba(255, 179, 0, 0.916);" >Add Dropdown Option</button>
+              </div>
+          </div>
+      </div>
+      <div *ngIf="checkBoxOptions" class="row" >
+        <div class="col">
+            <div class="form-floating">
+                <div *ngFor="let option of optionsArray; let i = index" style="margin-top: 1em ;margin-bottom: -25px"class="optionDiv">
+                    <input type="text" class="form-control" [(ngModel)]="option.checkBoxOptionName" #checkBoxOptionModel="ngModel" style="width: 30em;" placeholder="Enter Checkbox Option Here...">
+                    <button type="button" class="btn" (click)="deleteFieldValue(i)" style="margin-top:-65px;margin-left: 475px ;color: red;" ><fa-icon [icon]="faMinusSquare"  ></fa-icon></button>
+                </div>
+                <button class="btn" type="button"  (click)="addFieldValue()" style="margin-top: 1em; color:white; background-color: rgba(255, 179, 0, 0.916);" >Add Checkbox Option</button>
+            </div>
         </div>
     </div>
-    
-    <div class="row">
-        <app-table
-            [title]="'BN Coding'"
-            [records]="bnCodingList"
-            [table]="tableSettings"
-            [showTitle]="true"
-            [editable]="false"
-            [paginate]="true"
-        ></app-table>
+    <div *ngIf="radioButtonOptions" class="row" >
+      <div class="col">
+          <div class="form-floating">
+              <div *ngFor="let option of optionsArray; let i = index" style="margin-top: 1em ;margin-bottom: -25px" class="optionDiv">
+                  <input type="text" class="form-control" [(ngModel)]="option.radioButtonOptionName" #radioButtonOptionModel="ngModel" style="width: 30em;" placeholder="Enter Radio Button Option Here...">
+                  <button type="button" class="btn" (click)="deleteFieldValue(i)" style="margin-top:-65px;margin-left: 475px ;color: red;" ><fa-icon [icon]="faMinusSquare"  ></fa-icon></button>
+              </div>
+              <button class="btn" type="button"  (click)="addFieldValue()" style="margin-top: 1em; color:white; background-color: rgba(255, 179, 0, 0.916);" >Add Radio Button Option</button>
+          </div>
+      </div>
+  </div>
+
+        <div class="row" style="padding-top: 1em">
+            <div class="col-6">
+                <label for="modifiedBy" class="form-label">Modified By</label>
+                <input type="text" class="form-control" id="modifiedBy" [(ngModel)]="fieldData.modifiedBy" disabled="" />
+            </div>
+            <div class="col-6">
+                <label for="modifiedOn" class="form-label">Modified On</label>
+                <input type="text" class="form-control" id="modifiedOn" [(ngModel)]="fieldData.modifiedOn" disabled="" />
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" (click)="activeModal.dismiss()">
+      Close
+    </button>
+        <button type="button" class="btn btn-success" (click)="updateField()" style="color: white" [disabled]="!isValidForm()">
+      Save
+    </button>
     </div>
 </div>
-
-
-this is my table and table row html and ts
-
-<h3 class="d-inline-block" *ngIf="showTitle">{{title}}</h3>
-<span *ngIf="paginate" class="float-end mb-3">
-    <table-management-page
-        [(page)]="page"
-        [pageSize]="pageSize"
-        [listSize]="records.length"
-        >
-    </table-management-page>
-</span>
-
-<table class="{{table.tableClass}}">
-    <thead class="{{table.headerClass}}">
-        <tr>
-            <th *ngFor="let map of columnMaps">{{map.header}}</th>
-            <th *ngIf="editable" [appStyleCell]="title">Actions</th>
-            <th *ngIf="table.action!.length" [appStyleCell]="title">{{actionHeader}}</th>
-        </tr>
-    </thead>
-    <tbody>
-        <ng-container *ngIf="!editable">
-            <tr *ngFor="let record of records | slice : (page - 1) * pageSize : page * pageSize let i = index;">
-                <td *ngFor="let column of table.column">
-                    <span *ngIf="!column.pipe">
-                        {{ record[column.primaryKey] }}
-                    </span>
-                    <span *ngIf="column.pipe">
-                        {{format(record[column.primaryKey], column.pipe) }}
-                    </span>
-                </td>
-                <td *ngIf="table.action!.length">
-                    <ng-container *ngFor="let action of table.action">
-                        <button
-                            (click)="actionClick(record, action.func, action.params)"
-                            class="{{action.class}}"
-                        >
-                            <fa-icon [icon]="action.icon" *ngIf="action.icon"></fa-icon>
-                            <span *ngIf="action.title && action.showTitle">{{action.title}}</span>
-                        </button>
-                    </ng-container>
-                </td>
-            </tr>
-        </ng-container>
-        
-        <ng-container *ngIf="editable">
-            <tr *ngFor="let record of records | slice : (page - 1) * pageSize : page * pageSize; let i = index; "
-                app-table-row 
-                [record]="record" 
-                [index]="i" 
-                [columnMaps]="columnMaps"
-                [editable]="editable"
-                (saveValue)="saveRecord($event)"
-                (deleteValue)="deleteRecord($event)"
-            >
-            </tr>
-        </ng-container>
-    </tbody>
-</table>
-<span *ngIf="paginate" class="float-end mb-3">
-    <table-management-page
-        [(page)]="page"
-        [pageSize]="pageSize"
-        [listSize]="records.length"
-    >
-    </table-management-page>
-</span>
-
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { ColumnSetings, TableSettings } from '../../models/table.interface';
-import { FormatCellPipe } from '../../pipes/format-cell.pipe';
-
-@Component({
-  selector: 'app-table',
-  templateUrl: './table.component.html',
-  styleUrls: ['./table.component.scss'],
-  providers: [FormatCellPipe]
-})
-export class TableComponent implements OnInit {
-  @Input() title!: any; // Table title
-  @Input() records!: any[]; // Table Data
-  @Input() table!: TableSettings;
-  @Input() showTitle: boolean = false;
-  @Input() paginate: boolean = false;
-  @Input() pageSize = 10;
-  @Input() editable: boolean = false;
-  @Output() saveRow: EventEmitter<any> = new EventEmitter<any>();
-  @Output() deleteRow: EventEmitter<any> = new EventEmitter<any>();
-  columnMaps!: ColumnSetings[];
-  actionHeader!: string; // <th>
-  page = 1;
-
-  ngOnInit(): void {
-    if(!this.table.action) this.table.action = [];
-    this.table.action.length > 1 ? (this.actionHeader = 'Actions') : (this.actionHeader = 'Action');
-
-    if (this.table.column) {
-      this.columnMaps = this.table.column;
-    } else {
-      this.columnMaps = Object.keys(this.records[0]).map((key) => {
-        return {
-          primaryKey: key,
-          header: key.slice(0, 1).toUpperCase + key.replace(/_/g, ' ').slice(1),
-          format: 0,
-        };
-      });
-    }
-  }
-
-  actionClick(record: object[], func: any, params: any) {
-    func(...params.map((val: any)=> record[val]));
-  }
-
-  saveRecord(event: any) {
-    this.saveRow.emit(event);
-  }
-
-  deleteRecord(event: any) {
-    this.deleteRow.emit(event);
-  }
-
-  format(value: any, pipe: any){
-    let yesNo = new pipe();
-    return yesNo.transform(value);
-  }
-}
-
-    <td 
-        *ngFor="let map of columnMaps"
-        id="{{map.header}}-{{index}}"
-        [appStyleCell]="record[map.primaryKey]"
-        [key]="map.primaryKey"
-    >
-        <div class="input-group">
-            <input 
-                [ngClass]="{'form-control-plaintext': !editingRow, 'form-control': editingRow}"
-                [(ngModel)]="record[map.primaryKey]"
-                type="text"
-                name="{{record[map.primaryKey]}}" 
-                id="{{map.header}}-{{index}}" 
-                [value]="record[map.primaryKey]" 
-                [disabled]="!editingRow"
-            >
-        </div>
-        <!-- <div class="input-group" *ngIf="map.subColumns">
-            <div *ngFor="let subColumn of map.subColumns" class="input-group">
-                <span class="subHeader">{{subColumn.subHeader}}</span>
-            <input 
-                [ngClass]="{'form-control-plaintext': !editingRow, 'form-control': editingRow}"
-                [(ngModel)]="record[map.primaryKey][subColumn.subKey]"
-                type="text"
-                name="{{record[map.primaryKey][subColumn.subKey]}}" 
-                [value]="record[map.primaryKey][subColumn.subKey]" 
-                [disabled]="!editingRow"
-            >
-            </div>
-        </div> -->
-    </td>
-    <td *ngIf="editable">
-        <div class="button-container" *ngIf="!editingRow">
-            <button class="btn btn-outline-primary btn-sm me-2" (click)="toggleEditable()">
-                <fa-icon [icon]="faPenToSquare"></fa-icon>
-            </button>
-            <button class="btn btn-outline-danger btn-sm me-2" (click)="deleteRecord()">
-                <fa-icon [icon]="faTrashCan"></fa-icon>
-            </button>
-        </div>
-        <div class="button-container" *ngIf="editingRow">
-            <button class="btn btn-outline-success btn-sm me-2" (click)="saveRecord()">
-                <fa-icon [icon]="faCheck"></fa-icon>
-            </button>
-            <button class="btn btn-outline-danger btn-sm me-2" (click)="cancelEditing()">
-                <fa-icon [icon]="faX"></fa-icon>
-            </button>
-        </div>
-    </td>
-import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { faSquareFull } from '@fortawesome/free-regular-svg-icons';
-import { faCheck, faX } from '@fortawesome/free-solid-svg-icons';
-import { faPenToSquare, faTrashCan } from '@fortawesome/free-regular-svg-icons';
-
-@Component({
-  selector: '[app-table-row]',
-  templateUrl: './table-row.component.html',
-  styleUrls: ['./table.component.scss'],
-})
-export class TableRowComponent {
-  faPenToSquare = faPenToSquare;
-  faCheck = faCheck;
-  faTrashCan = faTrashCan;
-  faX = faX;
-
-  @Input() record!: any;
-  @Input() columnMaps!: any;
-  @Input() index!: number;
-  @Input() editable: boolean = false;
-  @Output() saveValue: EventEmitter<any> = new EventEmitter<any>();
-  @Output() deleteValue: EventEmitter<any> = new EventEmitter<any>();
-
-  editingRow: boolean = false;
-  faSquareFull = faSquareFull;
-  editableClass = 'form-control-plaintext';
-  oldRecord: any;
-
-  saveRecord() {
-    this.saveValue.emit(this.record);
-    this.editingRow = false;
-  }
-
-  deleteRecord() {
-    this.deleteValue.emit(this.record);
-    this.editingRow = false;
-  }
-
-  toggleEditable() {
-    this.editingRow = true;
-    this.oldRecord = { ...this.record };
-  }
-
-  cancelEditing(){
-    this.editingRow = false;
-    this.record = this.oldRecord;
-  }
-} 
-
-
-why is my screenerCoding.calc etc not showing values in my table that i have defined in table settings under primary key?
