@@ -1,36 +1,12 @@
-[
-  {
-    "gridID": 1,
-    "gridName": "abc",
-    "data": [
-      {
-        "column1": "A",
-        "column2": "B"
-        //add more columns if needed
-      },
-      {
-        "column1": "C",
-        "column2": "D"
-        //add more columns if needed
-      }
-      //add more rows if needed
-    ]
-  },
-  {
-    "gridID": 2,
-    "gridName": "def",
-    "data": [
-      {
-        "column1": "A",
-        "column2": "B"
-        //add more columns if needed
-      },
-      {
-        "column1": "C",
-        "column2": "D"
-        //add more columns if needed
-      }
-      //add more rows if needed
-    ]
-  }
-]
+<div *ngIf="checkBoxOptions" class="row" >
+            <div class="col">
+                <div class="form-floating">
+                    <div *ngFor="let option of optionsArray; let i = index" style="margin-top: 1em ; margin-bottom: -25px" class="optionDiv">
+                        <input type="radio" id="default" name="default" class="form-check-input">
+                        <input type="text" class="form-control" [(ngModel)]="option.checkBoxOptionName" #checkBoxOptionModel="ngModel" style="width: 30em;" placeholder="Enter Checkbox Option Here...">
+                        <button type="button" class="btn" (click)="deleteFieldValue(i)" style="margin-top:-65px;margin-left: 475px ;color: red;" ><fa-icon [icon]="faMinusSquare"  ></fa-icon></button>
+                    </div>
+                    <button class="btn" type="button"  (click)="addFieldValue()" style="margin-top: 1em; color:white; background-color: rgba(255, 179, 0, 0.916);" >Add Checkbox Option</button>
+                </div>
+            </div>
+        </div>
