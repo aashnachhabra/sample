@@ -1,332 +1,36 @@
-import { CommonModule } from '@angular/common';
-import { Component, Input } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { faCirclePlus, faPenToSquare, faTrash, faPlusCircle, faRectangleList } from '@fortawesome/free-solid-svg-icons';
-import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { Store } from '@ngrx/store';
-import { Subscription } from 'rxjs';
-import { SetAllFieldData, SetSelectedFieldData } from 'src/app/ngrx/actions/field.action';
-import { getSelectedTemplateDetails, RootReducerState } from 'src/app/ngrx/reducers';
-import { FieldManagementService } from 'src/app/shared/services/field-management/field-management.service';
-import { SpinnerService } from 'src/app/shared/services/spinner.service';
-import { TemplateManagementService } from 'src/app/shared/services/template-management/template-management.service';
-import { ToastService } from 'src/app/shared/services/toast.service';
-import { SharedModule } from 'src/app/shared/shared.module';
-import * as DataTable from 'frappe-datatable';
-import { DatePipe } from '@angular/common';
-
-
-@Component({
-  selector: 'app-add-field',
-  templateUrl: './add-field.component.html',
-  standalone: true,
-  imports: [CommonModule, FontAwesomeModule, FormsModule, SharedModule]
-})
-export class AddFieldComponent {
-  constructor(
-    public activeModal: NgbActiveModal,
-    public fieldManagementService: FieldManagementService,
-    public templateManagementService: TemplateManagementService,
-    public spinnerService: SpinnerService,
-    public toastService: ToastService,
-    private store: Store<RootReducerState>,
-    public modalService: NgbModal,
-    private datePipe: DatePipe
-  ) {
-    this.spinnerService.spinner$.subscribe((data: boolean) => {
-      setTimeout(() => {
-        this.showSpinner = data ? data : false;
-      });
-    });
-  }
-
-  faCirclePlus = faCirclePlus
-  allFieldDetailSub!: Subscription
-  fieldLists: any[] = [];
-  fields: any;
-  copy: any;
-  templateDetailSub!: Subscription
-  template: any;
-  @Input() item: any;
-  @Input() index: any;
-  requestBody: any = {}
-  selectedField: any;
-  isCheckboxChecked = false;
-  faPenToSquare = faPenToSquare;
-  faTrash = faTrash;
-  faPlusCircle = faPlusCircle;
-  faRectangleList = faRectangleList;
-  fieldManagementList: any = []
-  newList: any = []
-  selectedRows: Map<number, any> = new Map();
-  requiredFieldArray: Map<number, boolean> = new Map();
-  internalViewArray: Map<number, boolean> = new Map();
-  showSpinner = false;
-  finalSelectedFields: any = [];
-  disabledButtonAddField: boolean = true
-
-
-  columns: any[] = [
-    {
-      name: 'ID',
-      id: 'fieldID',
-      editable: false,
-    },
-    {
-      name: 'Field Name',
-      id: 'fieldName',
-      editable: false,
-    },
-    {
-      name: 'Field Help Text',
-      id: 'fieldHelpText',
-      editable: false,
-    },
-    {
-      name: 'Section Header',
-      id: 'sectionHeader',
-      editable: false,
-    },
-    {
-      name: 'Product Header',
-      id: 'productHeader',
-      editable: false,
-    },
-    {
-      name: 'Question Header',
-      id: 'questionHeader',
-      editable: false,
-    },
-    {
-      name: 'Required',
-      id: 'isRequired',
-      editable: false,
-
-    },
-    {
-      name: 'Internal View',
-      id: 'internalView',
-      editable: false,
-
-    },
-  ]
-
-
-  ngOnInit() {
-    this.fieldManagementService.getAllFields().subscribe((result: any) => {
-      if (result) {
-        this.spinnerService.showSpinner();
-        this.fieldLists = result;
-        this.store.dispatch(new SetAllFieldData({ data: result }))
-        this.spinnerService.hideSpinner();
-      }
-    });
-    this.mapToTemplateList();
-    this.mapToFieldManagement();
-  }
-  datatable: any;
-
-  setTableData(dataList: any[]) {
-    const that = this;
-    const datatable = new DataTable('#datatable', {
-      columns: this.columns,
-      data: dataList,
-      checkboxColumn: true,
-      inlineFilters: true,
-      layout: 'fluid',
-      serialNoColumn: false,
-      treeView: true,
-      checkedRowStatus: true,
-      events: {
-        onCheckRow() {
-          const rows: any[] = datatable.getRows();
-          const checkedRows: any[] = datatable.rowmanager.getCheckedRows();
-          rows.forEach(row => row[0].value = 'false');
-          checkedRows.forEach(checkedRow => rows[checkedRow][0].value = 'true');
-
-          const selectedRows = checkedRows.map(checkedRow => rows[checkedRow]);
-          const selectedFieldIDs = selectedRows.map(row => row[1].content);
-          that.selectRow(selectedFieldIDs);
-        },
+[
+  {
+    "gridID": 1,
+    "gridName": "abc",
+    "data": [
+      {
+        "column1": "A",
+        "column2": "B"
+        //add more columns if needed
       },
-      search: true,
-      searchColumns: ['fieldName'],
-      noDataMessage: 'Awe Snap! No results returned. Please update your search criteria then try again.',
-    });
-    this.datatable = datatable;
-  }
-
-
-  handleRequiredFieldValue(id: any) {
-    if (this.requiredFieldArray.get(id) == undefined || this.requiredFieldArray.get(id) == false)
-      this.requiredFieldArray.set(id, true);
-    else if (this.requiredFieldArray.get(id) == true)
-      this.requiredFieldArray.set(id, false);
-  }
-
-  handleInternalViewValue(id: any) {
-    if (this.internalViewArray.get(id) == undefined || this.internalViewArray.get(id) == false)
-      this.internalViewArray.set(id, true);
-    else if (this.internalViewArray.get(id) == true)
-      this.internalViewArray.set(id, false);
-  }
-
-  setRequiredColumn(fieldManagementList: any) {
-    fieldManagementList.forEach((item: any) => {
-      item[6] = `<div class="row">
-    <div class="col">
-    <div class="form-check form-switch">
-    <input class="form-check-input" type="checkbox" role="switch" name="requiredFieldColumn" id="${item[0]}">
-    </div>
-    </div>
-    </div>`
-      item[7] = `<div class="row">
-    <div class="col">
-    <div class="form-check form-switch">
-    <input class="form-check-input" type="checkbox" role="switch" name="internalViewColumn" id="${item[0]}">
-    </div>
-    </div>
-    </div>`
-
-
-    })
-    this.datatable.refresh(this.fieldManagementList, this.columns)
-    let requiredFieldinput = document.getElementsByName('requiredFieldColumn');
-    requiredFieldinput.forEach((x: any) =>
-      x.addEventListener('click', () => {
-        this.handleRequiredFieldValue(x.id);
+      {
+        "column1": "C",
+        "column2": "D"
+        //add more columns if needed
       }
-      )
-    );
-
-    let internalViewInput = document.getElementsByName('internalViewColumn');
-    internalViewInput.forEach((x: any) =>
-      x.addEventListener('click', () => {
-        this.handleInternalViewValue(x.id);
-      }
-      )
-    );
-  }
-
-
-
-  selectRow = (selectedFieldIDs: string[]) => {
-    this.selectedRows.clear();
-    selectedFieldIDs.forEach(fieldID => {
-      const field = this.fields.find((item: any) => item.fieldID === fieldID);
-      const rowIndex = this.fieldManagementList.findIndex((row: any) => row[0] === fieldID);
-      this.selectedRows.set(field, rowIndex);
-    });
-    if (this.selectedRows.size >= 0) {
-      if (this.selectedRows.size === 0) {
-        this.disabledButtonAddField = true;
-        this.store.dispatch(new SetSelectedFieldData({ data: undefined }));
-      } else if (this.selectedRows.size === 1) {
-        this.disabledButtonAddField = false;
-        this.selectedField = this.fields.find((item: any) => item.fieldID === selectedFieldIDs[0]);
-      } else {
-        this.disabledButtonAddField = false;
-        this.store.dispatch(new SetSelectedFieldData({ data: undefined }));
-      }
-    }
-  }
-
-  mapToTemplateList() {
-    this.templateDetailSub = this.store
-      .select(getSelectedTemplateDetails)
-      .subscribe((data: any) => {
-        if (data) {
-          this.template = Object.assign({}, data);
-        }
-      });
-  }
-  saveField() {
-    this.spinnerService.showSpinner();
-
-    const fields: any[] = Array.from(this.selectedRows.keys());
-    const ids = fields.map((item: any) => item.fieldID)
-    if (ids.length === 0) {
-      return;
-    }
-
-    for (let id of ids) {
-      let requiredFieldValue = false;
-      this.requiredFieldArray.forEach((value: boolean, key: number) => {
-        if (key == id)
-          requiredFieldValue = true;
-      });
-
-      let internalFieldValue = false;
-      this.internalViewArray.forEach((value: boolean, key: number) => {
-        if (key == id)
-          internalFieldValue = true;
-      });
-
-      const selectedField = {
-        fieldID: id,
-        ruleID: 1,
-        isRequired: requiredFieldValue,
-        internalView: internalFieldValue
-      }
-      this.finalSelectedFields.push(selectedField)
-    }
-    this.requiredFieldArray.clear();
-    this.internalViewArray.clear();
-    const sectionIndex = this.template.templateSections.findIndex((item: any) => JSON.stringify(item) === JSON.stringify(this.item));
-    let tempSections = this.template.templateSections
-    let newSections = tempSections.map((item: any) => ({ ...item }))
-    newSections[sectionIndex].templateFields = [
-      ...newSections[sectionIndex].templateFields, ...this.finalSelectedFields
+      //add more rows if needed
     ]
-    tempSections = newSections
-    this.template.templateSections = tempSections
-    this.templateManagementService
-      .updateTemplateDetails(this.template, this.template.templateID)
-      .subscribe((response: any) => {
-        this.activeModal.close({ data: response, isGetApiCallNeeded: true });
-      });
-    this.spinnerService.hideSpinner();
-    this.toastService.showSuccess(`Field was added successfully.`);
-  }
-
-
-  mapToFieldManagement() {
-    this.fieldManagementService.getAllFields().subscribe((result: any) => {
-      if (result) {
-        this.fields = result
-        this.fieldManagementList = result.map((fm: any) => {
-          return [
-            fm.fieldID,
-            fm.fieldName,
-            fm.fieldHelpText,
-            fm.sectionHeader,
-            fm.productHeader,
-            fm.questionHeader,
-          ];
-        });
-        this.setTableData(this.fieldManagementList)
-        this.setRequiredColumn(this.fieldManagementList);
-        this.store.dispatch(new SetAllFieldData({ data: result }))
-        this.spinnerService.hideSpinner();
+  },
+  {
+    "gridID": 2,
+    "gridName": "def",
+    "data": [
+      {
+        "column1": "A",
+        "column2": "B"
+        //add more columns if needed
+      },
+      {
+        "column1": "C",
+        "column2": "D"
+        //add more columns if needed
       }
-    });
+      //add more rows if needed
+    ]
   }
-
-  onSearchChange(event: any) {
-    const searchValue = (event.target as HTMLInputElement).value.toLowerCase();
-    const filteredRows = this.fieldManagementList.filter((row: any) =>
-      row[1].toLowerCase().includes(searchValue)
-    );
-    this.setTableData(filteredRows);
-  }
-
-  resetCheckboxes() {
-    const checkboxes = document.getElementsByTagName('input');
-    for (let i = 0; i < checkboxes.length; i++) {
-      if (checkboxes[i].type == 'checkbox') {
-        checkboxes[i].checked = false;
-      }
-    }
-  }
-}
+]
