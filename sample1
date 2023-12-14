@@ -1,30 +1,8 @@
- <div *ngIf="dropDownOptions" class="row">
-      <div class="col">
-        <div class="form-floating">
-          <div *ngFor="let option of optionsArray; let i = index,trackBy: trackByFn"
-            style="margin-top: 1em; margin-bottom: 10px" class="optionDiv row align-items-center">
-            <div class="col-md-1">
-              <input type="radio" id="default" name="default" class="form-check-input"
-                (change)="setDefaultDropdownOption(option)">
-            </div>
-            <div class="col-md-6" style="padding-left:0">
-              <input type="text" class="form-control" [(ngModel)]="option.dropDownOptionName"
-                [ngModelOptions]="{updateOn: 'change'}" (ngModelChange)="onInputChange($event,i)"
-                #dropDownOptionModel="ngModel" placeholder="Enter DropDown Option Here...">
-            </div>
-            <div class="col-md-1" style="padding-left:0">
-              <button type="button" class="btn" (click)="deleteFieldValue(i)" style="color: red;">
-                <fa-icon [icon]="faMinusSquare"></fa-icon>
-              </button>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col-md-12">
-              <button class="btn" type="button" (click)="addFieldValue()"
-                style="margin-top: 1em; color:white; background-color: rgba(255, 179, 0, 0.916);">Add Dropdown
-                Option</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+setDefaultDropdownOption(option: any) {
+    console.log(option)
+    this.optionsArray.forEach((item: any) => {
+      item.isDefault = false
+    })
+    console.log(this.optionsArray)
+    option.isDefault = true;
+  }
