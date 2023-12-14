@@ -1,8 +1,8 @@
-setDefaultDropdownOption(option: any) {
-    console.log(option)
-    this.optionsArray.forEach((item: any) => {
-      item.isDefault = false
-    })
-    console.log(this.optionsArray)
-    option.isDefault = true;
+ setDefaultCheckboxOption(option: any) {
+    if (option.isDefault == true) {
+      option.isDefault = false
+    }
+    else {
+      option.isDefault = true
+    }
   }
