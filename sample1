@@ -1,25 +1,11 @@
-<div class="search-select" [class.floating]="floating">
-    <label *ngIf="floating">{{label}}
-        <span class="text-danger">*</span>
-    </label>
-    <button class="select-trigger" (click)="show()" type="button" [ngClass]="{'empty-select': !selectedItem }" #reference>
-        <label *ngIf="!floating">{{label}}
-            <span *ngIf="required" class="text-danger">*</span>
-        </label>
-        <span>{{selectedItem && selectedItem[displayKey] || ''}}</span>
-        <button *ngIf="selectedItem && enableClear" type="button" class="clear-select" (click)="clearSelected($event)">Clear</button>
-    </button>
-    <ng-template cdk-portal>
-        <div class="search-list">
-            <div class="form-floating text-content">
-                <input [formControl]="search" #searchInput type="text" name="" id="searchInput" class="form-control" (keydown)="handleKeydown($event)">
-                <label for="">Search</label>
-            </div>
-            <ul #itemList>
-                <li *ngFor="let item of items; let i = index" [class.active]="i === highlightedItem" (click)="selectItem(item)" role="option">
-                    <ngb-highlight [result]="formatItem(item)" [term]='search.value'></ngb-highlight>
-                </li>
-            </ul>
-        </div>
-    </ng-template>
-</div>
+ <div class="form-group mb-3">
+      <ng-select [items]="filteredItems" bindLabel="displayName" [searchable]="true" (input)="onSearchChange($event)"
+        (change)="onItemSelected($event)">
+        <ng-template ng-label-tmp let-item="item">
+          {{ item.displayName }}
+        </ng-template>
+        <ng-template ng-option-tmp let-item="item" let-index="index">
+          {{ item.displayName }}
+        </ng-template>
+      </ng-select>
+    </div>
