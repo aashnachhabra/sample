@@ -1,8 +1,110 @@
- setDefaultCheckboxOption(option: any) {
-    if (option.isDefault == true) {
-      option.isDefault = false
-    }
-    else {
-      option.isDefault = true
-    }
-  }
+<div class="modal-header">
+    <h4 class="modal-title" id="modal-title">{{ actionTitle }} Account Management Contact</h4>
+    <button
+      type="button"
+      class="btn-close"
+      aria-label="Close"
+      (click)="activeModal.dismiss()">
+    </button>
+  </div>
+  <div class="modal-body">
+    <form [formGroup]="accMgmtContactForm">
+    <div class="form-group mb-3">
+      <label for="groupNumber">Group Number <span class="text-danger">*</span></label>
+      <input
+        type="number"
+        class="form-control"
+        id="groupNumber"
+        formControlName="groupNumber"
+        required />
+        <div *ngIf="groupNumber?.invalid && groupNumber?.touched" class="error-message text-danger" style="font-size: 12px;">
+          Group Number is required.
+      </div>
+    </div>
+    <div class="form-group mb-3">
+      <label for="groupName">Group Name <span class="text-danger">*</span></label>
+      <input
+        type="text"
+        class="form-control"
+        id="groupName"
+        formControlName="groupName"
+        fieldValidationDirective
+        required />
+        <div *ngIf="groupName?.invalid &&groupName?.touched" class="error-message text-danger" style="font-size: 12px;">
+          Group Name is required.
+      </div>
+    </div>
+      <div class="form-group mb-3">
+        <label for="role">Role </label>
+        <select
+          class="form-select"
+          id="role"
+          formControlName="role"
+         >
+          <option *ngFor="let role of roles" [value]="role">
+            {{ role }}
+        </option>
+        </select>
+      </div>
+      <!-- <div class="form-group mb-3">
+        <label for="contactName">Contact Name</label>
+        <input
+          type="text"
+          class="form-control"
+          id="contactName"
+          formControlName="contactName"
+          />
+      </div> -->
+      <div class="form-group mb-3">
+        <label for="tempAccMgmtContact">Temporary Account Mgmt Contact</label>
+        <input
+          type="text"
+          class="form-control"
+          id="tempAccMgmtContact"
+          formControlName="tempAccMgmtContact"
+          />
+      </div>
+      <div class="form-group mb-3">
+        <label for="effectiveDate">Effective Date </label>
+        <div class="input-group">
+            <input class="form-control"
+            id="effectiveDate"
+            formControlName="effectiveDate"
+                placeholder="yyyy-mm-dd"
+                name="d"
+                ngbDatepicker
+                #d="ngbDatepicker"
+                />
+            <button class="btn btn-outline-secondary bi bi-calendar3" (click)="d.toggle()" type="button"></button>
+        </div>
+      </div>
+      <div class="form-group mb-3">
+        <label for="termDate">Term Date </label>
+        <div class="input-group">
+            <input class="form-control"
+            id="termDate"
+            formControlName="termDate"
+                placeholder="yyyy-mm-dd"
+                name="c"
+                ngbDatepicker
+                #c="ngbDatepicker"
+                />
+            <button class="btn btn-outline-secondary bi bi-calendar3" (click)="c.toggle()" type="button"></button>
+        </div>
+      </div>
+      </form>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline-danger float-start" (click)="deleteAccMgmtContact()" *ngIf="actionTitle !== 'Add'">
+      Delete
+  </button>
+    <button
+      type="button"
+      class="btn btn-outline-danger"
+      (click)="activeModal.dismiss()">
+      Cancel
+    </button>
+    <button type="button" class="btn btn-outline-success" (click)="saveAccMgmtContact()">
+      Save
+    </button>
+  </div>
