@@ -1,4 +1,4 @@
- onSearchChange(searchTerm: any) {
+onSearchChange(searchTerm: any) {
     this.user.getUser(searchTerm.target.value)
       .subscribe((response: any) => {
         if (response) {
@@ -11,3 +11,17 @@
   onUserSelected(item: any) {
     this.accMgmtContactForm.get('contactEmail')?.setValue(item.email);
   }
+
+
+ <div class="form-group mb-3">
+      <label for="contactName">Contact Name</label>
+      <ng-select id="contactName" [items]="filteredItems" bindLabel="displayName" [searchable]="true" (input)="onSearchChange($event)"
+        (change)="onUserSelected($event)" class="form-control">
+        <ng-template ng-label-tmp let-item="item">
+          {{ item.displayName }}
+        </ng-template>
+        <ng-template ng-option-tmp let-item="item" let-index="index">
+          {{ item.displayName }}
+        </ng-template>
+      </ng-select>
+    </div>
