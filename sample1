@@ -1,5 +1,8 @@
- <div class="col-8" *ngIf="fieldType == 'textarea'">
-        <label for="textarea">{{name}}<span class="text-danger" *ngIf="isRequired">*</span> <span style="padding-left: 0.5em;padding-right: 0.5em;color:#002677"> <fa-icon [icon]="faInfoCircle"></fa-icon></span><span
-                *ngIf="internalView">(Internal View Only)</span></label>
-        <textarea id="textarea" class="form-control w-50"></textarea>
+<div class="col-8" *ngIf="fieldType == 'Text (without label)'">
+       <input type="text" class="form-control w-50" placeholder="text" [(ngModel)]="defaultText" [disabled]="!editable" required  /> 
+        <span class="text-danger" *ngIf="isRequired">*</span><span *ngIf="fieldHelpText"
+        class="icon-container">
+        <fa-icon [icon]="faInfoCircle" [title]="fieldHelpText" class="icon-class"></fa-icon>
+    </span> <span *ngIf="internalView">(Internal View
+        Only)</span>
     </div>
