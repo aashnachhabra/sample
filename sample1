@@ -1,12 +1,5 @@
-[
-    {
-        "id": null,
-        "userID": null,
-        "userName": "achhab16",
-        "displayName": "Chhabra, Aashna",
-        "email": "aashna_chhabra@optum.com",
-        "department": "OG Adv APAC-1",
-        "isCurrent": null,
-        "defaultBusiness": "Optum Global Advantage"
-    }
-]
+ <div class="col-8" *ngIf="fieldType == 'textarea'">
+        <label for="textarea">{{name}}<span class="text-danger" *ngIf="isRequired">*</span> <span style="padding-left: 0.5em;padding-right: 0.5em;color:#002677"> <fa-icon [icon]="faInfoCircle"></fa-icon></span><span
+                *ngIf="internalView">(Internal View Only)</span></label>
+        <textarea id="textarea" class="form-control w-50"></textarea>
+    </div>
