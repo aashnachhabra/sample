@@ -1,9 +1,11 @@
  <fieldset *ngIf="fieldType == 'radio'" class="col-8">
-        <legend>{{name}}<span class="text-danger" *ngIf="isRequired">*</span> <span *ngIf="fieldHelpText"
+        <div class="d-flex">
+        <legend class="d-flex align-items-start">{{name}}<span class="text-danger" *ngIf="isRequired">*</span> <span *ngIf="fieldHelpText"
                 class="icon-container">
                 <fa-icon [icon]="faInfoCircle" [title]="fieldHelpText" class="icon-class"></fa-icon>
             </span> <span *ngIf="internalView">(Internal View
                 Only)</span></legend>
+        </div>
         <div *ngFor="let option of radioButtonOptionsList" class="d-flex align-items-center col-8 mb-2">
             <input type="radio" [id]="'radio' + option.radioButtonOptionName" class="form-check-input me-2"
                 [checked]="option.isDefault">
