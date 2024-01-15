@@ -1,255 +1,407 @@
-import { CdkAccordionModule } from '@angular/cdk/accordion';
-import { CommonModule } from '@angular/common';
-import { Component, Input, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { faAngleDown, faAngleUp, faCompress, faExpand, faFloppyDisk } from '@fortawesome/free-solid-svg-icons';
-import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { FIELD_TYPES, FormField, FormFieldDetails, FormGridDetails, FormSection, TEXT_BOX_TYPES } from 'src/app/models/form-generation/form.model';
-import { DropdownNavigationComponent } from 'src/app/shared/components/dropdown-navigation/dropdown-navigation.component';
-import { SharedModule } from 'src/app/shared/shared.module';
-import { GridComponent } from '../../form-generation/components/grid/grid.component';
-import { Form, FORM_STATUS } from 'src/app/models/form-generation/form.model';
-
-@Component({
-  selector: 'app-compare-form-modal',
-  templateUrl: './compare-form-modal.component.html',
-  styleUrls: ['./compare-form-modal.component.scss'],
-  standalone: true,
-  imports: [CommonModule, DropdownNavigationComponent, SharedModule, FontAwesomeModule, ReactiveFormsModule, CdkAccordionModule, GridComponent],
-})
-export class CompareFormModalComponent implements OnInit {
-  @Input() compareResult: any;
-  selectedForm1: any;
-  selectedForm2: any;
-  FIELD_TYPES = FIELD_TYPES;
-  TEXT_BOX_TYPES = TEXT_BOX_TYPES;
-  faAngleDown = faAngleDown;
-  faAngleUp = faAngleUp;
-  faFloppyDisk = faFloppyDisk;
-  faCompress = faCompress;
-  faExpand = faExpand;
-  generatedForm!: FormGroup;
-  section0!: FormGroup;
-  showIdenticalMessage = false;
-  constructor(public activeModal: NgbActiveModal, private fb: FormBuilder,
-  ) { }
-  ngOnInit(): void {
-    if (this.compareResult) {
-      this.selectedForm1 = this.compareResult.form1
-      this.selectedForm2 = this.compareResult.form2
-      if (this.selectedForm1.formSections.length == 0 && this.selectedForm2.formSections.length == 0) {
-        this.showIdenticalMessage = true
-      }
-      else {
-        this.showIdenticalMessage = false
-        this._initializeForm1()
-        this._generateForm1(this.selectedForm1);
-        this._initializeForm2()
-        this._generateForm2(this.selectedForm2);
-      }
-    }
-  }
-  private _initializeForm1() {
-    if (this.selectedForm1) {
-      this.section0 = this.fb.group({
-        documentName: [this.selectedForm1.documentName || "", Validators.required],
-        groupNumber: [this.selectedForm1.groupNumber || "", Validators.required],
-        groupName: [this.selectedForm1.groupName || "", Validators.required],
-        planNumber: [this.selectedForm1.planNumber || "", Validators.required],
-        benefitPlan: [this.selectedForm1.benefitPlan || ""], // No UI yet
-        versionType: [this.selectedForm1.versionType || "", Validators.required],
-        recentVersion: [this.selectedForm1.recentVersion || ""], // No UI yet
-        careConsultant: [this.selectedForm1.careConsultant || "", Validators.required],
-        sae: [this.selectedForm1.sae || "", Validators.required],
-      })
-
-      this.generatedForm = this.fb.group({
-        "section-0": this.section0,
-      })
-    }
-  }
-  private _initializeForm2() {
-    if (this.selectedForm2) {
-      this.section0 = this.fb.group({
-        documentName: [this.selectedForm2.documentName || "", Validators.required],
-        groupNumber: [this.selectedForm2.groupNumber || "", Validators.required],
-        groupName: [this.selectedForm2.groupName || "", Validators.required],
-        planNumber: [this.selectedForm2.planNumber || "", Validators.required],
-        benefitPlan: [this.selectedForm2.benefitPlan || ""], // No UI yet
-        versionType: [this.selectedForm2.versionType || "", Validators.required],
-        recentVersion: [this.selectedForm2.recentVersion || ""], // No UI yet
-        careConsultant: [this.selectedForm2.careConsultant || "", Validators.required],
-        sae: [this.selectedForm2.sae || "", Validators.required],
-      })
-
-      this.generatedForm = this.fb.group({
-        "section-0": this.section0,
-      })
-    }
-  }
-  private _checkboxValueToStringArray(checkboxValue: any): string[] {
-    let x = []
-    for (const [key, value] of Object.entries((checkboxValue as any))) {
-      if (value === true) {
-        x.push(key)
-      }
-    }
-    return x;
-  }
-  private _instanceOfFormGridDetails(object: any): object is FormGridDetails {
-    return 'formGridID' in object;
-  }
-  private _addFormControl({ formFieldDetails, isRequired, formGridDetails, gridID }: FormField) {
-    const validators = [];
-
-    if (isRequired) {
-      validators.push(Validators.required);
-    }
-
-    //Textbox Email Type
-    if (formFieldDetails?.fieldType === FIELD_TYPES.TEXTBOX && formFieldDetails?.textBoxOptions?.textBoxOptionName === TEXT_BOX_TYPES.EMAIL) {
-      validators.push(Validators.pattern(/^[^\s@]+@[^\s@]+\.[^\s@]+$/))
-    }
-
-    //Checkbox Type
-    if (formFieldDetails?.fieldType === FIELD_TYPES.CHECKBOX) {
-      const checkboxGroup = this.fb.group({});
-      formFieldDetails?.checkBoxOptionsList?.map(option => {
-        checkboxGroup.addControl(option.checkBoxOptionName, this.fb.control(option.isDefault))
-      });
-
-      return checkboxGroup;
-    }
-
-    //Grid
-    if (gridID) {
-      return this.fb.control(formGridDetails, validators);
-    }
-
-    //All Other input types
-    return this.fb.control(
-      {
-        value: formFieldDetails?.fieldCurrentValue || formFieldDetails?.textBoxOptions?.defaultText || "",
-        disabled: formFieldDetails?.textBoxOptions?.isEditable !== null ? !formFieldDetails?.textBoxOptions?.isEditable : false
-      },
-      validators
-    );
-  }
-  private _generateForm1(form: Form) {
-    console.log("in generate", form)
-    form.formSections.forEach((section: FormSection) => {
-      const formSection: FormGroup = this.fb.group({})
-
-      section.formFields.forEach((field: FormField) => {
-        formSection.addControl(field.templateFieldID, this._addFormControl(field));
-      });
-
-      //Set subsdcriptions for dependency
-      section.formFields.forEach((field: FormField) => {
-        const fieldID = field.templateFieldID;
-        if (field.isDependent && field.dependentFieldID !== undefined && fieldID !== undefined) {
-
-          formSection.get(field.dependentFieldID)?.valueChanges.subscribe(value => {
-            let showField = false;
-            //Grids and Checkbox values are objects
-            //The rest are strings
-            //This checks for checkbox only
-            if (value instanceof Object && !this._instanceOfFormGridDetails(value) && !!field.showWhen) {
-              showField = this._checkboxValueToStringArray(value).includes(field.showWhen)
-            } else {
-              showField = value === field.showWhen && fieldID !== undefined
-            }
-
-            if (showField) {
-              formSection.get(fieldID)?.enable();
-              document.getElementById(fieldID)?.setAttribute('style', "display: flex;")
-            } else if (formSection.get(fieldID)?.enabled) {
-              formSection.get(fieldID)?.disable();
-              document.getElementById(fieldID)?.setAttribute('style', "display: none;")
-
-              if (!this._instanceOfFormGridDetails(formSection.get(fieldID)?.value)) {
-                formSection.get(fieldID)?.reset("", { emitEvent: false });
-              }
-            }
-
-          })
-        }
-      })
-      console.log("generated form", this.generatedForm)
-      this.generatedForm.addControl(`section-${section.orderNumber}`, formSection)
-    })
-  }
-  private _generateForm2(form: Form) {
-    console.log("in generate", form)
-    form.formSections.forEach((section: FormSection) => {
-      const formSection: FormGroup = this.fb.group({})
-
-      section.formFields.forEach((field: FormField) => {
-        formSection.addControl(field.templateFieldID, this._addFormControl(field));
-      });
-
-      //Set subsdcriptions for dependency
-      section.formFields.forEach((field: FormField) => {
-        const fieldID = field.templateFieldID;
-        if (field.isDependent && field.dependentFieldID !== undefined && fieldID !== undefined) {
-
-          formSection.get(field.dependentFieldID)?.valueChanges.subscribe(value => {
-            let showField = false;
-            //Grids and Checkbox values are objects
-            //The rest are strings
-            //This checks for checkbox only
-            if (value instanceof Object && !this._instanceOfFormGridDetails(value) && !!field.showWhen) {
-              showField = this._checkboxValueToStringArray(value).includes(field.showWhen)
-            } else {
-              showField = value === field.showWhen && fieldID !== undefined
-            }
-
-            if (showField) {
-              formSection.get(fieldID)?.enable();
-              document.getElementById(fieldID)?.setAttribute('style', "display: flex;")
-            } else if (formSection.get(fieldID)?.enabled) {
-              formSection.get(fieldID)?.disable();
-              document.getElementById(fieldID)?.setAttribute('style', "display: none;")
-
-              if (!this._instanceOfFormGridDetails(formSection.get(fieldID)?.value)) {
-                formSection.get(fieldID)?.reset("", { emitEvent: false });
-              }
-            }
-
-          })
-        }
-      })
-      console.log("generated form", this.generatedForm)
-      this.generatedForm.addControl(`section-${section.orderNumber}`, formSection)
-    })
-  }
-  getField(section: any, field: any) {
-    return this.generatedForm.get('section-' + section)?.get(field)
-  }
-  labelClass(fieldDetails: FormFieldDetails) {
-    let { fontSize, isBold } = Object.assign([], fieldDetails);
-    switch (fieldDetails.heading?.headingSize) {
-      case 'Small':
-        fontSize = 12;
-        isBold = true;
-        break;
-      case 'Medium':
-        fontSize = 18;
-        isBold = true;
-        break;
-      case 'Large':
-        fontSize = 24;
-        isBold = true;
-        break;
-    }
-
-    return {
-      'fw-bold': isBold,
-      'fst-italic': fieldDetails.isItalic,
-      'text-decoration-underline': fieldDetails.isUnderline,
-      [`fs-${fontSize}pt`]: fontSize,
-      [`indent-${fieldDetails.indentSize}`]: fieldDetails.indentSize
-    }
-  }
-}
+<div class="modal-content">
+    <div class="modal-header">
+        <h4 class="modal-title">Comparison Result</h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+        (click)="activeModal.dismiss()"></button>
+    </div>
+    <div class="modal-body">
+        <div class="row" *ngIf="showIdenticalMessage">
+            <p class="text-center text-success" style="font-size: 20px;">Both the forms are identical!</p>
+        </div>
+        <div class="row">
+            <div class="col">
+                <!-- First Form Content -->
+                <form [formGroup]="generatedForm">
+                    <cdk-accordion [multi]="true" #accordionParent="cdkAccordion">
+                    <cdk-accordion-item *ngFor="let section of selectedForm1?.formSections; let index = index;"
+                    #accordionItem="cdkAccordionItem"
+                    class="example-accordion-item"
+                    role="button"
+                    tabindex="0"
+                    [attr.id]="'accordion-header-' + index"
+                    [attr.aria-expanded]="accordionItem.expanded"
+                    [attr.aria-controls]="'accordion-body-' + index"
+                    [formGroupName]="'section-' + section.orderNumber" 
+                    [id]="'section-' + section.orderNumber" 
+                    class="mb-5">
+    
+                    <div class="section-header p-4 position-relative border-bottom border-top" (click)="accordionItem.toggle()">
+                        <h2>{{section.formSectionName}}</h2>
+                        <h6>{{section.formSectionDescription}}</h6>
+                        <div class="position-absolute" style="right: 24px; top: 35%">
+                            <fa-icon [icon]='faAngleUp' class="fs-18pt" *ngIf="accordionItem.expanded"></fa-icon>
+                            <fa-icon [icon]='faAngleDown' class="fs-18pt" *ngIf="!accordionItem.expanded"></fa-icon>
+                        </div>
+                    </div>
+    
+                    <div class="section-body d-flex flex-column gap-3 p-4" 
+                        role="region"
+                        [style.display]="accordionItem.expanded ? '' : 'none !important'"
+                        [attr.id]="'accordion-body-' + index"
+                        [attr.aria-labelledby]="'accordion-header-' + index">
+                        <!-- Switch Start -->
+                        <div *ngFor="let field of section.formFields" class="col-12">
+                            <!-- FIELD -->
+                            <div *ngIf="!field.internalView && field.formFieldDetails && field.templateFieldID" 
+                                class="form-group row" [ngStyle]="{'display' : field.isDependent ? 'none' : 'flex'}" 
+                                [ngSwitch]="field.formFieldDetails.fieldType" 
+                                [id]="field.templateFieldID">
+                                <!-- LABEL -->
+                                <div class="col-5" [ngClass]="{'col-12': field.formFieldDetails.fieldType === FIELD_TYPES.HEADING}">
+                                    <label class="" [ngClass]="labelClass(field.formFieldDetails)" 
+                                        *ngIf="field.formFieldDetails.textBoxOptions?.textBoxOptionName !== TEXT_BOX_TYPES.TEXT_WITHOUT_LABEL">
+                                        {{field.formFieldDetails.fieldName}}
+                                        <span class="text-danger" *ngIf="field.isRequired">*</span>
+                                    </label>
+                                </div>
+                                <!-- TEXTBOX -->
+                                <div class="col-5" *ngSwitchCase="FIELD_TYPES.TEXTBOX">
+                                    <ng-container class="" [ngSwitch]="field.formFieldDetails.textBoxOptions?.textBoxOptionName">
+                                         <!-- TEXT WITH LABEL -->
+                                        <ng-container *ngSwitchCase="TEXT_BOX_TYPES.TEXT_WITH_LABEL">
+                                            <input type="text" 
+                                                [formControlName]="field.templateFieldID"
+                                                [id]="'section-' + section.orderNumber + '-' + field.orderNumber"
+                                                class="form-control">
+                                        </ng-container>
+                                        <!-- TEXT WITHOUT LABEL -->
+                                        <ng-container *ngSwitchCase="TEXT_BOX_TYPES.TEXT_WITHOUT_LABEL">
+                                            <input type="text" 
+                                            [formControlName]="field.templateFieldID"
+                                            [id]="'section-' + section.orderNumber + '-' + field.orderNumber"
+                                            class="form-control">
+                                        </ng-container>
+                                        <!-- DATE -->
+                                        <ng-container *ngSwitchCase="TEXT_BOX_TYPES.DATE">
+                                            <input type="date" 
+                                            [formControlName]="field.templateFieldID"
+                                            [id]="'section-' + section.orderNumber + '-' + field.orderNumber"
+                                            class="form-control">
+                                        </ng-container>
+                                        <!-- PASSWORD -->
+                                        <ng-container *ngSwitchCase="TEXT_BOX_TYPES.PASSWORD">
+                                            <input type="password" placeholder="password"
+                                            [formControlName]="field.templateFieldID"
+                                            [id]="'section-' + section.orderNumber + '-' + field.orderNumber"
+                                            class="form-control">
+                                        </ng-container>
+                                        <!-- EMAIL -->
+                                        <ng-container *ngSwitchCase="TEXT_BOX_TYPES.EMAIL">
+                                            <input type="email" placeholder="example@gmail.com"
+                                            [formControlName]="field.templateFieldID"
+                                            [id]="'section-' + section.orderNumber + '-' + field.orderNumber"
+                                            class="form-control"
+                                            [ngClass]="{'field-error': getField(section.orderNumber, field.templateFieldID)?.invalid && getField(section.orderNumber, field.templateFieldID)?.touched}">
+                                            
+                                        </ng-container>
+                                        <!-- NUMBER -->
+                                        <ng-container *ngSwitchCase="TEXT_BOX_TYPES.NUMBER">
+                                            <input type="number" 
+                                            [formControlName]="field.templateFieldID"
+                                            [id]="'section-' + section.orderNumber + '-' + field.orderNumber"
+                                            class="form-control">
+                                        </ng-container>
+                                        <!-- RANGE -->
+                                        <ng-container *ngSwitchCase="TEXT_BOX_TYPES.RANGE">
+                                            <input type="range" class="form-range d-block" 
+                                                [min]="0" [max]="100" [step]="10" 
+                                                [formControlName]="field.templateFieldID"
+                                                [value]="generatedForm.get('section-' + section.orderNumber)?.get(field.templateFieldID)?.value" 
+                                                [id]="'section-' + section.orderNumber + '-' + field.orderNumber"/>
+                                            <input type="number" 
+                                                [formControlName]="field.templateFieldID"
+                                                [value]="generatedForm.get('section-' + section.orderNumber)?.get(field.templateFieldID)?.value" 
+                                                class="form-control">
+                                        </ng-container>
+                                        <!-- TELEPHONE NUMBER -->
+                                        <ng-container *ngSwitchCase="TEXT_BOX_TYPES.TELEPHONE_NUMBER">
+                                            <input type="tel" 
+                                            [formControlName]="field.templateFieldID"
+                                            [id]="'section-' + section.orderNumber + '-' + field.orderNumber"
+                                                class="form-control">
+                                        </ng-container>
+                                        <!-- URL -->
+                                        <ng-container *ngSwitchCase="TEXT_BOX_TYPES.URL">
+                                            <input type="url" 
+                                            [formControlName]="field.templateFieldID"
+                                            [id]="'section-' + section.orderNumber + '-' + field.orderNumber"
+                                                class="form-control">
+                                        </ng-container>
+                                        <!-- TIME -->
+                                        <ng-container *ngSwitchCase="TEXT_BOX_TYPES.TIME">
+                                            <input type="time" 
+                                            [formControlName]="field.templateFieldID"
+                                            [id]="'section-' + section.orderNumber + '-' + field.orderNumber"
+                                                class="form-control">
+                                        </ng-container>
+                                        <!-- FILE -->
+                                        <!-- CURRENCY -->
+                                        <ng-container *ngSwitchCase="TEXT_BOX_TYPES.CURRENCY">
+                                            <input type="text" 
+                                            [formControlName]="field.templateFieldID"
+                                            [id]="'section-' + section.orderNumber + '-' + field.orderNumber"
+                                                class="form-control">
+                                        </ng-container>
+                                    </ng-container>
+                                </div>                          
+                                <!-- RADIO -->
+                                <fieldset class="col-5" *ngSwitchCase="FIELD_TYPES.RADIO">
+                                    <div class="form-check" *ngFor="let option of field.formFieldDetails?.radioButtonOptionsList; let i = index">
+                                        <input class="form-check-input" type="radio" 
+                                            [formControlName]="field.templateFieldID"
+                                            [value]="option.radioButtonOptionName"
+                                            [id]="'section-' + section.orderNumber + '-' + field.orderNumber + '-' + i"
+                                            >
+                                        <label class="form-check-label" [for]="'section-' + section.orderNumber + '-' + field.orderNumber + '-' + i">
+                                            {{option.radioButtonOptionName}}
+                                        </label>
+                                    </div>
+                                </fieldset>
+                                <!-- CHECKBOX -->
+                                <fieldset class="col-5" *ngSwitchCase="FIELD_TYPES.CHECKBOX" [formArrayName]="field.templateFieldID">
+                                    <div class="form-check" *ngFor="let option of field.formFieldDetails?.checkBoxOptionsList; let i = index">
+                                        <input class="form-check-input" type="checkbox" 
+                                            [formControlName]="option.checkBoxOptionName"
+                                            >
+                                        <label class="form-check-label" for="">
+                                            {{option.checkBoxOptionName}}
+                                        </label>
+                                    </div>
+                                </fieldset>
+                                <!-- TEXTAREA -->
+                                <div class="col-5" *ngSwitchCase="FIELD_TYPES.TEXTAREA">
+                                    <textarea
+                                    [formControlName]="field.templateFieldID"
+                                    [id]="'section-' + section.orderNumber + '-' + field.orderNumber"
+                                        class="form-control"></textarea>
+                                </div>
+                                <!-- DROPDOWN -->
+                                <div class="col-5" *ngSwitchCase="FIELD_TYPES.DROPDOWN">
+                                    <select
+                                        [formControlName]="field.templateFieldID"
+                                        [id]="'section-' + section.orderNumber + '-' + field.orderNumber"
+                                        class="form-select">
+                                        <option *ngFor="let option of field.formFieldDetails.dropDownOptionsList"
+                                            [value]="option.dropDownOptionName">
+                                            {{option.dropDownOptionName}}
+                                        </option>
+                                    </select>
+                                </div>
+                                <!-- ERROR -->
+                                <div class="validation-error col" *ngIf="getField(section.orderNumber, field.templateFieldID)?.invalid && getField(section.orderNumber, field.templateFieldID)?.touched">
+                                    Error
+                                </div>
+                            </div>
+                            <!-- GRID -->
+                            <div *ngIf="!field.internalView && field.formGridDetails && field.templateFieldID" [id]="field.templateFieldID"  [ngStyle]="{'display' : field.isDependent ? 'none' : 'flex'}">
+                                <app-grid [(formGridDetails)]="field.formGridDetails"></app-grid>
+                            </div>
+                        </div>
+                    </div>
+                </cdk-accordion-item>
+                    </cdk-accordion>
+                </form>
+            </div>
+            <div class="col-1" style="border-left: 1px solid #ccc; padding-left: 15px;">
+                <!-- Divider -->
+            </div>
+            <div class="col">
+                <!-- Second Form Content -->
+                <form [formGroup]="generatedForm">
+                    <cdk-accordion [multi]="true" #accordionParent="cdkAccordion">
+                    <cdk-accordion-item *ngFor="let section of selectedForm2?.formSections; let index = index;"
+                    #accordionItem="cdkAccordionItem"
+                    class="example-accordion-item"
+                    role="button"
+                    tabindex="0"
+                    [attr.id]="'accordion-header-' + index"
+                    [attr.aria-expanded]="accordionItem.expanded"
+                    [attr.aria-controls]="'accordion-body-' + index"
+                    [formGroupName]="'section-' + section.orderNumber" 
+                    [id]="'section-' + section.orderNumber" 
+                    class="mb-5">
+    
+                    <div class="section-header p-4 position-relative border-bottom border-top" (click)="accordionItem.toggle()">
+                        <h2>{{section.formSectionName}}</h2>
+                        <h6>{{section.formSectionDescription}}</h6>
+                        <div class="position-absolute" style="right: 24px; top: 35%">
+                            <fa-icon [icon]='faAngleUp' class="fs-18pt" *ngIf="accordionItem.expanded"></fa-icon>
+                            <fa-icon [icon]='faAngleDown' class="fs-18pt" *ngIf="!accordionItem.expanded"></fa-icon>
+                        </div>
+                    </div>
+    
+                    <div class="section-body d-flex flex-column gap-3 p-4" 
+                        role="region"
+                        [style.display]="accordionItem.expanded ? '' : 'none !important'"
+                        [attr.id]="'accordion-body-' + index"
+                        [attr.aria-labelledby]="'accordion-header-' + index">
+                        <!-- Switch Start -->
+                        <div *ngFor="let field of section.formFields" class="col-12">
+                            <!-- FIELD -->
+                            <div *ngIf="!field.internalView && field.formFieldDetails && field.templateFieldID" 
+                                class="form-group row" [ngStyle]="{'display' : field.isDependent ? 'none' : 'flex'}" 
+                                [ngSwitch]="field.formFieldDetails.fieldType" 
+                                [id]="field.templateFieldID">
+                                <!-- LABEL -->
+                                <div class="col-5" [ngClass]="{'col-12': field.formFieldDetails.fieldType === FIELD_TYPES.HEADING}">
+                                    <label class="" [ngClass]="labelClass(field.formFieldDetails)" 
+                                        *ngIf="field.formFieldDetails.textBoxOptions?.textBoxOptionName !== TEXT_BOX_TYPES.TEXT_WITHOUT_LABEL">
+                                        {{field.formFieldDetails.fieldName}}
+                                        <span class="text-danger" *ngIf="field.isRequired">*</span>
+                                    </label>
+                                </div>
+                                <!-- TEXTBOX -->
+                                <div class="col-5" *ngSwitchCase="FIELD_TYPES.TEXTBOX">
+                                    <ng-container class="" [ngSwitch]="field.formFieldDetails.textBoxOptions?.textBoxOptionName">
+                                         <!-- TEXT WITH LABEL -->
+                                        <ng-container *ngSwitchCase="TEXT_BOX_TYPES.TEXT_WITH_LABEL">
+                                            <input type="text" 
+                                                [formControlName]="field.templateFieldID"
+                                                [id]="'section-' + section.orderNumber + '-' + field.orderNumber"
+                                                class="form-control">
+                                        </ng-container>
+                                        <!-- TEXT WITHOUT LABEL -->
+                                        <ng-container *ngSwitchCase="TEXT_BOX_TYPES.TEXT_WITHOUT_LABEL">
+                                            <input type="text" 
+                                            [formControlName]="field.templateFieldID"
+                                            [id]="'section-' + section.orderNumber + '-' + field.orderNumber"
+                                            class="form-control">
+                                        </ng-container>
+                                        <!-- DATE -->
+                                        <ng-container *ngSwitchCase="TEXT_BOX_TYPES.DATE">
+                                            <input type="date" 
+                                            [formControlName]="field.templateFieldID"
+                                            [id]="'section-' + section.orderNumber + '-' + field.orderNumber"
+                                            class="form-control">
+                                        </ng-container>
+                                        <!-- PASSWORD -->
+                                        <ng-container *ngSwitchCase="TEXT_BOX_TYPES.PASSWORD">
+                                            <input type="password" placeholder="password"
+                                            [formControlName]="field.templateFieldID"
+                                            [id]="'section-' + section.orderNumber + '-' + field.orderNumber"
+                                            class="form-control">
+                                        </ng-container>
+                                        <!-- EMAIL -->
+                                        <ng-container *ngSwitchCase="TEXT_BOX_TYPES.EMAIL">
+                                            <input type="email" placeholder="example@gmail.com"
+                                            [formControlName]="field.templateFieldID"
+                                            [id]="'section-' + section.orderNumber + '-' + field.orderNumber"
+                                            class="form-control"
+                                            [ngClass]="{'field-error': getField(section.orderNumber, field.templateFieldID)?.invalid && getField(section.orderNumber, field.templateFieldID)?.touched}">
+                                            
+                                        </ng-container>
+                                        <!-- NUMBER -->
+                                        <ng-container *ngSwitchCase="TEXT_BOX_TYPES.NUMBER">
+                                            <input type="number" 
+                                            [formControlName]="field.templateFieldID"
+                                            [id]="'section-' + section.orderNumber + '-' + field.orderNumber"
+                                            class="form-control">
+                                        </ng-container>
+                                        <!-- RANGE -->
+                                        <ng-container *ngSwitchCase="TEXT_BOX_TYPES.RANGE">
+                                            <input type="range" class="form-range d-block" 
+                                                [min]="0" [max]="100" [step]="10" 
+                                                [formControlName]="field.templateFieldID"
+                                                [value]="generatedForm.get('section-' + section.orderNumber)?.get(field.templateFieldID)?.value" 
+                                                [id]="'section-' + section.orderNumber + '-' + field.orderNumber"/>
+                                            <input type="number" 
+                                                [formControlName]="field.templateFieldID"
+                                                [value]="generatedForm.get('section-' + section.orderNumber)?.get(field.templateFieldID)?.value" 
+                                                class="form-control">
+                                        </ng-container>
+                                        <!-- TELEPHONE NUMBER -->
+                                        <ng-container *ngSwitchCase="TEXT_BOX_TYPES.TELEPHONE_NUMBER">
+                                            <input type="tel" 
+                                            [formControlName]="field.templateFieldID"
+                                            [id]="'section-' + section.orderNumber + '-' + field.orderNumber"
+                                                class="form-control">
+                                        </ng-container>
+                                        <!-- URL -->
+                                        <ng-container *ngSwitchCase="TEXT_BOX_TYPES.URL">
+                                            <input type="url" 
+                                            [formControlName]="field.templateFieldID"
+                                            [id]="'section-' + section.orderNumber + '-' + field.orderNumber"
+                                                class="form-control">
+                                        </ng-container>
+                                        <!-- TIME -->
+                                        <ng-container *ngSwitchCase="TEXT_BOX_TYPES.TIME">
+                                            <input type="time" 
+                                            [formControlName]="field.templateFieldID"
+                                            [id]="'section-' + section.orderNumber + '-' + field.orderNumber"
+                                                class="form-control">
+                                        </ng-container>
+                                        <!-- FILE -->
+                                        <!-- CURRENCY -->
+                                        <ng-container *ngSwitchCase="TEXT_BOX_TYPES.CURRENCY">
+                                            <input type="text" 
+                                            [formControlName]="field.templateFieldID"
+                                            [id]="'section-' + section.orderNumber + '-' + field.orderNumber"
+                                                class="form-control">
+                                        </ng-container>
+                                    </ng-container>
+                                </div>                          
+                                <!-- RADIO -->
+                                <fieldset class="col-5" *ngSwitchCase="FIELD_TYPES.RADIO">
+                                    <div class="form-check" *ngFor="let option of field.formFieldDetails?.radioButtonOptionsList; let i = index">
+                                        <input class="form-check-input" type="radio" 
+                                            [formControlName]="field.templateFieldID"
+                                            [value]="option.radioButtonOptionName"
+                                            [id]="'section-' + section.orderNumber + '-' + field.orderNumber + '-' + i"
+                                            >
+                                        <label class="form-check-label" [for]="'section-' + section.orderNumber + '-' + field.orderNumber + '-' + i">
+                                            {{option.radioButtonOptionName}}
+                                        </label>
+                                    </div>
+                                </fieldset>
+                                <!-- CHECKBOX -->
+                                <fieldset class="col-5" *ngSwitchCase="FIELD_TYPES.CHECKBOX" [formArrayName]="field.templateFieldID">
+                                    <div class="form-check" *ngFor="let option of field.formFieldDetails?.checkBoxOptionsList; let i = index">
+                                        <input class="form-check-input" type="checkbox" 
+                                            [formControlName]="option.checkBoxOptionName"
+                                            >
+                                        <label class="form-check-label" for="">
+                                            {{option.checkBoxOptionName}}
+                                        </label>
+                                    </div>
+                                </fieldset>
+                                <!-- TEXTAREA -->
+                                <div class="col-5" *ngSwitchCase="FIELD_TYPES.TEXTAREA">
+                                    <textarea
+                                    [formControlName]="field.templateFieldID"
+                                    [id]="'section-' + section.orderNumber + '-' + field.orderNumber"
+                                        class="form-control"></textarea>
+                                </div>
+                                <!-- DROPDOWN -->
+                                <div class="col-5" *ngSwitchCase="FIELD_TYPES.DROPDOWN">
+                                    <select
+                                        [formControlName]="field.templateFieldID"
+                                        [id]="'section-' + section.orderNumber + '-' + field.orderNumber"
+                                        class="form-select">
+                                        <option *ngFor="let option of field.formFieldDetails.dropDownOptionsList"
+                                            [value]="option.dropDownOptionName">
+                                            {{option.dropDownOptionName}}
+                                        </option>
+                                    </select>
+                                </div>
+                                <!-- ERROR -->
+                                <div class="validation-error col" *ngIf="getField(section.orderNumber, field.templateFieldID)?.invalid && getField(section.orderNumber, field.templateFieldID)?.touched">
+                                    Error
+                                </div>
+                            </div>
+                            <!-- GRID -->
+                            <div *ngIf="!field.internalView && field.formGridDetails && field.templateFieldID" [id]="field.templateFieldID"  [ngStyle]="{'display' : field.isDependent ? 'none' : 'flex'}">
+                                <app-grid [(formGridDetails)]="field.formGridDetails"></app-grid>
+                            </div>
+                        </div>
+                    </div>
+                </cdk-accordion-item>
+                    </cdk-accordion>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="activeModal.close('Close click')">Close</button>
+        <!-- Add other buttons or actions as needed -->
+    </div>
+</div>
