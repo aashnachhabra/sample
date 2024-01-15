@@ -1,380 +1,255 @@
-{
-    "form1": {
-        "id": null,
-        "formID": 690,
-        "status": "DRAFT",
-        "documentName": "tf1",
-        "groupName": "1",
-        "groupNumber": "1",
-        "planNumber": "1",
-        "benefitPlan": "",
-        "versionType": "1",
-        "installType": null,
-        "customerType": null,
-        "effectiveDate": null,
-        "recentVersion": "",
-        "careConsultant": "1",
-        "sae": "1",
-        "templateID": null,
-        "formSections": [
-            {
-                "formSectionName": "section 1",
-                "formSectionDescription": "s1",
-                "orderNumber": 1,
-                "formFields": [
-                    {
-                        "templateFieldID": "e060aa02-a76f-4862-9758-4eef653255e8",
-                        "fieldID": 582,
-                        "gridID": null,
-                        "ruleID": 1,
-                        "isRequired": null,
-                        "internalView": false,
-                        "orderNumber": 1,
-                        "isDependent": null,
-                        "dependentFieldID": null,
-                        "showWhen": null,
-                        "formFieldDetails": {
-                            "fieldName": "El Test - Currency",
-                            "fieldHelpText": "",
-                            "fieldCurrentValue": "",
-                            "fieldType": "textbox",
-                            "isCurrent": true,
-                            "isRequired": false,
-                            "heading": null,
-                            "dropDownOptionsList": null,
-                            "checkBoxOptionsList": null,
-                            "radioButtonOptionsList": null,
-                            "isBold": null,
-                            "isItalic": null,
-                            "isUnderline": null,
-                            "isHighlight": null,
-                            "indentSize": null,
-                            "fontSize": null,
-                            "textBoxOptions": {
-                                "textBoxOptionID": null,
-                                "textBoxOptionName": "Currency",
-                                "isCurrent": true,
-                                "createdBy": null,
-                                "createdOn": "2024-01-05T11:13:02.308",
-                                "modifiedBy": null,
-                                "modifiedOn": null,
-                                "isEditable": null,
-                                "defaultText": null
-                            }
-                        },
-                        "formGridDetails": null,
-                        "fieldCurrentValue": ""
-                    },
-                    {
-                        "templateFieldID": "ee79abf4-7273-4a33-a82b-8b0add6366e1",
-                        "fieldID": 583,
-                        "gridID": null,
-                        "ruleID": 1,
-                        "isRequired": null,
-                        "internalView": false,
-                        "orderNumber": 2,
-                        "isDependent": null,
-                        "dependentFieldID": null,
-                        "showWhen": null,
-                        "formFieldDetails": {
-                            "fieldName": "El Test - Date",
-                            "fieldHelpText": "",
-                            "fieldCurrentValue": "",
-                            "fieldType": "textbox",
-                            "isCurrent": true,
-                            "isRequired": false,
-                            "heading": null,
-                            "dropDownOptionsList": null,
-                            "checkBoxOptionsList": null,
-                            "radioButtonOptionsList": null,
-                            "isBold": null,
-                            "isItalic": null,
-                            "isUnderline": null,
-                            "isHighlight": null,
-                            "indentSize": null,
-                            "fontSize": null,
-                            "textBoxOptions": {
-                                "textBoxOptionID": null,
-                                "textBoxOptionName": "Date",
-                                "isCurrent": true,
-                                "createdBy": null,
-                                "createdOn": "2024-01-05T11:13:20.261",
-                                "modifiedBy": null,
-                                "modifiedOn": null,
-                                "isEditable": null,
-                                "defaultText": null
-                            }
-                        },
-                        "formGridDetails": null,
-                        "fieldCurrentValue": ""
-                    },
-                    {
-                        "templateFieldID": "b1c8715e-1c04-402b-8d6b-03dccb1ba168",
-                        "fieldID": 584,
-                        "gridID": null,
-                        "ruleID": 1,
-                        "isRequired": null,
-                        "internalView": false,
-                        "orderNumber": 3,
-                        "isDependent": null,
-                        "dependentFieldID": null,
-                        "showWhen": null,
-                        "formFieldDetails": {
-                            "fieldName": "El Test - Email",
-                            "fieldHelpText": "",
-                            "fieldCurrentValue": "",
-                            "fieldType": "textbox",
-                            "isCurrent": true,
-                            "isRequired": false,
-                            "heading": null,
-                            "dropDownOptionsList": null,
-                            "checkBoxOptionsList": null,
-                            "radioButtonOptionsList": null,
-                            "isBold": null,
-                            "isItalic": null,
-                            "isUnderline": null,
-                            "isHighlight": null,
-                            "indentSize": null,
-                            "fontSize": null,
-                            "textBoxOptions": {
-                                "textBoxOptionID": null,
-                                "textBoxOptionName": "Email",
-                                "isCurrent": true,
-                                "createdBy": null,
-                                "createdOn": "2024-01-05T11:15:10.601",
-                                "modifiedBy": null,
-                                "modifiedOn": null,
-                                "isEditable": null,
-                                "defaultText": null
-                            }
-                        },
-                        "formGridDetails": null,
-                        "fieldCurrentValue": ""
-                    }
-                ]
-            }
-        ],
-        "createdBy": null,
-        "createdOn": "2024-01-15T11:37:40.318",
-        "modifiedBy": null,
-        "modifiedOn": "2024-01-15T11:37:48.578",
-        "isCurrent": null
-    },
-    "form2": {
-        "id": null,
-        "formID": 691,
-        "status": "DRAFT",
-        "documentName": "tf2",
-        "groupName": "1",
-        "groupNumber": "1",
-        "planNumber": "1",
-        "benefitPlan": "",
-        "versionType": "1",
-        "installType": null,
-        "customerType": null,
-        "effectiveDate": null,
-        "recentVersion": "",
-        "careConsultant": "1",
-        "sae": "1",
-        "templateID": null,
-        "formSections": [
-            {
-                "formSectionName": "section 1",
-                "formSectionDescription": "s1",
-                "orderNumber": 1,
-                "formFields": [
-                    {
-                        "templateFieldID": "a052815b-5e79-48bb-97f9-6871dd0406e4",
-                        "fieldID": 676,
-                        "gridID": null,
-                        "ruleID": 1,
-                        "isRequired": null,
-                        "internalView": false,
-                        "orderNumber": 1,
-                        "isDependent": null,
-                        "dependentFieldID": null,
-                        "showWhen": null,
-                        "formFieldDetails": {
-                            "fieldName": "Does customer have Complex Condition CARE?",
-                            "fieldHelpText": "",
-                            "fieldCurrentValue": "",
-                            "fieldType": "dropdown",
-                            "isCurrent": true,
-                            "isRequired": false,
-                            "heading": null,
-                            "dropDownOptionsList": [
-                                {
-                                    "dropDownOptionName": "Yes",
-                                    "isDefault": null,
-                                    "isCurrent": true
-                                },
-                                {
-                                    "dropDownOptionName": "No",
-                                    "isDefault": null,
-                                    "isCurrent": true
-                                }
-                            ],
-                            "checkBoxOptionsList": null,
-                            "radioButtonOptionsList": null,
-                            "isBold": null,
-                            "isItalic": null,
-                            "isUnderline": null,
-                            "isHighlight": null,
-                            "indentSize": null,
-                            "fontSize": null,
-                            "textBoxOptions": null
-                        },
-                        "formGridDetails": null,
-                        "fieldCurrentValue": ""
-                    },
-                    {
-                        "templateFieldID": "59b042fb-5bee-4c37-a36b-94e7267bda2b",
-                        "fieldID": 677,
-                        "gridID": null,
-                        "ruleID": 1,
-                        "isRequired": null,
-                        "internalView": false,
-                        "orderNumber": 2,
-                        "isDependent": null,
-                        "dependentFieldID": null,
-                        "showWhen": null,
-                        "formFieldDetails": {
-                            "fieldName": "If yes, include:",
-                            "fieldHelpText": "",
-                            "fieldCurrentValue": "",
-                            "fieldType": "dropdown",
-                            "isCurrent": true,
-                            "isRequired": false,
-                            "heading": null,
-                            "dropDownOptionsList": [
-                                {
-                                    "dropDownOptionName": "Full program",
-                                    "isDefault": null,
-                                    "isCurrent": true
-                                },
-                                {
-                                    "dropDownOptionName": "Transplant only",
-                                    "isDefault": null,
-                                    "isCurrent": true
-                                },
-                                {
-                                    "dropDownOptionName": "BH/BH SUD only",
-                                    "isDefault": null,
-                                    "isCurrent": true
-                                },
-                                {
-                                    "dropDownOptionName": "Both transplant and BH/BH SUD",
-                                    "isDefault": null,
-                                    "isCurrent": true
-                                }
-                            ],
-                            "checkBoxOptionsList": null,
-                            "radioButtonOptionsList": null,
-                            "isBold": null,
-                            "isItalic": null,
-                            "isUnderline": null,
-                            "isHighlight": null,
-                            "indentSize": null,
-                            "fontSize": null,
-                            "textBoxOptions": null
-                        },
-                        "formGridDetails": null,
-                        "fieldCurrentValue": ""
-                    },
-                    {
-                        "templateFieldID": "bf948e0d-23ab-45e1-9cac-337693806614",
-                        "fieldID": 678,
-                        "gridID": null,
-                        "ruleID": 1,
-                        "isRequired": null,
-                        "internalView": false,
-                        "orderNumber": 3,
-                        "isDependent": null,
-                        "dependentFieldID": null,
-                        "showWhen": null,
-                        "formFieldDetails": {
-                            "fieldName": "Select who to communicate transplant details with.",
-                            "fieldHelpText": "",
-                            "fieldCurrentValue": "",
-                            "fieldType": "dropdown",
-                            "isCurrent": true,
-                            "isRequired": false,
-                            "heading": null,
-                            "dropDownOptionsList": [
-                                {
-                                    "dropDownOptionName": "Member and provider",
-                                    "isDefault": null,
-                                    "isCurrent": true
-                                },
-                                {
-                                    "dropDownOptionName": "Provider only",
-                                    "isDefault": null,
-                                    "isCurrent": true
-                                }
-                            ],
-                            "checkBoxOptionsList": null,
-                            "radioButtonOptionsList": null,
-                            "isBold": null,
-                            "isItalic": null,
-                            "isUnderline": null,
-                            "isHighlight": null,
-                            "indentSize": null,
-                            "fontSize": null,
-                            "textBoxOptions": null
-                        },
-                        "formGridDetails": null,
-                        "fieldCurrentValue": ""
-                    },
-                    {
-                        "templateFieldID": "c32ed2e5-da75-477e-8827-9b982b4e8b15",
-                        "fieldID": 679,
-                        "gridID": null,
-                        "ruleID": 1,
-                        "isRequired": null,
-                        "internalView": false,
-                        "orderNumber": 4,
-                        "isDependent": null,
-                        "dependentFieldID": null,
-                        "showWhen": null,
-                        "formFieldDetails": {
-                            "fieldName": "Effective date:",
-                            "fieldHelpText": "",
-                            "fieldCurrentValue": "",
-                            "fieldType": "textbox",
-                            "isCurrent": true,
-                            "isRequired": false,
-                            "heading": null,
-                            "dropDownOptionsList": null,
-                            "checkBoxOptionsList": null,
-                            "radioButtonOptionsList": null,
-                            "isBold": null,
-                            "isItalic": null,
-                            "isUnderline": null,
-                            "isHighlight": null,
-                            "indentSize": null,
-                            "fontSize": null,
-                            "textBoxOptions": {
-                                "textBoxOptionID": null,
-                                "textBoxOptionName": "Date",
-                                "isCurrent": true,
-                                "createdBy": null,
-                                "createdOn": "2024-01-10T08:46:41.74",
-                                "modifiedBy": null,
-                                "modifiedOn": null,
-                                "isEditable": null,
-                                "defaultText": null
-                            }
-                        },
-                        "formGridDetails": null,
-                        "fieldCurrentValue": ""
-                    }
-                ]
-            }
-        ],
-        "createdBy": null,
-        "createdOn": "2024-01-15T11:38:08.744",
-        "modifiedBy": null,
-        "modifiedOn": "2024-01-15T11:38:15.793",
-        "isCurrent": null
+import { CdkAccordionModule } from '@angular/cdk/accordion';
+import { CommonModule } from '@angular/common';
+import { Component, Input, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { faAngleDown, faAngleUp, faCompress, faExpand, faFloppyDisk } from '@fortawesome/free-solid-svg-icons';
+import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+import { FIELD_TYPES, FormField, FormFieldDetails, FormGridDetails, FormSection, TEXT_BOX_TYPES } from 'src/app/models/form-generation/form.model';
+import { DropdownNavigationComponent } from 'src/app/shared/components/dropdown-navigation/dropdown-navigation.component';
+import { SharedModule } from 'src/app/shared/shared.module';
+import { GridComponent } from '../../form-generation/components/grid/grid.component';
+import { Form, FORM_STATUS } from 'src/app/models/form-generation/form.model';
+
+@Component({
+  selector: 'app-compare-form-modal',
+  templateUrl: './compare-form-modal.component.html',
+  styleUrls: ['./compare-form-modal.component.scss'],
+  standalone: true,
+  imports: [CommonModule, DropdownNavigationComponent, SharedModule, FontAwesomeModule, ReactiveFormsModule, CdkAccordionModule, GridComponent],
+})
+export class CompareFormModalComponent implements OnInit {
+  @Input() compareResult: any;
+  selectedForm1: any;
+  selectedForm2: any;
+  FIELD_TYPES = FIELD_TYPES;
+  TEXT_BOX_TYPES = TEXT_BOX_TYPES;
+  faAngleDown = faAngleDown;
+  faAngleUp = faAngleUp;
+  faFloppyDisk = faFloppyDisk;
+  faCompress = faCompress;
+  faExpand = faExpand;
+  generatedForm!: FormGroup;
+  section0!: FormGroup;
+  showIdenticalMessage = false;
+  constructor(public activeModal: NgbActiveModal, private fb: FormBuilder,
+  ) { }
+  ngOnInit(): void {
+    if (this.compareResult) {
+      this.selectedForm1 = this.compareResult.form1
+      this.selectedForm2 = this.compareResult.form2
+      if (this.selectedForm1.formSections.length == 0 && this.selectedForm2.formSections.length == 0) {
+        this.showIdenticalMessage = true
+      }
+      else {
+        this.showIdenticalMessage = false
+        this._initializeForm1()
+        this._generateForm1(this.selectedForm1);
+        this._initializeForm2()
+        this._generateForm2(this.selectedForm2);
+      }
     }
+  }
+  private _initializeForm1() {
+    if (this.selectedForm1) {
+      this.section0 = this.fb.group({
+        documentName: [this.selectedForm1.documentName || "", Validators.required],
+        groupNumber: [this.selectedForm1.groupNumber || "", Validators.required],
+        groupName: [this.selectedForm1.groupName || "", Validators.required],
+        planNumber: [this.selectedForm1.planNumber || "", Validators.required],
+        benefitPlan: [this.selectedForm1.benefitPlan || ""], // No UI yet
+        versionType: [this.selectedForm1.versionType || "", Validators.required],
+        recentVersion: [this.selectedForm1.recentVersion || ""], // No UI yet
+        careConsultant: [this.selectedForm1.careConsultant || "", Validators.required],
+        sae: [this.selectedForm1.sae || "", Validators.required],
+      })
+
+      this.generatedForm = this.fb.group({
+        "section-0": this.section0,
+      })
+    }
+  }
+  private _initializeForm2() {
+    if (this.selectedForm2) {
+      this.section0 = this.fb.group({
+        documentName: [this.selectedForm2.documentName || "", Validators.required],
+        groupNumber: [this.selectedForm2.groupNumber || "", Validators.required],
+        groupName: [this.selectedForm2.groupName || "", Validators.required],
+        planNumber: [this.selectedForm2.planNumber || "", Validators.required],
+        benefitPlan: [this.selectedForm2.benefitPlan || ""], // No UI yet
+        versionType: [this.selectedForm2.versionType || "", Validators.required],
+        recentVersion: [this.selectedForm2.recentVersion || ""], // No UI yet
+        careConsultant: [this.selectedForm2.careConsultant || "", Validators.required],
+        sae: [this.selectedForm2.sae || "", Validators.required],
+      })
+
+      this.generatedForm = this.fb.group({
+        "section-0": this.section0,
+      })
+    }
+  }
+  private _checkboxValueToStringArray(checkboxValue: any): string[] {
+    let x = []
+    for (const [key, value] of Object.entries((checkboxValue as any))) {
+      if (value === true) {
+        x.push(key)
+      }
+    }
+    return x;
+  }
+  private _instanceOfFormGridDetails(object: any): object is FormGridDetails {
+    return 'formGridID' in object;
+  }
+  private _addFormControl({ formFieldDetails, isRequired, formGridDetails, gridID }: FormField) {
+    const validators = [];
+
+    if (isRequired) {
+      validators.push(Validators.required);
+    }
+
+    //Textbox Email Type
+    if (formFieldDetails?.fieldType === FIELD_TYPES.TEXTBOX && formFieldDetails?.textBoxOptions?.textBoxOptionName === TEXT_BOX_TYPES.EMAIL) {
+      validators.push(Validators.pattern(/^[^\s@]+@[^\s@]+\.[^\s@]+$/))
+    }
+
+    //Checkbox Type
+    if (formFieldDetails?.fieldType === FIELD_TYPES.CHECKBOX) {
+      const checkboxGroup = this.fb.group({});
+      formFieldDetails?.checkBoxOptionsList?.map(option => {
+        checkboxGroup.addControl(option.checkBoxOptionName, this.fb.control(option.isDefault))
+      });
+
+      return checkboxGroup;
+    }
+
+    //Grid
+    if (gridID) {
+      return this.fb.control(formGridDetails, validators);
+    }
+
+    //All Other input types
+    return this.fb.control(
+      {
+        value: formFieldDetails?.fieldCurrentValue || formFieldDetails?.textBoxOptions?.defaultText || "",
+        disabled: formFieldDetails?.textBoxOptions?.isEditable !== null ? !formFieldDetails?.textBoxOptions?.isEditable : false
+      },
+      validators
+    );
+  }
+  private _generateForm1(form: Form) {
+    console.log("in generate", form)
+    form.formSections.forEach((section: FormSection) => {
+      const formSection: FormGroup = this.fb.group({})
+
+      section.formFields.forEach((field: FormField) => {
+        formSection.addControl(field.templateFieldID, this._addFormControl(field));
+      });
+
+      //Set subsdcriptions for dependency
+      section.formFields.forEach((field: FormField) => {
+        const fieldID = field.templateFieldID;
+        if (field.isDependent && field.dependentFieldID !== undefined && fieldID !== undefined) {
+
+          formSection.get(field.dependentFieldID)?.valueChanges.subscribe(value => {
+            let showField = false;
+            //Grids and Checkbox values are objects
+            //The rest are strings
+            //This checks for checkbox only
+            if (value instanceof Object && !this._instanceOfFormGridDetails(value) && !!field.showWhen) {
+              showField = this._checkboxValueToStringArray(value).includes(field.showWhen)
+            } else {
+              showField = value === field.showWhen && fieldID !== undefined
+            }
+
+            if (showField) {
+              formSection.get(fieldID)?.enable();
+              document.getElementById(fieldID)?.setAttribute('style', "display: flex;")
+            } else if (formSection.get(fieldID)?.enabled) {
+              formSection.get(fieldID)?.disable();
+              document.getElementById(fieldID)?.setAttribute('style', "display: none;")
+
+              if (!this._instanceOfFormGridDetails(formSection.get(fieldID)?.value)) {
+                formSection.get(fieldID)?.reset("", { emitEvent: false });
+              }
+            }
+
+          })
+        }
+      })
+      console.log("generated form", this.generatedForm)
+      this.generatedForm.addControl(`section-${section.orderNumber}`, formSection)
+    })
+  }
+  private _generateForm2(form: Form) {
+    console.log("in generate", form)
+    form.formSections.forEach((section: FormSection) => {
+      const formSection: FormGroup = this.fb.group({})
+
+      section.formFields.forEach((field: FormField) => {
+        formSection.addControl(field.templateFieldID, this._addFormControl(field));
+      });
+
+      //Set subsdcriptions for dependency
+      section.formFields.forEach((field: FormField) => {
+        const fieldID = field.templateFieldID;
+        if (field.isDependent && field.dependentFieldID !== undefined && fieldID !== undefined) {
+
+          formSection.get(field.dependentFieldID)?.valueChanges.subscribe(value => {
+            let showField = false;
+            //Grids and Checkbox values are objects
+            //The rest are strings
+            //This checks for checkbox only
+            if (value instanceof Object && !this._instanceOfFormGridDetails(value) && !!field.showWhen) {
+              showField = this._checkboxValueToStringArray(value).includes(field.showWhen)
+            } else {
+              showField = value === field.showWhen && fieldID !== undefined
+            }
+
+            if (showField) {
+              formSection.get(fieldID)?.enable();
+              document.getElementById(fieldID)?.setAttribute('style', "display: flex;")
+            } else if (formSection.get(fieldID)?.enabled) {
+              formSection.get(fieldID)?.disable();
+              document.getElementById(fieldID)?.setAttribute('style', "display: none;")
+
+              if (!this._instanceOfFormGridDetails(formSection.get(fieldID)?.value)) {
+                formSection.get(fieldID)?.reset("", { emitEvent: false });
+              }
+            }
+
+          })
+        }
+      })
+      console.log("generated form", this.generatedForm)
+      this.generatedForm.addControl(`section-${section.orderNumber}`, formSection)
+    })
+  }
+  getField(section: any, field: any) {
+    return this.generatedForm.get('section-' + section)?.get(field)
+  }
+  labelClass(fieldDetails: FormFieldDetails) {
+    let { fontSize, isBold } = Object.assign([], fieldDetails);
+    switch (fieldDetails.heading?.headingSize) {
+      case 'Small':
+        fontSize = 12;
+        isBold = true;
+        break;
+      case 'Medium':
+        fontSize = 18;
+        isBold = true;
+        break;
+      case 'Large':
+        fontSize = 24;
+        isBold = true;
+        break;
+    }
+
+    return {
+      'fw-bold': isBold,
+      'fst-italic': fieldDetails.isItalic,
+      'text-decoration-underline': fieldDetails.isUnderline,
+      [`fs-${fontSize}pt`]: fontSize,
+      [`indent-${fieldDetails.indentSize}`]: fieldDetails.indentSize
+    }
+  }
 }
