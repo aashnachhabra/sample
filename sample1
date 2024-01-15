@@ -1,407 +1,380 @@
-<div class="modal-content">
-    <div class="modal-header">
-        <h4 class="modal-title">Comparison Result</h4>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
-        (click)="activeModal.dismiss()"></button>
-    </div>
-    <div class="modal-body">
-        <div class="row" *ngIf="showIdenticalMessage">
-            <p class="text-center text-success" style="font-size: 20px;">Both the forms are identical!</p>
-        </div>
-        <div class="row">
-            <div class="col">
-                <!-- First Form Content -->
-                <form [formGroup]="generatedForm">
-                    <cdk-accordion [multi]="true" #accordionParent="cdkAccordion">
-                    <cdk-accordion-item *ngFor="let section of selectedForm1?.formSections; let index = index;"
-                    #accordionItem="cdkAccordionItem"
-                    class="example-accordion-item"
-                    role="button"
-                    tabindex="0"
-                    [attr.id]="'accordion-header-' + index"
-                    [attr.aria-expanded]="accordionItem.expanded"
-                    [attr.aria-controls]="'accordion-body-' + index"
-                    [formGroupName]="'section-' + section.orderNumber" 
-                    [id]="'section-' + section.orderNumber" 
-                    class="mb-5">
-    
-                    <div class="section-header p-4 position-relative border-bottom border-top" (click)="accordionItem.toggle()">
-                        <h2>{{section.formSectionName}}</h2>
-                        <h6>{{section.formSectionDescription}}</h6>
-                        <div class="position-absolute" style="right: 24px; top: 35%">
-                            <fa-icon [icon]='faAngleUp' class="fs-18pt" *ngIf="accordionItem.expanded"></fa-icon>
-                            <fa-icon [icon]='faAngleDown' class="fs-18pt" *ngIf="!accordionItem.expanded"></fa-icon>
-                        </div>
-                    </div>
-    
-                    <div class="section-body d-flex flex-column gap-3 p-4" 
-                        role="region"
-                        [style.display]="accordionItem.expanded ? '' : 'none !important'"
-                        [attr.id]="'accordion-body-' + index"
-                        [attr.aria-labelledby]="'accordion-header-' + index">
-                        <!-- Switch Start -->
-                        <div *ngFor="let field of section.formFields" class="col-12">
-                            <!-- FIELD -->
-                            <div *ngIf="!field.internalView && field.formFieldDetails && field.templateFieldID" 
-                                class="form-group row" [ngStyle]="{'display' : field.isDependent ? 'none' : 'flex'}" 
-                                [ngSwitch]="field.formFieldDetails.fieldType" 
-                                [id]="field.templateFieldID">
-                                <!-- LABEL -->
-                                <div class="col-5" [ngClass]="{'col-12': field.formFieldDetails.fieldType === FIELD_TYPES.HEADING}">
-                                    <label class="" [ngClass]="labelClass(field.formFieldDetails)" 
-                                        *ngIf="field.formFieldDetails.textBoxOptions?.textBoxOptionName !== TEXT_BOX_TYPES.TEXT_WITHOUT_LABEL">
-                                        {{field.formFieldDetails.fieldName}}
-                                        <span class="text-danger" *ngIf="field.isRequired">*</span>
-                                    </label>
-                                </div>
-                                <!-- TEXTBOX -->
-                                <div class="col-5" *ngSwitchCase="FIELD_TYPES.TEXTBOX">
-                                    <ng-container class="" [ngSwitch]="field.formFieldDetails.textBoxOptions?.textBoxOptionName">
-                                         <!-- TEXT WITH LABEL -->
-                                        <ng-container *ngSwitchCase="TEXT_BOX_TYPES.TEXT_WITH_LABEL">
-                                            <input type="text" 
-                                                [formControlName]="field.templateFieldID"
-                                                [id]="'section-' + section.orderNumber + '-' + field.orderNumber"
-                                                class="form-control">
-                                        </ng-container>
-                                        <!-- TEXT WITHOUT LABEL -->
-                                        <ng-container *ngSwitchCase="TEXT_BOX_TYPES.TEXT_WITHOUT_LABEL">
-                                            <input type="text" 
-                                            [formControlName]="field.templateFieldID"
-                                            [id]="'section-' + section.orderNumber + '-' + field.orderNumber"
-                                            class="form-control">
-                                        </ng-container>
-                                        <!-- DATE -->
-                                        <ng-container *ngSwitchCase="TEXT_BOX_TYPES.DATE">
-                                            <input type="date" 
-                                            [formControlName]="field.templateFieldID"
-                                            [id]="'section-' + section.orderNumber + '-' + field.orderNumber"
-                                            class="form-control">
-                                        </ng-container>
-                                        <!-- PASSWORD -->
-                                        <ng-container *ngSwitchCase="TEXT_BOX_TYPES.PASSWORD">
-                                            <input type="password" placeholder="password"
-                                            [formControlName]="field.templateFieldID"
-                                            [id]="'section-' + section.orderNumber + '-' + field.orderNumber"
-                                            class="form-control">
-                                        </ng-container>
-                                        <!-- EMAIL -->
-                                        <ng-container *ngSwitchCase="TEXT_BOX_TYPES.EMAIL">
-                                            <input type="email" placeholder="example@gmail.com"
-                                            [formControlName]="field.templateFieldID"
-                                            [id]="'section-' + section.orderNumber + '-' + field.orderNumber"
-                                            class="form-control"
-                                            [ngClass]="{'field-error': getField(section.orderNumber, field.templateFieldID)?.invalid && getField(section.orderNumber, field.templateFieldID)?.touched}">
-                                            
-                                        </ng-container>
-                                        <!-- NUMBER -->
-                                        <ng-container *ngSwitchCase="TEXT_BOX_TYPES.NUMBER">
-                                            <input type="number" 
-                                            [formControlName]="field.templateFieldID"
-                                            [id]="'section-' + section.orderNumber + '-' + field.orderNumber"
-                                            class="form-control">
-                                        </ng-container>
-                                        <!-- RANGE -->
-                                        <ng-container *ngSwitchCase="TEXT_BOX_TYPES.RANGE">
-                                            <input type="range" class="form-range d-block" 
-                                                [min]="0" [max]="100" [step]="10" 
-                                                [formControlName]="field.templateFieldID"
-                                                [value]="generatedForm.get('section-' + section.orderNumber)?.get(field.templateFieldID)?.value" 
-                                                [id]="'section-' + section.orderNumber + '-' + field.orderNumber"/>
-                                            <input type="number" 
-                                                [formControlName]="field.templateFieldID"
-                                                [value]="generatedForm.get('section-' + section.orderNumber)?.get(field.templateFieldID)?.value" 
-                                                class="form-control">
-                                        </ng-container>
-                                        <!-- TELEPHONE NUMBER -->
-                                        <ng-container *ngSwitchCase="TEXT_BOX_TYPES.TELEPHONE_NUMBER">
-                                            <input type="tel" 
-                                            [formControlName]="field.templateFieldID"
-                                            [id]="'section-' + section.orderNumber + '-' + field.orderNumber"
-                                                class="form-control">
-                                        </ng-container>
-                                        <!-- URL -->
-                                        <ng-container *ngSwitchCase="TEXT_BOX_TYPES.URL">
-                                            <input type="url" 
-                                            [formControlName]="field.templateFieldID"
-                                            [id]="'section-' + section.orderNumber + '-' + field.orderNumber"
-                                                class="form-control">
-                                        </ng-container>
-                                        <!-- TIME -->
-                                        <ng-container *ngSwitchCase="TEXT_BOX_TYPES.TIME">
-                                            <input type="time" 
-                                            [formControlName]="field.templateFieldID"
-                                            [id]="'section-' + section.orderNumber + '-' + field.orderNumber"
-                                                class="form-control">
-                                        </ng-container>
-                                        <!-- FILE -->
-                                        <!-- CURRENCY -->
-                                        <ng-container *ngSwitchCase="TEXT_BOX_TYPES.CURRENCY">
-                                            <input type="text" 
-                                            [formControlName]="field.templateFieldID"
-                                            [id]="'section-' + section.orderNumber + '-' + field.orderNumber"
-                                                class="form-control">
-                                        </ng-container>
-                                    </ng-container>
-                                </div>                          
-                                <!-- RADIO -->
-                                <fieldset class="col-5" *ngSwitchCase="FIELD_TYPES.RADIO">
-                                    <div class="form-check" *ngFor="let option of field.formFieldDetails?.radioButtonOptionsList; let i = index">
-                                        <input class="form-check-input" type="radio" 
-                                            [formControlName]="field.templateFieldID"
-                                            [value]="option.radioButtonOptionName"
-                                            [id]="'section-' + section.orderNumber + '-' + field.orderNumber + '-' + i"
-                                            >
-                                        <label class="form-check-label" [for]="'section-' + section.orderNumber + '-' + field.orderNumber + '-' + i">
-                                            {{option.radioButtonOptionName}}
-                                        </label>
-                                    </div>
-                                </fieldset>
-                                <!-- CHECKBOX -->
-                                <fieldset class="col-5" *ngSwitchCase="FIELD_TYPES.CHECKBOX" [formArrayName]="field.templateFieldID">
-                                    <div class="form-check" *ngFor="let option of field.formFieldDetails?.checkBoxOptionsList; let i = index">
-                                        <input class="form-check-input" type="checkbox" 
-                                            [formControlName]="option.checkBoxOptionName"
-                                            >
-                                        <label class="form-check-label" for="">
-                                            {{option.checkBoxOptionName}}
-                                        </label>
-                                    </div>
-                                </fieldset>
-                                <!-- TEXTAREA -->
-                                <div class="col-5" *ngSwitchCase="FIELD_TYPES.TEXTAREA">
-                                    <textarea
-                                    [formControlName]="field.templateFieldID"
-                                    [id]="'section-' + section.orderNumber + '-' + field.orderNumber"
-                                        class="form-control"></textarea>
-                                </div>
-                                <!-- DROPDOWN -->
-                                <div class="col-5" *ngSwitchCase="FIELD_TYPES.DROPDOWN">
-                                    <select
-                                        [formControlName]="field.templateFieldID"
-                                        [id]="'section-' + section.orderNumber + '-' + field.orderNumber"
-                                        class="form-select">
-                                        <option *ngFor="let option of field.formFieldDetails.dropDownOptionsList"
-                                            [value]="option.dropDownOptionName">
-                                            {{option.dropDownOptionName}}
-                                        </option>
-                                    </select>
-                                </div>
-                                <!-- ERROR -->
-                                <div class="validation-error col" *ngIf="getField(section.orderNumber, field.templateFieldID)?.invalid && getField(section.orderNumber, field.templateFieldID)?.touched">
-                                    Error
-                                </div>
-                            </div>
-                            <!-- GRID -->
-                            <div *ngIf="!field.internalView && field.formGridDetails && field.templateFieldID" [id]="field.templateFieldID"  [ngStyle]="{'display' : field.isDependent ? 'none' : 'flex'}">
-                                <app-grid [(formGridDetails)]="field.formGridDetails"></app-grid>
-                            </div>
-                        </div>
-                    </div>
-                </cdk-accordion-item>
-                    </cdk-accordion>
-                </form>
-            </div>
-            <div class="col-1" style="border-left: 1px solid #ccc; padding-left: 15px;">
-                <!-- Divider -->
-            </div>
-            <div class="col">
-                <!-- Second Form Content -->
-                <form [formGroup]="generatedForm">
-                    <cdk-accordion [multi]="true" #accordionParent="cdkAccordion">
-                    <cdk-accordion-item *ngFor="let section of selectedForm2?.formSections; let index = index;"
-                    #accordionItem="cdkAccordionItem"
-                    class="example-accordion-item"
-                    role="button"
-                    tabindex="0"
-                    [attr.id]="'accordion-header-' + index"
-                    [attr.aria-expanded]="accordionItem.expanded"
-                    [attr.aria-controls]="'accordion-body-' + index"
-                    [formGroupName]="'section-' + section.orderNumber" 
-                    [id]="'section-' + section.orderNumber" 
-                    class="mb-5">
-    
-                    <div class="section-header p-4 position-relative border-bottom border-top" (click)="accordionItem.toggle()">
-                        <h2>{{section.formSectionName}}</h2>
-                        <h6>{{section.formSectionDescription}}</h6>
-                        <div class="position-absolute" style="right: 24px; top: 35%">
-                            <fa-icon [icon]='faAngleUp' class="fs-18pt" *ngIf="accordionItem.expanded"></fa-icon>
-                            <fa-icon [icon]='faAngleDown' class="fs-18pt" *ngIf="!accordionItem.expanded"></fa-icon>
-                        </div>
-                    </div>
-    
-                    <div class="section-body d-flex flex-column gap-3 p-4" 
-                        role="region"
-                        [style.display]="accordionItem.expanded ? '' : 'none !important'"
-                        [attr.id]="'accordion-body-' + index"
-                        [attr.aria-labelledby]="'accordion-header-' + index">
-                        <!-- Switch Start -->
-                        <div *ngFor="let field of section.formFields" class="col-12">
-                            <!-- FIELD -->
-                            <div *ngIf="!field.internalView && field.formFieldDetails && field.templateFieldID" 
-                                class="form-group row" [ngStyle]="{'display' : field.isDependent ? 'none' : 'flex'}" 
-                                [ngSwitch]="field.formFieldDetails.fieldType" 
-                                [id]="field.templateFieldID">
-                                <!-- LABEL -->
-                                <div class="col-5" [ngClass]="{'col-12': field.formFieldDetails.fieldType === FIELD_TYPES.HEADING}">
-                                    <label class="" [ngClass]="labelClass(field.formFieldDetails)" 
-                                        *ngIf="field.formFieldDetails.textBoxOptions?.textBoxOptionName !== TEXT_BOX_TYPES.TEXT_WITHOUT_LABEL">
-                                        {{field.formFieldDetails.fieldName}}
-                                        <span class="text-danger" *ngIf="field.isRequired">*</span>
-                                    </label>
-                                </div>
-                                <!-- TEXTBOX -->
-                                <div class="col-5" *ngSwitchCase="FIELD_TYPES.TEXTBOX">
-                                    <ng-container class="" [ngSwitch]="field.formFieldDetails.textBoxOptions?.textBoxOptionName">
-                                         <!-- TEXT WITH LABEL -->
-                                        <ng-container *ngSwitchCase="TEXT_BOX_TYPES.TEXT_WITH_LABEL">
-                                            <input type="text" 
-                                                [formControlName]="field.templateFieldID"
-                                                [id]="'section-' + section.orderNumber + '-' + field.orderNumber"
-                                                class="form-control">
-                                        </ng-container>
-                                        <!-- TEXT WITHOUT LABEL -->
-                                        <ng-container *ngSwitchCase="TEXT_BOX_TYPES.TEXT_WITHOUT_LABEL">
-                                            <input type="text" 
-                                            [formControlName]="field.templateFieldID"
-                                            [id]="'section-' + section.orderNumber + '-' + field.orderNumber"
-                                            class="form-control">
-                                        </ng-container>
-                                        <!-- DATE -->
-                                        <ng-container *ngSwitchCase="TEXT_BOX_TYPES.DATE">
-                                            <input type="date" 
-                                            [formControlName]="field.templateFieldID"
-                                            [id]="'section-' + section.orderNumber + '-' + field.orderNumber"
-                                            class="form-control">
-                                        </ng-container>
-                                        <!-- PASSWORD -->
-                                        <ng-container *ngSwitchCase="TEXT_BOX_TYPES.PASSWORD">
-                                            <input type="password" placeholder="password"
-                                            [formControlName]="field.templateFieldID"
-                                            [id]="'section-' + section.orderNumber + '-' + field.orderNumber"
-                                            class="form-control">
-                                        </ng-container>
-                                        <!-- EMAIL -->
-                                        <ng-container *ngSwitchCase="TEXT_BOX_TYPES.EMAIL">
-                                            <input type="email" placeholder="example@gmail.com"
-                                            [formControlName]="field.templateFieldID"
-                                            [id]="'section-' + section.orderNumber + '-' + field.orderNumber"
-                                            class="form-control"
-                                            [ngClass]="{'field-error': getField(section.orderNumber, field.templateFieldID)?.invalid && getField(section.orderNumber, field.templateFieldID)?.touched}">
-                                            
-                                        </ng-container>
-                                        <!-- NUMBER -->
-                                        <ng-container *ngSwitchCase="TEXT_BOX_TYPES.NUMBER">
-                                            <input type="number" 
-                                            [formControlName]="field.templateFieldID"
-                                            [id]="'section-' + section.orderNumber + '-' + field.orderNumber"
-                                            class="form-control">
-                                        </ng-container>
-                                        <!-- RANGE -->
-                                        <ng-container *ngSwitchCase="TEXT_BOX_TYPES.RANGE">
-                                            <input type="range" class="form-range d-block" 
-                                                [min]="0" [max]="100" [step]="10" 
-                                                [formControlName]="field.templateFieldID"
-                                                [value]="generatedForm.get('section-' + section.orderNumber)?.get(field.templateFieldID)?.value" 
-                                                [id]="'section-' + section.orderNumber + '-' + field.orderNumber"/>
-                                            <input type="number" 
-                                                [formControlName]="field.templateFieldID"
-                                                [value]="generatedForm.get('section-' + section.orderNumber)?.get(field.templateFieldID)?.value" 
-                                                class="form-control">
-                                        </ng-container>
-                                        <!-- TELEPHONE NUMBER -->
-                                        <ng-container *ngSwitchCase="TEXT_BOX_TYPES.TELEPHONE_NUMBER">
-                                            <input type="tel" 
-                                            [formControlName]="field.templateFieldID"
-                                            [id]="'section-' + section.orderNumber + '-' + field.orderNumber"
-                                                class="form-control">
-                                        </ng-container>
-                                        <!-- URL -->
-                                        <ng-container *ngSwitchCase="TEXT_BOX_TYPES.URL">
-                                            <input type="url" 
-                                            [formControlName]="field.templateFieldID"
-                                            [id]="'section-' + section.orderNumber + '-' + field.orderNumber"
-                                                class="form-control">
-                                        </ng-container>
-                                        <!-- TIME -->
-                                        <ng-container *ngSwitchCase="TEXT_BOX_TYPES.TIME">
-                                            <input type="time" 
-                                            [formControlName]="field.templateFieldID"
-                                            [id]="'section-' + section.orderNumber + '-' + field.orderNumber"
-                                                class="form-control">
-                                        </ng-container>
-                                        <!-- FILE -->
-                                        <!-- CURRENCY -->
-                                        <ng-container *ngSwitchCase="TEXT_BOX_TYPES.CURRENCY">
-                                            <input type="text" 
-                                            [formControlName]="field.templateFieldID"
-                                            [id]="'section-' + section.orderNumber + '-' + field.orderNumber"
-                                                class="form-control">
-                                        </ng-container>
-                                    </ng-container>
-                                </div>                          
-                                <!-- RADIO -->
-                                <fieldset class="col-5" *ngSwitchCase="FIELD_TYPES.RADIO">
-                                    <div class="form-check" *ngFor="let option of field.formFieldDetails?.radioButtonOptionsList; let i = index">
-                                        <input class="form-check-input" type="radio" 
-                                            [formControlName]="field.templateFieldID"
-                                            [value]="option.radioButtonOptionName"
-                                            [id]="'section-' + section.orderNumber + '-' + field.orderNumber + '-' + i"
-                                            >
-                                        <label class="form-check-label" [for]="'section-' + section.orderNumber + '-' + field.orderNumber + '-' + i">
-                                            {{option.radioButtonOptionName}}
-                                        </label>
-                                    </div>
-                                </fieldset>
-                                <!-- CHECKBOX -->
-                                <fieldset class="col-5" *ngSwitchCase="FIELD_TYPES.CHECKBOX" [formArrayName]="field.templateFieldID">
-                                    <div class="form-check" *ngFor="let option of field.formFieldDetails?.checkBoxOptionsList; let i = index">
-                                        <input class="form-check-input" type="checkbox" 
-                                            [formControlName]="option.checkBoxOptionName"
-                                            >
-                                        <label class="form-check-label" for="">
-                                            {{option.checkBoxOptionName}}
-                                        </label>
-                                    </div>
-                                </fieldset>
-                                <!-- TEXTAREA -->
-                                <div class="col-5" *ngSwitchCase="FIELD_TYPES.TEXTAREA">
-                                    <textarea
-                                    [formControlName]="field.templateFieldID"
-                                    [id]="'section-' + section.orderNumber + '-' + field.orderNumber"
-                                        class="form-control"></textarea>
-                                </div>
-                                <!-- DROPDOWN -->
-                                <div class="col-5" *ngSwitchCase="FIELD_TYPES.DROPDOWN">
-                                    <select
-                                        [formControlName]="field.templateFieldID"
-                                        [id]="'section-' + section.orderNumber + '-' + field.orderNumber"
-                                        class="form-select">
-                                        <option *ngFor="let option of field.formFieldDetails.dropDownOptionsList"
-                                            [value]="option.dropDownOptionName">
-                                            {{option.dropDownOptionName}}
-                                        </option>
-                                    </select>
-                                </div>
-                                <!-- ERROR -->
-                                <div class="validation-error col" *ngIf="getField(section.orderNumber, field.templateFieldID)?.invalid && getField(section.orderNumber, field.templateFieldID)?.touched">
-                                    Error
-                                </div>
-                            </div>
-                            <!-- GRID -->
-                            <div *ngIf="!field.internalView && field.formGridDetails && field.templateFieldID" [id]="field.templateFieldID"  [ngStyle]="{'display' : field.isDependent ? 'none' : 'flex'}">
-                                <app-grid [(formGridDetails)]="field.formGridDetails"></app-grid>
-                            </div>
-                        </div>
-                    </div>
-                </cdk-accordion-item>
-                    </cdk-accordion>
-                </form>
-            </div>
-        </div>
-    </div>
-    <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" (click)="activeModal.close('Close click')">Close</button>
-        <!-- Add other buttons or actions as needed -->
-    </div>
-</div>
+{
+    "form1": {
+        "id": null,
+        "formID": 692,
+        "status": "DRAFT",
+        "documentName": "tf1",
+        "groupName": "1",
+        "groupNumber": "1",
+        "planNumber": "1",
+        "benefitPlan": "",
+        "versionType": "1",
+        "installType": null,
+        "customerType": null,
+        "effectiveDate": null,
+        "recentVersion": "",
+        "careConsultant": "11",
+        "sae": "1",
+        "templateID": null,
+        "formSections": [
+            {
+                "formSectionName": "section 2",
+                "formSectionDescription": "s1",
+                "orderNumber": 1,
+                "formFields": [
+                    {
+                        "templateFieldID": "e060aa02-a76f-4862-9758-4eef653255e8",
+                        "fieldID": 582,
+                        "gridID": null,
+                        "ruleID": 1,
+                        "isRequired": null,
+                        "internalView": false,
+                        "orderNumber": 1,
+                        "isDependent": null,
+                        "dependentFieldID": null,
+                        "showWhen": null,
+                        "formFieldDetails": {
+                            "fieldName": "El Test - Currency",
+                            "fieldHelpText": "",
+                            "fieldCurrentValue": "",
+                            "fieldType": "textbox",
+                            "isCurrent": true,
+                            "isRequired": false,
+                            "heading": null,
+                            "dropDownOptionsList": null,
+                            "checkBoxOptionsList": null,
+                            "radioButtonOptionsList": null,
+                            "isBold": null,
+                            "isItalic": null,
+                            "isUnderline": null,
+                            "isHighlight": null,
+                            "indentSize": null,
+                            "fontSize": null,
+                            "textBoxOptions": {
+                                "textBoxOptionID": null,
+                                "textBoxOptionName": "Currency",
+                                "isCurrent": true,
+                                "createdBy": null,
+                                "createdOn": "2024-01-05T11:13:02.308",
+                                "modifiedBy": null,
+                                "modifiedOn": null,
+                                "isEditable": null,
+                                "defaultText": null
+                            }
+                        },
+                        "formGridDetails": null,
+                        "fieldCurrentValue": ""
+                    },
+                    {
+                        "templateFieldID": "ee79abf4-7273-4a33-a82b-8b0add6366e1",
+                        "fieldID": 583,
+                        "gridID": null,
+                        "ruleID": 1,
+                        "isRequired": null,
+                        "internalView": false,
+                        "orderNumber": 2,
+                        "isDependent": null,
+                        "dependentFieldID": null,
+                        "showWhen": null,
+                        "formFieldDetails": {
+                            "fieldName": "El Test - Date",
+                            "fieldHelpText": "",
+                            "fieldCurrentValue": "",
+                            "fieldType": "textbox",
+                            "isCurrent": true,
+                            "isRequired": false,
+                            "heading": null,
+                            "dropDownOptionsList": null,
+                            "checkBoxOptionsList": null,
+                            "radioButtonOptionsList": null,
+                            "isBold": null,
+                            "isItalic": null,
+                            "isUnderline": null,
+                            "isHighlight": null,
+                            "indentSize": null,
+                            "fontSize": null,
+                            "textBoxOptions": {
+                                "textBoxOptionID": null,
+                                "textBoxOptionName": "Date",
+                                "isCurrent": true,
+                                "createdBy": null,
+                                "createdOn": "2024-01-05T11:13:20.261",
+                                "modifiedBy": null,
+                                "modifiedOn": null,
+                                "isEditable": null,
+                                "defaultText": null
+                            }
+                        },
+                        "formGridDetails": null,
+                        "fieldCurrentValue": ""
+                    },
+                    {
+                        "templateFieldID": "b1c8715e-1c04-402b-8d6b-03dccb1ba168",
+                        "fieldID": 584,
+                        "gridID": null,
+                        "ruleID": 1,
+                        "isRequired": null,
+                        "internalView": false,
+                        "orderNumber": 3,
+                        "isDependent": null,
+                        "dependentFieldID": null,
+                        "showWhen": null,
+                        "formFieldDetails": {
+                            "fieldName": "El Test - Email",
+                            "fieldHelpText": "",
+                            "fieldCurrentValue": "",
+                            "fieldType": "textbox",
+                            "isCurrent": true,
+                            "isRequired": false,
+                            "heading": null,
+                            "dropDownOptionsList": null,
+                            "checkBoxOptionsList": null,
+                            "radioButtonOptionsList": null,
+                            "isBold": null,
+                            "isItalic": null,
+                            "isUnderline": null,
+                            "isHighlight": null,
+                            "indentSize": null,
+                            "fontSize": null,
+                            "textBoxOptions": {
+                                "textBoxOptionID": null,
+                                "textBoxOptionName": "Email",
+                                "isCurrent": true,
+                                "createdBy": null,
+                                "createdOn": "2024-01-05T11:15:10.601",
+                                "modifiedBy": null,
+                                "modifiedOn": null,
+                                "isEditable": null,
+                                "defaultText": null
+                            }
+                        },
+                        "formGridDetails": null,
+                        "fieldCurrentValue": ""
+                    }
+                ]
+            }
+        ],
+        "createdBy": null,
+        "createdOn": "2024-01-15T11:43:22.481",
+        "modifiedBy": null,
+        "modifiedOn": "2024-01-15T11:43:33.23",
+        "isCurrent": null
+    },
+    "form2": {
+        "id": null,
+        "formID": 694,
+        "status": "DRAFT",
+        "documentName": "tf2",
+        "groupName": "1",
+        "groupNumber": "1",
+        "planNumber": "1",
+        "benefitPlan": "",
+        "versionType": "1",
+        "installType": null,
+        "customerType": null,
+        "effectiveDate": null,
+        "recentVersion": "",
+        "careConsultant": "1",
+        "sae": "1",
+        "templateID": null,
+        "formSections": [
+            {
+                "formSectionName": "section 1",
+                "formSectionDescription": "s1",
+                "orderNumber": 1,
+                "formFields": [
+                    {
+                        "templateFieldID": "a052815b-5e79-48bb-97f9-6871dd0406e4",
+                        "fieldID": 676,
+                        "gridID": null,
+                        "ruleID": 1,
+                        "isRequired": null,
+                        "internalView": false,
+                        "orderNumber": 1,
+                        "isDependent": null,
+                        "dependentFieldID": null,
+                        "showWhen": null,
+                        "formFieldDetails": {
+                            "fieldName": "Does customer have Complex Condition CARE?",
+                            "fieldHelpText": "",
+                            "fieldCurrentValue": "",
+                            "fieldType": "dropdown",
+                            "isCurrent": true,
+                            "isRequired": false,
+                            "heading": null,
+                            "dropDownOptionsList": [
+                                {
+                                    "dropDownOptionName": "Yes",
+                                    "isDefault": null,
+                                    "isCurrent": true
+                                },
+                                {
+                                    "dropDownOptionName": "No",
+                                    "isDefault": null,
+                                    "isCurrent": true
+                                }
+                            ],
+                            "checkBoxOptionsList": null,
+                            "radioButtonOptionsList": null,
+                            "isBold": null,
+                            "isItalic": null,
+                            "isUnderline": null,
+                            "isHighlight": null,
+                            "indentSize": null,
+                            "fontSize": null,
+                            "textBoxOptions": null
+                        },
+                        "formGridDetails": null,
+                        "fieldCurrentValue": ""
+                    },
+                    {
+                        "templateFieldID": "59b042fb-5bee-4c37-a36b-94e7267bda2b",
+                        "fieldID": 677,
+                        "gridID": null,
+                        "ruleID": 1,
+                        "isRequired": null,
+                        "internalView": false,
+                        "orderNumber": 2,
+                        "isDependent": null,
+                        "dependentFieldID": null,
+                        "showWhen": null,
+                        "formFieldDetails": {
+                            "fieldName": "If yes, include:",
+                            "fieldHelpText": "",
+                            "fieldCurrentValue": "",
+                            "fieldType": "dropdown",
+                            "isCurrent": true,
+                            "isRequired": false,
+                            "heading": null,
+                            "dropDownOptionsList": [
+                                {
+                                    "dropDownOptionName": "Full program",
+                                    "isDefault": null,
+                                    "isCurrent": true
+                                },
+                                {
+                                    "dropDownOptionName": "Transplant only",
+                                    "isDefault": null,
+                                    "isCurrent": true
+                                },
+                                {
+                                    "dropDownOptionName": "BH/BH SUD only",
+                                    "isDefault": null,
+                                    "isCurrent": true
+                                },
+                                {
+                                    "dropDownOptionName": "Both transplant and BH/BH SUD",
+                                    "isDefault": null,
+                                    "isCurrent": true
+                                }
+                            ],
+                            "checkBoxOptionsList": null,
+                            "radioButtonOptionsList": null,
+                            "isBold": null,
+                            "isItalic": null,
+                            "isUnderline": null,
+                            "isHighlight": null,
+                            "indentSize": null,
+                            "fontSize": null,
+                            "textBoxOptions": null
+                        },
+                        "formGridDetails": null,
+                        "fieldCurrentValue": ""
+                    },
+                    {
+                        "templateFieldID": "bf948e0d-23ab-45e1-9cac-337693806614",
+                        "fieldID": 678,
+                        "gridID": null,
+                        "ruleID": 1,
+                        "isRequired": null,
+                        "internalView": false,
+                        "orderNumber": 3,
+                        "isDependent": null,
+                        "dependentFieldID": null,
+                        "showWhen": null,
+                        "formFieldDetails": {
+                            "fieldName": "Select who to communicate transplant details with.",
+                            "fieldHelpText": "",
+                            "fieldCurrentValue": "",
+                            "fieldType": "dropdown",
+                            "isCurrent": true,
+                            "isRequired": false,
+                            "heading": null,
+                            "dropDownOptionsList": [
+                                {
+                                    "dropDownOptionName": "Member and provider",
+                                    "isDefault": null,
+                                    "isCurrent": true
+                                },
+                                {
+                                    "dropDownOptionName": "Provider only",
+                                    "isDefault": null,
+                                    "isCurrent": true
+                                }
+                            ],
+                            "checkBoxOptionsList": null,
+                            "radioButtonOptionsList": null,
+                            "isBold": null,
+                            "isItalic": null,
+                            "isUnderline": null,
+                            "isHighlight": null,
+                            "indentSize": null,
+                            "fontSize": null,
+                            "textBoxOptions": null
+                        },
+                        "formGridDetails": null,
+                        "fieldCurrentValue": ""
+                    },
+                    {
+                        "templateFieldID": "c32ed2e5-da75-477e-8827-9b982b4e8b15",
+                        "fieldID": 679,
+                        "gridID": null,
+                        "ruleID": 1,
+                        "isRequired": null,
+                        "internalView": false,
+                        "orderNumber": 4,
+                        "isDependent": null,
+                        "dependentFieldID": null,
+                        "showWhen": null,
+                        "formFieldDetails": {
+                            "fieldName": "Effective date:",
+                            "fieldHelpText": "",
+                            "fieldCurrentValue": "",
+                            "fieldType": "textbox",
+                            "isCurrent": true,
+                            "isRequired": false,
+                            "heading": null,
+                            "dropDownOptionsList": null,
+                            "checkBoxOptionsList": null,
+                            "radioButtonOptionsList": null,
+                            "isBold": null,
+                            "isItalic": null,
+                            "isUnderline": null,
+                            "isHighlight": null,
+                            "indentSize": null,
+                            "fontSize": null,
+                            "textBoxOptions": {
+                                "textBoxOptionID": null,
+                                "textBoxOptionName": "Date",
+                                "isCurrent": true,
+                                "createdBy": null,
+                                "createdOn": "2024-01-10T08:46:41.74",
+                                "modifiedBy": null,
+                                "modifiedOn": null,
+                                "isEditable": null,
+                                "defaultText": null
+                            }
+                        },
+                        "formGridDetails": null,
+                        "fieldCurrentValue": ""
+                    }
+                ]
+            }
+        ],
+        "createdBy": null,
+        "createdOn": "2024-01-15T11:45:31.002",
+        "modifiedBy": null,
+        "modifiedOn": "2024-01-15T11:45:43.591",
+        "isCurrent": null
+    }
+}
