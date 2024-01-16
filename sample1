@@ -1,14 +1,4 @@
-<div class="modal-content">
-    <div class="modal-header">
-        <h4 class="modal-title">Comparison Result</h4>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
-            (click)="activeModal.dismiss()"></button>
-    </div>
-    <div class="modal-body">
-        <div class="row" *ngIf="showIdenticalMessage">
-            <p class="text-center text-success" style="font-size: 20px;">Both the forms are identical!</p>
-        </div>
-        <div *ngFor="let section of selectedForm1?.formSections; let index = index;">
+ <div *ngFor="let section of selectedForm1?.formSections; let index = index;">
             <div class="row">
                 <div class="col-md-5">
                     <!-- First Form Content -->
@@ -598,9 +588,3 @@
                 </div>
             </div>
         </div>
-    </div>
-    <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" (click)="activeModal.close('Close click')">Close</button>
-        <!-- Add other buttons or actions as needed -->
-    </div>
-</div>
