@@ -40,71 +40,6 @@
                                         </label>
                                     </div>
                                     <div class="col-5" *ngSwitchCase="FIELD_TYPES.TEXTBOX">
-                                        <ng-container class=""
-                                            [ngSwitch]="field.formFieldDetails.textBoxOptions?.textBoxOptionName">
-                                            <ng-container *ngSwitchCase="TEXT_BOX_TYPES.TEXT_WITH_LABEL">
-                                                <input type="text" [formControlName]="field.templateFieldID"
-                                                    [id]="'section-' + section.orderNumber + '-' + field.orderNumber"
-                                                    class="form-control">
-                                            </ng-container>
-                                            <ng-container *ngSwitchCase="TEXT_BOX_TYPES.TEXT_WITHOUT_LABEL">
-                                                <input type="text" [formControlName]="field.templateFieldID"
-                                                    [id]="'section-' + section.orderNumber + '-' + field.orderNumber"
-                                                    class="form-control">
-                                            </ng-container>
-                                            <ng-container *ngSwitchCase="TEXT_BOX_TYPES.DATE">
-                                                <input type="date" [formControlName]="field.templateFieldID"
-                                                    [id]="'section-' + section.orderNumber + '-' + field.orderNumber"
-                                                    class="form-control">
-                                            </ng-container>
-                                            <ng-container *ngSwitchCase="TEXT_BOX_TYPES.PASSWORD">
-                                                <input type="password" placeholder="password"
-                                                    [formControlName]="field.templateFieldID"
-                                                    [id]="'section-' + section.orderNumber + '-' + field.orderNumber"
-                                                    class="form-control">
-                                            </ng-container>
-                                            <ng-container *ngSwitchCase="TEXT_BOX_TYPES.EMAIL">
-                                                <input type="email" placeholder="example@gmail.com"
-                                                    [formControlName]="field.templateFieldID"
-                                                    [id]="'section-' + section.orderNumber + '-' + field.orderNumber"
-                                                    class="form-control"
-                                                    [ngClass]="{'field-error': getField(section.orderNumber, field.templateFieldID)?.invalid && getField(section.orderNumber, field.templateFieldID)?.touched}">
-
-                                            </ng-container>
-                                            <ng-container *ngSwitchCase="TEXT_BOX_TYPES.NUMBER">
-                                                <input type="number" [formControlName]="field.templateFieldID"
-                                                    [id]="'section-' + section.orderNumber + '-' + field.orderNumber"
-                                                    class="form-control">
-                                            </ng-container>
-                                            <ng-container *ngSwitchCase="TEXT_BOX_TYPES.RANGE">
-                                                <input type="range" class="form-range d-block" [min]="0"
-                                                    [max]="100" [step]="10"
-                                                    [formControlName]="field.templateFieldID"
-                                                    [value]="generatedForm1.get('section-' + section.orderNumber)?.get(field.templateFieldID)?.value"
-                                                    [id]="'section-' + section.orderNumber + '-' + field.orderNumber" />
-                                                <input type="number" [formControlName]="field.templateFieldID"
-                                                    [value]="generatedForm1.get('section-' + section.orderNumber)?.get(field.templateFieldID)?.value"
-                                                    class="form-control">
-                                            </ng-container>
-                                                <input type="tel" [formControlName]="field.templateFieldID"
-                                                    [id]="'section-' + section.orderNumber + '-' + field.orderNumber"
-                                                    class="form-control">
-                                            </ng-container>
-                                            <ng-container *ngSwitchCase="TEXT_BOX_TYPES.URL">
-                                                <input type="url" [formControlName]="field.templateFieldID"
-                                                    [id]="'section-' + section.orderNumber + '-' + field.orderNumber"
-                                                    class="form-control">
-                                            </ng-container>
-                                            <ng-container *ngSwitchCase="TEXT_BOX_TYPES.TIME">
-                                                <input type="time" [formControlName]="field.templateFieldID"
-                                                    [id]="'section-' + section.orderNumber + '-' + field.orderNumber"
-                                                    class="form-control">
-                                            </ng-container>
-                                            <ng-container *ngSwitchCase="TEXT_BOX_TYPES.CURRENCY">
-                                                <input type="text" [formControlName]="field.templateFieldID"
-                                                    [id]="'section-' + section.orderNumber + '-' + field.orderNumber"
-                                                    class="form-control">
-                                            </ng-container>
                                     </div>
                                     <fieldset class="col-5" *ngSwitchCase="FIELD_TYPES.RADIO">
                                         <div class="form-check"
@@ -208,75 +143,6 @@
                                             </label>
                                         </div>
                                         <div class="col-5" *ngSwitchCase="FIELD_TYPES.TEXTBOX">
-                                            <ng-container class=""
-                                                [ngSwitch]="field.formFieldDetails.textBoxOptions?.textBoxOptionName">
-                                                <ng-container *ngSwitchCase="TEXT_BOX_TYPES.TEXT_WITH_LABEL">
-                                                    <input type="text" [formControlName]="field.templateFieldID"
-                                                        [id]="'section2-' + section2.orderNumber + '-' + field.orderNumber"
-                                                        class="form-control">
-                                                </ng-container>
-                                                <ng-container *ngSwitchCase="TEXT_BOX_TYPES.TEXT_WITHOUT_LABEL">
-                                                    <input type="text" [formControlName]="field.templateFieldID"
-                                                        [id]="'section2-' + section2.orderNumber + '-' + field.orderNumber"
-                                                        class="form-control">
-                                                </ng-container>
-                                                <ng-container *ngSwitchCase="TEXT_BOX_TYPES.DATE">
-                                                    <input type="date" [formControlName]="field.templateFieldID"
-                                                        [id]="'section2-' + section2.orderNumber + '-' + field.orderNumber"
-                                                        class="form-control">
-                                                </ng-container>
-                                                <ng-container *ngSwitchCase="TEXT_BOX_TYPES.PASSWORD">
-                                                    <input type="password" placeholder="password"
-                                                        [formControlName]="field.templateFieldID"
-                                                        [id]="'section2-' + section2.orderNumber + '-' + field.orderNumber"
-                                                        class="form-control">
-                                                </ng-container>
-                                                <ng-container *ngSwitchCase="TEXT_BOX_TYPES.EMAIL">
-                                                    <input type="email" placeholder="example@gmail.com"
-                                                        [formControlName]="field.templateFieldID"
-                                                        [id]="'section2-' + section2.orderNumber + '-' + field.orderNumber"
-                                                        class="form-control"
-                                                        [ngClass]="{'field-error': getField(section2.orderNumber, field.templateFieldID)?.invalid && getField(section2.orderNumber, field.templateFieldID)?.touched}">
-
-                                                </ng-container>
-                                                <ng-container *ngSwitchCase="TEXT_BOX_TYPES.NUMBER">
-                                                    <input type="number"
-                                                        [formControlName]="field.templateFieldID"
-                                                        [id]="'section2-' + section2.orderNumber + '-' + field.orderNumber"
-                                                        class="form-control">
-                                                </ng-container>
-                                                <ng-container *ngSwitchCase="TEXT_BOX_TYPES.RANGE">
-                                                    <input type="range" class="form-range d-block" [min]="0"
-                                                        [max]="100" [step]="10"
-                                                        [formControlName]="field.templateFieldID"
-                                                        [value]="generatedForm2.get('section2-' + section2.orderNumber)?.get(field.templateFieldID)?.value"
-                                                        [id]="'section2-' + section2.orderNumber + '-' + field.orderNumber" />
-                                                    <input type="number"
-                                                        [formControlName]="field.templateFieldID"
-                                                        [value]="generatedForm2.get('section2-' + section2.orderNumber)?.get(field.templateFieldID)?.value"
-                                                        class="form-control">
-                                                </ng-container>
-                                                <ng-container *ngSwitchCase="TEXT_BOX_TYPES.TELEPHONE_NUMBER">
-                                                    <input type="tel" [formControlName]="field.templateFieldID"
-                                                        [id]="'section2-' + section2.orderNumber + '-' + field.orderNumber"
-                                                        class="form-control">
-                                                </ng-container>
-                                                <ng-container *ngSwitchCase="TEXT_BOX_TYPES.URL">
-                                                    <input type="url" [formControlName]="field.templateFieldID"
-                                                        [id]="'section2-' + section2.orderNumber + '-' + field.orderNumber"
-                                                        class="form-control">
-                                                </ng-container>
-                                                <ng-container *ngSwitchCase="TEXT_BOX_TYPES.TIME">
-                                                    <input type="time" [formControlName]="field.templateFieldID"
-                                                        [id]="'section2-' + section2.orderNumber + '-' + field.orderNumber"
-                                                        class="form-control">
-                                                </ng-container>
-                                                <ng-container *ngSwitchCase="TEXT_BOX_TYPES.CURRENCY">
-                                                    <input type="text" [formControlName]="field.templateFieldID"
-                                                        [id]="'section2-' + section2.orderNumber + '-' + field.orderNumber"
-                                                        class="form-control">
-                                                </ng-container>
-                                            </ng-container>
                                         </div>
                                         <fieldset class="col-5" *ngSwitchCase="FIELD_TYPES.RADIO">
                                             <div class="form-check"
@@ -386,44 +252,6 @@
                                         </label>
                                     </div>
                                     <div class="col-5" *ngSwitchCase="FIELD_TYPES.TEXTBOX">
-                                        <ng-container class=""
-                                            [ngSwitch]="field.formFieldDetails.textBoxOptions?.textBoxOptionName">
-                                            <ng-container *ngSwitchCase="TEXT_BOX_TYPES.TEXT_WITH_LABEL">
-                                                <input type="text" [formControlName]="field.templateFieldID"
-                                                    [id]="'section2-' + section2.orderNumber + '-' + field.orderNumber"
-                                                    class="form-control">
-                                            </ng-container>
-                                            <ng-container *ngSwitchCase="TEXT_BOX_TYPES.RANGE">
-                                                <input type="range" class="form-range d-block" [min]="0"
-                                                    [max]="100" [step]="10"
-                                                    [formControlName]="field.templateFieldID"
-                                                    [value]="generatedForm2.get('section2-' + section2.orderNumber)?.get(field.templateFieldID)?.value"
-                                                    [id]="'section2-' + section2.orderNumber + '-' + field.orderNumber" />
-                                                <input type="number" [formControlName]="field.templateFieldID"
-                                                    [value]="generatedForm2.get('section2-' + section2.orderNumber)?.get(field.templateFieldID)?.value"
-                                                    class="form-control">
-                                            </ng-container>
-                                            <ng-container *ngSwitchCase="TEXT_BOX_TYPES.TELEPHONE_NUMBER">
-                                                <input type="tel" [formControlName]="field.templateFieldID"
-                                                    [id]="'section2-' + section2.orderNumber + '-' + field.orderNumber"
-                                                    class="form-control">
-                                            </ng-container>
-                                            <ng-container *ngSwitchCase="TEXT_BOX_TYPES.URL">
-                                                <input type="url" [formControlName]="field.templateFieldID"
-                                                    [id]="'section2-' + section2.orderNumber + '-' + field.orderNumber"
-                                                    class="form-control">
-                                            </ng-container>
-                                            <ng-container *ngSwitchCase="TEXT_BOX_TYPES.TIME">
-                                                <input type="time" [formControlName]="field.templateFieldID"
-                                                    [id]="'section2-' + section2.orderNumber + '-' + field.orderNumber"
-                                                    class="form-control">
-                                            </ng-container>
-                                            <ng-container *ngSwitchCase="TEXT_BOX_TYPES.CURRENCY">
-                                                <input type="text" [formControlName]="field.templateFieldID"
-                                                    [id]="'section2-' + section2.orderNumber + '-' + field.orderNumber"
-                                                    class="form-control">
-                                            </ng-container>
-                                        </ng-container>
                                     </div>
                                     <fieldset class="col-5" *ngSwitchCase="FIELD_TYPES.RADIO">
                                         <div class="form-check"
