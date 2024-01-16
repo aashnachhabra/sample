@@ -393,35 +393,6 @@
                                                     [id]="'section2-' + section2.orderNumber + '-' + field.orderNumber"
                                                     class="form-control">
                                             </ng-container>
-                                            <ng-container *ngSwitchCase="TEXT_BOX_TYPES.TEXT_WITHOUT_LABEL">
-                                                <input type="text" [formControlName]="field.templateFieldID"
-                                                    [id]="'section2-' + section2.orderNumber + '-' + field.orderNumber"
-                                                    class="form-control">
-                                            </ng-container>
-                                            <ng-container *ngSwitchCase="TEXT_BOX_TYPES.DATE">
-                                                <input type="date" [formControlName]="field.templateFieldID"
-                                                    [id]="'section2-' + section2.orderNumber + '-' + field.orderNumber"
-                                                    class="form-control">
-                                            </ng-container>
-                                            <ng-container *ngSwitchCase="TEXT_BOX_TYPES.PASSWORD">
-                                                <input type="password" placeholder="password"
-                                                    [formControlName]="field.templateFieldID"
-                                                    [id]="'section2-' + section2.orderNumber + '-' + field.orderNumber"
-                                                    class="form-control">
-                                            </ng-container>
-                                            <ng-container *ngSwitchCase="TEXT_BOX_TYPES.EMAIL">
-                                                <input type="email" placeholder="example@gmail.com"
-                                                    [formControlName]="field.templateFieldID"
-                                                    [id]="'section2-' + section2.orderNumber + '-' + field.orderNumber"
-                                                    class="form-control"
-                                                    [ngClass]="{'field-error': getField(section2.orderNumber, field.templateFieldID)?.invalid && getField(section2.orderNumber, field.templateFieldID)?.touched}">
-
-                                            </ng-container>
-                                            <ng-container *ngSwitchCase="TEXT_BOX_TYPES.NUMBER">
-                                                <input type="number" [formControlName]="field.templateFieldID"
-                                                    [id]="'section2-' + section2.orderNumber + '-' + field.orderNumber"
-                                                    class="form-control">
-                                            </ng-container>
                                             <ng-container *ngSwitchCase="TEXT_BOX_TYPES.RANGE">
                                                 <input type="range" class="form-range d-block" [min]="0"
                                                     [max]="100" [step]="10"
