@@ -1,29 +1,44 @@
-<form [formGroup]="accMgmtContactForm">
-    <div class="form-group mb-3">
-      <label for="groupNumber">Group Number <span class="text-danger">*</span></label>
-      <input type="number" class="form-control" id="groupNumber" formControlName="groupNumber" (change)="getGroupName()" required />
-    <div *ngIf="groupNumber?.invalid && groupNumber?.touched" class="error-message text-danger"
-    style="font-size: 12px;">
-    Group Number is required.
-  </div>
-    </div>
-    <div class="form-group mb-3">
-      <label for="groupName">Group Name <span class="text-danger">*</span></label>
-      <input type="text" class="form-control" id="groupName" formControlName="groupName" readonly style="background-color: rgb(234, 231, 231)"
-        required />
-      <div *ngIf="groupName?.invalid &&groupName?.touched" class="error-message text-danger" style="font-size: 12px;">
-        Group Name is required.
-      </div>
-    </div>
-
-getGroupName(){
-    let groupNumber = this.accMgmtContactForm.get('groupNumber')?.value;
-    console.log(groupNumber)
-    this.customerInfoService.getCustomerInfoByGroupNumber(groupNumber)
-    .subscribe((result: any) => {
-      this.customerList = result;
-      console.log(result)
-      this.store.dispatch(new SetAllCustomerInfoData({ data: result }))
-      this.groupName?.setValue(result[0]?.groupName);
-    })
+private _setFrappeTable(forms: FormDashboardItem[]) {
+    const that = this;
+    const selectRowFn = this.selectRow;
+    const datatable = new DataTable(this.formTable?.nativeElement, {
+      columns: this.columns,
+      data: forms,
+      checkboxColumn: true,
+      inlineFilters: true,
+      layout: 'fluid',
+      serialNoColumn: false,
+      treeView: true,
+      dynamicRowHeight: true,
+      disableReorderColumn: true,
+      events: {
+        onCheckRow() {
+          const rows: any[] = datatable.getRows();
+          const checkedRows: any[] = datatable.rowmanager.getCheckedRows();
+          rows.forEach(row => row[0].value = 'false');
+          checkedRows.forEach(checkedRow => rows[checkedRow][0].value = 'true');
+          const selectedRows = checkedRows.map(checkedRow => rows[checkedRow]);
+          const selectedFormIDs = selectedRows.map(row => row[1].content);
+          that.selectRow(selectedFormIDs);
+        },
+      },
+      search: true,
+      searchColumns: ['formID',
+        'status',
+        'documentName',
+        'groupName',
+        'groupNumber',
+        'planNumber',
+        'benefitPlan',
+        'versionType',
+        'careConsultant',
+        'sae',
+        'recentVersion',
+        'createdBy',
+        'createdOn',
+        'modifiedBy',
+        'modifiedOn'],
+      noDataMessage: 'Awe Snap! No results returned. Please update your search criteria then try again.'
+    });
+    datatable.style.setStyle(`.dt-cell__content--header-0 > input`, { display: 'none' });
   }
