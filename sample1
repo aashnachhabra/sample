@@ -38,101 +38,15 @@
  <script src="js/app/serviceIdMapping.js"></script>
     <link href="https://unpkg.com/frappe-datatable@0.0.5/dist/frappe-datatable.min.css" rel="stylesheet">
 </head>
-<body onload="getDeductibleMgmtData()">
+<body >
 	<%@include file="loader.jsp"%>
 	<%@include file="header.jsp"%>
     <div class="text-primary" style="margin: 2em;">
 		<h1><i class="fa-solid fa-filter-circle-dollar"></i> Deductible Management</h1>
 	</div>
-    <div class="shadow-lg p-3 mb-5 bg-white rounded" style="margin:2em">
-        <form>
-        	<div class="row" style="margin-top: 1em;">
-                <div class="col">
-                    <div class="d-grid gap-2">
-                        <!-- button type="button" id="newButton" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#dedMgmtCreateModal"><i class="fa-solid fa-circle-plus"></i> Add</button-->
-                        <a class="btn btn-outline-success" role="button" id="newButton" href="./deductibleManagementEdit">Add</a>
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="d-grid gap-2">
-                        <button type="button" id="deleteButton" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal"><i class="fa-solid fa-trash"></i> Delete</button>
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="d-grid gap-2">
-                        <button type="button" id="editButton" class="btn btn-outline-primary" onclick="deductibleEdit();"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
-                    </div>
-                </div>
-            </div>
-        </form>
-        <div id="datatable" style="margin-top: 1em;"></div>
-	</div>
 
-    <!-- Delete Warning Modal -->
-    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true" data-bs-backdrop="static">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title text-danger" id="deleteModalLabel">Warning</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form>
-                        <div class="row">
-                            <div class="col">
-                                <h5 class="text-danger">Please confirm that you'd like to delete this entry. Once deleted it cannot be restored.</h5>
-                            </div>
-                        </div>
-                        <div class="row" style="padding-top: 1em;">
-                            <div class="col">
-                                <div class="d-grid gap-2">
-                                    <button type="button" class="btn btn-danger" onclick="deductibleDeleteRequest();">Confirm & Delete</button>
-                                </div>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
     <%@include file="footer.html"%>
 
-    <form action="./limitManagement" id="dedManagement" method="get" autocomplete="off">
-<div class="modal fade" id="sucessBoxModal" tabindex="-1" role="dialog" aria-labelledby="sucessBoxModalLabel"  aria-hidden="true" data-bs-backdrop="static">
-       <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5><span id="lblWarnTitle" class="modal-title text-success"> Success </span></h5>
-                <!-- button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button-->
-            </div>
-            <div class="modal-body" id="SaveSuccessMessage">
-            </div>
-            <div class="modal-footer">
-                <button type="submit" id="dedManagement" class="btn btn-outline-success" data-dismiss="modal">OK</a>
-            </div>
-        </div>
-	</div>
-</div>
-</form>
-
-
- <form action="./limitManagement" id="dedMgmt" method="get" autocomplete="off">
-<div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="errorModalLabel"  aria-hidden="true" data-bs-backdrop="static">
-       <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5><span id="ErrorClose" class="modal-title text-danger"> Error </span></h5>
-                <!-- button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button-->
-            </div>
-            <div class="modal-body" id="ErrorMesssage">
-            </div>
-            <div class="modal-footer">
-                <button type="submit" id="dedMgmt" class="btn btn-outline-success" data-dismiss="modal">OK</a>
-            </div>
-        </div>
-	</div>
-</div>
-</form>
 
 </body>
 </html>
