@@ -1,25 +1,6 @@
-CREATE TABLE `limit` (
-   limitID INT(10) NOT NULL AUTO_INCREMENT PRIMARY KEY,
-   LTLT_PFX VARCHAR(4),
-   ACAC_ACC_NO DECIMAL(5,0),
-   LTLT_DESC VARCHAR(70),
-   LTLT_CAT VARCHAR(1),
-   LTLT_LEVEL VARCHAR(1),
-   LTLT_PERIOD_IND VARCHAR(1),
-   LTLT_RULE VARCHAR(1),
-   LTLT_IX_IND VARCHAR(1),
-   LTLT_IX_TYPE VARCHAR(1),
-   EXCD_ID VARCHAR(3),
-   LTLT_AMT1 DECIMAL(18,4),
-   LTLT_AMT2 DECIMAL(18,4),
-   LILT_OPTS VARCHAR(4),
-   LTLT_SAL_IND VARCHAR(1),
-   LTLT_DAYS DECIMAL(5,0),
-   WMDS_SEQ_NO DECIMAL(5,0),
-   LTLT_EXCL_DED_IND_NVL VARCHAR(1),
-   createdBy INT(10),
-   createdOn DATETIME,
-   modifiedBy INT(10),
-   modifiedOn DATETIME,
-   isCurrent BOOL
-);
+ if (limitMgmtRequest == null) throw new Exception("limitMgmtRequest should not be Empty or null..!");
+
+        HttpSession session = request.getSession();
+        session.setAttribute("limitMgmtRequest", limitMgmtRequest);
+return ResponseEntity.status(HttpStatus.OK).body(Collections.singletonMap("limitMsg", "SUCCESS"));
+    }
