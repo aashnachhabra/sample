@@ -1,6 +1,38 @@
- if (limitMgmtRequest == null) throw new Exception("limitMgmtRequest should not be Empty or null..!");
-
-        HttpSession session = request.getSession();
-        session.setAttribute("limitMgmtRequest", limitMgmtRequest);
-return ResponseEntity.status(HttpStatus.OK).body(Collections.singletonMap("limitMsg", "SUCCESS"));
+ @Override
+    public String splitPlLimitRecord(LimitMgmtRequest limitMgmtRequest, String currentUser) {
+        try {
+            Optional<CBBUsers> cbbUsers = cbbUsersRepository.findOneByUserName(currentUser);
+            CBBUsers cbbUsers1 = cbbUsers.get();
+            Integer plLimitID = limitMgmtRequest.getPlLimitID();
+            logger.info("plLimitID : "+plLimitID);
+            
+            //Save plCostShare table
+            Integer plLimitIdSCopy = null;
+            if(Objects.nonNull(plLimitID)) {
+                Optional<PlLimit> plLimitOpt =plLimitRepository.findByPlLimitIDAndIsCurrent(plLimitID, ABBConstant.IS_CURRENT);
+                PlLimit plLimit = new PlLimit();
+                if(plLimitOpt.isPresent()) {
+                    plLimit.setRxOopType(plLimitOpt.get().getRxOopType());
+                    plLimit.setCrossApplies(plLimitOpt.get().getCrossApplies());
+                    plLimit.setCarryover(plLimitOpt.get().getCarryover());
+                    plLimit.setCreatedBy(getUserDetails(currentUser));
+                    plLimit.setCreatedOn(DateUtil.getCurrentDateToFormat(ABBConstant.BATCH_DATE_FORMAT));
+                    plLimit.setTierNumber(plLimitOpt.get().getTierNumber());
+                    plLimit.setIndividualOOPM(0);
+                    plLimit.setFamilyOOPM(plLimitOpt.get().getFamilyOOPM());
+                    plLimit.setIsCurrent(ABBConstant.IS_CURRENT);
+                }
+                PlLimit plLimitRow = plLimitRepository.save(plLimit);
+                plLimitIdSCopy = plLimitRow.getPlLimitID();
+                logger.info("plLimitIdSCopy :: " +plLimitIdSCopy);
+            }
+        } catch(Exception e) {
+            logger.error(e.getMessage());
+            return ABBConstant.ERROR;
+        }
+        return ABBConstant.SUCCESS;
     }
+}
+
+
+In this function i want to set the familyOOPM key of plLimit with id plLimitID as 0 somewhere after line 28
