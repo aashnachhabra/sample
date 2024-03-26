@@ -1,7 +1,5 @@
-<div class="col">
-                                        <div class="d-grid gap-2">
-                                            <a role="button" class="btn btn-outline-primary"
-                                                onclick="limitMgmtSave();"><i class="fa-solid fa-floppy-disk"></i>
-                                                Save</a>
-                                        </div>
-                                    </div>
+<button type="button" id="splitBtn" name="splitButton"
+                                                                    class="btn btn-outline-light"
+                                                                    onclick="splitLimitMgmt('${limitManagementDTO.plLimitID}')">
+                                                                    <i class="fa-solid fa-arrows-split-up-and-left"></i>
+                                                                </button>
