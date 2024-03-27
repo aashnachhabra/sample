@@ -1,5 +1,20 @@
-<button type="button" id="splitBtn" name="splitButton"
-                                                                    class="btn btn-outline-light"
-                                                                    onclick="splitLimitMgmt('${limitManagementDTO.plLimitID}')">
-                                                                    <i class="fa-solid fa-arrows-split-up-and-left"></i>
-                                                                </button>
+function getPrefix() {
+var inputPrefix = document.getElementById("inputPrefix").value;
+        $.ajax({
+               type: "GET",
+               contentType: "application/json",
+               url: "/abb/getLookUpRecord",
+               data: JSON.stringify(inputPrefix),
+               dataType: 'json',
+               success: function(response) {
+               CONSOLE.LOG('HERE')
+                       	console.log(response);
+
+               },
+               error: function(xhr) {
+   	            console.log("error",xhr);
+   	            document.getElementById("ErrorMesssage").innerHTML = 'Something went wrong... Please try again...!';
+        		$("#errorModal").modal("toggle");
+               }
+           });
+}
