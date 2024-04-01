@@ -1,20 +1,57 @@
-function getPrefix() {
-var inputPrefix = document.getElementById("inputPrefix").value;
-        $.ajax({
-               type: "GET",
-               contentType: "application/json",
-               url: "/abb/getLookUpRecord",
-               data: JSON.stringify(inputPrefix),
-               dataType: 'json',
-               success: function(response) {
-               CONSOLE.LOG('HERE')
-                       	console.log(response);
+<div class="shadow-lg p-3 mb-5 bg-white rounded" style="margin:2em">
+                            <div id="datatable" style="margin-top: 1em;display: none"></div>
+                            <div class="tab-content" id="ifpBatchProcess">
+                                <div class="tab-pane fade show active">
 
-               },
-               error: function(xhr) {
-   	            console.log("error",xhr);
-   	            document.getElementById("ErrorMesssage").innerHTML = 'Something went wrong... Please try again...!';
-        		$("#errorModal").modal("toggle");
-               }
-           });
-}
+                                    <div class="form-row">
+                                        <div class="form-group col-12">
+                                            <div>
+                                                <table class="table table-sm table-hover table-striped dataTable"
+                                                    style="margin-top: 1em;" data-search="true" id="dedTable">
+                                                    <thead>
+                                                        <tr>
+                                                            <th scope="col">Embedded Type</th>
+                                                            <th scope="col">RX Ded Type</th>
+                                                            <th scope="col">Cross Applies</th>
+                                                            <th scope="col">Carry Over</th>
+                                                            <th scope="col">Tier Number</th>
+                                                            <th scope="col">Individual Ded</th>
+                                                            <th scope="col">Family Ded</th>
+                                                            <th scope="col">Action</th>
+
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <c:forEach var="matchDedDetailObj"
+                                                            items="${matchDedList.matchDed}">
+                                                            <tr>
+                                                                <td>${matchDedDetailObj.embeddedType}</td>
+                                                                <td>${matchDedDetailObj.rxDedType}</td>
+                                                                <td>${matchDedDetailObj.crossApplies}</td>
+                                                                <td>${matchDedDetailObj.carryover}</td>
+                                                                <td>${matchDedDetailObj.tierNumber}</td>
+                                                                <td>${matchDedDetailObj.individualDed}</td>
+                                                                <td>${matchDedDetailObj.familyDed}</td>
+                                                                <td>
+                                                                    <div class="btn-group">
+                                                                        <a role="button"
+                                                                            class="btn btn-outline-primary btn-sm"
+                                                                            data-toggle="tooltip"
+                                                                            data-placement="bottom" title="View"
+                                                                            onclick="viewDedDetails('${matchDedDetailObj.dedAdminID}')"><i
+                                                                                class="fas fa-eye"></i></a>
+                                                                    </div>
+                                                                </td>
+
+                                                            </tr>
+                                                        </c:forEach>
+
+                                                    </tbody>
+                                                </table>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
