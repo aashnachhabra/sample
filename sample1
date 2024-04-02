@@ -1,50 +1,12 @@
-@Override
-    public String splitPlLimitRecord(LimitMgmtRequest limitMgmtRequest, String currentUser) {
-        try {
-            Integer plLimitID = limitMgmtRequest.getPlLimitID();
-            logger.info("plLimitID : "+plLimitID);
-            //Save plLimit table
-            Integer plLimitIdSCopy = null;
-            if(Objects.nonNull(plLimitID)) {
-                Optional<PlLimit> plLimitOpt =plLimitRepository.findByPlLimitIDAndIsCurrent(plLimitID, ABBConstant.IS_CURRENT);
-                PlLimit plLimit = new PlLimit();
-                if(plLimitOpt.isPresent()) {
-                    plLimit.setRxOopType(plLimitOpt.get().getRxOopType());
-                    plLimit.setCrossApplies(plLimitOpt.get().getCrossApplies());
-                    plLimit.setCarryover(plLimitOpt.get().getCarryover());
-                    plLimit.setCreatedBy(getUserDetails(currentUser));
-                    plLimit.setCreatedOn(DateUtil.getCurrentDateToFormat(ABBConstant.BATCH_DATE_FORMAT));
-                    plLimit.setTierNumber(plLimitOpt.get().getTierNumber());
-                    plLimit.setIndividualOOPM(null);
-                    plLimit.setFamilyOOPM(plLimitOpt.get().getFamilyOOPM());
-                    plLimit.setIsCurrent(ABBConstant.IS_CURRENT);
-                }
-                PlLimit plLimitRow = plLimitRepository.save(plLimit);
-                plLimitIdSCopy = plLimitRow.getPlLimitID();
-                logger.info("plLimitIdSCopy :: " +plLimitIdSCopy);
-            }
-            Integer limitAdminIDCopy= null;
-			LimitAdmin limitAdmin = new LimitAdmin();
-            limitAdmin.setPlLimitID(plLimitIdSCopy);
-			limitAdmin.setCreatedBy(getUserDetails(currentUser));
-			limitAdmin.setCreatedOn(DateUtil.getCurrentDateToFormat(ABBConstant.BATCH_DATE_FORMAT));
-			limitAdmin.setIsCurrent(ABBConstant.IS_CURRENT);
-			LimitAdmin limitAdminSave = limitAdminRepository.save(limitAdmin);
-			limitAdminIDCopy = limitAdminSave.getLimitAdminID();
-			logger.info("limitAdminIDCopy :: " +limitAdminIDCopy);
-					
-            if(Objects.nonNull(plLimitID)){
-                Optional<PlLimit> plLimitOpt = plLimitRepository.findByPlLimitIDAndIsCurrent(plLimitID, ABBConstant.IS_CURRENT);
-                if(plLimitOpt.isPresent()){
-                    PlLimit existingLimit = plLimitOpt.get();
-                    existingLimit.setFamilyOOPM(null);
-                    plLimitRepository.save(existingLimit);
-                }
-            }
-            splitPlLimit(plLimitID, plLimitIdSCopy, currentUser);
-        } catch(Exception e) {
-            logger.error(e.getMessage());
-            return ABBConstant.ERROR;
-        }
-        return ABBConstant.SUCCESS;
+  @PostMapping("/splitPlLimitRecord")
+    @ResponseBody
+    @ApiOperation(value="Split PL Limit Record")
+    public ResponseEntity<Object> splitPlLimitRecord(ModelAndView modelAndView, HttpServletRequest request,
+                                                        @RequestBody LimitMgmtRequest limitMgmtRequest) throws Exception {
+        if (limitMgmtRequest == null)
+            throw new Exception("limitMgmtRequest split should not be Empty or null..!");
+        HttpSession session = request.getSession();
+        String currentUser = (String) session.getAttribute(SessionConstants.USER_NAME);
+        String limitMsg = limitManagementService.splitPlLimitRecord(limitMgmtRequest, currentUser);
+        return ResponseEntity.status(HttpStatus.CREATED).body(Collections.singletonMap("limitMsg", limitMsg));
     }
