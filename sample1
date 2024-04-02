@@ -1,57 +1,50 @@
-<div class="shadow-lg p-3 mb-5 bg-white rounded" style="margin:2em">
-                            <div id="datatable" style="margin-top: 1em;display: none"></div>
-                            <div class="tab-content" id="ifpBatchProcess">
-                                <div class="tab-pane fade show active">
-
-                                    <div class="form-row">
-                                        <div class="form-group col-12">
-                                            <div>
-                                                <table class="table table-sm table-hover table-striped dataTable"
-                                                    style="margin-top: 1em;" data-search="true" id="dedTable">
-                                                    <thead>
-                                                        <tr>
-                                                            <th scope="col">Embedded Type</th>
-                                                            <th scope="col">RX Ded Type</th>
-                                                            <th scope="col">Cross Applies</th>
-                                                            <th scope="col">Carry Over</th>
-                                                            <th scope="col">Tier Number</th>
-                                                            <th scope="col">Individual Ded</th>
-                                                            <th scope="col">Family Ded</th>
-                                                            <th scope="col">Action</th>
-
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        <c:forEach var="matchDedDetailObj"
-                                                            items="${matchDedList.matchDed}">
-                                                            <tr>
-                                                                <td>${matchDedDetailObj.embeddedType}</td>
-                                                                <td>${matchDedDetailObj.rxDedType}</td>
-                                                                <td>${matchDedDetailObj.crossApplies}</td>
-                                                                <td>${matchDedDetailObj.carryover}</td>
-                                                                <td>${matchDedDetailObj.tierNumber}</td>
-                                                                <td>${matchDedDetailObj.individualDed}</td>
-                                                                <td>${matchDedDetailObj.familyDed}</td>
-                                                                <td>
-                                                                    <div class="btn-group">
-                                                                        <a role="button"
-                                                                            class="btn btn-outline-primary btn-sm"
-                                                                            data-toggle="tooltip"
-                                                                            data-placement="bottom" title="View"
-                                                                            onclick="viewDedDetails('${matchDedDetailObj.dedAdminID}')"><i
-                                                                                class="fas fa-eye"></i></a>
-                                                                    </div>
-                                                                </td>
-
-                                                            </tr>
-                                                        </c:forEach>
-
-                                                    </tbody>
-                                                </table>
-                                            </div>
-
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+@Override
+    public String splitPlLimitRecord(LimitMgmtRequest limitMgmtRequest, String currentUser) {
+        try {
+            Integer plLimitID = limitMgmtRequest.getPlLimitID();
+            logger.info("plLimitID : "+plLimitID);
+            //Save plLimit table
+            Integer plLimitIdSCopy = null;
+            if(Objects.nonNull(plLimitID)) {
+                Optional<PlLimit> plLimitOpt =plLimitRepository.findByPlLimitIDAndIsCurrent(plLimitID, ABBConstant.IS_CURRENT);
+                PlLimit plLimit = new PlLimit();
+                if(plLimitOpt.isPresent()) {
+                    plLimit.setRxOopType(plLimitOpt.get().getRxOopType());
+                    plLimit.setCrossApplies(plLimitOpt.get().getCrossApplies());
+                    plLimit.setCarryover(plLimitOpt.get().getCarryover());
+                    plLimit.setCreatedBy(getUserDetails(currentUser));
+                    plLimit.setCreatedOn(DateUtil.getCurrentDateToFormat(ABBConstant.BATCH_DATE_FORMAT));
+                    plLimit.setTierNumber(plLimitOpt.get().getTierNumber());
+                    plLimit.setIndividualOOPM(null);
+                    plLimit.setFamilyOOPM(plLimitOpt.get().getFamilyOOPM());
+                    plLimit.setIsCurrent(ABBConstant.IS_CURRENT);
+                }
+                PlLimit plLimitRow = plLimitRepository.save(plLimit);
+                plLimitIdSCopy = plLimitRow.getPlLimitID();
+                logger.info("plLimitIdSCopy :: " +plLimitIdSCopy);
+            }
+            Integer limitAdminIDCopy= null;
+			LimitAdmin limitAdmin = new LimitAdmin();
+            limitAdmin.setPlLimitID(plLimitIdSCopy);
+			limitAdmin.setCreatedBy(getUserDetails(currentUser));
+			limitAdmin.setCreatedOn(DateUtil.getCurrentDateToFormat(ABBConstant.BATCH_DATE_FORMAT));
+			limitAdmin.setIsCurrent(ABBConstant.IS_CURRENT);
+			LimitAdmin limitAdminSave = limitAdminRepository.save(limitAdmin);
+			limitAdminIDCopy = limitAdminSave.getLimitAdminID();
+			logger.info("limitAdminIDCopy :: " +limitAdminIDCopy);
+					
+            if(Objects.nonNull(plLimitID)){
+                Optional<PlLimit> plLimitOpt = plLimitRepository.findByPlLimitIDAndIsCurrent(plLimitID, ABBConstant.IS_CURRENT);
+                if(plLimitOpt.isPresent()){
+                    PlLimit existingLimit = plLimitOpt.get();
+                    existingLimit.setFamilyOOPM(null);
+                    plLimitRepository.save(existingLimit);
+                }
+            }
+            splitPlLimit(plLimitID, plLimitIdSCopy, currentUser);
+        } catch(Exception e) {
+            logger.error(e.getMessage());
+            return ABBConstant.ERROR;
+        }
+        return ABBConstant.SUCCESS;
+    }
