@@ -1,12 +1,91 @@
-  @PostMapping("/splitPlLimitRecord")
-    @ResponseBody
-    @ApiOperation(value="Split PL Limit Record")
-    public ResponseEntity<Object> splitPlLimitRecord(ModelAndView modelAndView, HttpServletRequest request,
-                                                        @RequestBody LimitMgmtRequest limitMgmtRequest) throws Exception {
-        if (limitMgmtRequest == null)
-            throw new Exception("limitMgmtRequest split should not be Empty or null..!");
-        HttpSession session = request.getSession();
-        String currentUser = (String) session.getAttribute(SessionConstants.USER_NAME);
-        String limitMsg = limitManagementService.splitPlLimitRecord(limitMgmtRequest, currentUser);
-        return ResponseEntity.status(HttpStatus.CREATED).body(Collections.singletonMap("limitMsg", limitMsg));
-    }
+<c:if test="${not empty matchObject.dedLookUpResponse}">
+                            <div class="shadow-lg p-3 mb-5 bg-white rounded" style="margin:2em">
+                                <div id="datatable" style="margin-top: 1em;display: none"></div>
+                                <div class="tab-content" id="ifpBatchProcess">
+                                    <div class="tab-pane fade show active">
+
+                                        <div class="form-row">
+                                            <div class="form-group col-12">
+                                                <div>
+                                                    <table class="table table-sm table-hover table-striped dataTable"
+                                                        style="margin-top: 1em;" data-search="true" id="dedTable">
+                                                        <caption class="table-caption">Deductible Detail</caption>
+                                                        <thead>
+                                                            <tr>
+                                                                <th scope="col">Embedded Type</th>
+                                                                <th scope="col">RX Ded Type</th>
+                                                                <th scope="col">Cross Applies</th>
+                                                                <th scope="col">Carry Over</th>
+                                                                <th scope="col">Tier Number</th>
+                                                                <th scope="col">Individual Ded</th>
+                                                                <th scope="col">Family Ded</th>
+                                                                <th scope="col">Pfx</th>
+                                                                <th scope="col">PfxDesc</th>
+                                                                <th scope="col">AcacAccNo</th>
+                                                                <th scope="col">Desc</th>
+                                                                <th scope="col">Rule</th>
+                                                                <th scope="col">RelAccId</th>
+                                                                <th scope="col">CobOopInd</th>
+                                                                <th scope="col">SlInd</th>
+                                                                <th scope="col">PeriodInd</th>
+                                                                <th scope="col">AggPerson</th>
+                                                                <th scope="col">AggPersonCo</th>
+                                                                <th scope="col">FamAmt</th>
+                                                                <th scope="col">FamAmtCo</th>
+                                                                <th scope="col">MemeAmt</th>
+                                                                <th scope="col">MemeAmtCo</th>
+                                                                <th scope="col">Opts</th>
+                                                                <th scope="col">CoBypass</th>
+                                                                <th scope="col">MemSalInd</th>
+                                                                <th scope="col">FamSalInd</th>
+                                                                <th scope="col">LockToken</th>
+
+
+
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+
+                                                            <tr>
+                                                                <td>${matchObject.dedLookUpResponse.embeddedType}</td>
+                                                                <td>${matchObject.dedLookUpResponse.rxDedType}</td>
+                                                                <td>${matchObject.dedLookUpResponse.crossApplies}</td>
+                                                                <td>${matchObject.dedLookUpResponse.carryover}</td>
+                                                                <td>${matchObject.dedLookUpResponse.tierNumber}</td>
+                                                                <td>${matchObject.dedLookUpResponse.individualDed}</td>
+                                                                <td>${matchObject.dedLookUpResponse.familyDed}</td>
+                                                                <td>${matchObject.dedLookUpResponse.dedPfx}</td>
+                                                                <td>${matchObject.dedLookUpResponse.dedPfxDesc}</td>
+                                                                <td>${matchObject.dedLookUpResponse.acacAccNo}</td>
+                                                                <td>${matchObject.dedLookUpResponse.dedDesc}</td>
+                                                                <td>${matchObject.dedLookUpResponse.dedRule}</td>
+                                                                <td>${matchObject.dedLookUpResponse.dedRelAccId}</td>
+                                                                <td>${matchObject.dedLookUpResponse.dedCobOopInd}</td>
+                                                                <td>${matchObject.dedLookUpResponse.dedSlInd}</td>
+                                                                <td>${matchObject.dedLookUpResponse.dedPeriodInd}</td>
+                                                                <td>${matchObject.dedLookUpResponse.dedAggPerson}</td>
+                                                                <td>${matchObject.dedLookUpResponse.dedAggPersonCo}</td>
+                                                                <td>${matchObject.dedLookUpResponse.dedFamAmt}</td>
+                                                                <td>${matchObject.dedLookUpResponse.dedFamAmtCo}</td>
+                                                                <td>${matchObject.dedLookUpResponse.dedMemeAmt}</td>
+                                                                <td>${matchObject.dedLookUpResponse.dedMemeAmtCo}</td>
+                                                                <td>${matchObject.dedLookUpResponse.dedOpts}</td>
+                                                                <td>${matchObject.dedLookUpResponse.dedCoBypass}</td>
+                                                                <td>${matchObject.dedLookUpResponse.dedMemSalInd}</td>
+                                                                <td>${matchObject.dedLookUpResponse.dedFamSalInd}</td>
+                                                                <td>${matchObject.dedLookUpResponse.dedLockToken}</td>
+
+
+                                                            </tr>
+
+
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </c:if>
