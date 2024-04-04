@@ -1,6 +1,52 @@
-Whitelabel Error Page
-This application has no explicit mapping for /error, so you are seeing this as a fallback.
-
-Thu Apr 04 15:09:45 IST 2024
-There was an unexpected error (type=Not Found, status=404).
-JSP file [/<table class="table table-sm table-hover table-striped dataTable"><thead><tr><th scope="col">Code</th><th scope="col">Accumulator Code</th><th scope="col">Type</th><th scope="col">Min</th><th scope="col">Max</th><th scope="col">Coinsurance</th><th scope="col">Copayment</th></tr></thead><tbody><tr><td>1.0</td><td>1.0</td><td>Amount</td><td>1.1</td><td>1.01</td><td>11.0</td><td>11.11</td></tr></tbody></table>.jsp] not found
+function splitLimitMgmtRecord() {
+    var request = {};
+    request["plLimitID"] = document.getElementById("plLimitID").value;
+    if (request != null || request != '') {
+        showAndHide();
+        $.ajax({
+            type: "POST",
+            contentType: "application/json",
+            url: "splitPlLimitRecord",
+            data: JSON.stringify(request),
+            dataType: 'json',
+            success: function (response) {
+                if (response.limit.msg == "SUCCESS") {
+                    $("#copyModal").modal('hide');
+                    document.getElementById("SaveSuccessMessageSplit").innerHTML = 'Successfully Split PL Limit Record';
+                    $("#sucessBoxModalSplit").modal("toggle");
+                    window.location.href = "./getLimitMgmtDetails";
+                    var request = {};
+                    request["limitMgmtArray"] = [response.limit.limitAdminCopy];
+                    console.log(request)
+                    $.ajax({
+                        type: "POST",
+                        contentType: "application/json",
+                        url: "setLimitID",
+                        data: JSON.stringify(request),
+                        dataType: 'json',
+                        success: function (response) {
+                            if (response.limitMsg == "SUCCESS") {
+                                console.log('here')
+                                var newTab = window.open("./getLimitMgmtDetails", '_blank')
+                                newTab.focus();
+                            }
+                        },
+                        error: function (xhr) {
+                            console.log(xhr);
+                            alert("Error while Getting Limit Management Details.");
+                        }
+                    });
+                } else if (response.limitMsg == "ERROR") {
+                    $("#copyModal").modal('hide');
+                    document.getElementById("ErrorMesssage").innerHTML = 'Something went wrong while splitting PL Limit Record, please try again..!';
+                    $("#errorModal").modal("toggle");
+                }
+                showAndHide();
+            },
+            error: function (xhr) {
+                console.log("error", xhr);
+                alert("Something went wrong while splitting PL Limit Record, please try again..!");
+            }
+        });
+    }
+}
