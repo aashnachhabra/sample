@@ -1,91 +1,139 @@
-<c:if test="${not empty matchObject.dedLookUpResponse}">
-                            <div class="shadow-lg p-3 mb-5 bg-white rounded" style="margin:2em">
-                                <div id="datatable" style="margin-top: 1em;display: none"></div>
-                                <div class="tab-content" id="ifpBatchProcess">
-                                    <div class="tab-pane fade show active">
+@GetMapping("/getServiceTierLookUp")
+    @ResponseBody
+    @ApiOperation(value = "Get the lookup records")
+    public ModelAndView getServiceLookUp(@RequestParam("serviceRuleID") Integer serviceRuleID, ModelAndView modelAndView) {
 
-                                        <div class="form-row">
-                                            <div class="form-group col-12">
-                                                <div>
-                                                    <table class="table table-sm table-hover table-striped dataTable"
-                                                        style="margin-top: 1em;" data-search="true" id="dedTable">
-                                                        <caption class="table-caption">Deductible Detail</caption>
-                                                        <thead>
-                                                            <tr>
-                                                                <th scope="col">Embedded Type</th>
-                                                                <th scope="col">RX Ded Type</th>
-                                                                <th scope="col">Cross Applies</th>
-                                                                <th scope="col">Carry Over</th>
-                                                                <th scope="col">Tier Number</th>
-                                                                <th scope="col">Individual Ded</th>
-                                                                <th scope="col">Family Ded</th>
-                                                                <th scope="col">Pfx</th>
-                                                                <th scope="col">PfxDesc</th>
-                                                                <th scope="col">AcacAccNo</th>
-                                                                <th scope="col">Desc</th>
-                                                                <th scope="col">Rule</th>
-                                                                <th scope="col">RelAccId</th>
-                                                                <th scope="col">CobOopInd</th>
-                                                                <th scope="col">SlInd</th>
-                                                                <th scope="col">PeriodInd</th>
-                                                                <th scope="col">AggPerson</th>
-                                                                <th scope="col">AggPersonCo</th>
-                                                                <th scope="col">FamAmt</th>
-                                                                <th scope="col">FamAmtCo</th>
-                                                                <th scope="col">MemeAmt</th>
-                                                                <th scope="col">MemeAmtCo</th>
-                                                                <th scope="col">Opts</th>
-                                                                <th scope="col">CoBypass</th>
-                                                                <th scope="col">MemSalInd</th>
-                                                                <th scope="col">FamSalInd</th>
-                                                                <th scope="col">LockToken</th>
+        List<ServiceRuleTierResponse> serviceRuleTierResponse = cmcPdvcVarCompRecordService.lookUpServiceRuleTierMatch(serviceRuleID);
+
+        modelAndView.setViewName("CostShareDetails");
+
+        modelAndView.addObject("serviceRuleTier", serviceRuleTierResponse);
+
+        return modelAndView;
+    }
 
 
+jsp page
 
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+    <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+        <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+            <!doctype html>
+            <html>
 
-                                                            <tr>
-                                                                <td>${matchObject.dedLookUpResponse.embeddedType}</td>
-                                                                <td>${matchObject.dedLookUpResponse.rxDedType}</td>
-                                                                <td>${matchObject.dedLookUpResponse.crossApplies}</td>
-                                                                <td>${matchObject.dedLookUpResponse.carryover}</td>
-                                                                <td>${matchObject.dedLookUpResponse.tierNumber}</td>
-                                                                <td>${matchObject.dedLookUpResponse.individualDed}</td>
-                                                                <td>${matchObject.dedLookUpResponse.familyDed}</td>
-                                                                <td>${matchObject.dedLookUpResponse.dedPfx}</td>
-                                                                <td>${matchObject.dedLookUpResponse.dedPfxDesc}</td>
-                                                                <td>${matchObject.dedLookUpResponse.acacAccNo}</td>
-                                                                <td>${matchObject.dedLookUpResponse.dedDesc}</td>
-                                                                <td>${matchObject.dedLookUpResponse.dedRule}</td>
-                                                                <td>${matchObject.dedLookUpResponse.dedRelAccId}</td>
-                                                                <td>${matchObject.dedLookUpResponse.dedCobOopInd}</td>
-                                                                <td>${matchObject.dedLookUpResponse.dedSlInd}</td>
-                                                                <td>${matchObject.dedLookUpResponse.dedPeriodInd}</td>
-                                                                <td>${matchObject.dedLookUpResponse.dedAggPerson}</td>
-                                                                <td>${matchObject.dedLookUpResponse.dedAggPersonCo}</td>
-                                                                <td>${matchObject.dedLookUpResponse.dedFamAmt}</td>
-                                                                <td>${matchObject.dedLookUpResponse.dedFamAmtCo}</td>
-                                                                <td>${matchObject.dedLookUpResponse.dedMemeAmt}</td>
-                                                                <td>${matchObject.dedLookUpResponse.dedMemeAmtCo}</td>
-                                                                <td>${matchObject.dedLookUpResponse.dedOpts}</td>
-                                                                <td>${matchObject.dedLookUpResponse.dedCoBypass}</td>
-                                                                <td>${matchObject.dedLookUpResponse.dedMemSalInd}</td>
-                                                                <td>${matchObject.dedLookUpResponse.dedFamSalInd}</td>
-                                                                <td>${matchObject.dedLookUpResponse.dedLockToken}</td>
+            <head>
+                <meta charset="utf-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+                <link rel="stylesheet" href="css/UHCcustom.css">
+                <link rel="stylesheet" href="css/bootstrap.css">
+                <link rel="stylesheet" href="css/css/fontawesome.min.css">
+                <link rel="stylesheet" href="css/css/brands.min.css">
+                <link rel="stylesheet" href="css/css/solid.min.css">
+                <link rel="stylesheet" href="css/loader.css">
+                <link href="https://unpkg.com/frappe-datatable@1.16.2/dist/frappe-datatable.min.css" rel="stylesheet">
+                <link rel="stylesheet" href="css/plan-management.css">
+                <script src="js/jquery-3.3.1.min.js"></script>
+                <script src="js/popper.min.js"></script>
+                <script src="js/UHCcustom.js"></script>
+                <script src="js/bootstrap.min.js"></script>
+                <script src="js/loader.js"></script>
+                <!-- include the dependencies -->
+                <script src="https://unpkg.com/sortablejs@1.7.0/Sortable.min.js"></script>
+                <script src="https://unpkg.com/clusterize.js@0.18.0/clusterize.min.js"></script>
+                <!-- include the lib -->
+                <script src="js/frappe-datatable.min.js"></script>
+                <script src="js/app/batchObserverDetail.js"></script>
 
+                <title>Service Rule Tier Detail</title>
+                <link rel="icon" href="assets/PlanBuilderFavIcon.png">
+                <script>
+                    $(function () {
+                        $('[data-toggle="tooltip"]').tooltip()
+                    })
+                </script>
 
-                                                            </tr>
+            </head>
 
+            <body>
+                <%@include file="loader.jsp" %>
+                    <%@include file="header.jsp" %>
+                        <div class="text-primary" style="margin: 2em;">
+                            <h1><i class="fa-solid fa-tower-observation"></i> Service Rule Tier Detail</h1>
+                        </div>
+                        <div class="shadow-lg p-3 mb-5 bg-white rounded" style="margin:2em">
+                            <div id="datatable" style="margin-top: 1em;display: none"></div>
+                            <div class="tab-content" id="ifpBatchProcess">
+                                <div class="tab-pane fade show active">
 
-                                                        </tbody>
-                                                    </table>
-                                                </div>
+                                    <div class="form-row">
+                                        <div class="form-group col-12">
+                                            <div>
+                                                <table class="table table-sm table-hover table-striped dataTable"
+                                                    style="margin-top: 1em;" data-search="true" id="costShareTable">
+                                                    <thead>
+                                                        <tr>
+                                                            <th scope="col">Code</th>
+                                                            <th scope="col">Accumulator Code</th>
+                                                            <th scope="col">Type</th>
+                                                            <th scope="col">Min</th>
+                                                            <th scope="col">Max</th>
+                                                            <th scope="col">Coinsurance</th>
+                                                            <th scope="col">Copayment</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <c:forEach var="serviceRuleTierObj"
+                                                        items="${serviceRuleTier}">
+                                                        <tr>
+                                                            <td>${serviceRuleTierObj.code}</td>
+                                                            <td>${serviceRuleTierObj.accumulatorCode}</td>
+                                                            <td>${serviceRuleTierObj.type}</td>
+                                                            <td>${serviceRuleTierObj.min}</td>
+                                                            <td>${serviceRuleTierObj.max}</td>
+                                                            <td>${serviceRuleTierObj.coinsurance}</td>
+                                                            <td>${serviceRuleTierObj.copayment}</td>
+                                                        </tr>
 
+                                                        </c:forEach>
+                                                    </tbody>
+                                                </table>
                                             </div>
+
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </c:if>
+                        </div>
+                        <%@include file="footer.html" %>
+                            <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel"
+                                aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5><span id="ErrorClose" class="modal-title text-danger">Error</span></h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body"
+                                            style="overflow: auto; overflow-wrap: break-word; width: 30em; max-height: 20em;">
+                                            <p>
+                                                <span id="ErrorMesssage"></span>
+                                                <input type="hidden" name="ctl00$MainContent$hfBatchTypes" value="0"
+                                                    autocomplete="off">
+                                            </p>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <input type="submit" name="ctl00$MainContent$btnLGClose" value="Cancel"
+                                                id="errorModalClose" class="btn btn-outline-danger"
+                                                data-bs-dismiss="modal" autocomplete="off">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+            </body>
+
+            </html>
+
+
+i am opening the above jsp page throught the controller above. it opens up a new page but i want to show this jsp page as a modal in the same screen
