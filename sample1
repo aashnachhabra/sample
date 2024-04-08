@@ -1,69 +1,18 @@
-public PdvcLookUpScreenResponse lookUpPdvc(String searchTerm, Integer batchDetailID) {
-		PdvcLookUpScreenResponse pdvcLookUpScreenResponse = new PdvcLookUpScreenResponse();
-
-		try {
-			Optional<PrefixDed> prefixDed = prefixDedRepository.findByDedePfxIgnoreCaseAndBatchDetailID(searchTerm, batchDetailID);
-			if (prefixDed.isPresent()) {
-				Optional<MatchDed> matchDed = matchDedRepository.findByMatchDedIDAndIsCurrent(prefixDed.get().getMatchDedID(), Constants.ISCURRENT);;
-				Ded ded = new Ded();
-				if(matchDed.isPresent()) {
-					ded = lookUpDedMatch(matchDed.get().getDedAdminID());
-				}
-				else{
-					throw new RuntimeException("No Ded record found for the given prefix");
-				}
-				DedLookUpResponse dedLookUpResponse = toDedLookUpResponse(matchDed.get(), ded);
-				pdvcLookUpScreenResponse.setDedLookUpResponse(dedLookUpResponse);
-			}
-
-			List<PrefixLimit> prefixLimitList = prefixLimitRepository.findByLtltPfxIgnoreCaseAndBatchDetailID(searchTerm, batchDetailID);
-			if (!prefixLimitList.isEmpty()) {
-				List<LimitLookUpResponse> limitLookUpResponseList = new ArrayList<>();
-				for (PrefixLimit prefixLimit : prefixLimitList) {
-					Optional<MatchLimit> matchLimit = matchLimitRepository.findByMatchLimitIDAndIsCurrent(prefixLimit.getMatchLimitID(), Constants.ISCURRENT);
-					if(matchLimit.isPresent()){
-						Limit limit = lookUpLimitMatch(matchLimit.get().getLimitAdminID());
-						LimitLookUpResponse limitLookUpResponse = toLimitLookUpResponse(matchLimit.get(), limit);
-						limitLookUpResponseList.add(limitLookUpResponse);
-					}
-					else {
-						throw new RuntimeException("No Limit record found for the given prefix");
-					}
-				}
-				pdvcLookUpScreenResponse.setLimitLookUpResponseList(limitLookUpResponseList);
-			}
-
-			List<PrefixCostShare> prefixCostShareList = prefixCostShareRepository.findByPrefixCostSharePfxIgnoreCaseAndBatchDetailID(searchTerm, batchDetailID);
-			if (!prefixCostShareList.isEmpty()) {
-				List<CostShareLookUpResponse> costShareLookUpResponseList = new ArrayList<>();
-				for (PrefixCostShare prefixCostShare : prefixCostShareList) {
-					Optional<MatchCostshare> matchCostShare = matchCostshareRepository.findByMatchCostshareIDAndIsCurrent(prefixCostShare.getMatchCostshareID(), Constants.ISCURRENT);
-					if(matchCostShare.isPresent()){
-						Optional<ServiceRuleNew> serviceRuleNew = lookUpServiceRuleMatch(matchCostShare.get().getCostShareAdminID());
-						if(serviceRuleNew.isPresent()){
-							CostShareLookUpResponse costShareLookUpResponse = toCostShareLookUpResponse(matchCostShare.get(), serviceRuleNew.get());
-							costShareLookUpResponseList.add(costShareLookUpResponse);
-						}
-						else{
-							throw new RuntimeException("No Service Rule record found for the given prefix");
-						}
-					}
-					else{
-						throw new RuntimeException("No Cost Share record found for the given prefix");
-					}
-
-				}
-				pdvcLookUpScreenResponse.setCostShareLookUpResponseList(costShareLookUpResponseList);
-			}
-
-			if(pdvcLookUpScreenResponse.getDedLookUpResponse() != null || pdvcLookUpScreenResponse.getLimitLookUpResponseList() != null || pdvcLookUpScreenResponse.getCostShareLookUpResponseList() != null){
-				return pdvcLookUpScreenResponse;
-			}
-			else{
-				throw new Exception("Search term '" + searchTerm + "' not found in the database");
-			}
-		} catch (Exception e) {
-			System.out.println("Error: " + e.getMessage());
-			return null;
-		}
-	}
+function viewCostShareDetails(serviceRuleId) {
+    $.get("/abb/getServiceTierLookUp?serviceRuleID="+serviceRuleId, function(data) {
+        var tbody = $('#tierDetails');
+        tbody.empty();
+        data.forEach(function(item) {
+                            var row = $('<tr>');
+                            row.append($('<td>').text(item.code));
+                            row.append($('<td>').text(item.accumulatorCode));
+                            row.append($('<td>').text(item.type));
+                            row.append($('<td>').text(item.min));
+                            row.append($('<td>').text(item.max));
+                            row.append($('<td>').text(item.coinsurance));
+                            row.append($('<td>').text(item.copayment));
+                            tbody.append(row);
+                        });                      
+        $('#myModal').modal('show');
+    });
+ }
