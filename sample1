@@ -1,102 +1,69 @@
-function viewCostShareDetails(serviceRuleId) {
-    $.get("/abb/getServiceTierLookUp?serviceRuleID="+serviceRuleId, function(data) {
-        // Populate the table with the fetched data
-        // data = JSON.parse(data)
-        console.log(data)
-        var tbody = $('#myModal tbody');
-        tbody.empty();
-        data.forEach(function(item) {
-            console.log(item)
-                            var row = $('<tr>');
-                            row.append($('<td>').text(item.code));
-                            row.append($('<td>').text(item.accumulatorCode));
-                            row.append($('<td>').text(item.type));
-                            row.append($('<td>').text(item.min));
-                            row.append($('<td>').text(item.max));
-                            row.append($('<td>').text(item.coinsurance));
-                            row.append($('<td>').text(item.copayment));
-                            console.log(row)
-                            tbody.append(row);
-                        });
-                      
-        // Show the modal
-        $('#myModal').css('display', 'block');
-    });
- }
- $('.close').click(function() {
-    $('#myModal').css('display', 'none');
- });
+public PdvcLookUpScreenResponse lookUpPdvc(String searchTerm, Integer batchDetailID) {
+		PdvcLookUpScreenResponse pdvcLookUpScreenResponse = new PdvcLookUpScreenResponse();
 
-function to open the modal
+		try {
+			Optional<PrefixDed> prefixDed = prefixDedRepository.findByDedePfxIgnoreCaseAndBatchDetailID(searchTerm, batchDetailID);
+			if (prefixDed.isPresent()) {
+				Optional<MatchDed> matchDed = matchDedRepository.findByMatchDedIDAndIsCurrent(prefixDed.get().getMatchDedID(), Constants.ISCURRENT);;
+				Ded ded = new Ded();
+				if(matchDed.isPresent()) {
+					ded = lookUpDedMatch(matchDed.get().getDedAdminID());
+				}
+				else{
+					throw new RuntimeException("No Ded record found for the given prefix");
+				}
+				DedLookUpResponse dedLookUpResponse = toDedLookUpResponse(matchDed.get(), ded);
+				pdvcLookUpScreenResponse.setDedLookUpResponse(dedLookUpResponse);
+			}
 
-modal html
+			List<PrefixLimit> prefixLimitList = prefixLimitRepository.findByLtltPfxIgnoreCaseAndBatchDetailID(searchTerm, batchDetailID);
+			if (!prefixLimitList.isEmpty()) {
+				List<LimitLookUpResponse> limitLookUpResponseList = new ArrayList<>();
+				for (PrefixLimit prefixLimit : prefixLimitList) {
+					Optional<MatchLimit> matchLimit = matchLimitRepository.findByMatchLimitIDAndIsCurrent(prefixLimit.getMatchLimitID(), Constants.ISCURRENT);
+					if(matchLimit.isPresent()){
+						Limit limit = lookUpLimitMatch(matchLimit.get().getLimitAdminID());
+						LimitLookUpResponse limitLookUpResponse = toLimitLookUpResponse(matchLimit.get(), limit);
+						limitLookUpResponseList.add(limitLookUpResponse);
+					}
+					else {
+						throw new RuntimeException("No Limit record found for the given prefix");
+					}
+				}
+				pdvcLookUpScreenResponse.setLimitLookUpResponseList(limitLookUpResponseList);
+			}
 
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-    <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-        <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
-            <!doctype html>
-            <html>
+			List<PrefixCostShare> prefixCostShareList = prefixCostShareRepository.findByPrefixCostSharePfxIgnoreCaseAndBatchDetailID(searchTerm, batchDetailID);
+			if (!prefixCostShareList.isEmpty()) {
+				List<CostShareLookUpResponse> costShareLookUpResponseList = new ArrayList<>();
+				for (PrefixCostShare prefixCostShare : prefixCostShareList) {
+					Optional<MatchCostshare> matchCostShare = matchCostshareRepository.findByMatchCostshareIDAndIsCurrent(prefixCostShare.getMatchCostshareID(), Constants.ISCURRENT);
+					if(matchCostShare.isPresent()){
+						Optional<ServiceRuleNew> serviceRuleNew = lookUpServiceRuleMatch(matchCostShare.get().getCostShareAdminID());
+						if(serviceRuleNew.isPresent()){
+							CostShareLookUpResponse costShareLookUpResponse = toCostShareLookUpResponse(matchCostShare.get(), serviceRuleNew.get());
+							costShareLookUpResponseList.add(costShareLookUpResponse);
+						}
+						else{
+							throw new RuntimeException("No Service Rule record found for the given prefix");
+						}
+					}
+					else{
+						throw new RuntimeException("No Cost Share record found for the given prefix");
+					}
 
-            <head>
-                <meta charset="utf-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-                <link rel="stylesheet" href="css/UHCcustom.css">
-                <link rel="stylesheet" href="css/bootstrap.css">
-                <link rel="stylesheet" href="css/css/fontawesome.min.css">
-                <link rel="stylesheet" href="css/css/brands.min.css">
-                <link rel="stylesheet" href="css/css/solid.min.css">
-                <link rel="stylesheet" href="css/loader.css">
-                <link href="https://unpkg.com/frappe-datatable@1.16.2/dist/frappe-datatable.min.css" rel="stylesheet">
-                <link rel="stylesheet" href="css/plan-management.css">
-                <script src="js/jquery-3.3.1.min.js"></script>
-                <script src="js/popper.min.js"></script>
-                <script src="js/UHCcustom.js"></script>
-                <script src="js/bootstrap.min.js"></script>
-                <script src="js/loader.js"></script>
-                <!-- include the dependencies -->
-                <script src="https://unpkg.com/sortablejs@1.7.0/Sortable.min.js"></script>
-                <script src="https://unpkg.com/clusterize.js@0.18.0/clusterize.min.js"></script>
-                <!-- include the lib -->
-                <script src="js/frappe-datatable.min.js"></script>
-                <script src="js/app/batchObserverDetail.js"></script>
+				}
+				pdvcLookUpScreenResponse.setCostShareLookUpResponseList(costShareLookUpResponseList);
+			}
 
-                <title>Service Rule Tier Detail</title>
-                <link rel="icon" href="assets/PlanBuilderFavIcon.png">
-                <script>
-                    $(function () {
-                        $('[data-toggle="tooltip"]').tooltip()
-                    })
-                </script>
-
-            </head>
-
-            <body>
-                <!-- Your modal markup -->
-<div id="myModal" class="modal">
-    <div class="modal-content">
-    <span class="close">&times;</span>
-    <h2 class="modal-title">Service Rule Tier Details</h2> <!-- Add title here -->
-    <table>
-    <thead>
-    <tr>
-        <th scope="col">Code</th>
-        <th scope="col">Accumulator Code</th>
-        <th scope="col">Type</th>
-        <th scope="col">Min</th>
-        <th scope="col">Max</th>
-        <th scope="col">Coinsurance</th>
-        <th scope="col">Copayment</th>
-    </tr>
-    </thead>
-    <tbody>
-    <!-- Data will be filled dynamically using JavaScript -->
-    </tbody>
-    </table>
-    </div>
-    </div>
-
-            </body>
-
-            </html>
-
-modal is not opening but getting data from api call. How to check from js function whether table is generated correctly or not
+			if(pdvcLookUpScreenResponse.getDedLookUpResponse() != null || pdvcLookUpScreenResponse.getLimitLookUpResponseList() != null || pdvcLookUpScreenResponse.getCostShareLookUpResponseList() != null){
+				return pdvcLookUpScreenResponse;
+			}
+			else{
+				throw new Exception("Search term '" + searchTerm + "' not found in the database");
+			}
+		} catch (Exception e) {
+			System.out.println("Error: " + e.getMessage());
+			return null;
+		}
+	}
