@@ -1,4 +1,4 @@
-html: function ( data ) {
+function ( data ) {
             return _empty(data) ?
                 data :
                 typeof data === 'string' ?
