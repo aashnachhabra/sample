@@ -1,1 +1,12 @@
-      result = value.replace(/<(?:.|\n)*?>/gm, '');
+     var $scriptElements = $('script[src]');
+	                $scriptElements.each(function (i, scriptElement) {
+	                    var source = scriptElement.src;
+	                    var matches = source.match('trumbowyg(\.min)?\.js');
+The escape sequence '.' is equivalent to just '.', so the sequence may still represent a meta-character when it is used in a .
+CodeQL
+	                    if (matches != null) {
+	                        svgPathOption = source.substring(0, source.indexOf(matches[0])) + 'ui/icons.svg';
+	                    }
+
+Useless regular-expression character escape
+fix without disturbing functionality
