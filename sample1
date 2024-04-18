@@ -1,21 +1,12 @@
-exports.HTML2TEXT = function (value) {
-  var result = '';
 
-  if (value) {
-    if (value instanceof Array) {
-      value.forEach(function (line) {
-        if (result !== '') {
-          result += '\n';
-        }
-        result += (line.replace(/<(?:.|\n)*?>/gm, ''));
-      });
-    } else {
-      result = value.replace(/<(?:.|\n)*?>/gm, '');
-    }
-  }
+<div class="form-floating" >
+   <select class="form-select" id="dedRule">
+                      <c:forEach var="rule" items="${dedMgmtDDMap.dedRuleMap}">
+                      <option id="${rule.key}" name="${rule.value}">${rule.value}</option>
+                </c:forEach>
+                  </select>
+</div>
 
-  return result;
-};
-
-Incomplete multi-character sanitization
-This string may still contain <script, which may cause an HTML element injection vulnerability. Codeql
+i want to set default value and call onchange function where do i set the below lines in the above code
+value="${deductibleManagementDTO.dedRuleStr != null ? deductibleManagementDTO.dedRuleStr : '1 - Per Person with or without family aggregate'}"
+onchange="resetIfInvalid(this);"
