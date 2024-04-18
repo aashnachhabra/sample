@@ -1,9 +1,4 @@
-function ( data ) {
-            return _empty(data) ?
-                data :
-                typeof data === 'string' ?
-                    data
-                        .replace( _re_new_lines, " " )
-                        .replace( _re_html, "" ) :
-                    '';
-        },
+var col = columns[i];
+            var asSorting = col.asSorting;
+            var sTitle = col.ariaTitle || col.sTitle.replace( /<.*?>/g, "" );
+            var th = col.nTh;
