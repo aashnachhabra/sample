@@ -1,4 +1,5 @@
-var col = columns[i];
-            var asSorting = col.asSorting;
-            var sTitle = col.ariaTitle || col.sTitle.replace( /<.*?>/g, "" );
-            var th = col.nTh;
+  s = _fnGetCellData( settings, i, colIdx, 'display' )+'';
+            s = s.replace( __re_html_remove, '' );
+            s = s.replace( /&nbsp;/g, ' ' );
+
+same issue in line 2 pls fix without modifying functionality
