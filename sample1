@@ -1,4 +1,4 @@
-     var $scriptElements = $('script[src]');
+   var $scriptElements = $('script[src]');
 	                $scriptElements.each(function (i, scriptElement) {
 	                    var source = scriptElement.src;
 	                    var matches = source.match('trumbowyg(\.min)?\.js');
