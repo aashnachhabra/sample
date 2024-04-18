@@ -1,7 +1,9 @@
- "html-pre": function ( a ) {
-            return _empty(a) ?
-                '' :
-                a.replace ?
-                    a.replace( /<.*?>/g, "" ).toLowerCase() :
-                    a+'';
+html: function ( data ) {
+            return _empty(data) ?
+                data :
+                typeof data === 'string' ?
+                    data
+                        .replace( _re_new_lines, " " )
+                        .replace( _re_html, "" ) :
+                    '';
         },
