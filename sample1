@@ -1,12 +1,7 @@
-
-<div class="form-floating" >
-   <select class="form-select" id="dedRule">
-                      <c:forEach var="rule" items="${dedMgmtDDMap.dedRuleMap}">
-                      <option id="${rule.key}" name="${rule.value}">${rule.value}</option>
-                </c:forEach>
-                  </select>
-</div>
-
-i want to set default value and call onchange function where do i set the below lines in the above code
-value="${deductibleManagementDTO.dedRuleStr != null ? deductibleManagementDTO.dedRuleStr : '1 - Per Person with or without family aggregate'}"
-onchange="resetIfInvalid(this);"
+ "html-pre": function ( a ) {
+            return _empty(a) ?
+                '' :
+                a.replace ?
+                    a.replace( /<.*?>/g, "" ).toLowerCase() :
+                    a+'';
+        },
