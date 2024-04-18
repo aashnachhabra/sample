@@ -1,12 +1,21 @@
-   var $scriptElements = $('script[src]');
-	                $scriptElements.each(function (i, scriptElement) {
-	                    var source = scriptElement.src;
-	                    var matches = source.match('trumbowyg(\.min)?\.js');
-The escape sequence '.' is equivalent to just '.', so the sequence may still represent a meta-character when it is used in a .
-CodeQL
-	                    if (matches != null) {
-	                        svgPathOption = source.substring(0, source.indexOf(matches[0])) + 'ui/icons.svg';
-	                    }
+exports.HTML2TEXT = function (value) {
+  var result = '';
 
-Useless regular-expression character escape
-fix without disturbing functionality
+  if (value) {
+    if (value instanceof Array) {
+      value.forEach(function (line) {
+        if (result !== '') {
+          result += '\n';
+        }
+        result += (line.replace(/<(?:.|\n)*?>/gm, ''));
+      });
+    } else {
+      result = value.replace(/<(?:.|\n)*?>/gm, '');
+    }
+  }
+
+  return result;
+};
+
+Incomplete multi-character sanitization
+This string may still contain <script, which may cause an HTML element injection vulnerability. Codeql
