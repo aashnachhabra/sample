@@ -1,11 +1,44 @@
- var $scriptElements = $('script[src]');
-	                $scriptElements.each(function (i, scriptElement) {
-	                    var source = scriptElement.src;
-	                    var matches = source.match('trumbowyg(\.min)?\.js');
-The escape sequence '.' is equivalent to just '.', so the sequence may still represent a meta-character when it is used in a .
-CodeQL
-	                    if (matches != null) {
-	                        svgPathOption = source.substring(0, source.indexOf(matches[0])) + 'ui/icons.svg';
-	                    }
+ <div class="modal-body">
+                                    <div class="row">
+                                        <div class="col">
+                                            <div class="mb-3">
+                                                <label for="prefixSearch" class="form-label">Prefix</label>
+                                                <input type="text" class="form-control" id="inputPrefix"
+                                                    placeholder="Enter Prefix Here...">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <div class="d-grid gap-2">
+                                        <button class="btn btn-outline-primary" type="button"
+                                            onclick="getPrefix()">Lookup</button>
+                                    </div>
+                                </div>
 
-getting Useless regular-expression character escape codeql issue. Pls fix without modifying functionality
+JS 
+
+function getPrefix() {
+    showAndHide();
+    var inputPrefix = document.getElementById("inputPrefix").value;
+    var request =createRequestBodyPrefix(inputPrefix)
+    $.ajax({
+        type: "GET",
+        contentType: "application/json",
+        url: "/abb/getLookUpRecord",
+        data: request,
+        success: function (response) {
+            window.location.href = "/abb/getLookUpRecord?batchDetailID=" + request.batchDetailID + "&term=" +encodeURIComponent(request.term);
+            $('#prefixLookup').modal('hide');
+            showAndHide();
+        },
+        error: function (xhr) {
+            document.getElementById("ErrorMessagePrefix").innerHTML = "No record found for the given prefix";
+            $('#errorModalPrefix').modal('show');
+            $('#prefixLookup').modal('hide');
+            showAndHide();
+        }
+    });
+}
+
+I WANT TO CLEAR THE INPUT BOX ONCE IT HAS BEEN CANCELLED OR SUBMITTED
