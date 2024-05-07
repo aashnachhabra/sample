@@ -1,109 +1,28 @@
-function setServiceRuleManagementDatatable(inputData){
-    const datatable = new DataTable('#datatable', {
-    	columns: [
-			{
-				name: 'paymentLineCount',
-				id:'paymentLineCount',
-				editable: false, 
-                dropdown: false,
-			},
-    		{
-    			name: 'costShareMapIDs',
-                id: 'costShareMapIDs',
-                editable: false, 
-                dropdown: false,
-				renderer: function(data){
-					return {costShareMapIDs : data}
-				}
-            },
-            {
-    			name: 'costShareAdminIDs',
-                id: 'costShareAdminIDs',
-                editable: false, 
-                dropdown: false,
-				renderer: function(data){
-					return {costShareAdminIDs : data}
-				}
-            },
-            {
-    			name: 'plCostShareIDs',
-                id: 'plCostShareIDs',
-                editable: false, 
-                dropdown: false,
-				renderer: function(data){
-					return {plCostShareIDs : data}
-				}
-            },
-            {
-    			name: 'serviceRuleID',
-                id: 'serviceRuleID',
-                editable: false, 
-                dropdown: false,
-            },
-            {
-                name: 'Rule',
-                id: 'serviceRule',
-                editable: false,
-            },
-            {
-                name: 'Description',
-                id: 'description',
-                editable: false,
-            },
-            {
-                name: 'Calculation Method',
-                id: 'serviceCalcMethod',
-                editable: false,
-            },
-            {
-                name: 'Cost Share Assigned',
-                id: 'deductibleAssigned',
-                editable: false,
-            },
-        ],
-        events: {
-            onCheckRow: () => {
-                let arrayrow = datatable.getRows();
-                for (var i = 0; i < arrayrow.length; i++) {
-                    arrayrow[i][0].value = "false";
-                }
-                this.checkedRows = this.datatable.rowmanager.getCheckedRows();
-                if (this.checkedRows.length <= 0) {
-                	document.getElementById('editButton').disabled=true;
-                	document.getElementById('deleteButton').disabled=true;
-                }else{
-                    for(var i = 0; i< this.checkedRows.length; i++){
-                        arrayrow[this.checkedRows[i]][0].value = "true";
-                    }
-                    if(this.checkedRows.length >=2){
-                    	document.getElementById('editButton').disabled=true;
-                    	if (abbRoleId != 19) { //is user role not as just view: ifp_abb_view user.
-                            document.getElementById('deleteButton').disabled = false;
-                        }
-                    }else{
-                        document.getElementById('editButton').disabled=false;
-                    	if (abbRoleId != 19) { //is user role not as just view: ifp_abb_view user.
-                            document.getElementById('deleteButton').disabled = false;
-                        }
-                    }
-                }
-            }
-        },
-        data: inputData,
-        checkboxColumn: true,
-        id: "costShareMapID",
-        inlineFilters: true,
-        layout: 'fluid',
-        serialNoColumn: false,
-        noDataMessage: 'Awe Snap! No results, please create new Sevice Rule to display.'
-    }); 
-    datatable.style.setStyle(`.dt-cell__content .dt-cell__content--header-0`, {padding: '0'});
-    datatable.style.setStyle(`.dt-cell--header .dt-cell__content`, {overflow: 'visible'});
-    datatable.style.setStyle(`.dt-cell__content--col-0`, {overflow: 'visible'});
-    datatable.style.setStyle(`.dt-toast`, {top: '40px'});
-    datatable.style.setStyle(`.dt-scrollable`, {'border-bottom': '1px solid #d1d8dd !important'});
-    window.datatable=datatable;    
+{
+    "0": 1093,
+    "1": 1622,
+    "rowIndex": 2,
+    "indent": 0,
+    "content": "",
+    "sortOrder": "none",
+    "colIndex": 2,
+    "column": {
+        "isHeader": 1,
+        "editable": false,
+        "sortable": true,
+        "resizable": true,
+        "focusable": true,
+        "dropdown": false,
+        "width": -41,
+        "content": "costShareMapIDs",
+        "sortOrder": "none",
+        "colIndex": 2,
+        "name": "costShareMapIDs",
+        "id": "costShareMapIDs",
+        "align": "right",
+        "html": "costShareMapIDs",
+        "minWidth": 11.3281,
+        "naturalWidth": 30
+    },
+    "html": ""
 }
-
-
-this is my function to create frappe datatable in my js file of jsp springboot project. Under the column costShareAdminIDs i have an array of numbers. when i check a row of the datatable i want that to come as array but it is coming as {0:12,1:98} pls fix
