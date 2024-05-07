@@ -1,44 +1,109 @@
- <div class="modal-body">
-                                    <div class="row">
-                                        <div class="col">
-                                            <div class="mb-3">
-                                                <label for="prefixSearch" class="form-label">Prefix</label>
-                                                <input type="text" class="form-control" id="inputPrefix"
-                                                    placeholder="Enter Prefix Here...">
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="modal-footer">
-                                    <div class="d-grid gap-2">
-                                        <button class="btn btn-outline-primary" type="button"
-                                            onclick="getPrefix()">Lookup</button>
-                                    </div>
-                                </div>
-
-JS 
-
-function getPrefix() {
-    showAndHide();
-    var inputPrefix = document.getElementById("inputPrefix").value;
-    var request =createRequestBodyPrefix(inputPrefix)
-    $.ajax({
-        type: "GET",
-        contentType: "application/json",
-        url: "/abb/getLookUpRecord",
-        data: request,
-        success: function (response) {
-            window.location.href = "/abb/getLookUpRecord?batchDetailID=" + request.batchDetailID + "&term=" +encodeURIComponent(request.term);
-            $('#prefixLookup').modal('hide');
-            showAndHide();
+function setServiceRuleManagementDatatable(inputData){
+    const datatable = new DataTable('#datatable', {
+    	columns: [
+			{
+				name: 'paymentLineCount',
+				id:'paymentLineCount',
+				editable: false, 
+                dropdown: false,
+			},
+    		{
+    			name: 'costShareMapIDs',
+                id: 'costShareMapIDs',
+                editable: false, 
+                dropdown: false,
+				renderer: function(data){
+					return {costShareMapIDs : data}
+				}
+            },
+            {
+    			name: 'costShareAdminIDs',
+                id: 'costShareAdminIDs',
+                editable: false, 
+                dropdown: false,
+				renderer: function(data){
+					return {costShareAdminIDs : data}
+				}
+            },
+            {
+    			name: 'plCostShareIDs',
+                id: 'plCostShareIDs',
+                editable: false, 
+                dropdown: false,
+				renderer: function(data){
+					return {plCostShareIDs : data}
+				}
+            },
+            {
+    			name: 'serviceRuleID',
+                id: 'serviceRuleID',
+                editable: false, 
+                dropdown: false,
+            },
+            {
+                name: 'Rule',
+                id: 'serviceRule',
+                editable: false,
+            },
+            {
+                name: 'Description',
+                id: 'description',
+                editable: false,
+            },
+            {
+                name: 'Calculation Method',
+                id: 'serviceCalcMethod',
+                editable: false,
+            },
+            {
+                name: 'Cost Share Assigned',
+                id: 'deductibleAssigned',
+                editable: false,
+            },
+        ],
+        events: {
+            onCheckRow: () => {
+                let arrayrow = datatable.getRows();
+                for (var i = 0; i < arrayrow.length; i++) {
+                    arrayrow[i][0].value = "false";
+                }
+                this.checkedRows = this.datatable.rowmanager.getCheckedRows();
+                if (this.checkedRows.length <= 0) {
+                	document.getElementById('editButton').disabled=true;
+                	document.getElementById('deleteButton').disabled=true;
+                }else{
+                    for(var i = 0; i< this.checkedRows.length; i++){
+                        arrayrow[this.checkedRows[i]][0].value = "true";
+                    }
+                    if(this.checkedRows.length >=2){
+                    	document.getElementById('editButton').disabled=true;
+                    	if (abbRoleId != 19) { //is user role not as just view: ifp_abb_view user.
+                            document.getElementById('deleteButton').disabled = false;
+                        }
+                    }else{
+                        document.getElementById('editButton').disabled=false;
+                    	if (abbRoleId != 19) { //is user role not as just view: ifp_abb_view user.
+                            document.getElementById('deleteButton').disabled = false;
+                        }
+                    }
+                }
+            }
         },
-        error: function (xhr) {
-            document.getElementById("ErrorMessagePrefix").innerHTML = "No record found for the given prefix";
-            $('#errorModalPrefix').modal('show');
-            $('#prefixLookup').modal('hide');
-            showAndHide();
-        }
-    });
+        data: inputData,
+        checkboxColumn: true,
+        id: "costShareMapID",
+        inlineFilters: true,
+        layout: 'fluid',
+        serialNoColumn: false,
+        noDataMessage: 'Awe Snap! No results, please create new Sevice Rule to display.'
+    }); 
+    datatable.style.setStyle(`.dt-cell__content .dt-cell__content--header-0`, {padding: '0'});
+    datatable.style.setStyle(`.dt-cell--header .dt-cell__content`, {overflow: 'visible'});
+    datatable.style.setStyle(`.dt-cell__content--col-0`, {overflow: 'visible'});
+    datatable.style.setStyle(`.dt-toast`, {top: '40px'});
+    datatable.style.setStyle(`.dt-scrollable`, {'border-bottom': '1px solid #d1d8dd !important'});
+    window.datatable=datatable;    
 }
 
-I WANT TO CLEAR THE INPUT BOX ONCE IT HAS BEEN CANCELLED OR SUBMITTED
+
+this is my function to create frappe datatable in my js file of jsp springboot project. Under the column costShareAdminIDs i have an array of numbers. when i check a row of the datatable i want that to come as array but it is coming as {0:12,1:98} pls fix
