@@ -1,28 +1,18 @@
-{
-    "0": 1093,
-    "1": 1622,
-    "rowIndex": 2,
-    "indent": 0,
-    "content": "",
-    "sortOrder": "none",
-    "colIndex": 2,
-    "column": {
-        "isHeader": 1,
-        "editable": false,
-        "sortable": true,
-        "resizable": true,
-        "focusable": true,
-        "dropdown": false,
-        "width": -41,
-        "content": "costShareMapIDs",
-        "sortOrder": "none",
-        "colIndex": 2,
-        "name": "costShareMapIDs",
-        "id": "costShareMapIDs",
-        "align": "right",
-        "html": "costShareMapIDs",
-        "minWidth": 11.3281,
-        "naturalWidth": 30
-    },
-    "html": ""
-}
+<div class="row">
+    <div class="col">
+       <div class="mb-3">
+          <label class="form-label">Region</label>
+          <div class="form-floating">
+             <select class="form-select" id="region">
+                <c:forEach var="region"
+                   items="${planDD.regionMap}">
+                   <option id="${region.key}" name="${region.value}"
+                      value="${region.value}">${region.value}
+                      </option>
+                </c:forEach>
+             </select>
+          </div>
+       </div>
+    </div>
+
+</div>
