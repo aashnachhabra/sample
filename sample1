@@ -1,101 +1,94 @@
-function buildDatatable(inputdata){
-    let checkFlag = false;
-    const datatable = new DataTable('#datatable', {
-        columns: [
-            {
-                name: 'Plan AssignmentId',
-                id: 'planManagementId',
-                editable: false,
-                dropdown: false,
-            },
-            {
-                name: 'Plan Code',
-                id: 'planCode',
-                editable: false,
-            },
-            {
-                name: 'Product ID',
-                id: 'productID',
-                editable: false,
-            },
-            {
-                name: 'HIOS ID',
-                id: 'hiosID',
-                editable: false,
-            },
-            {
-                name: 'COC Series',
-                id: 'cocSeries',
-                editable: false,
-            },
-            {
-                name: 'State',
-                id: 'stateAbbr',
-                editable: false,
-            },
-            {
-                name: 'Licence',
-                id: 'licenceCode',
-                editable: false,
-            },
-            {
-                name: 'Product Family',
-                id: 'product',
-                editable: false,
-            },
-            {
-                name: 'Last Generated Date',
-                id: 'lastGeneratedDate',
-                editable: false,
-            },
-            {
-                name: 'Release Date',
-                id: 'lastGenDate',
-                editable: false,
-            },
-            {
-                name: 'Version',
-                id: 'version',
-                editable: false,
-            },
-            {
-                name: 'Region',
-                id: 'region',
-                editable: false,
-            },
-        ],
-        events: {
-                    onCheckRow: () => {
-                        let arrayrow = datatable.getRows();
-                        for (var i = 0; i < arrayrow.length; i++) {
-                            arrayrow[i][0].value = "false";
-                        }
-                        this.checkedRows = this.datatable.rowmanager.getCheckedRows();
+html
 
-                        console.log("checked rows::::"+this.checkedRows);
+<div>
+    <div class="row">
+        <div class="button-container mb-2">
+            <button class="btn btn-outline-success btn-sm float-end" (click)="openMappingModal()">Add Mapping</button>
+        </div>
+    </div>
 
-                        if (this.checkedRows.length <= 0) {
-                            disabledButtons();
-                        }else{
-                            for(var i = 0; i< this.checkedRows.length; i++){
-                                arrayrow[this.checkedRows[i]][0].value = "true";
-                            }
-                            enableButtons();
-                        }
-                    }
-                  },
-        data: inputdata,
-        checkboxColumn: true,
-        id: "planManagementId",
-        inlineFilters: true,
-        layout: 'fluid',
-        serialNoColumn: false,
-        noDataMessage: 'Awe Snap! No results returned. Please update your search criteria then try again.'
+    <div class="row">
+        <app-table title="Category and Sub-Category Mapping"
+            [records]="(subWorkTypeGroupStore.subWorkTypeGroup$ | async) ?? []"
+            [table]="tableSettings"
+            [showTitle]="true" [editable]="true" [paginate]="true"></app-table>
+    </div>
+</div>
+
+
+js
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { NgbModal, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { SharedModule } from 'src/app/shared/shared.module';
+import { TableSettings } from 'src/app/shared/models/table.interface';
+import { Subscription } from 'rxjs';
+import { SpinnerService } from 'src/app/shared/services/spinner.service';
+import { ToastService } from 'src/app/shared/services/toast.service';
+import { CategorySubCategoryModalComponent } from './category-sub-category-modal/category-sub-category-modal.component';
+import { SubWorkTypeGroupStoreService } from 'src/app/shared/services/subWorkTypeGroup/sub-work-type-group-store.service';
+
+@Component({
+  selector: 'app-category-subcategory',
+  standalone: true,
+  imports: [
+    CommonModule,
+    FontAwesomeModule,
+    SharedModule,
+    NgbPaginationModule,
+  ],
+  templateUrl: './category-subcategory.component.html',
+  styleUrls: ['./category-subcategory.component.scss']
+})
+export class CategorySubcategoryComponent {
+  loadingSubscription: Subscription = new Subscription;
+  tableSettings: TableSettings = {
+    tableClass: ['table', 'table-striped', 'caption-top'],
+    headerClass: ['table-light'],
+    column: [
+      {
+        primaryKey: 'groupName',
+        header: 'Category'
+      },
+      {
+        primaryKey: 'subWorkTypeName',
+        header: 'Sub Category'
+      }
+    ]
+  }
+  constructor(
+    public modalService: NgbModal,
+    private spinnerService: SpinnerService,
+    private toast: ToastService,
+    public subWorkTypeGroupStore: SubWorkTypeGroupStoreService
+  ) { 
+    this.loadingSubscription = this._subscribeToLoading();
+  }
+  ngOnInit(): void {
+    this._fetchAllMappings();
+  }
+
+  openMappingModal() {
+    this.modalService.open(CategorySubCategoryModalComponent);
+  }
+  private _fetchAllMappings() {
+    this.subWorkTypeGroupStore.findAllSubWorkTypeGroups().subscribe({
+      error: () => {
+        this.toast.showDanger("Something went wrong. Please refresh the page and try again.");
+      }
     });
-    datatable.style.setStyle(`.dt-cell__content .dt-cell__content--header-0`, {padding: '0'});
-    datatable.style.setStyle(`.dt-cell--header .dt-cell__content`, {overflow: 'visible'});
-    datatable.style.setStyle(`.dt-cell__content--col-0`, {overflow: 'visible'});
-    datatable.style.setStyle(`.dt-toast`, {top: '40px'});
-    datatable.style.setStyle(`.dt-scrollable`, {'border-bottom': '1px solid #d1d8dd !important'});
-    window.datatable=datatable;
+  }
+  private _subscribeToLoading() {
+    return this.subWorkTypeGroupStore.loading$.subscribe((loading) => {
+      if(loading) {
+        this.spinnerService.showSpinner();
+      } else {
+        this.spinnerService.hideSpinner();
+      }
+    })
+  }
+
 }
+
+i want my table to show records in ascending order of groupName
