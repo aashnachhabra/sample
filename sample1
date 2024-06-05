@@ -1,111 +1,25 @@
-ts file 
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { FieldValidationService } from 'src/app/shared/services/field-validation.service';
-import { ToastService } from 'src/app/shared/services/toast.service';
-import { SubWorkTypeStoreService } from 'src/app/shared/services/subWorkType/sub-work-type-store.service';
-import { ImpactedGroupStoreService } from 'src/app/shared/services/impactedGroup/impacted-group-store.service';
-import { SubWorkTypeGroupStoreService } from 'src/app/shared/services/subWorkTypeGroup/sub-work-type-group-store.service';
-import { HttpErrorResponse } from '@angular/common/http';
-@Component({
-  selector: 'app-category-sub-category-modal',
-  standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: './category-sub-category-modal.component.html',
-  styleUrls: ['./category-sub-category-modal.component.scss']
-})
-export class CategorySubCategoryModalComponent {
-  mappingForm: FormGroup;
-
-  constructor(
-    public activeModal: NgbActiveModal,
-    public fieldValidation: FieldValidationService,
-    private toast: ToastService,
-    private fb: FormBuilder,
-    public subWorkTypeStore: SubWorkTypeStoreService,
-    public impactedGroupStore: ImpactedGroupStoreService,
-    public subWorkTypeGroupStore: SubWorkTypeGroupStoreService
-  ) {
-    this.mappingForm = this.fb.group({
-      groupID: ['', Validators.required],
-      subWorkTypeID: ['', Validators.required]
-    })
-  }
-
-  get groupID() {
-    return this.mappingForm.get('groupID')
-  }
-
-  get subWorkTypeID() {
-    return this.mappingForm.get('subWorkTypeID');
-  }
-  saveMapping() {
-    this.mappingForm.markAllAsTouched();
-
-    if (this.mappingForm.valid) {
-      this.subWorkTypeGroupStore.saveSubWorkTypeGroup(this.mappingForm.value).subscribe({
-        next: () => {
-          this.toast.showSuccess(`Mapping was created.`);
-        },
-        error: (error: HttpErrorResponse) => {
-          console.log(error.message)
-          if(error?.message.includes("Duplicate Mapping")){
-            this.toast.showDanger("Duplicate! Mapping already exists")
-          }
-          else
-          this.toast.showDanger(`Something went wrong. Mapping could not be created.`);
+public NotificationAuditTrail saveNotificationAuditTrail(NotificationAuditTrailRequest notificationAuditTrailRequest) {
+        NotificationAuditTrail notificationAuditTrail = new NotificationAuditTrail();
+        notificationAuditTrail.setField(notificationAuditTrailRequest.getField());
+        notificationAuditTrail.setOldValue(notificationAuditTrailRequest.getOldValue());
+        notificationAuditTrail.setNewValue(notificationAuditTrailRequest.getNewValue());
+        notificationAuditTrail.setIsCurrent(true);
+        notificationAuditTrail.setModifiedBy(usersService.getCurrentUser());
+        if (notificationRepository.findByNotificationIDAndIsCurrentTrue(notificationAuditTrailRequest.getNotificationID())!=null)
+        {
+            notificationAuditTrail.setNotification(notificationRepository.findByNotificationIDAndIsCurrentTrue(notificationAuditTrailRequest.getNotificationID()));
+        }else
+        {
+            throw new ResourceNotFoundException("Notification not found.");
         }
-      });
-      this.activeModal.close('save');
+        if (usersRepository.findByUserID(notificationAuditTrailRequest.getUserID())!=null)
+        {
+            notificationAuditTrail.setUsers(usersRepository.findByUserID(notificationAuditTrailRequest.getUserID()));
+        }else
+        {
+            throw new ResourceNotFoundException("User not found.");
+        }
+        return notificationAuditTrailRepository.save(notificationAuditTrail);
     }
-  }
-}
 
-html
-<div class="modal-header">
-  <h4 class="modal-title" id="modal-title">Add Category and Sub-Category Mapping</h4>
-  <button type="button" class="btn-close" aria-label="Close" (click)="activeModal.dismiss()">
-  </button>
-</div>
-
-<div class="modal-body">
-  <form [formGroup]="mappingForm">
-
-    <div class="form-group mb-3">
-      <label for="groupID">Category <span class="text-danger">*</span></label>
-      <select class="form-select" formControlName="groupID" id="groupID">
-        <option *ngFor="let category of impactedGroupStore.impactedGroups$ | async" [value]="category.groupID">
-          {{category.groupName}}</option>
-      </select>
-      <div *ngIf="groupID?.invalid && groupID?.touched" class="error-message text-danger" style="font-size: 12px;">
-        Category is required.
-      </div>
-    </div>
-
-    <div class="form-group mb-3">
-      <label for="subWorkTypeID">Sub-Category <span class="text-danger">*</span></label>
-      <select class="form-select" formControlName="subWorkTypeID" id="subWorkTypeID">
-        <option *ngFor="let subCategory of subWorkTypeStore.subWorkType$ | async" [value]="subCategory.subWorkTypeID">
-          {{subCategory.subWorkTypeName}}</option>
-      </select>
-      <div *ngIf="subWorkTypeID?.invalid && subWorkTypeID?.touched" class="error-message text-danger"
-        style="font-size: 12px;">
-        Sub-Category is required.
-      </div>
-    </div>
-
-  </form>
-</div>
-
-<div class="modal-footer">
-  <button type="button" class="btn btn-outline-danger" (click)="activeModal.dismiss()">
-    Cancel
-  </button>
-  <button type="button" class="btn btn-outline-success" (click)="saveMapping()">
-    Save
-  </button>
-</div>
-
-this is my current ts and html file to add a new entry however i want to so similar thing for edit but i want values to display and then update in case any change. Implement feature to implement prefiling of data from dropdown and update when any changes on hitting save
+write a spock groovy test case for this function using specification
