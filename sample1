@@ -1,25 +1,23 @@
-public NotificationAuditTrail saveNotificationAuditTrail(NotificationAuditTrailRequest notificationAuditTrailRequest) {
-        NotificationAuditTrail notificationAuditTrail = new NotificationAuditTrail();
-        notificationAuditTrail.setField(notificationAuditTrailRequest.getField());
-        notificationAuditTrail.setOldValue(notificationAuditTrailRequest.getOldValue());
-        notificationAuditTrail.setNewValue(notificationAuditTrailRequest.getNewValue());
-        notificationAuditTrail.setIsCurrent(true);
-        notificationAuditTrail.setModifiedBy(usersService.getCurrentUser());
-        if (notificationRepository.findByNotificationIDAndIsCurrentTrue(notificationAuditTrailRequest.getNotificationID())!=null)
-        {
-            notificationAuditTrail.setNotification(notificationRepository.findByNotificationIDAndIsCurrentTrue(notificationAuditTrailRequest.getNotificationID()));
-        }else
-        {
-            throw new ResourceNotFoundException("Notification not found.");
-        }
-        if (usersRepository.findByUserID(notificationAuditTrailRequest.getUserID())!=null)
-        {
-            notificationAuditTrail.setUsers(usersRepository.findByUserID(notificationAuditTrailRequest.getUserID()));
-        }else
-        {
-            throw new ResourceNotFoundException("User not found.");
-        }
-        return notificationAuditTrailRepository.save(notificationAuditTrail);
+def "Should get Notification by ID"(){
+        given:
+        def notification = new Notification(
+                notificationID: 1,
+                notificationDescription: "Test",
+                notificationShortDescription: "TestType",
+        )
+        notificationRepository.findByNotificationIDAndIsCurrentTrue(1) >> notification
+
+        when:
+        def result = notificationService.getNotificationByNotificationID(1)
+
+        then:
+        result == notification
     }
 
-write a spock groovy test case for this function using specification
+    def requestNotification(){
+        new NotificationRequest(
+                notificationID: 1,
+                notificationDescription: "Test",
+                notificationShortDescription: "TestType",
+        )
+    }
