@@ -1,23 +1,14 @@
-def "Should get Notification by ID"(){
-        given:
-        def notification = new Notification(
-                notificationID: 1,
-                notificationDescription: "Test",
-                notificationShortDescription: "TestType",
-        )
-        notificationRepository.findByNotificationIDAndIsCurrentTrue(1) >> notification
+FROM node:21-alpine
 
-        when:
-        def result = notificationService.getNotificationByNotificationID(1)
+WORKDIR /usr/src/app
 
-        then:
-        result == notification
-    }
+COPY package*.json ./
 
-    def requestNotification(){
-        new NotificationRequest(
-                notificationID: 1,
-                notificationDescription: "Test",
-                notificationShortDescription: "TestType",
-        )
-    }
+RUN npm install
+
+COPY . .
+
+EXPOSE 3000
+
+CMD [ "npm","start" ]
+
