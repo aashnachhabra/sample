@@ -11,7 +11,7 @@
   <groupId>com.optum.transform</groupId>
   <artifactId>abb-service</artifactId>
   <version>0.0.4-SNAPSHOT</version>
-  <packaging>war</packaging>
+  <packaging>jar</packaging>
   <name>abb-service</name>
   <dependencies>
     <dependency>
