@@ -1,18 +1,28 @@
-FROM docker.repo1.uhc.com/maven:3.8.6 AS builder
-COPY . /usr/src/app
-COPY settings.xml /root/.m2/settings.xml
-WORKDIR /usr/src/app
-# Using main POM
-RUN mvn clean install -f pom.xml
+achhab16@LAMU0N62HHYPH2V abb-service % docker build -t abb-service .
+[+] Building 0.8s (9/14)                                                                                                                                                   docker:desktop-linux
+ => [internal] load build definition from Dockerfile                                                                                                                                       0.0s
+ => => transferring dockerfile: 720B                                                                                                                                                       0.0s
+ => [internal] load metadata for docker.repo1.uhc.com/maven:3.8.6                                                                                                                          0.0s
+ => [internal] load metadata for docker.repo1.uhc.com/tomcat:10-jdk17                                                                                                                      0.0s
+ => [internal] load .dockerignore                                                                                                                                                          0.0s
+ => => transferring context: 2B                                                                                                                                                            0.0s
+ => CACHED [builder 1/5] FROM docker.repo1.uhc.com/maven:3.8.6                                                                                                                             0.0s
+ => CACHED [stage-1 1/4] FROM docker.repo1.uhc.com/tomcat:10-jdk17                                                                                                                         0.0s
+ => [internal] load build context                                                                                                                                                          0.7s
+ => => transferring context: 1.78MB                                                                                                                                                        0.7s
+ => CANCELED [builder 2/5] COPY . /usr/src/app                                                                                                                                             0.1s
+ => ERROR [builder 3/5] COPY settings.xml /root/.m2/settings.xml                                                                                                                           0.0s
+------
+ > [builder 3/5] COPY settings.xml /root/.m2/settings.xml:
+------
+Dockerfile:4
+--------------------
+   2 |     FROM docker.repo1.uhc.com/maven:3.8.6 AS builder
+   3 |     COPY . /usr/src/app
+   4 | >>> COPY settings.xml /root/.m2/settings.xml
+   5 |     WORKDIR /usr/src/app/abb-service
+   6 |     # Use the pom.xml in abb-service directory
+--------------------
+ERROR: failed to solve: failed to compute cache key: failed to calculate checksum of ref 85dd8961-9bea-477f-8ad9-185e6d78ce0b::cyc5rudrgl7jyv7c39o32mtrg: "/settings.xml": not found
 
-FROM docker.repo1.uhc.com/tomcat:10-jdk17
-ENV JAVA_OPTS="-Djasypt.encryptor.password=W4a!hXnhEc -Dspring.profiles.active=mac"
-COPY --from=builder /usr/src/app/abb-web/target/classes/planlibrary.uhc.com.jks /usr/local/tomcat/lib/planlibrary.uhc.com.jks
-COPY --from=builder /usr/src/app/abb-web/target/abb.war /usr/local/tomcat/webapps/abb.war
-COPY --from=builder /usr/src/app/server.xml /usr/local/tomcat/conf
-
-RUN chown -R 1001:0 /usr/local/tomcat/webapps/*
-RUN chmod -R 777 /usr/local/tomcat/webapps/*
-
-EXPOSE 443
-CMD ["/usr/local/tomcat/bin/catalina.sh","run"]
+View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/u765evv737of3v7no5g71g23j
