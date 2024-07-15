@@ -1,34 +1,209 @@
-docker build -f abb-service/Dockerfile -t abb-service .
-[+] Building 307.2s (12/14)                                                                                                                                                docker:desktop-linux
- => [internal] load build definition from Dockerfile                                                                                                                                       0.0s
- => => transferring dockerfile: 720B                                                                                                                                                       0.0s
- => [internal] load metadata for docker.repo1.uhc.com/tomcat:10-jdk17                                                                                                                      0.0s
- => [internal] load metadata for docker.repo1.uhc.com/maven:3.8.6                                                                                                                          0.0s
- => [internal] load .dockerignore                                                                                                                                                          0.0s
- => => transferring context: 2B                                                                                                                                                            0.0s
- => CACHED [builder 1/5] FROM docker.repo1.uhc.com/maven:3.8.6                                                                                                                             0.0s
- => [internal] load build context                                                                                                                                                          4.3s
- => => transferring context: 359.59MB                                                                                                                                                      4.3s
- => CACHED [stage-1 1/4] FROM docker.repo1.uhc.com/tomcat:10-jdk17                                                                                                                         0.0s
- => [builder 2/5] COPY . /usr/src/app                                                                                                                                                      1.0s
- => [builder 3/5] COPY settings.xml /root/.m2/settings.xml                                                                                                                                 0.0s
- => [builder 4/5] WORKDIR /usr/src/app/abb-service                                                                                                                                         0.0s
- => [builder 5/5] RUN mvn clean install -f pom.xml                                                                                                                                       301.9s
- => ERROR [stage-1 2/4] COPY --from=builder /usr/src/app/abb-service/target/abb-service.war /usr/local/tomcat/webapps/abb-service.war                                                      0.0s
-------                                                                                                                                                                                          
- > [stage-1 2/4] COPY --from=builder /usr/src/app/abb-service/target/abb-service.war /usr/local/tomcat/webapps/abb-service.war:                                                                 
-------                                                                                                                                                                                          
-Dockerfile:11                                                                                                                                                                                   
---------------------                                                                                                                                                                            
-   9 |     FROM docker.repo1.uhc.com/tomcat:10-jdk17
-  10 |     ENV JAVA_OPTS="-Djasypt.encryptor.password=W4a!hXnhEc -Dspring.profiles.active=mac"
-  11 | >>> COPY --from=builder /usr/src/app/abb-service/target/abb-service.war /usr/local/tomcat/webapps/abb-service.war
-  12 |     RUN chown -R 1001:0 /usr/local/tomcat/webapps/*
-  13 |     RUN chmod -R 777 /usr/local/tomcat/webapps/*
---------------------
-ERROR: failed to solve: failed to compute cache key: failed to calculate checksum of ref 85dd8961-9bea-477f-8ad9-185e6d78ce0b::5upwhmgcrg733dv0fmc0eame8: "/usr/src/app/abb-service/target/abb-service.war": not found
+<?xml version="1.0"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.optum.transform</groupId>
+    <artifactId>abb</artifactId>
+    <version>0.0.4-SNAPSHOT</version>
+  </parent>
 
-View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/xfuaumz55sqjbwholvqp7fg1n
+  <groupId>com.optum.transform</groupId>
+  <artifactId>abb-service</artifactId>
+  <version>0.0.4-SNAPSHOT</version>
+  <packaging>war</packaging>
+  <name>abb-service</name>
+  <dependencies>
+    <dependency>
+      <groupId>net.sourceforge.jtds</groupId>
+      <artifactId>jtds</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.zaxxer</groupId>
+      <artifactId>HikariCP</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-jdbc</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>org.apache.tomcat</groupId>
+          <artifactId>tomcat-jdbc</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
 
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-jpa</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-mail</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-configuration-processor</artifactId>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>javax.interceptor</groupId>
+      <artifactId>javax.interceptor-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.jayway.jsonpath</groupId>
+      <artifactId>json-path</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-collections4</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-text</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>log4j-api</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-mongodb</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>javax.validation</groupId>
+      <artifactId>validation-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.microsoft.sqlserver</groupId>
+      <artifactId>mssql-jdbc</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.kafka</groupId>
+      <artifactId>kafka-clients</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.kafka</groupId>
+      <artifactId>connect-json</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.kafka</groupId>
+      <artifactId>spring-kafka</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.httpcomponents.client5</groupId>
+      <artifactId>httpclient5</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.json</groupId>
+      <artifactId>json</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.mysql</groupId>
+      <artifactId>mysql-connector-j</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.github.ulisesbocchio</groupId>
+      <artifactId>jasypt-spring-boot-starter</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>net.javacrumbs.shedlock</groupId>
+      <artifactId>shedlock-spring</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>net.javacrumbs.shedlock</groupId>
+      <artifactId>shedlock-provider-jdbc-template</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.poi</groupId>
+      <artifactId>poi</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.poi</groupId>
+      <artifactId>poi-ooxml</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>org.apache.commons</groupId>
+          <artifactId>commons-compress</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-compress</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.data</groupId>
+      <artifactId>spring-data-mongodb</artifactId>
+    </dependency>
 
-a jar file is created though in the target folder under abb-service
+      <dependency>
+          <groupId>org.projectlombok</groupId>
+          <artifactId>lombok</artifactId>
+      </dependency>
+
+      <!-- Optional dependencies for using Spock -->
+      <dependency> <!-- use a specific Groovy version rather than the one specified by spock-core -->
+        <groupId>org.apache.groovy</groupId>
+        <artifactId>groovy</artifactId>
+      </dependency>
+      <!-- Mandatory dependencies for using Spock -->
+      <dependency>
+          <groupId>org.spockframework</groupId>
+          <artifactId>spock-core</artifactId>
+          <scope>test</scope>
+      </dependency>
+      <dependency>
+          <groupId>org.spockframework</groupId>
+          <artifactId>spock-spring</artifactId>
+          <scope>test</scope>
+      </dependency>
+  </dependencies>
+
+    <profiles>
+        <profile>
+            <id>dev</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <spring.profiles.active>dev</spring.profiles.active>
+            </properties>
+        </profile>
+    </profiles>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>com.github.ulisesbocchio</groupId>
+        <artifactId>jasypt-maven-plugin</artifactId>
+        <version>3.0.3</version>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <testFailureIgnore>true</testFailureIgnore>
+          <skip>false</skip>
+          <reuseForks>false</reuseForks>
+        </configuration>
+      </plugin>
+
+    </plugins>
+  </build>
+</project>
