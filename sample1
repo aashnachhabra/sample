@@ -1,209 +1,36 @@
-<?xml version="1.0"?>
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <groupId>com.optum.transform</groupId>
-    <artifactId>abb</artifactId>
-    <version>0.0.4-SNAPSHOT</version>
-  </parent>
+package com.uhc.ei.planlibrary.cbb.controller;
 
-  <groupId>com.optum.transform</groupId>
-  <artifactId>abb-service</artifactId>
-  <version>0.0.4-SNAPSHOT</version>
-  <packaging>jar</packaging>
-  <name>abb-service</name>
-  <dependencies>
-    <dependency>
-      <groupId>net.sourceforge.jtds</groupId>
-      <artifactId>jtds</artifactId>
-      <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.zaxxer</groupId>
-      <artifactId>HikariCP</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-jdbc</artifactId>
-      <exclusions>
-        <exclusion>
-          <groupId>org.apache.tomcat</groupId>
-          <artifactId>tomcat-jdbc</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
 
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-data-jpa</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-mail</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-configuration-processor</artifactId>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
-      <groupId>javax.interceptor</groupId>
-      <artifactId>javax.interceptor-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.jayway.jsonpath</groupId>
-      <artifactId>json-path</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-lang3</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-collections4</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-text</artifactId>
-      <exclusions>
-        <exclusion>
-          <groupId>org.apache.logging.log4j</groupId>
-          <artifactId>log4j-api</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-data-mongodb</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>javax.validation</groupId>
-      <artifactId>validation-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.microsoft.sqlserver</groupId>
-      <artifactId>mssql-jdbc</artifactId>
-      <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.kafka</groupId>
-      <artifactId>kafka-clients</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.kafka</groupId>
-      <artifactId>connect-json</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.kafka</groupId>
-      <artifactId>spring-kafka</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-databind</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.httpcomponents.client5</groupId>
-      <artifactId>httpclient5</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.json</groupId>
-      <artifactId>json</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.mysql</groupId>
-      <artifactId>mysql-connector-j</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.github.ulisesbocchio</groupId>
-      <artifactId>jasypt-spring-boot-starter</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>net.javacrumbs.shedlock</groupId>
-      <artifactId>shedlock-spring</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>net.javacrumbs.shedlock</groupId>
-      <artifactId>shedlock-provider-jdbc-template</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.poi</groupId>
-      <artifactId>poi</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.poi</groupId>
-      <artifactId>poi-ooxml</artifactId>
-      <exclusions>
-        <exclusion>
-          <groupId>org.apache.commons</groupId>
-          <artifactId>commons-compress</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-compress</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.data</groupId>
-      <artifactId>spring-data-mongodb</artifactId>
-    </dependency>
+import com.uhc.ei.planlibrary.mongodb.domain.MedicalLibraryAPICollection;
+import com.uhc.ei.planlibrary.mongodb.repo.MedicalLibraryAPICollectionRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 
-      <dependency>
-          <groupId>org.projectlombok</groupId>
-          <artifactId>lombok</artifactId>
-      </dependency>
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
-      <!-- Optional dependencies for using Spock -->
-      <dependency> <!-- use a specific Groovy version rather than the one specified by spock-core -->
-        <groupId>org.apache.groovy</groupId>
-        <artifactId>groovy</artifactId>
-      </dependency>
-      <!-- Mandatory dependencies for using Spock -->
-      <dependency>
-          <groupId>org.spockframework</groupId>
-          <artifactId>spock-core</artifactId>
-          <scope>test</scope>
-      </dependency>
-      <dependency>
-          <groupId>org.spockframework</groupId>
-          <artifactId>spock-spring</artifactId>
-          <scope>test</scope>
-      </dependency>
-  </dependencies>
+@Controller
+public class StressPerformanceController {
 
-    <profiles>
-        <profile>
-            <id>dev</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <properties>
-                <spring.profiles.active>dev</spring.profiles.active>
-            </properties>
-        </profile>
-    </profiles>
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <groupId>com.github.ulisesbocchio</groupId>
-        <artifactId>jasypt-maven-plugin</artifactId>
-        <version>3.0.3</version>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <configuration>
-          <testFailureIgnore>true</testFailureIgnore>
-          <skip>false</skip>
-          <reuseForks>false</reuseForks>
-        </configuration>
-      </plugin>
+    @Autowired
+    private MedicalLibraryAPICollectionRepository medicalLibraryAPICollectionRepository;
 
-    </plugins>
-  </build>
-</project>
+    @GetMapping("/latestPlans")
+    public ResponseEntity<List<Long>> getLatestPlans() {
+        List<MedicalLibraryAPICollection> latestPlans = new ArrayList<>();
+
+        latestPlans.addAll(medicalLibraryAPICollectionRepository.findTop50ByPlanDetails_OrganizationAndPlanDetails_CocSeriesOrderByPlanDetails_CreatedOnDesc("Surest - FI", 2024));
+        latestPlans.addAll(medicalLibraryAPICollectionRepository.findTop50ByPlanDetails_OrganizationAndPlanDetails_CocSeriesOrderByPlanDetails_CreatedOnDesc("UnitedHealthcare", 2024));
+        latestPlans.addAll(medicalLibraryAPICollectionRepository.findTop50ByPlanDetails_OrganizationAndPlanDetails_CocSeriesOrderByPlanDetails_CreatedOnDesc("Level 2", 2024));
+
+        return ResponseEntity.ok().body(latestPlans.stream().map(plan -> plan.getPlanAssignmentID()).collect(Collectors.toList()));
+    }
+}
+
+this is my get call which returns total 150 plans i need to create a post call which will call an already existing function in another controller String generateResult = planManagementGenerateService.generateBatch(planMngGenerateRequest,userId, userEmail);
+
+		return ResponseEntity.status(HttpStatus.CREATED).body(Collections.singletonMap("generateResult", generateResult));
+ the above code. The request body will be the response of the get call above
