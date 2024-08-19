@@ -1,36 +1,46 @@
-package com.uhc.ei.planlibrary.cbb.controller;
+<div class="d-grid gap-2">
+                    <c:choose>
+                    <c:when test="${sbcRoleId eq '13' or sbcRoleId eq '12' or sbcRoleId eq '11' }">
+                    <a class="btn btn-primary" role="button" href="${pageContext.session.getAttribute('sbcUrl')}/planManagement">Plan Management</a>
+                     <a class="btn btn-primary" role="button" 
+                     href="<c:url value="sbcBatchManagementView"/>">Batch Management</a>
+                    </c:when>
+                    <c:otherwise>
+                    <a class="btn btn-primary" role="button" 
+                           href="${pageContext.session.getAttribute('sbcUrl')}/planManagement" style="display: none" >Plan Management</a>
+                    <a class="btn btn-primary" role="button" style="display: none"
+                     href="<c:url value="sbcBatchManagementView"/>">Batch Management</a>
+                    </c:otherwise>
+                    </c:choose>
+                    
+                    <c:choose>
+                    <c:when test="${sbcRoleId eq '13' or sbcRoleId eq '12'}">
+                    <a class="btn btn-primary" role="button"
+                            href="<c:url value="sbcTemplateRuleManagementView"/>">Template Rule Management</a>
+                    </c:when>
+                    <c:otherwise>
+                    <a class="btn btn-primary" role="button"
+                            href="<c:url value="sbcTemplateRuleManagementView"/>"style="display: none" >Template Rule Management</a>
+                    </c:otherwise>
+                    </c:choose>
+                    
+                    <c:choose>
+                    <c:when  test="${sbcRoleId eq '13'}">
+                     <a class="btn btn-primary" role="button"
+                            href="${pageContext.servletContext.contextPath }/SbcUnderlineWords.jsp">Admin Table Management</a>
+                         <!-- Only visible to Super_Users or It Role -->
+                         <a class="btn btn-primary" role="button"
+                            href="<c:url value="sbcTemplateManagementView"/>">Template Management</a>
+                    </c:when>
+                   <c:otherwise>
+                    <a class="btn btn-primary" role="button"
+                            href="${pageContext.servletContext.contextPath }/SingleWords.jsp" style="display: none">Admin Table Management</a>
+                         <!-- Only visible to Super_Users or It Role -->
+                         <a class="btn btn-primary" role="button"
+                            href="<c:url value="sbcTemplateManagementView"/>" style="display: none">Template Management</a>
+                   </c:otherwise>
+                    </c:choose>
+                    </div>
 
 
-import com.uhc.ei.planlibrary.mongodb.domain.MedicalLibraryAPICollection;
-import com.uhc.ei.planlibrary.mongodb.repo.MedicalLibraryAPICollectionRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
-@Controller
-public class StressPerformanceController {
-
-    @Autowired
-    private MedicalLibraryAPICollectionRepository medicalLibraryAPICollectionRepository;
-
-    @GetMapping("/latestPlans")
-    public ResponseEntity<List<Long>> getLatestPlans() {
-        List<MedicalLibraryAPICollection> latestPlans = new ArrayList<>();
-
-        latestPlans.addAll(medicalLibraryAPICollectionRepository.findTop50ByPlanDetails_OrganizationAndPlanDetails_CocSeriesOrderByPlanDetails_CreatedOnDesc("Surest - FI", 2024));
-        latestPlans.addAll(medicalLibraryAPICollectionRepository.findTop50ByPlanDetails_OrganizationAndPlanDetails_CocSeriesOrderByPlanDetails_CreatedOnDesc("UnitedHealthcare", 2024));
-        latestPlans.addAll(medicalLibraryAPICollectionRepository.findTop50ByPlanDetails_OrganizationAndPlanDetails_CocSeriesOrderByPlanDetails_CreatedOnDesc("Level 2", 2024));
-
-        return ResponseEntity.ok().body(latestPlans.stream().map(plan -> plan.getPlanAssignmentID()).collect(Collectors.toList()));
-    }
-}
-
-this is my get call which returns total 150 plans i need to create a post call which will call an already existing function in another controller String generateResult = planManagementGenerateService.generateBatch(planMngGenerateRequest,userId, userEmail);
-
-		return ResponseEntity.status(HttpStatus.CREATED).body(Collections.singletonMap("generateResult", generateResult));
- the above code. The request body will be the response of the get call above
+for oage context for sbcUrl it is redirecting lo localhost instead on external url
