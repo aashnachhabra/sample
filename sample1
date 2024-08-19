@@ -1,46 +1,601 @@
-<div class="d-grid gap-2">
-                    <c:choose>
-                    <c:when test="${sbcRoleId eq '13' or sbcRoleId eq '12' or sbcRoleId eq '11' }">
-                    <a class="btn btn-primary" role="button" href="${pageContext.session.getAttribute('sbcUrl')}/planManagement">Plan Management</a>
-                     <a class="btn btn-primary" role="button" 
-                     href="<c:url value="sbcBatchManagementView"/>">Batch Management</a>
-                    </c:when>
-                    <c:otherwise>
-                    <a class="btn btn-primary" role="button" 
-                           href="${pageContext.session.getAttribute('sbcUrl')}/planManagement" style="display: none" >Plan Management</a>
-                    <a class="btn btn-primary" role="button" style="display: none"
-                     href="<c:url value="sbcBatchManagementView"/>">Batch Management</a>
-                    </c:otherwise>
-                    </c:choose>
-                    
-                    <c:choose>
-                    <c:when test="${sbcRoleId eq '13' or sbcRoleId eq '12'}">
-                    <a class="btn btn-primary" role="button"
-                            href="<c:url value="sbcTemplateRuleManagementView"/>">Template Rule Management</a>
-                    </c:when>
-                    <c:otherwise>
-                    <a class="btn btn-primary" role="button"
-                            href="<c:url value="sbcTemplateRuleManagementView"/>"style="display: none" >Template Rule Management</a>
-                    </c:otherwise>
-                    </c:choose>
-                    
-                    <c:choose>
-                    <c:when  test="${sbcRoleId eq '13'}">
-                     <a class="btn btn-primary" role="button"
-                            href="${pageContext.servletContext.contextPath }/SbcUnderlineWords.jsp">Admin Table Management</a>
-                         <!-- Only visible to Super_Users or It Role -->
-                         <a class="btn btn-primary" role="button"
-                            href="<c:url value="sbcTemplateManagementView"/>">Template Management</a>
-                    </c:when>
-                   <c:otherwise>
-                    <a class="btn btn-primary" role="button"
-                            href="${pageContext.servletContext.contextPath }/SingleWords.jsp" style="display: none">Admin Table Management</a>
-                         <!-- Only visible to Super_Users or It Role -->
-                         <a class="btn btn-primary" role="button"
-                            href="<c:url value="sbcTemplateManagementView"/>" style="display: none">Template Management</a>
-                   </c:otherwise>
-                    </c:choose>
-                    </div>
+package com.uhc.ei.planlibrary.cbb.service;
+
+import com.uhc.ei.planlibrary.api.service.v1.PgAccessLogService;
+import com.uhc.ei.planlibrary.api.service.v1.UserService;
+import com.uhc.ei.planlibrary.cbb.domain.CBBUsers;
+import com.uhc.ei.planlibrary.constants.DBSSessionConstants;
+import com.uhc.ei.planlibrary.constants.SessionConstants;
+import com.uhc.ei.planlibrary.logservice.service.LogService;
+import com.uhc.ei.planlibrary.model.response.PingSSOResponse;
+import com.uhc.ei.planlibrary.tic.TicUserGroups;
+import com.uhc.ei.planlibrary.utils.PlanLibraryVulnerabilityUtils;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.TrustStrategy;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.*;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
+
+import javax.net.ssl.SSLContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.Base64.Decoder;
+import java.util.Date;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
+
+@Service
+public class PingSSOServiceImpl implements PingSSOService {
+    @Value("${ping.sso.url}")
+    private String pingSSOUrl;
+
+    @Value("${ping.redirect.url}")
+    private String pingRedirectUrl;
+
+    @Value("${ping.sso.clientID}")
+    private String pingSSOClientID;
+    @Value("${ping.sso.clientSecret}")
+    private String pingSSOClientSecret;
+
+    @Autowired
+    private PgAccessLogService pgAccessLogService;
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private LogService logService;
+
+    @Value("${env}")
+    private String env;
+    @Value("${ice.url}")
+    private String iceUrl;
+
+    @Value("${ifpCard.url}")
+    private String ifpCardUrl;
+
+    @Value("${ice.enable}")
+    private boolean iceEnable;
+
+    @Value("${cd.url}")
+    private String cdUrl;
+
+    @Value("${cd.byof.url}")
+    private String cdByofUrl;
+
+    @Value("${byof.enable}")
+    private boolean byofEnable;
+
+    @Value("${byof.url}")
+    private String byofUrl;
+    
+    @Value("${sbc.enable}")
+    private boolean sbcEnable;
+
+    @Value("${sbc.url}")
+    private String sbcUrl;
+
+    @Value("${core.byof.enable}")
+    private boolean coreByofEnable;
+    @Value("${core.byof.url}")
+    private String coreByofUrl;
+
+    @Value("${rx.automation.enable:false}")
+    private boolean rxAutomationEnable;
+    
+    @Value("${bctlv.automation.enable}")
+    private boolean bctlvAutomation;
+
+    @Value("${cbb.dental.vision.enable}")
+    private boolean cbbEnableDentalVision;
+
+    private final static Logger logger = LoggerFactory.getLogger(PingSSOServiceImpl.class);
 
 
-for oage context for sbcUrl it is redirecting lo localhost instead on external url
+    //@Autowired
+    //pri//vate AuthLogService authService;
+    @Override
+    public int ssoOperation(String code, HttpServletRequest request) {
+        try {
+            MultiValueMap<String, String> body = new LinkedMultiValueMap<String, String>();
+
+            body.add("grant_type", "authorization_code");
+            body.add("redirect_uri", pingRedirectUrl);
+            body.add("code", code);
+            body.add("client_id", pingSSOClientID);
+            body.add("client_secret", pingSSOClientSecret);
+
+            ResponseEntity<PingSSOResponse> response = restCallForAuthentication(body);
+
+            JSONObject object1 = convertDecode(response.getBody().getAccess_token());
+            JSONObject object2 = convertDecode(response.getBody().getId_token());
+            Date date = new Date(TimeUnit.SECONDS.toMillis(object1.getLong("exp")));
+
+            long time = date.getTime() - new Date().getTime();
+            String msid = object1.getString("msid");
+
+            String givenName = object2.getString("given_name");
+            String email = object2.getString("email");
+            String company = object2.getString("company");
+            String department = object2.getString("department");
+            String displayName = object2.getString("displayName");
+            String roleName = null;
+            ArrayList<String> rolelist = new ArrayList<String>();
+            if (object2.get("msad_groups") instanceof JSONArray) {
+                JSONArray jsonArray = object2.getJSONArray("msad_groups");
+                if (jsonArray != null) {
+                    int len = jsonArray.length();
+                    for (int i = 0; i < len; i++) {
+                        rolelist.add(jsonArray.get(i).toString());
+                    }
+                }
+
+                if (CollectionUtils.isEmpty(rolelist))
+
+                    roleName = object2.getString("msad_groups");
+                else
+                    roleName = rolelist.get(0);
+            } else {
+                roleName = object2.getString("msad_groups");
+            }
+
+            logger.info(String.valueOf(rolelist.size()));
+            logger.info(rolelist.get(0));
+            ArrayList<String> rolelist1 = new ArrayList<String>();
+
+            for (String string : rolelist) {
+                String role1 = string.replace(",CN=Users,DC=ms,DC=ds,DC=uhc,DC=com", "").replace("CN=", "");
+                if (role1.startsWith("CBB_")) {
+                    rolelist1.add(role1.replace("CBB_", ""));
+                }
+                if (role1.startsWith("Plan_Library_")) {
+                    rolelist1.add(role1.replace("Plan_Library_", ""));
+                }
+
+                if(role1.startsWith("planlibrary")) {
+                    rolelist1.add(role1);
+                }
+
+                if(role1.startsWith("DigitalBenSum")) {
+                    rolelist1.add(role1);
+                }
+                if(role1.startsWith("CORE")) {
+                    rolelist1.add(role1);
+                }
+
+				/*if (role1.startsWith("Plan_Library_") && !role1.equals("Plan_Library_IT_Support")) {
+					rolelist1.add(role1.replace("Plan_Library_", ""));
+				}
+				if(role1.equals("Plan_Library_IT_Support")) {
+					rolelist1.add(role1);
+				}*/
+            }
+            logger.info(String.valueOf(rolelist1));
+
+			Integer ifpRoleId = null;
+			Integer sbcRoleId = null;
+            Integer iceRoleId= null;
+            Integer cdRoleId = null;
+            Integer reportingId=null;
+            Integer dentalVisionRoleId = null;
+            Integer coreId = null;
+            Integer dbsId = null;
+            Integer abbId = null;
+            Integer byofId = null;
+            Integer nonIfpRoleId = null;
+            String ifpCardRole = "";
+
+			if (rolelist1.contains("IFP_SuperUser")) {
+				ifpRoleId = 8;
+			} else if (rolelist1.contains("IFP_Editor")) {
+				ifpRoleId = 9;
+			} else if (rolelist1.contains("IFP_Viewer")) {
+				ifpRoleId = 10;
+			} else if (rolelist1.contains("IT_Support")) {
+				ifpRoleId = 4;
+			}
+
+            if (rolelist1.contains("Med_PortfolioEditor_SuperUser")) {
+                nonIfpRoleId = 37;
+            } else if (rolelist1.contains("Med_PortfolioEditor_Editor")) {
+                nonIfpRoleId = 36;
+            } else if (rolelist1.contains("Med_PortfolioEditor_Viewer")) {
+                nonIfpRoleId = 35;
+            } else if (rolelist1.contains("IT_Support")) {
+                nonIfpRoleId = 4;
+            }
+
+			if(rolelist1.contains("IFP_ABB_View")) {
+				abbId = 19;
+			}else if(rolelist1.contains("IFP_ABB_Edit")) {
+				abbId = 20;
+			}else if(rolelist1.contains("IFP_ABB_SuperUser")) {
+				abbId = 21;
+			}
+			
+			if(rolelist1.contains("IFP_SBC_SuperUser") || rolelist1.contains("IT_Support") || rolelist1.contains("UNET_SBC_SuperUser")) {
+				sbcRoleId= 13;
+			} else if (rolelist1.contains("IFP_SBC_Edit") || rolelist1.contains("UNET_SBC_Edit")) {
+				sbcRoleId = 12;
+			} else if (rolelist1.contains("IFP_SBC_View") || rolelist1.contains("UNET_SBC_View")) {
+				sbcRoleId = 11;
+			}
+
+            if (rolelist1.contains("IFP_ID_CARD_SuperUser")) {
+                ifpCardRole = "IFP_ID_CARD_SuperUser";
+            } else if (rolelist1.contains("IFP_ID_CARD_View")) {
+                ifpCardRole = "IFP_ID_CARD_View";
+            }
+
+            if (rolelist1.contains("ICE_Cirrus_Submit_Explore")) {
+                iceRoleId = 12;
+            } else if (rolelist1.contains("ICE_Cirrus_SuperUser")) {
+                iceRoleId = 13;
+            } else if (rolelist1.contains("ICE_Cirrus_IT_Support")) {
+                iceRoleId = 14;
+            }
+
+            if (rolelist1.contains("planlibrary_config_desktop_super_user") || rolelist1.contains("IT_Support")) {
+                cdRoleId = 23;
+            } else if (rolelist1.contains("planlibrary_config_desktop_config_manager")) {
+                cdRoleId = 25;
+            } else if (rolelist1.contains("planlibrary_config_desktop_config_analyst")) {
+                cdRoleId = 24;
+            } else if (rolelist1.contains("planlibrary_config_desktop_team_member")) {
+                cdRoleId = 22;
+            }
+
+            if(rolelist1.contains("Kibana_General")) {
+            	reportingId=1;
+            }
+
+            if(rolelist1.contains("IT_Support") || (rolelist1.contains("Dental_SuperUser") && rolelist1.contains("Vision_SuperUser"))){
+                dentalVisionRoleId = 1;
+            }
+            else if(rolelist1.contains("Dental_SuperUser")){
+                dentalVisionRoleId = 2;
+            }
+            else if(rolelist1.contains("Vision_SuperUser")){
+                dentalVisionRoleId = 3;
+            }
+            else if(rolelist1.contains("Dental_Edit")){
+                dentalVisionRoleId = 4;
+            }
+            else if(rolelist1.contains("Vision_Edit")){
+                dentalVisionRoleId = 5;
+            }
+            else if(rolelist1.contains("Dental_View")){
+                dentalVisionRoleId = 6;
+            }
+            else if(rolelist1.contains("Vision_View")){
+                dentalVisionRoleId = 7;
+            }
+
+            for(String role : rolelist1) {
+                if(role.contains("DigitalBenSum")) {
+                    dbsId = 1;
+                }
+                if(role.contains("CORE")) {
+                    coreId = 1;
+                }
+            }
+
+            if((rolelist1.contains("CMID_Admin") )){
+                byofId = 31;
+            }
+            else if(rolelist1.contains("CMID_Editor")){
+                byofId = 32;
+            }
+            else if(rolelist1.contains("CMID_SuperUser")){
+                byofId = 33;
+            }
+            else if(rolelist1.contains("CMID_View")){
+                byofId = 34;
+            }
+
+
+
+
+            if (userService.checkRole(rolelist1)) {
+                userService.userOperation(msid, rolelist1, displayName, department, company, email);
+
+                pgAccessLogService.saveLog(msid, request);
+                CBBUsers user = pgAccessLogService.getUser(msid);
+                if (user != null) {
+                    HttpSession session = request.getSession(true);
+                    session.setMaxInactiveInterval((int) time / 1000);
+                    session.setAttribute(DBSSessionConstants.userId, user.getUserID());
+                    session.setAttribute(DBSSessionConstants.roleId, "" + user.getRoleID());
+
+					if (ifpRoleId != null) {
+						session.setAttribute("ifpRoleId", "" + ifpRoleId);
+					} else {
+						session.setAttribute("ifpRoleId", "");
+					}
+
+                    if (nonIfpRoleId != null) {
+                        session.setAttribute("nonIfpRoleId", "" + nonIfpRoleId);
+                    } else {
+                        session.setAttribute("nonIfpRoleId", "");
+                    }
+
+                    if(abbId != null) {
+                    	session.setAttribute("abbId", "" + abbId);
+                    }else {
+						session.setAttribute("abbId", "");
+					}
+
+					if (sbcRoleId != null) {
+						session.setAttribute("sbcRoleId", "" + sbcRoleId);
+					} else {
+						session.setAttribute("sbcRoleId", "");
+					}
+
+                    if (iceRoleId != null) {
+                        session.setAttribute("iceRoleId", "" + iceRoleId);
+                    } else {
+                        session.setAttribute("iceRoleId", "");
+                    }
+
+                    if (ifpCardRole != "") {
+                        session.setAttribute("ifpCardRole", "" + ifpCardRole);
+                    } else {
+                        session.setAttribute("ifpCardRole", "");
+                    }
+
+                    if (cdRoleId != null) {
+                        session.setAttribute("cdRoleId", "" + cdRoleId);
+                    } else {
+                        session.setAttribute("cdRoleId", "");
+                    }
+                    
+                    if (reportingId != null) {
+                        session.setAttribute("reportingId", "" + reportingId);
+                    } else {
+                        session.setAttribute("reportingId", "");
+                    }
+
+                    if (reportingId != null) {
+                        session.setAttribute("reportingId", "" + reportingId);
+                    } else {
+                        session.setAttribute("reportingId", "");
+                    }
+
+                    if (byofId != null) {
+                        session.setAttribute("byofId", "" + byofId);
+                    } else {
+                        session.setAttribute("byofId", "");
+                    }
+
+                    if(ifpCardUrl!=null){
+                        session.setAttribute("ifpCardUrl", ""+ifpCardUrl);
+                    }
+                    
+                    if(iceUrl!=null){
+                        session.setAttribute("iceUrl", ""+iceUrl);
+                        session.setAttribute("iceEnable", ""+iceEnable);
+                    }
+
+                    if(cdUrl!=null) {
+                        session.setAttribute("cdUrl", ""+cdUrl);
+                    } else {
+                        session.setAttribute("cdUrl", "");
+                    }
+
+                    if (cdByofUrl != null) {
+                        session.setAttribute("cdByofUrl", "" + cdByofUrl);
+                    } else {
+                        session.setAttribute("cdByofUrl", "");
+                    }
+
+                    if(byofUrl!=null) {
+                        session.setAttribute("byofUrl", ""+byofUrl);
+                        session.setAttribute("byofEnable", ""+byofEnable);
+                    }
+
+                    if(sbcUrl!=null) {
+                        session.setAttribute("sbcUrl", ""+sbcUrl);
+                        session.setAttribute("sbcEnable", ""+sbcEnable);
+                    }
+
+                    if(coreByofUrl!=null) {
+                        session.setAttribute("coreByofUrl", ""+coreByofUrl);
+                        session.setAttribute("coreByofEnable", ""+coreByofEnable);
+                    }
+
+                    if (dentalVisionRoleId != null) {
+                        session.setAttribute("dentalVisionRoleId", "" + dentalVisionRoleId);
+                    } else {
+                        session.setAttribute("dentalVisionRoleId", "");
+                    }
+
+                    if (coreId != null) {
+                        session.setAttribute("coreId", "" + coreId);
+                    } else {
+                        session.setAttribute("coreId", "");
+                    }
+
+                    if (dbsId != null) {
+                        session.setAttribute("dbsId", "" + dbsId);
+                    } else {
+                        session.setAttribute("dbsId", "");
+                    }
+                    
+                    session.setAttribute("rxAutomationEnable", "" + rxAutomationEnable);
+                    session.setAttribute("bctlvAutomation", "" + bctlvAutomation);
+                    session.setAttribute("cbbEnableDentalVision", "" + cbbEnableDentalVision);
+
+                    if(isValidId(msid)){
+                    session.setAttribute(SessionConstants.USER_NAME, PlanLibraryVulnerabilityUtils.validateUserForPingSSOSessionAttribute(msid));
+                    }
+                    session.setAttribute(SessionConstants.DISPLAY_NAME, user.getDisplayName());
+                    session.setAttribute(SessionConstants.USER_EMAIL, user.getEmail());
+                    if(isValidRefreshToken(response.getBody())) {
+                        session.setAttribute(SessionConstants.REFRESH_TOKEN, PlanLibraryVulnerabilityUtils.validateRefreshTokenForPingSSOSessionAttribute(response.getBody().getRefresh_token()));
+                    }
+                    session.setAttribute(SessionConstants.DEFAULT_BUSINESS, user.getDefaultBusiness());
+                    if(isValidAccessToken(response.getBody())) {
+                        session.setAttribute(SessionConstants.ACCESS_TOKEN, PlanLibraryVulnerabilityUtils.validateRefreshTokenForPingSSOSessionAttribute(response.getBody().getAccess_token()));
+                    }
+                    addTicGroup(session, rolelist);
+                }
+
+                logService.saveLoginEvent(msid, true);
+            } else {
+                logService.saveLoginEvent(msid, false);
+                return HttpStatus.BAD_REQUEST.value();
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return HttpStatus.BAD_REQUEST.value();
+        }
+        return HttpStatus.OK.value();
+    }
+
+    private boolean isValidId(String msid){
+        int maxLength = 100;
+        if(msid == null || msid.length() > maxLength){
+            return false;
+        }
+        String regex = "[a-zA-Z0-9]+";
+        if(!msid.matches(regex)){
+            return false;
+        }
+        return true;
+    }
+    private boolean isValidAccessToken(PingSSOResponse response){
+        return response.getAccess_token() != null;
+    }
+
+    private boolean isValidRefreshToken(PingSSOResponse response){
+        return response.getRefresh_token() != null;
+    }
+    private void addTicGroup(HttpSession session, ArrayList<String> rolelist) {
+        for (String groupId : rolelist) {
+            if (groupId != null && groupId.length() > 0 && groupId.startsWith("CN=Plan_Library_TiC")) {
+                String ticGroup = groupId.replace(",CN=Users,DC=ms,DC=ds,DC=uhc,DC=com", "").replace("CN=", "");
+                String value = TicUserGroups.getTicGroups().get(ticGroup);
+                session.setAttribute("ticSchedulerGroup", value);
+                session.setAttribute("ticUIGroup", 1);
+                session.setAttribute("env", env);
+                break;
+            }
+        }
+    }
+
+    @Override
+    public int ssorefreshOperation(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        String refreshToken = (String) session.getAttribute(SessionConstants.REFRESH_TOKEN);
+        if (refreshToken != null) {
+            try {
+
+                MultiValueMap<String, String> body = new LinkedMultiValueMap<String, String>();
+
+                body.add("grant_type", "refresh_token");
+                body.add("refresh_token", refreshToken);
+                body.add("client_id", pingSSOClientID);
+                body.add("client_secret", pingSSOClientSecret);
+                ResponseEntity<PingSSOResponse> response = restCallForAuthentication(body);
+
+                List<String> listGroup = new ArrayList<String>();
+
+                JSONObject object1 = convertDecode(response.getBody().getAccess_token());
+
+                String msid = object1.getString("msid");
+                //String givenName = object1.getString("given_name");
+                //String email = object1.getString("email");
+                // String company = "UHC";
+                // String department = "Optum Tech UHC Technology";
+
+                Date date = new Date(TimeUnit.SECONDS.toMillis(object1.getLong("exp")));
+
+                long time = date.getTime() - new Date().getTime();
+
+                logger.info("refresh token time : " + (time / 1000) / 60);
+
+                //userService.userOperation(msid, listGroup, givenName, department, company, email);
+
+                //authService.userAuthLogSuccess(msid, request);
+
+                pgAccessLogService.saveLog(msid, request);
+                CBBUsers user = pgAccessLogService.getUser(msid);
+                session = request.getSession(true);
+                session.setMaxInactiveInterval((int) time / 1000);
+                session.setAttribute(DBSSessionConstants.userId, user.getUserID());
+
+                if(isValidId(msid)){
+                    session.setAttribute(SessionConstants.USER_NAME, PlanLibraryVulnerabilityUtils.validateUserForPingSSOSessionAttribute(msid));
+                }
+                session.setAttribute(SessionConstants.REFRESH_TOKEN, PlanLibraryVulnerabilityUtils.validateRefreshTokenForPingSSOSessionAttribute(refreshToken));
+                if(isValidAccessToken(response.getBody())) {
+                    session.setAttribute(SessionConstants.ACCESS_TOKEN, PlanLibraryVulnerabilityUtils.validateRefreshTokenForPingSSOSessionAttribute(response.getBody().getAccess_token()));
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                return HttpStatus.BAD_REQUEST.value();
+            }
+
+            return HttpStatus.OK.value();
+        }
+        return 0;
+    }
+
+    private ResponseEntity<PingSSOResponse> restCallForAuthentication(MultiValueMap<String, String> body)
+            throws NoSuchAlgorithmException, KeyManagementException, KeyStoreException {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+        HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(body, headers);
+
+        TrustStrategy acceptingTrustStrategy = (X509Certificate[] chain, String authType) -> true;
+
+        SSLContext sslContext = org.apache.http.ssl.SSLContexts.custom().loadTrustMaterial(null, acceptingTrustStrategy)
+                .build();
+
+        SSLConnectionSocketFactory csf = new SSLConnectionSocketFactory(sslContext);
+
+        CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(csf).build();
+
+        HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
+
+        requestFactory.setHttpClient(httpClient);
+
+        ResponseEntity<PingSSOResponse> response = new RestTemplate(requestFactory).postForEntity(pingSSOUrl,
+                requestEntity, PingSSOResponse.class);
+        return response;
+    }
+
+    private JSONObject convertDecode(String jwtToken) throws JSONException {
+        String[] split_string = jwtToken.split("\\.");
+        String base64EncodedBody = split_string[1];
+        Decoder decoder = Base64.getDecoder();
+        byte[] bytes = decoder.decode(base64EncodedBody);
+        String decodedString = new String(bytes, UTF_8);
+
+        JSONObject jsonResponse = new JSONObject(decodedString);
+
+        return jsonResponse;
+    }
+
+}
