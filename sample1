@@ -1,32 +1,8 @@
-public Map<String, String> validateVision(Map<String, String> dataPointerMap, List<PortfolioBenefits> benefits ){
-		updateCoinsValue(dataPointerMap, benefits, "Pediatric Vision - Routine Vision Exam", "PedVisExam");
-		updateCoinsValue(dataPointerMap, benefits, "Pediatric Vision - Eyeglasses (Frames and Lenses)", "PedPrevLens");
-		updateCoinsValue(dataPointerMap, benefits, "Pediatric Vision - Eyeglasses (Frames and Lenses)", "PedPrevFramesT1");
-		updateCoinsValue(dataPointerMap, benefits, "Pediatric Vision - Eyeglasses (Frames and Lenses)", "PedPrevFramesT2");
-		updateCoinsValue(dataPointerMap, benefits, "Pediatric Vision - Eyeglasses (Frames and Lenses)", "PedPrevFramesT3");
-		updateCoinsValue(dataPointerMap, benefits, "Pediatric Vision - Eyeglasses (Frames and Lenses)", "PedPrevFramesT4");
-		updateCoinsValue(dataPointerMap, benefits, "Pediatric Vision - Eyeglasses (Frames and Lenses)", "PedPrevFramesT5");
-		updateCoinsValue(dataPointerMap, benefits, "Pediatric Vision - Contact Lenses", "PedPrevContacts");
-		updateCoinsValue(dataPointerMap, benefits, "Pediatric Vision - Contact Lenses", "MedNecPedContacts");
-		updateCoinsValueOON(dataPointerMap, benefits, "Pediatric Vision - Low Vision Testing", "OONLowVisionTesting");
-		updateCoinsValueOON(dataPointerMap, benefits, "Pediatric Vision - Low Vision Therapy", "OONLowVisionTherapy");
-		updateCoinsValue(dataPointerMap, benefits, "Adult Vision - Routine Vision Exam", "AdultExam");
-		updateCoinsValueOON(dataPointerMap, benefits, "Pediatric Vision - Routine Vision Exam", "OONPedExam");
-		updateCoinsValueOON(dataPointerMap, benefits, "Pediatric Vision - Eyeglasses (Frames and Lenses)", "OONSVLens");
-		updateCoinsValueOON(dataPointerMap, benefits, "Pediatric Vision - Eyeglasses (Frames and Lenses)", "OONBifocalLens");
-		updateCoinsValueOON(dataPointerMap, benefits, "Pediatric Vision - Eyeglasses (Frames and Lenses)", "OONTrifocal&LenticularLens");
-		updateCoinsValueOON(dataPointerMap, benefits, "Pediatric Vision - Eyeglasses (Frames and Lenses)", "OONFrame");
-		updateCoinsValueOON(dataPointerMap, benefits, "Pediatric Vision - Eyeglasses (Frames and Lenses)", "OONContact");
-		updateCoinsValueOON(dataPointerMap, benefits, "Pediatric Vision - Eyeglasses (Frames and Lenses)", "OONMedicallNecContacts");
-		updateCoinsValue(dataPointerMap, benefits, "Adult Vision - Retinal Screening", "AdultRetinalScreening");
-		updateCoinsValue(dataPointerMap, benefits, "Adult Vision - Eyeglass Lenses", "AdultLensesCopay");
-		updateCoinsValue(dataPointerMap, benefits, "Adult Vision - Frames (Tier 1)", "AdultFramesT1");
-		updateCoinsValue(dataPointerMap, benefits, "Adult Vision - Contact Lenses (Formulary)", "AdultContacts");
-		updateCoinsValue(dataPointerMap, benefits, "Adult Vision - Contacts Lenses (Non-Formulary)", "AdultContactsNon-Form");
-		updateCoinsValue(dataPointerMap, benefits, "Adult Vision - Scratch Guard", "AdultScratchGuard");
-		updateCoinsValue(dataPointerMap, benefits, "Adult Vision - Polycarbonate Lenses", "AdultPolyCarb");
-		return dataPointerMap;
-	}
+ <div class="col-2">
+                                                <div class="d-grid gap-2">
+                                                    <a href="downloadSPGChangeReport?batchId=' +batchId + '" id="exportButton" type="button" class="btn btn-outline-success">Export</a>
+                                                </div>
+                                            </div>
 
 
-can u create an enum file in my springboot project for this
+i have to download on click of export please fix this above code for dyanmic url
