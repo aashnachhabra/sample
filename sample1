@@ -1,8 +1,136 @@
- <div class="col-2">
-                                                <div class="d-grid gap-2">
-                                                    <a href="downloadSPGChangeReport?batchId=' +batchId + '" id="exportButton" type="button" class="btn btn-outline-success">Export</a>
-                                                </div>
-                                            </div>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+    <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+        <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+            <!doctype html>
+            <html>
+
+            <head>
+                <meta charset="utf-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+                <link rel="stylesheet" href="css/UHCcustom.css">
+                <link rel="stylesheet" href="css/bootstrap.css">
+                <link rel="stylesheet" href="css/css/fontawesome.min.css">
+                <link rel="stylesheet" href="css/css/brands.min.css">
+                <link rel="stylesheet" href="css/css/solid.min.css">
+                <link rel="stylesheet" href="css/loader.css">
+                <script src="js/app/spgReportBatchManagement.js"></script>
+                <script src="js/jquery-3.3.1.min.js"></script>
+                <script src="js/popper.min.js"></script>
+                <script src="js/UHCcustom.js"></script>
+                <script src="js/loader.js"></script>
+                <script src="js/bootstrap.min.js"></script>
+                <title>Plan Library</title>
+                <link rel="icon" href="assets/PlanBuilderFavIcon.png">
+                <script>
+                    $(function () {
+                        $('[data-toggle="tooltip"]').tooltip()
+                    })
+
+                </script>
+                <link rel="stylesheet" href="css/frappe-datatable.min.css">
+                <script src="js/handsontable/handsontable.full.min.js"></script>
+                <link rel="stylesheet" href="css/handsontable/handsontable.full.min.css" />
+            </head>
+
+            <body>
+                <%@include file="loader.jsp" %>
+                <%@include file="header.jsp"%>
+                    <div class="text-primary" style="margin: 2em;">
+                        <h1><i class="fa-solid fa-binoculars"></i> SPG Report Batch Details</h1>
+                        <h2>SPG Batch ID: ${batchId} </h2>
+                    </div>
+
+                        <div class="shadow-lg p-3 mb-5 bg-white rounded" style="margin: 2em;">
+                        <div class="tab-content" id="myTabContent">
+                            <!--start  table-->
+                            <div class="tab-pane fade active show" id="SPG" role="tabpanel" aria-labelledby="SPG-tab">
+                            <div class="row">
+                            <div class="col-10"></div>
+                                                                                                                                                                   
+                                 <c:if test="${empty spgReportDataList}">
+                                    <div><p class="text-center">No Records Found for SPG Batch</p></div>
+                                 </c:if>
+                            <c:if test="${batchStatus=='Ready for Review'}">
+                                <div class="col-10"></div>
+
+                                  <div class="col-1" id="acceptbtn">
+                                     <div class="d-grid gap-2">
+                                       <button class="btn btn-outline-success" type="button"  id ="accept"  onclick="acceptOrRejectSpgBatch(${batchId},'Accept')">
+                                       <i class="fa-regular fa-file-excel"></i> Accept</button>
+                                    </div>
+                                  </div>
+                                  <div class="col-1" id="rejectbtn">
+                                       <div class="d-grid gap-2">
+                                         <button class="btn btn-outline-danger" type="button"  id ="reject" onclick="acceptOrRejectSpgBatch(${batchId},'Reject')">
+                                         <i class="fa-regular fa-file-excel"></i> Reject</button>
+                                       </div>
+
+                                  </div>
+                                  <div class="col-10"></div>
+                                                                                                                                              <div class="col-2 mt-1">
+                                                                                                                                                  <div class="d-grid gap-2">
+                                                                                                                                                      <a href='downloadSPGChangeReport?batchId=${batchId}' id="exportReportButton" type="button" class="btn btn-outline-success">Export</a>
+                                                                                                                                                  </div>
+                                                                                                                                              </div>
+                                  </c:if>
+                            </div>
+                             <div class="row" style="padding-top: 1em;">
+                                   <div class="col">
+                                       <div id="spgReportTable"></div>
+                                   </div>
+
+                             </div>
+                            </div>
+                            <!--end  table-->
+
+                            </div>
+                        </div>
+                        <%@include file="footer.html"%>
+
+                    </div>
+                    <div style="position: fixed; top:1%; right:40%; z-index:1;" class="toast" data-autohide="false" id="updateStatusSuccess">
+            			    <div class="toast-header" style="position: relative;height: 40px;">
+            			        <strong class="mr-auto text-primary" id="updateStatusSuccessHeader"></strong>
+            			        <button type="button" style="position: absolute;right: 5%;" class="btn-close" data-dismiss="toast"></button>
+            			    </div>
+            	    <div class="toast-body" style="background-color: #E8E8E8" id="updateStatusSuccessMessage"></div>
+            </div>
 
 
-i have to download on click of export please fix this above code for dyanmic url
+            </body>
+                     <script>
+
+                            var spgReportData = [
+                                    <c:forEach items="${spgReportDataList}" var="spgReportObj">
+                                                    ["${spgReportObj.planCode}", "${spgReportObj.cocSeries}", "${spgReportObj.state}", "${spgReportObj.productFamily}",
+                                                    "${spgReportObj.changeType}", "${spgReportObj.benefitCategory}", "${spgReportObj.levelValue}", "${spgReportObj.tier}",
+                                                    "${spgReportObj.oldValue}", "${spgReportObj.newValue}", "${spgReportObj.dedOldValue}", "${spgReportObj.dedNewValue}",
+                                                    "${spgReportObj.coinsOldValue}", "${spgReportObj.coinsNewValue}", "${spgReportObj.copayOldValue}",
+                                                    "${spgReportObj.copayNewValue}", "${spgReportObj.podOldValue}", "${spgReportObj.podNewValue}",
+                                                    "${spgReportObj.minCopayOldValue}","${spgReportObj.minCopayNewValue}",
+                                                    "${spgReportObj.maxCopayOldValue}","${spgReportObj.maxCopayNewValue}"],
+                                                </c:forEach>
+                                            ];
+                                            const spgReportContainer = document.querySelector('#spgReportTable');
+
+                                            const spgReportHot = new Handsontable(spgReportContainer, {
+                                                data: spgReportData,
+                                                rowHeaders: false,
+                                                colHeaders: ['Plan Code', 'COC Series', 'State', 'Product Family', 'Change Type', 'Benefit Category', 'Level Value',
+                                                'Tier', 'Old Value', 'New Value', 'DED Old Value', 'DED New Value', 'Coins Old Value', 'Coins New Value', 'Copay Old Value',
+                                                 'Copay New Value', 'POD Old Value', 'POD New Value','Min Copay Old Value', 'Min Copay New Value',
+                                                 'Max Copay Old Value', 'Max Copay New Value'],
+                                                height: 'auto',
+                                                autoWrapRow: true,
+                                                autoWrapCol: true,
+                                                readOnly: true,
+                                                dropdownMenu: true,
+                                                filters: true,
+                                                licenseKey: '568da-e01fd-0b795-74d1d-4ba3c' // for non-commercial use only
+                                            });
+                    </script>
+
+            </html>
+
+
+here i wanna add the export div like i did for ready to review if table is not empty and status is not ready for review
