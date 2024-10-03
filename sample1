@@ -1,370 +1,45 @@
-var app = angular.module("planLibrary", []);
-app.controller("portfolioEditorController", function ($scope, $http, portfolioEditorValidationService, $timeout) {
-	$scope.isClone = false;
-	$scope.isCloneFlag = false;
-	$scope.clickHomeFlag = false;
-	$scope.clickLeaveBtn = false;
-	$scope.allPlansRequestBody = [];
-    $scope.allPlansParentChildMap = [];
-    $scope.allPlansportfolioEditorDDMapResponse = [];
-    $scope.planAssignmentIdEdit = null;
-    $scope.parentChildMap = null;
-    $scope.portfolioEditorDDMapResponse = null;
-    $scope.currentPrograms = "";
-    $scope.state = "";
-    $scope.cocSeries = "";
-    $scope.productFamily = "";
-    $scope.validateCascade = false;
-    $scope.activedCreateVariant = false;
-    $scope.requestBodyCopy = [];
-    $scope.requestBody = {planDetails: {}, accumulators: {}, programs: [], benefits: [], pharmacyDetails: {}};
-    $scope.activeTabIndex = 0;
-    $scope.requestBody.planDetails = {
-        planType: "Medical",
-        cocSeries: parseInt($("#cocSeriesNew").val()),
-        organization: "Individual Exchange",
-        segment: "SB",
-        product: "Individual Exchange",
-        firstTierUtilization: "100%",
-        secondTierUtilization: "N/A",
-        childOnlyOffering: "Adult and Child Only"
-    };
-    $scope.requestBody.accumulators = {
-    	outOfPocketType	: "Embedded"
-    };
+<div class="shadow-lg p-3 mb-5 bg-white rounded" style="margin: 2em;">
+								<input type="hidden" name="portfolioDDMaps" id="portfolioddId" value="${portfolioDD}">
+								<div class="row serchfilters">
+									<div class="col">
+										<div class="form-floating">
+											<input type="text" class="form-control" name="planCode" id="planCode"
+												placeholder="Plan Code">
+											<label for="planCode" class="form-label">Plan Code</label>
+										</div>
+									</div>
+									<div class="col">
+										<div class="form-floating">
+											<input type="text" class="form-control" name="planName" id="planName"
+												placeholder="Plan Name">
+											<label for="planName" class="form-label">Plan Name</label>
+										</div>
+									</div>
+									<div class="col">
+										<div class="form-floating">
+											<select id="stateName" class="form-control" multiple="multiple"
+												onchange="return multiselectChange(event)">
+												<datalist id="states">
+													<c:forEach var="state" items="${portfolioDD.stateMap}">
+														<option id="${state.key}" value="${state.key}">${state.key}
+														</option>
+													</c:forEach>
+												</datalist>
+											</select>
+										</div>
+									</div>
+									<div class="col">
+										<div class="form-floating">
+											<select id="cocSeries" class="form-control" multiple="multiple"
+												onchange="return multiselectChange(event),getPortfolioIfpDropdowns()">
+												<datalist id="COCs">
+													<c:forEach var="coc" items="${portfolioDD.cocSeriesMap}">
+														<option id="${coc.key}" value="${coc.key}">${coc.value}</option>
+													</c:forEach>
+												</datalist>
+											</select>
+										</div>
+									</div>
+								</div>
 
-    $scope.requestBody.pharmacyDetails = { "prescriptionDrug": "", "pharmacyNetwork": "", "mailOrders": [{ "retailCopayMultiplier": "", "copayMultiplier": "","retailDaySupply": "", "daySupply": "", "freeInsulin" : "", "type": "Preferred" }, { "retailCopayMultiplier": "", "copayMultiplier": "", "retailDaySupply": "90", "daySupply": "90", "freeInsulin" : "", "type": "Network" }], "productTiers": [{ "tier": "Tier 1", "description": "", "tiers": [{"isCovered": "","copay": "","coins": "","dedApplies": "","minCopay": "","maxCopay": "","type": "Preferred" }, {"isCovered": "","copay": "","coins": "","dedApplies": "","minCopay": "","maxCopay": "","type": "Network" }] }, { "tier": "Tier 2", "description": "", "tiers": [{"isCovered": "","copay": "","coins": "","dedApplies": "","minCopay": "","maxCopay": "","type": "Preferred" }, {"isCovered": "","copay": "","coins": "","dedApplies": "","minCopay": "","maxCopay": "","type": "Network" }] }, { "tier": "Tier 3", "description": "", "tiers": [{"isCovered": "","copay": "","coins": "","dedApplies": "","minCopay": "","maxCopay": "","type": "Preferred" }, {"isCovered": "","copay": "","coins": "","dedApplies": "","minCopay": "","maxCopay": "","type": "Network" }] }, { "tier": "Tier 4", "description": "", "tiers": [{"isCovered": "","copay": "","coins": "","dedApplies": "","minCopay": "","maxCopay": "","type": "Preferred" }, {"isCovered": "","copay": "","coins": "","dedApplies": "","minCopay": "","maxCopay": "","type": "Network" }] }, { "tier": "Tier 5", "description": "", "tiers": [{"isCovered": "","copay": "","coins": "","dedApplies": "","minCopay": "","maxCopay": "","type": "Preferred" }, {"isCovered": "","copay": "","coins": "","dedApplies": "","minCopay": "","maxCopay": "","type": "Network" }] }, { "tier": "Tier 6", "description": "", "tiers": [{"isCovered": "","copay": "","coins": "","dedApplies": "","minCopay": "","maxCopay": "","type": "Preferred" }, {"isCovered": "","copay": "","coins": "","dedApplies": "","minCopay": "","maxCopay": "","type": "Network" }]}]}
-    $scope.requestBody.pharmacyDetails.productTiers= [{ "tier": "Tier 1", "description": "", "tiers": [{"isCovered": "","copay": "","coins": "","dedApplies": "","minCopay": "","maxCopay": "","type": "Preferred" }, {"isCovered": "","copay": "","coins": "","dedApplies": "","minCopay": "","maxCopay": "","type": "Network" }] }, { "tier": "Tier 2", "description": "", "tiers": [{"isCovered": "","copay": "","coins": "","dedApplies": "","minCopay": "","maxCopay": "","type": "Preferred" }, {"isCovered": "","copay": "","coins": "","dedApplies": "","minCopay": "","maxCopay": "","type": "Network" }] }, { "tier": "Tier 3", "description": "", "tiers": [{"isCovered": "","copay": "","coins": "","dedApplies": "","minCopay": "","maxCopay": "","type": "Preferred" }, {"isCovered": "","copay": "","coins": "","dedApplies": "","minCopay": "","maxCopay": "","type": "Network" }] }, { "tier": "Tier 4", "description": "", "tiers": [{"isCovered": "","copay": "","coins": "","dedApplies": "","minCopay": "","maxCopay": "","type": "Preferred" }, {"isCovered": "","copay": "","coins": "","dedApplies": "","minCopay": "","maxCopay": "","type": "Network" }] }, { "tier": "Tier 5", "description": "", "tiers": [{"isCovered": "","copay": "","coins": "","dedApplies": "","minCopay": "","maxCopay": "","type": "Preferred" }, {"isCovered": "","copay": "","coins": "","dedApplies": "","minCopay": "","maxCopay": "","type": "Network" }] }, { "tier": "Tier 6", "description": "", "tiers": [{"isCovered": "","copay": "","coins": "","dedApplies": "","minCopay": "","maxCopay": "","type": "Preferred" }, {"isCovered": "","copay": "","coins": "","dedApplies": "","minCopay": "","maxCopay": "","type": "Network" }]}];
-    $scope.requestBody.pharmacyDetails.mailOrders=[{ "retailCopayMultiplier": "", "copayMultiplier": "","retailDaySupply": "", "daySupply": "", "type": "Preferred" }, { "retailCopayMultiplier": "", "copayMultiplier": "", "retailDaySupply": "90", "daySupply": "90", "type": "Network" }];
-
-    $scope.planCount = new Array(parseInt($("#planCount").val()));
-    $scope.cocSeriesNew = parseInt($("#cocSeriesNew").val());
-
-    if($scope.cocSeriesNew > 0){
-        $http.get("portfolioEditorDDMapResponse/"+$scope.cocSeriesNew).then(function (response) {
-        if (response.status == 200) {
-        for (var i = 0; i < $scope.planCount.length; i++) {
-             $scope.allPlansportfolioEditorDDMapResponse[i] = response.data;
-         }
-            $scope.portfolioEditorDDMapResponse = response.data;
-
-        }
-    }, function () {
-
-        window.alert("wrong input data doesn't exist");
-    });
-    }
-
-    var preserveInd = $scope.activeTabIndex;
-
-    $scope.switchTab = function (index) {
-
-        if ($scope.portfolioEditorName.$dirty) {
-                $scope.confirmationDialogConfig = {
-                    title: "Warning",
-                    message: "Changes you made may not be saved. Are you sure you want to Switch?",
-                    cancel: "Cancel",
-                    buttons: [{
-                        label: "Yes",
-                        action: "setPlanData",
-                        index: index,
-                        preserveInd: preserveInd
-                    }]
-                };
-                $("#AlertBoxModal").modal("toggle");
-        } else {
-
-            $scope.setPlanData(index);
-            $scope.changeTheStatusOfCreateVariantBtn(index);
-        }
-    };
-
-    $scope.executeDialogAction = function(action,index,preserveInd) {
-        if(typeof $scope[action] === "function") {
-        	var preserveAssignmentId = $scope.requestBody.planAssignmentID;
-            $scope[action](index);
-            $("#AlertBoxModal").modal("toggle");
-            if($scope.planAssignmentIdEdit) {
-                //Edit
-
-                $scope.allPlansRequestBody[preserveInd] = $scope.initEditAllPlansRequestBody[preserveInd];
-                $scope.allPlansParentChildMap[preserveInd] = $scope.initEditAllPlansParentChildMap[preserveInd];
-                $scope.allPlansportfolioEditorDDMapResponse[preserveInd] = $scope.initEditallPlansportfolioEditorDDMapResponse[preserveInd];
-            } else if(!preserveAssignmentId){
-                //create
-            	var planRequestBody = {planDetails: {}, accumulators: {}, programs: [], benefits: [], pharmacyDetails: {}};
-        		planRequestBody.planDetails = {
-                        planType: "Medical",
-                        cocSeries: parseInt($("#cocSeriesNew").val()),
-                        organization: "Individual Exchange",
-                        segment: "SB",
-                        product: "Individual Exchange",
-                        firstTierUtilization: "100%",
-                        secondTierUtilization: "N/A",
-                        childOnlyOffering: "Adult and Child Only"
-                    };
-                planRequestBody.pharmacyDetails = { "prescriptionDrug": "", "pharmacyNetwork": "", "mailOrders": [{ "retailCopayMultiplier":"", "copayMultiplier": "","retailDaySupply": "", "daySupply": "", "type": "Preferred" }, { "retailCopayMultiplier":"", "copayMultiplier": "", "retailDaySupply": "90", "daySupply": "90", "type": "Network" }], "productTiers": [{ "tier": "Tier 1", "description": "", "tiers": [{"isCovered": "","copay": "","coins": "","dedApplies": "","minCopay": "","maxCopay": "","type": "Preferred" }, {"isCovered": "","copay": "","coins": "","dedApplies": "","minCopay": "","maxCopay": "","type": "Network" }] }, { "tier": "Tier 2", "description": "", "tiers": [{"isCovered": "","copay": "","coins": "","dedApplies": "","minCopay": "","maxCopay": "","type": "Preferred" }, {"isCovered": "","copay": "","coins": "","dedApplies": "","minCopay": "","maxCopay": "","type": "Network" }] }, { "tier": "Tier 3", "description": "", "tiers": [{"isCovered": "","copay": "","coins": "","dedApplies": "","minCopay": "","maxCopay": "","type": "Preferred" }, {"isCovered": "","copay": "","coins": "","dedApplies": "","minCopay": "","maxCopay": "","type": "Network" }] }, { "tier": "Tier 4", "description": "", "tiers": [{"isCovered": "","copay": "","coins": "","dedApplies": "","minCopay": "","maxCopay": "","type": "Preferred" }, {"isCovered": "","copay": "","coins": "","dedApplies": "","minCopay": "","maxCopay": "","type": "Network" }] }, { "tier": "Tier 5", "description": "", "tiers": [{"isCovered": "","copay": "","coins": "","dedApplies": "","minCopay": "","maxCopay": "","type": "Preferred" }, {"isCovered": "","copay": "","coins": "","dedApplies": "","minCopay": "","maxCopay": "","type": "Network" }] }, { "tier": "Tier 6", "description": "", "tiers": [{"isCovered": "","copay": "","coins": "","dedApplies": "","minCopay": "","maxCopay": "","type": "Preferred" }, {"isCovered": "","copay": "","coins": "","dedApplies": "","minCopay": "","maxCopay": "","type": "Network" }]}]};
-
-                $scope.allPlansRequestBody[preserveInd] = planRequestBody;
-                $scope.allPlansParentChildMap[preserveInd] = null;
-            }
-            $scope.portfolioEditorName.$setPristine();
-            $scope.portfolioEditorName.$setUntouched();
-        }
-    };
-
-    $scope.setPlanData=function(index) {
-        preserveInd = index;
-        $scope.setCurrentTab(index);
-        portfolioEditorValidationService.removeValidation();
-        $scope.requestBody = $scope.allPlansRequestBody[index];
-        $scope.requestBodyCopy.push(angular.copy($scope.requestBody));
-        $scope.parentChildMap = $scope.allPlansParentChildMap[index];
-        $scope.portfolioEditorDDMapResponse = $scope.allPlansportfolioEditorDDMapResponse[index];
-        $scope.activeTabIndex = index;
-        $scope.state =  $scope.requestBody.planDetails.stateAbbr;
-        $scope.cocSeries =  $scope.requestBody.planDetails.cocSeries;
-        $scope.productFamily =  $scope.requestBody.planDetails.standard;
-        if($scope.requestBody.planDetails.planCode != null && $scope.requestBody.planDetails.planCode.indexOf("_CLONE") !== -1){
-    		$scope.isCloneFlag = true;
-    	}
-    }
-
-    $scope.validateBenefitCategory = function(errorBcs, bc) {
-        return errorBcs.includes(bc);
-    }
-
-    $scope.productFamilyInOptions =  function(productFamily) {
-    	for(standard in $scope.portfolioEditorDDMapResponse.standardMap){
-    		if($scope.portfolioEditorDDMapResponse.standardMap.hasOwnProperty(standard)
-    					&& standard == productFamily){
-    			return true;
-    		}
-    	}
-    	return false;
-    }
-
-    $scope.setCurrentTab=function(currentIndex) {
-        $("#tab_"+currentIndex).tab("show");
-        $("#AlertBoxModal").modal("hide");
-    }
-
-    if ($scope.planCount.length == 0) {
-    	$scope.currentPrograms = "Yes";
-        $scope.dataPayloadID = $("#dataPayloadID").val();
-        $scope.planAssignmentIdEdit = $("#planAssignmentIdEdit").val().split(",");
-        if ($scope.dataPayloadID != null && $scope.dataPayloadID != "") {
-            var validationMessage = {};
-            $http.get("validationStatus/"+$scope.dataPayloadID).then(function (response) {
-                if (response.status == 200) {
-                    var validationStatus = response.data;
-                    for(var i = 0; i < validationStatus.length; i++) {
-                        if ('ailure' === validationStatus[i].dataValidation) {
-                            for(var j=0; j < validationStatus[i].dataValidationMessage.length; j++) {
-                                for(var k=0; k < validationStatus[i].dataValidationMessage[j].childValidationMessage.length; k++) {
-                                    for (var l=0; l < validationStatus[i].dataValidationMessage[j].childValidationMessage[k].fieldValidationMessage.length; l++) {
-                                        var errorObject = validationStatus[i].dataValidationMessage[j].childValidationMessage[k];
-                                        if (errorObject.fieldValidationMessage[l].tierNumber) {
-                                            var numberValue = errorObject.fieldValidationMessage[l].tierNumber;
-                                            var tier = 'tier'.concat(numberValue);
-                                            validationMessage[tier.concat(errorObject.fieldValidationMessage[l].fieldName)] = errorObject.ruleDescription;
-                                            if (validationMessage[tier.concat(errorObject.fieldValidationMessage[l].fieldName).concat('benefitCategory')] && errorObject.fieldValidationMessage[l].benefitCategory) {
-                                                validationMessage[tier.concat(errorObject.fieldValidationMessage[l].fieldName).concat('benefitCategory')] = validationMessage[tier.concat(errorObject.fieldValidationMessage[l].fieldName).concat('benefitCategory')] + ';' + errorObject.fieldValidationMessage[l].benefitCategory;
-                                            } else {
-                                                validationMessage[tier.concat(errorObject.fieldValidationMessage[l].fieldName).concat('benefitCategory')] = errorObject.fieldValidationMessage[l].benefitCategory;
-                                            }
-                                        } else {
-                                            validationMessage[errorObject.fieldValidationMessage[l].fieldName] = errorObject.ruleDescription;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                $scope.validationMessage = validationMessage;
-            }, function () {
-                window.alert("wrong input data doesn't exist");
-            });
-        }
-
-        $http.post("getPlanDetailsforEdit", $scope.planAssignmentIdEdit).then(function (response) {
-            if (response.status == 200) {
-                var plPortfolioData = [];
-                var plParentBenefitMap = [];
-                var sourceConfigurations = [];
-                var plEditDDResponseMap = [];
-                for(var i = 0; i < response.data.length; i++) {
-                    if (response.data[i].plPortfolioMgmtCollection.pharmacyDetails.productTiers == null) {
-                        response.data[i].plPortfolioMgmtCollection.pharmacyDetails.productTiers = $scope.requestBody.pharmacyDetails.productTiers;
-                    }
-                    if (response.data[i].plPortfolioMgmtCollection.pharmacyDetails.mailOrders == null) {
-                        response.data[i].plPortfolioMgmtCollection.pharmacyDetails.mailOrders = $scope.requestBody.pharmacyDetails.mailOrders;
-                    }
-                    plPortfolioData.push(response.data[i].plPortfolioMgmtCollection);
-                    plParentBenefitMap.push(response.data[i].parentChildMap);
-
-                    plEditDDResponseMap.push(response.data[i].portfolioEditorDDMapResponse);
-                    if (response.data[i].sourceConfigurations != null) {
-                        sourceConfigurations = response.data[i].sourceConfigurations;
-                    }
-                }
-                $scope.allPlansRequestBody = plPortfolioData;
-                $scope.allPlansParentChildMap = plParentBenefitMap;
-                $scope.initEditAllPlansRequestBody =plPortfolioData;
-                $scope.initEditAllPlansParentChildMap =plPortfolioData;
-                $scope.initEditallPlansportfolioEditorDDMapResponse = plEditDDResponseMap;
-                $scope.sourceConfigurations = sourceConfigurations;
-                $scope.allPlansportfolioEditorDDMapResponse = plEditDDResponseMap;
-
-                $scope.setPlanData(0);
-                $scope.setPlanCodeToTabs($scope.allPlansRequestBody);
-                $scope.changeTheStatusOfCreateVariantBtn(0);
-            }
-        }, function () {
-            window.alert("wrong input data doesn't exist");
-        });
-    } else {
-
-    	$scope.currentPrograms = "No";
-
-        for (var i = 0; i < $scope.planCount.length; i++) {
-            $scope.allPlansRequestBody.push(angular.copy($scope.requestBody));
-            $scope.allPlansParentChildMap.push(angular.copy($scope.parentChildMap));
-            $scope.allPlansportfolioEditorDDMapResponse.push(angular.copy($scope.portfolioEditorDDMapResponse));
-        }
-        $scope.setPlanData(0);
-    }
-
-    $scope.setPlanCodeToTabs = function (allPlans) {
-        if (allPlans != null) {
-            for (var i = 0; i < allPlans.length; i++) {
-
-            	if(allPlans[i].planDetails.cocSeries != undefined && allPlans[i].planDetails.planCode != undefined){
-            		$scope.planCount.push(allPlans[i].planDetails.cocSeries + " " + allPlans[i].planDetails.planCode);
-            	}else{
-            		$scope.planCount.push("Plan " + (i + 1));
-            	}
-            }
-        }
-    }
-
-    $scope.openConfirmClearModal = function () {
-    	$("#clearCfrmBoxModal").modal("toggle");
-    }
-
-    $scope.openValidateModal = function () {
-        $("#validateDataLabel").modal("toggle");
-    }
-
-    $scope.sendToValidate = function () {
-        let sourceConfigId = '';
-        $http.get('source-config-id?dataStructureTitle='+"PL_Portfolio_Management_New").then(function (response) {
-            if (response.status == 200) {
-                sourceConfigId = response.data;
-                let requestBody = $scope.requestBody;
-                requestBody.sourceConfigId = sourceConfigId;
-
-                $http.post('ifpPublishPlans', angular.toJson(requestBody)).then(function (res) {
-                    console.log(res);
-                        if(res.data.validateMsg == 'Validated') {
-                            document.getElementById("ValidateFailureMessage").innerHTML = "Plan has been already validated"
-                            $("#validateErrorModal").modal("toggle");
-                        } else if (res.data.validateMsg == 'Success') {
-                            document.getElementById("SaveSuccessMessage").innerHTML = "Plan submitted successfully. An email will be sent once the validation is complete.";
-                            $("#sucessBoxModal").modal("toggle");
-                        } else if(res.data.validateMsg == 'Failed') {
-                            document.getElementById("ValidateFailureMessage").innerHTML = "Failed to submit the selected Plan(s) for validation. Please try again later.";
-                            $("#validateErrorModal").modal("toggle");
-                        }
-                    }, function () {
-                    window.alert("wrong input data doesn't exist");
-                });
-            }
-        }, function () {
-            window.alert("wrong input data doesn't exist");
-        });
-
-    }
-
-    $scope.clearPlan = function () {
-    	var planAssignmentID = null;
-    	var version = null;
-    	var id = null;
-    	if($scope.requestBody.planAssignmentID != undefined){
-    		planAssignmentID = $scope.requestBody.planAssignmentID;
-    		version = $scope.requestBody.version;
-    		id = $scope.requestBody.id;
-    	}
-    	$scope.requestBody = {planDetails: {}, accumulators: {}, programs: [], benefits: [], pharmacyDetails: {}};
-        $scope.requestBody.planDetails = {
-            planType: "Medical",
-            organization: "Individual Exchange",
-            segment: "SB",
-            product: "Individual Exchange",
-            firstTierUtilization: "100%",
-            secondTierUtilization: "N/A",
-            childOnlyOffering: "Adult and Child Only"
-        };
-        $scope.requestBody.pharmacyDetails = { "prescriptionDrug": "", "pharmacyNetwork": "", "mailOrders": [{ "retailCopayMultiplier":"", "copayMultiplier": "","retailDaySupply": "", "daySupply": "", "type": "Preferred" }, { "retailCopayMultiplier":"", "copayMultiplier": "", "retailDaySupply": "90", "daySupply": "90", "type": "Network" }], "productTiers": [{ "tier": "Tier 1", "description": "", "tiers": [{"isCovered": "","copay": "","coins": "","dedApplies": "","minCopay": "","maxCopay": "","type": "Preferred" }, {"isCovered": "","copay": "","coins": "","dedApplies": "","minCopay": "","maxCopay": "","type": "Network" }] }, { "tier": "Tier 2", "description": "", "tiers": [{"isCovered": "","copay": "","coins": "","dedApplies": "","minCopay": "","maxCopay": "","type": "Preferred" }, {"isCovered": "","copay": "","coins": "","dedApplies": "","minCopay": "","maxCopay": "","type": "Network" }] }, { "tier": "Tier 3", "description": "", "tiers": [{"isCovered": "","copay": "","coins": "","dedApplies": "","minCopay": "","maxCopay": "","type": "Preferred" }, {"isCovered": "","copay": "","coins": "","dedApplies": "","minCopay": "","maxCopay": "","type": "Network" }] }, { "tier": "Tier 4", "description": "", "tiers": [{"isCovered": "","copay": "","coins": "","dedApplies": "","minCopay": "","maxCopay": "","type": "Preferred" }, {"isCovered": "","copay": "","coins": "","dedApplies": "","minCopay": "","maxCopay": "","type": "Network" }] }, { "tier": "Tier 5", "description": "", "tiers": [{"isCovered": "","copay": "","coins": "","dedApplies": "","minCopay": "","maxCopay": "","type": "Preferred" }, {"isCovered": "","copay": "","coins": "","dedApplies": "","minCopay": "","maxCopay": "","type": "Network" }] }, { "tier": "Tier 6", "description": "", "tiers": [{"isCovered": "","copay": "","coins": "","dedApplies": "","minCopay": "","maxCopay": "","type": "Preferred" }, {"isCovered": "","copay": "","coins": "","dedApplies": "","minCopay": "","maxCopay": "","type": "Network" }]}]};
-        if(planAssignmentID != null){
-         	$scope.requestBody.planAssignmentID = planAssignmentID;
-         	$scope.requestBody.version = version;
-         	$scope.requestBody.id = id;
-    	}
-        $("#clearCfrmBoxModal").modal("hide");
-        $scope.requestBody.planAssignmentID = null;
-    }
-
-    $scope.openConfirmCloneModal = function () {
-    	 $scope.requestBody.cocSeriesNew = undefined ;
-    	 $scope.countCloneCocChecked = function(){
-    	        var count = 0;
-
-    	       if($scope.requestBody.cocSeriesNew  != undefined ){
-
-    	    	   count= count+1
-    	       }
-    	        return count;
-    	    }
-    	 $scope.clearCloneCocChecked = function(){
-
- 	       $scope.requestBody.cocSeriesNew = undefined ;
-
- 	 	    }
-
-    	$("#cloneCfrmBoxModal").modal("toggle");
-    }
-
-
-  $scope.clonePlan = function () {
-	  $scope.cocSeriesNew = $scope.requestBody.cocSeriesNew;
-
-	    if($scope.cocSeriesNew > 0){
-	        $http.get("portfolioEditorDDMapResponse/"+$scope.cocSeriesNew).then(function (response) {
-	        if (response.status == 200) {
-	            $scope.portfolioEditorDDMapResponse = response.data;
-
-	        }
-	    }, function () {
-
-	        window.alert("wrong input data doesn't exist");
-	    });
-	    }
-	  $scope.planCount = [];
-	  $scope.clonePlansRequestBody = [];
-	  $scope.clonePlansRequestBody.push(angular.copy($scope.requestBody));
-      $scope.clonePlansRequestBody[0].planAssignmentID = null;
-	  $scope.clonePlansRequestBody[0].id = null;
-	  $scope.clonePlansRequestBody[0].version = null;
-      $scope.clonePlansRequestBody[0].planDetails.planCode = $scope.clonePlansRequestBody[0].planDetails.planCode+"_CLONE";
-      $scope.clonePlansRequestBody[0].planDetails.cocSeries = $scope.requestBody.cocSeriesNew;
-      $scope.allPlansRequestBody.push(...$scope.clonePlansRequestBody);
-      $scope.allPlansportfolioEditorDDMapResponse.push(angular.copy($scope.portfolioEditorDDMapResponse));
-      $scope.setPlanCodeToTabs($scope.allPlansRequestBody);
-      $scope.isCloneFlag = true;
-      $("#cloneCfrmBoxModal").modal("hide");
-      $scope.switchTab ($scope.allPlansRequestBody.length-1);
-
-    }
-entire js file how do populate the dropdowns in jsp and js
+this is a code snippet from jsp file i want to have the same coc series dropdown as above code inside a modal with id cloneCfrmBoxModal. it should be a warning modal and in body should have text Please select a COC Series Value and confirm that you'd like to Clone the selected pla and below that should be that coc series dropdown and a footer which has 2 select options confirm or cancel
