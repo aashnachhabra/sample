@@ -1,45 +1,21 @@
-<div class="shadow-lg p-3 mb-5 bg-white rounded" style="margin: 2em;">
-								<input type="hidden" name="portfolioDDMaps" id="portfolioddId" value="${portfolioDD}">
-								<div class="row serchfilters">
-									<div class="col">
-										<div class="form-floating">
-											<input type="text" class="form-control" name="planCode" id="planCode"
-												placeholder="Plan Code">
-											<label for="planCode" class="form-label">Plan Code</label>
-										</div>
-									</div>
-									<div class="col">
-										<div class="form-floating">
-											<input type="text" class="form-control" name="planName" id="planName"
-												placeholder="Plan Name">
-											<label for="planName" class="form-label">Plan Name</label>
-										</div>
-									</div>
-									<div class="col">
-										<div class="form-floating">
-											<select id="stateName" class="form-control" multiple="multiple"
-												onchange="return multiselectChange(event)">
-												<datalist id="states">
-													<c:forEach var="state" items="${portfolioDD.stateMap}">
-														<option id="${state.key}" value="${state.key}">${state.key}
-														</option>
-													</c:forEach>
-												</datalist>
-											</select>
-										</div>
-									</div>
-									<div class="col">
-										<div class="form-floating">
-											<select id="cocSeries" class="form-control" multiple="multiple"
-												onchange="return multiselectChange(event),getPortfolioIfpDropdowns()">
-												<datalist id="COCs">
-													<c:forEach var="coc" items="${portfolioDD.cocSeriesMap}">
-														<option id="${coc.key}" value="${coc.key}">${coc.value}</option>
-													</c:forEach>
-												</datalist>
-											</select>
-										</div>
-									</div>
-								</div>
+    myHeaders.append("Content-Type", "application/json");
+        
+	    $('#planAssignmentIdView').val(portfolioAssignmentArray.toString());
+	    localStorage.setItem('planAssignmentIdView',portfolioAssignmentArray.toString());
+This stores sensitive data returned by an access to plapi  as clear text.
+This stores sensitive data returned by an access to plapi as clear text.
+CodeQL 
+	   
+	    var form = angular.element(document.querySelector('#portfolioEditorView'));
+	    form.attr("onsubmit", "window.open('about:blank','./portfolioViewEditor','')");
+Rule
+Tool
+CodeQL
+Rule ID
+js/clear-text-storage-of-sensitive-data
+Query
+View source
+Description
+Sensitive information that is stored unencrypted is accessible to an attacker who gains access to the storage. This is particularly important for cookies, which are stored on the machine of the end-user.
 
-this is a code snippet from jsp file i want to have the same coc series dropdown as above code inside a modal with id cloneCfrmBoxModal. it should be a warning modal and in body should have text Please select a COC Series Value and confirm that you'd like to Clone the selected pla and below that should be that coc series dropdown and a footer which has 2 select options confirm or cancel
+please fix this vulnerability
