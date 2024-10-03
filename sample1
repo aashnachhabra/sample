@@ -51,4 +51,4 @@ function openConfirmCloneModal()
 }
 
 
-can u make these compatible for angular ts format with ajax call in api for get
+can u make these compatible for jsp frontend with ajax call in api for get do not use scope and all
