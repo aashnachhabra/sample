@@ -1,38 +1,3 @@
-    <div class="modal fade" id="cloneCfrmBoxModal" tabindex="-1"
-         role="dialog" aria-labelledby="cloneCfrmBoxModalLabel"
-         aria-idden="true">
-        <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5>
-							<span id="lblWarnTitle" class="modal-title text-danger">
-								Warning </span>
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"
-                            aria-label="Close" ng-click="clearCloneCocChecked()" ></button>
-                </div>
-                <div class="modal-body">Please select a COC Series Value and confirm that you'd like to Clone the selected plan</div>
-                      <div>                    
-                            <select class="form-select" ng-model="requestBody.cocSeriesNew" id="cocSeriesNew"
-                       				 name="cocSeriesNew" >
-                    <option value="">Select...</option>
-                    <option
-                            ng-repeat="(key, value) in portfolioEditorDDMapResponse.cocSeriesMap | objectByReverseOrder"
-                            ng-selected="requestBody.cocSeriesNew == value" ng-value="{{value}}">{{value}}
-                    </option>
-                </select>
-                        </div>
-                <div class="modal-footer">
-                    <input type="submit" value="Cancel" id="deleteClose"
-                           class="btn btn-outline-danger" data-bs-dismiss="modal"
-                           ng-disabled="countCloneCocChecked() == 0"  ng-click="clearCloneCocChecked()" autocomplete="off">
-                    <button type="button" class="btn btn-outline-primary"
-                            id="cloneConfirm" ng-disabled="countCloneCocChecked() == 0" ng-click="clonePlan()">Confirm</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
 var app = angular.module("planLibrary", []);
 app.controller("portfolioEditorController", function ($scope, $http, portfolioEditorValidationService, $timeout) {
 	$scope.isClone = false;
@@ -402,4 +367,4 @@ app.controller("portfolioEditorController", function ($scope, $http, portfolioEd
       $scope.switchTab ($scope.allPlansRequestBody.length-1);
 
     }
-this is js and jsp files now i want to create similar function and jsp using jsp and not angular and function should be wihtout scope how do i create a similar clone and clone modal dropdown functionality
+entire js file how do populate the dropdowns in jsp and js
