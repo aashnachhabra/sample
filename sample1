@@ -1,21 +1,24 @@
-    myHeaders.append("Content-Type", "application/json");
+$scope.OpenViewEditor = function() {
+		
+		let portfolioAssignmentArray = [];
+	    
+	    if($scope.requestBody.planAssignmentID != null){
+	    	portfolioAssignmentArray.push($scope.requestBody.planAssignmentID);
+	    }
+	    
+	    var myHeaders = new Headers();
+	    myHeaders.append("Content-Type", "application/json");
         
 	    $('#planAssignmentIdView').val(portfolioAssignmentArray.toString());
 	    localStorage.setItem('planAssignmentIdView',portfolioAssignmentArray.toString());
-This stores sensitive data returned by an access to plapi  as clear text.
-This stores sensitive data returned by an access to plapi as clear text.
-CodeQL 
 	   
 	    var form = angular.element(document.querySelector('#portfolioEditorView'));
 	    form.attr("onsubmit", "window.open('about:blank','./portfolioViewEditor','')");
-Rule
-Tool
-CodeQL
-Rule ID
-js/clear-text-storage-of-sensitive-data
-Query
-View source
-Description
-Sensitive information that is stored unencrypted is accessible to an attacker who gains access to the storage. This is particularly important for cookies, which are stored on the machine of the end-user.
+	    form.attr("target", "./portfolioViewEditor");
+         $timeout(function() {
+	    	form.submit();
+        }, 0, false);
+	    
+	}
 
-please fix this vulnerability
+this function is causing security vulnerability at portfolioAssignmentArray.toString() since it is exposing information. please suggest fix for this without disrupting the functionality
