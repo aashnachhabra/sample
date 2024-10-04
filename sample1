@@ -1,24 +1,39 @@
-$scope.OpenViewEditor = function() {
-		
-		let portfolioAssignmentArray = [];
-	    
-	    if($scope.requestBody.planAssignmentID != null){
-	    	portfolioAssignmentArray.push($scope.requestBody.planAssignmentID);
-	    }
-	    
-	    var myHeaders = new Headers();
-	    myHeaders.append("Content-Type", "application/json");
-        
-	    $('#planAssignmentIdView').val(portfolioAssignmentArray.toString());
-	    localStorage.setItem('planAssignmentIdView',portfolioAssignmentArray.toString());
-	   
-	    var form = angular.element(document.querySelector('#portfolioEditorView'));
-	    form.attr("onsubmit", "window.open('about:blank','./portfolioViewEditor','')");
-	    form.attr("target", "./portfolioViewEditor");
-         $timeout(function() {
-	    	form.submit();
-        }, 0, false);
-	    
+function loadViewPageData(){
+	var planAssignmentIdView = localStorage.getItem('planAssignmentIdView');
+	let ifpRole = document.getElementById("ifpRole").value;
+	localStorage.removeItem('planAssignmentIdView');
+	if(planAssignmentIdView != null && planAssignmentIdView !=""){
+		showAndHide();
+		$.ajax({
+			type : "POST",
+			contentType : "application/json",
+			url : "portfolioviewsearch",
+			data : planAssignmentIdView,
+			dataType : 'json',
+			success : function(response) {
+				if (response.length !== 0) {
+					$('#processLogDataTable').css('display', 'block');
+					$('#noResult').css('display', 'none');
+					var table = $('#processLog').DataTable();
+					populateTableData(response);
+					table.columns.adjust().draw();
+					createViewExportRequest(planAssignmentIdView);
+					if (ifpRole != 10) {
+						enableButtons();
+					}
+				} else {
+					$('#noResult').css('display', 'block');
+					$('#processLogDataTable').css('display', 'none');
+					$('#clearButton').prop('disabled', false);
+				}
+				showAndHide();
+			},
+			error : function(xhr) {
+				$('#processLogDataTable').css('display', 'none');
+				$('#noResult').css('display', 'block');
+				showAndHide();
+			}
+		});
 	}
-
-this function is causing security vulnerability at portfolioAssignmentArray.toString() since it is exposing information. please suggest fix for this without disrupting the functionality
+};
+this function is fetching it from local storage. what changes do i need to make here to make sure the above changes work without disrupting the functionality at all
