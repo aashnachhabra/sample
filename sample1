@@ -1,39 +1,27 @@
-function loadViewPageData(){
-	var planAssignmentIdView = localStorage.getItem('planAssignmentIdView');
-	let ifpRole = document.getElementById("ifpRole").value;
-	localStorage.removeItem('planAssignmentIdView');
-	if(planAssignmentIdView != null && planAssignmentIdView !=""){
-		showAndHide();
-		$.ajax({
-			type : "POST",
-			contentType : "application/json",
-			url : "portfolioviewsearch",
-			data : planAssignmentIdView,
-			dataType : 'json',
-			success : function(response) {
-				if (response.length !== 0) {
-					$('#processLogDataTable').css('display', 'block');
-					$('#noResult').css('display', 'none');
-					var table = $('#processLog').DataTable();
-					populateTableData(response);
-					table.columns.adjust().draw();
-					createViewExportRequest(planAssignmentIdView);
-					if (ifpRole != 10) {
-						enableButtons();
-					}
-				} else {
-					$('#noResult').css('display', 'block');
-					$('#processLogDataTable').css('display', 'none');
-					$('#clearButton').prop('disabled', false);
-				}
-				showAndHide();
-			},
-			error : function(xhr) {
-				$('#processLogDataTable').css('display', 'none');
-				$('#noResult').css('display', 'block');
-				showAndHide();
-			}
-		});
-	}
-};
-this function is fetching it from local storage. what changes do i need to make here to make sure the above changes work without disrupting the functionality at all
+ if(ifpSpgBatchManagement.getStatus().equalsIgnoreCase("Completed"))
+        {
+
+            filePath = nasDrivePath+"SPGChangeReports"+File.separator+"Completed";
+        }
+       else if(ifpSpgBatchManagement.getStatus().equalsIgnoreCase("Queued"))
+        {
+            filePath = nasDrivePath+"SPGChangeReports"+File.separator+"Queued";
+        }
+        else if(ifpSpgBatchManagement.getStatus().equalsIgnoreCase("Rejected"))
+        {
+            filePath = nasDrivePath+"SPGChangeReports"+File.separator+"Failed";
+        }
+       else if(ifpSpgBatchManagement.getStatus().equalsIgnoreCase("Failed"))
+        {
+            filePath = nasDrivePath+"SPGChangeReports"+File.separator+"Failed";
+        }
+        else if(ifpSpgBatchManagement.getStatus().equalsIgnoreCase("In Progress"))
+        {
+            filePath = nasDrivePath+"SPGChangeReports"+File.separator+"In Progress";
+        }
+        else if(ifpSpgBatchManagement.getStatus().equalsIgnoreCase("Ready for Review"))
+        {
+            filePath = nasDrivePath+"SPGChangeReports"+File.separator+ifpSpgBatchManagement.getCocSeries().iterator().next();
+        }
+
+make switch statement for above instead of if and else if
