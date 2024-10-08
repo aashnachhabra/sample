@@ -25,3 +25,5 @@
         }
 
 make switch statement for above instead of if and else if
+also There are multiple instances of String literals that can be defined as constant variables for example - "Completed", "Queued", "Rejected", "Failed", "In-Progress"
+make a constant or enum for this
