@@ -1,29 +1,178 @@
- if(ifpSpgBatchManagement.getStatus().equalsIgnoreCase("Completed"))
-        {
+package com.optum.ideate.controller;
 
-            filePath = nasDrivePath+"SPGChangeReports"+File.separator+"Completed";
-        }
-       else if(ifpSpgBatchManagement.getStatus().equalsIgnoreCase("Queued"))
-        {
-            filePath = nasDrivePath+"SPGChangeReports"+File.separator+"Queued";
-        }
-        else if(ifpSpgBatchManagement.getStatus().equalsIgnoreCase("Rejected"))
-        {
-            filePath = nasDrivePath+"SPGChangeReports"+File.separator+"Failed";
-        }
-       else if(ifpSpgBatchManagement.getStatus().equalsIgnoreCase("Failed"))
-        {
-            filePath = nasDrivePath+"SPGChangeReports"+File.separator+"Failed";
-        }
-        else if(ifpSpgBatchManagement.getStatus().equalsIgnoreCase("In Progress"))
-        {
-            filePath = nasDrivePath+"SPGChangeReports"+File.separator+"In Progress";
-        }
-        else if(ifpSpgBatchManagement.getStatus().equalsIgnoreCase("Ready for Review"))
-        {
-            filePath = nasDrivePath+"SPGChangeReports"+File.separator+ifpSpgBatchManagement.getCocSeries().iterator().next();
+import com.optum.ideate.constants.SessionConstants;
+import com.optum.ideate.model.request.SPGBatchManagementRquest;
+import com.optum.ideate.model.response.PortfolioEditorDDMapResponse;
+import com.optum.ideate.mongodb.domain.IFPSPGBatchManagement;
+import com.optum.ideate.mongodb.domain.ReportCollection;
+import com.optum.ideate.mongodb.domain.SPGChangeReportData;
+import com.optum.ideate.mongodb.repo.IFPSPGBatchMangementRepository;
+import com.optum.ideate.mongodb.repo.ReportRepository;
+import com.optum.ideate.service.IFPBatchManagementService;
+import com.optum.ideate.service.PortfolioManagementV2Service;
+import com.optum.ideate.service.SPGReportBatchManagementService;
+import lombok.SneakyThrows;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
+import static java.util.stream.Collectors.toMap;
+
+
+@Controller
+public class SPGReportBatchManagementController {
+    private static final Logger logger = LoggerFactory.getLogger(IFPBatchManagementController.class);
+
+    @Autowired
+    SPGReportBatchManagementService spgReportBatchManagementService;
+    @Autowired
+    private PortfolioManagementV2Service portfolioManagementV2Service;
+
+    @Autowired
+    ReportRepository reportRepository;
+    @Autowired
+    IFPBatchManagementService  ifpBatchManagementService;
+
+    @Autowired
+    private IFPSPGBatchMangementRepository ifpSPGBatchManagementRepository;
+
+    @GetMapping("/spgReportBatchManagement")
+    public ModelAndView spgReportBatchManagement(ModelAndView modelAndView, HttpServletRequest request, HttpSession session) {
+
+        try {
+            String currentUser = (String) session.getAttribute(SessionConstants.USER_NAME);
+            modelAndView.setViewName("SPGReportBatchManagement");
+            PortfolioEditorDDMapResponse portfolioEditorDDMapResponse = portfolioManagementV2Service.getPortfolioEditorDropDownsMap();
+            Map<Long, String> reportMap = reportRepository.findAll().stream()
+                    .collect(toMap(ReportCollection::getReportID, ReportCollection::getReportName));
+
+            modelAndView.addObject("currentUser",currentUser);
+            modelAndView.addObject("selectedCurrentUser",currentUser);
+            modelAndView.addObject("stateAttrList",portfolioEditorDDMapResponse.getStateMap());
+            modelAndView.addObject("cocSeriesList",portfolioEditorDDMapResponse.getCocSeriesMap());
+            modelAndView.addObject("reportList",reportMap);
+            modelAndView.addObject("stateAttrList",portfolioEditorDDMapResponse.getStateMap());
+
+        }catch(Exception e) {
+            logger.error("Exception Occured:- SPGReportBatchManagementController: spgReportBatchManagement :- {}",e.getMessage());
+            e.printStackTrace();
         }
 
-make switch statement for above instead of if and else if
-also There are multiple instances of String literals that can be defined as constant variables for example - "Completed", "Queued", "Rejected", "Failed", "In-Progress"
-make a constant or enum for this
+        return modelAndView;
+    }
+    @PostMapping("/searchSPGReportBatchManagement")
+    @ResponseBody
+    public List<IFPSPGBatchManagement> searchSPGReportBatchManagement(HttpServletRequest request, HttpSession session,
+                                                          @RequestBody SPGBatchManagementRquest spgBatchManagementRquest) {
+        List<IFPSPGBatchManagement> ifpSpgBatchList = new ArrayList<>();
+        try {
+
+                ifpSpgBatchList = spgReportBatchManagementService.getSPGReportBatchDetails(spgBatchManagementRquest);
+
+        }catch(Exception e) {
+            logger.error("Exception Occured:- SPGReportBatchManagementController: searchSPGReportBatchManagement :- {}",e.getMessage());
+            e.printStackTrace();
+        }
+        return ifpSpgBatchList;
+
+    }
+    @GetMapping("/spgChangeReportBatchDetails")
+    public ModelAndView getSpgReportBatchDetails(HttpServletRequest request,ModelAndView modelAndView,@RequestParam("batchId") Integer batchId,@RequestParam("batchStatus") String batchStatus) {
+        List<SPGChangeReportData> spgReportDataList = new ArrayList<>();
+        modelAndView.setViewName("SPGChangeReportBatchDetails");
+        try {
+            spgReportDataList = spgReportBatchManagementService.readSpgChangeReportDetails(batchId);
+            modelAndView.addObject("batchId", batchId);
+            modelAndView.addObject("batchStatus", batchStatus);
+            modelAndView.addObject("spgReportDataList", spgReportDataList);
+        }catch(Exception e) {
+            logger.error("Exception Occured:- SPGReportBatchManagementController: getSpgReportBatchProcessDetails :- {}",e.getMessage());
+            e.printStackTrace();
+        }
+        return modelAndView;
+
+    }
+
+    @SneakyThrows
+    @GetMapping("/acceptOrRejectSpgBatch")
+    @ResponseBody
+    public ResponseEntity<Object> acceptOrRejectSpgBatch(ModelAndView modelAndView, HttpServletRequest request, HttpServletResponse response, HttpSession session, Model model,
+                                                 @RequestParam(required = true, name = "batchId") Integer batchId,@RequestParam(required = true, name = "batchStatus") String batchStatus)
+            throws Exception {
+        modelAndView.setViewName("SPGChangeReportBatchDetails");
+
+        String currentUser = (String) request.getSession().getAttribute(SessionConstants.USER_NAME);
+        IFPSPGBatchManagement ifpSPGBatchManagement= spgReportBatchManagementService.acceptOrRejectSpgBatchDetails(batchId, batchStatus,currentUser);
+        try {
+
+        }catch(Exception e) {
+            logger.error("Exception Occured:- SPGReportBatchManagementController: acceptSpgBatch :- {}",e.getMessage());
+            e.printStackTrace();
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(true);
+
+    }
+
+    @GetMapping(value = "/downloadSPGFile")
+    public String downloadIFPFile(HttpServletRequest request, HttpServletResponse response, Model model,
+                                  @RequestParam(required = true, name = "batchId") Integer batchId)
+            throws Exception {
+        return spgReportBatchManagementService.downloadIFPSPGReportFile(request, response, model, batchId);
+    }
+
+    @GetMapping(value = "/downloadSPGChangeReport")
+    public String downloadSPGChangeReport(HttpServletRequest request, HttpServletResponse response, Model model,
+                                  @RequestParam(required = true, name = "batchId") Integer batchId)
+            throws Exception {
+        return spgReportBatchManagementService.downloadSPGChangeReport(request, response, model, batchId);
+    }
+
+
+    @GetMapping("/spgReportBatchProcessSync")
+    public ResponseEntity<Object> spgReportBatchProcessSync(HttpServletRequest request, HttpSession session) {
+        try {
+            List<IFPSPGBatchManagement> spgQueuedReportList = ifpSPGBatchManagementRepository.findByStatus("Queued");
+            if(spgQueuedReportList != null && !spgQueuedReportList.isEmpty()) {
+                ifpBatchManagementService.processQueuedSPGChangeReports(spgQueuedReportList);
+              
+                return ResponseEntity.status(HttpStatus.OK).body(Collections.singletonMap("status","success"));
+            }else {
+                return ResponseEntity.status(HttpStatus.OK).body(Collections.singletonMap("status","noQueuedBatches"));
+            }
+        }catch(Exception e) {
+            logger.error("Exception Occured:- SPGReportBatchManagementController: spgReportBatchProcessSync :- {}",e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.singletonMap("status","error"));
+        }
+    }
+
+    @GetMapping("/deleteSpgBatch")
+    public ResponseEntity<Object> deleteSpgBatch(ModelAndView modelAndView, HttpServletRequest request, HttpServletResponse response, @RequestParam(required = true, name = "batchId") Integer batchId)
+            {
+        try {
+            String currentUser = (String) request.getSession().getAttribute(SessionConstants.USER_NAME);
+            spgReportBatchManagementService.deleteSpgBatch(batchId,currentUser);
+            return ResponseEntity.status(HttpStatus.OK).body(Collections.singletonMap("status","success"));
+        }catch(Exception e) {
+            logger.error("Exception Occured:- SPGReportBatchManagementController: deleteSpgBatch :- {}",e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.singletonMap("status","error"));
+        }
+
+            }
+}
+ write groovy unit test case for downloadSPGChangeReport
