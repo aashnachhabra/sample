@@ -1,27 +1,83 @@
-<div class="modal fade" id="cloneCfrmChildBoxModal" tabindex="-1" role="dialog"
-                									aria-labelledby="deleteCfrmBoxModalLabel" aria-idden="true">
-                									<div class="modal-dialog modal-dialog-centered" role="document">
+function clonePlans() {
+    const selectedCocSeries = document.getElementById('cocSeriesModal').value;
+    console.log("selected coc", selectedCocSeries)
 
-                										<div class="modal-content">
-                											<div class="modal-header">
-                												<h5><span id="lblWarnTitle" class="modal-title text-danger"> Warning
-                													</span></h5>
-                												<button type="button" class="btn-close" data-bs-dismiss="modal"
-                													aria-label="Close"></button>
-                											</div>
-                											<div class="modal-body">
+    let portfolioAssignmentArray = [];
+    let checkedArray = datatable.getRows();
+    datatable.clearToastMessage();
+    for (var i = 0; i < checkedArray.length; i++) {
+        if (checkedArray[i][0].value === 'true') {
+            let content = checkedArray[i][1].content;
+            portfolioAssignmentArray.push(content);
+        }
+    }
 
-                												Do you want to clone the plan variants along with its base plan?
-                											</div>
-                											<div class="modal-footer">
-                												<a id="deleteConfirm"
-                                                                                													class="btn btn-outline-success" data-dismiss="modal">No</a>
-                												<a  id="deleteConfirm"
-                													class="btn btn-outline-success" data-dismiss="modal">Yes</a>
+    var myHeaders = new Headers();
+    myHeaders.append("Content-Type", "application/json");
+    var request = {};
+    request["portfolioAssignmentArray"] = portfolioAssignmentArray;
+    request["selectedCocSeries"] = selectedCocSeries;
+    let planAssignmentArray = [];
+    for (var i = 0; i < checkedArray.length; i++) {
+        if (checkedArray[i][0].value === 'true') {
+            let request1 = {};
+            request1["stateName"] = checkedArray[i][4].content;
+            request1["planManagementId"] = checkedArray[i][1].content;
+            request1["parentPlanManagementId"] = checkedArray[i][12].content;
+            planAssignmentArray.push(request1);
+        }
+    }
 
-                											</div>
-                										</div>
-                									</div>
-                								</div>
+    var isStateSame = checkStateSame(planAssignmentArray);
 
-here on yes click i want to send true to a variable named cloneChildPlan and on no send false to same variable modify above code to implement this
+    if (!isStateSame) {
+        document.getElementById("ErrorMesssage").innerHTML = 'You can only clone plans with the same state value. Please select plans with a single state to proceed.';
+        $('#cloneCfrmBoxModal').modal('toggle');
+        $("#errorModalCOC").modal("toggle");
+    }
+    else {
+        var planVariant = planVariantError(planAssignmentArray);
+        if (!planVariant) {
+            document.getElementById("ErrorMesssage").innerHTML = 'base plan has not been selected and plan variants cannot be cloned on their own';
+            $('#cloneCfrmBoxModal').modal('toggle');
+            $("#errorModalCOC").modal("toggle");
+        }
+        else {
+            var basePlanOnly = basePlanSelected(planAssignmentArray);
+            if (!basePlanOnly) {
+                 $('#cloneCfrmBoxModal').modal('toggle');
+                $('#cloneCfrmChildBoxModal').modal('toggle');
+                 var cloneChildPlan = true
+
+            }
+            else {
+                request["cloneChildPlans"] = false;
+                console.log(JSON.stringify(request)); showAndHide();
+                            $.ajax({
+                                type: "POST",
+                                contentType: "application/json",
+                                url: "cloneMultiplePortfolioMgmtPlans",
+                                data: JSON.stringify(request),
+                                dataType: 'json',
+                                success: function (res) {
+                                    showAndHide();
+                                    window.open("/ifp/cloneMultiplePortfolioMgmtPlans");
+                                },
+                                error: function (xhr) {
+                                    showAndHide();
+                                    console.log(xhr);
+                                    alert("Error while cloning plans ");
+                                }
+                            });
+                            datatable.destroy();
+                            getSearchData();
+                            disabledButtons();
+                             $('#cloneCfrmBoxModal').modal('toggle');
+            }
+
+        }
+    }
+}
+
+IN THIS FUNCTION I WANT TO SET YES OR NO TRUE/ FALSE VALUE IN VARIABLE  $('#cloneCfrmChildBoxModal').modal('toggle');
+                 var cloneChildPlan AND MAKE AN API CALL AFTER THIS HERE ITSELF WITH request["cloneChildPlans"] = cloneChildPlan ; WHICH HAS EXISTING REQUEST BODY. hELP ME ACHIEVE THIS
