@@ -1,70 +1,27 @@
-  public String downloadSPGChangeReport(HttpServletRequest request, HttpServletResponse response, Model model, Integer batchId) throws Exception {
+<div class="modal fade" id="cloneCfrmChildBoxModal" tabindex="-1" role="dialog"
+                									aria-labelledby="deleteCfrmBoxModalLabel" aria-idden="true">
+                									<div class="modal-dialog modal-dialog-centered" role="document">
 
-        IFPSPGBatchManagement ifpSpgBatchManagement  = ifpSPGBatchMangementRepository.findByBatchIdAndIsCurrent(batchId, Constants.isCurrentTrue);
+                										<div class="modal-content">
+                											<div class="modal-header">
+                												<h5><span id="lblWarnTitle" class="modal-title text-danger"> Warning
+                													</span></h5>
+                												<button type="button" class="btn-close" data-bs-dismiss="modal"
+                													aria-label="Close"></button>
+                											</div>
+                											<div class="modal-body">
 
-        String fileName=	ifpSpgBatchManagement.getFileName();
-        String filePath=null;
-        String status = ifpSpgBatchManagement.getStatus();
-        SpgBatchStatus batchStatus = SpgBatchStatus.fromString(status);
-        switch (batchStatus) {
-            case COMPLETED:
-                filePath = nasDrivePath + "SPGChangeReports" + File.separator + "Completed";
-                break;
-            case QUEUED:
-                filePath = nasDrivePath + "SPGChangeReports" + File.separator + "Queued";
-                break;
-            case REJECTED:
-            case FAILED:
-                filePath = nasDrivePath + "SPGChangeReports" + File.separator + "Failed";
-                break;
-            case IN_PROGRESS:
-                filePath = nasDrivePath + "SPGChangeReports" + File.separator + "In Progress";
-                break;
-            case READY_FOR_REVIEW:
-                filePath = nasDrivePath + "SPGChangeReports" + File.separator + ifpSpgBatchManagement.getCocSeries().iterator().next();
-                break;
-            default:
-                throw new IllegalStateException("Unexpected value: " + batchStatus);
-        }
-        response.setContentType("application/octet-stream");
-        response.setHeader("Content-disposition", "attachment;filename=" + fileName);
+                												Do you want to clone the plan variants along with its base plan?
+                											</div>
+                											<div class="modal-footer">
+                												<a id="deleteConfirm"
+                                                                                													class="btn btn-outline-success" data-dismiss="modal">No</a>
+                												<a  id="deleteConfirm"
+                													class="btn btn-outline-success" data-dismiss="modal">Yes</a>
 
-        byte[] fileBytes=null;
-        if(!fileName.isEmpty()) {
-            File srcFile = getFileFromNasDrive(fileName, filePath);
-            if (srcFile != null) {
-                InputStream inputStream = null;
-                fileBytes = Files.readAllBytes(srcFile.toPath());
+                											</div>
+                										</div>
+                									</div>
+                								</div>
 
-                if (fileBytes.length > 0) {
-                    try {
-                        inputStream = new ByteArrayInputStream(fileBytes);
-                        DataOutputStream os = new DataOutputStream(response.getOutputStream());
-                        response.setHeader("Content-Length", String.valueOf(fileBytes.length));
-                        byte[] buffer = new byte[1024];
-                        int len;
-                        while ((len = inputStream.read(buffer)) > 0) {
-                            os.write(buffer, 0, len);
-                        }
-                    } catch (Exception e) {
-                        logger.error(e.getLocalizedMessage(), e);
-                        response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
-                    } finally {
-
-                        if (inputStream != null) {
-                            inputStream.close();
-                        }
-                    }
-                }
-            }
-        }
-        else {
-            response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
-        }
-
-
-        return "Success";
-
-    }
-
-write groovy test case for this serviceimpl function also
+here on yes click i want to send true to a variable named cloneChildPlan and on no send false to same variable modify above code to implement this
