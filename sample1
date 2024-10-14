@@ -1,104 +1,39 @@
-function buildDatatable(inputdata) {
-    let checkFlag = false;
-    const datatable = new DataTable('#datatable', {
-        columns: [
+<div class="modal fade" id="cloneCfrmBoxModal" tabindex="-1" aria-labelledby="cloneCfrmBoxModalLabel"
+					aria-hidden="true">
+					<div class="modal-dialog modal-dialog-centered">
+						<div class="modal-content">
+							<!-- Modal Header -->
+							<div class="modal-header">
+								<h5>
+									<span id="lblWarnTitle" class="modal-title text-danger">
+										Warning </span>
+								</h5>
+								<button type="button" class="btn-close" data-bs-dismiss="modal"
+									aria-label="Close"></button>
+							</div>
+							<!-- Modal Body -->
+							<div class="modal-body">
+								<p>Please select a COC Series Value and confirm that you'd like to clone the selected
+									plan.</p>
+								<div class="form-floating">
+									<select id="cocSeriesModal" class="form-select"
+										>
+										<option value="" disabled selected>Select COC Series</option>
+										<c:forEach var="coc" items="${portfolioDD.cocSeriesMap}">
+											<option id="${coc.key}" value="${coc.key}">${coc.value}</option>
+										</c:forEach>
+									</select>
+									<label for="cocSeriesModal">COC Series</label>
+								</div>
+							</div>
+							<!-- Modal Footer -->
+							<div class="modal-footer">
+								<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+								<button type="button" class="btn btn-primary" onclick="clonePlans()">Confirm</button>
+							</div>
+						</div>
+					</div>
+				</div>
 
-            {
-                name: 'Plan AssignmentId',
-                id: 'planManagementId',
-                editable: false,
-                dropdown: false,
-            },
-            {
-                name: 'Plan Code',
-                id: 'planCode',
-                editable: false,
-            },
-            {
-                name: 'COC Series',
-                id: 'cocSeries',
-                editable: false,
-            },
-            {
-                name: 'State',
-                id: 'stateAbbr',
-                editable: false,
-            },
-            {
-                name: 'License',
-                id: 'licenceCode',
-                editable: false,
-            },
-            {
-                name: 'Plan Status',
-                id: 'planStatus',
-                editable: false,
-            },
-            {
-                name: 'Sent To COM360?',
-                id: 'sentToCOM360',
-                editable: false
-            },
-            {
-                name: 'Published?',
-                id: 'published',
-                editable: false
-            },
-            {
-                name: 'Validated?',
-                id: 'planValidateStatus',
-                editable: false
-            },
-            {
-                name: 'Last Modified On',
-                id: 'lastModifiedOn',
-                editable: false,
-            },
-            {
-                name: 'Version',
-                id: 'version',
-                editable: false,
-            },
-            {
-                name: 'Parent Plan AssignmentId',
-                id: 'parentPlanManagementId',
-               hidden: true
-            },
-        ],
-        events: {
-            onCheckRow: () => {
-                let arrayrow = datatable.getRows();
-                for (var i = 0; i < arrayrow.length; i++) {
-                    arrayrow[i][0].value = "false";
-                }
-                this.checkedRows = this.datatable.rowmanager.getCheckedRows();
-
-                console.log("checked rows::::" + this.checkedRows);
-
-                if (this.checkedRows.length <= 0) {
-                    disabledButtons();
-                } else {
-                    for (var i = 0; i < this.checkedRows.length; i++) {
-                        arrayrow[this.checkedRows[i]][0].value = "true";
-                    }
-                    enableButtons();
-                }
-            }
-        },
-        data: inputdata,
-        checkboxColumn: true,
-        id: "planManagementId",
-        inlineFilters: true,
-        layout: 'fluid',
-        serialNoColumn: false,
-        noDataMessage: 'Awe Snap! No results returned. Please update your search criteria then try again.'
-    });
-    datatable.style.setStyle(`.dt-cell__content .dt-cell__content--header-0`, { padding: '0' });
-    datatable.style.setStyle(`.dt-cell--header .dt-cell__content`, { overflow: 'visible' });
-    datatable.style.setStyle(`.dt-cell__content--col-0`, { overflow: 'visible' });
-    datatable.style.setStyle(`.dt-toast`, { top: '40px' });
-    datatable.style.setStyle(`.dt-scrollable`, { 'border-bottom': '1px solid #d1d8dd !important' });
-    window.datatable = datatable;
-}
-
-i just want to hide Parent Plan AssignmentId column 
+i want to clear the ui of the selected coc series dropdown after the modal is closed 
+please implement this
