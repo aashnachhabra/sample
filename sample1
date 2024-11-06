@@ -1,31 +1,7 @@
+June works for a privately owned company that's bidding on a government contract in Switzerland. As part of the process, June must interact with various people.
 
-***************************
-APPLICATION FAILED TO START
-***************************
+First, she meets with Silvan, her company's Vice President of Sales. Silvan is originally from Switzerland; he's well-versed in Swiss culture, so the team is leveraging his knowledge for their bid.
 
-Description:
+Then June spoke with Heilwig, an elected government representative from Geneva, who is the team's main point of contact for any bid-related questions.
 
-Parameter 6 of constructor in springfox.documentation.spring.web.plugins.DocumentationPluginsBootstrapper required a bean of type 'javax.servlet.ServletContext' that could not be found.
-
-
-Action:
-
-Consider defining a bean of type 'javax.servlet.ServletContext' in your configuration.
-
-2024-11-05T19:56:15.165+05:30 ERROR 36766 --- [  restartedMain] o.s.b.d.LoggingFailureAnalysisReporter   : 
-
-***************************
-APPLICATION FAILED TO START
-***************************
-
-Description:
-
-Parameter 6 of constructor in springfox.documentation.spring.web.plugins.DocumentationPluginsBootstrapper required a bean of type 'javax.servlet.ServletContext' that could not be found.
-
-
-Action:
-
-Consider defining a bean of type 'javax.servlet.ServletContext' in your configuration.
-
-
-Process finished with exit code 0
+Who is a public official—Silvan or Heilwig?
