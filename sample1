@@ -1,7 +1,38 @@
-June works for a privately owned company that's bidding on a government contract in Switzerland. As part of the process, June must interact with various people.
+FROM docker.repo1.uhc.com/maven:3.9.6 AS builder
+COPY . /usr/src/app
+COPY settings.xml /root/.m2/settings.xml
+WORKDIR /usr/src/app
+RUN mvn clean install
 
-First, she meets with Silvan, her company's Vice President of Sales. Silvan is originally from Switzerland; he's well-versed in Swiss culture, so the team is leveraging his knowledge for their bid.
+FROM docker.repo1.uhc.com/tomcat:10-jdk17
+RUN apt-get update && apt-get upgrade -y
 
-Then June spoke with Heilwig, an elected government representative from Geneva, who is the team's main point of contact for any bid-related questions.
+COPY --from=builder /usr/src/app/target/planlibrary.war /usr/local/tomcat/webapps/planlibrary.war
 
-Who is a public official—Silvan or Heilwig?
+RUN mkdir -m 755 /usr/local/tomcat/kafka
+
+COPY --from=builder /usr/src/app/target/classes/cert.jks /usr/local/tomcat/kafka/cert.jks
+
+RUN chown -R 1001:0 /usr/local/tomcat/webapps/*
+RUN chmod -R 777 /usr/local/tomcat/webapps/*
+
+ENV SPRING_PROFILES_ACTIVE=dev-gcp
+
+EXPOSE 8080
+
+CMD ["catalina.sh","run"]
+
+dockerfile
+
+getting this error
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.11.0:compile (default-compile) on project plan-library-web: Fatal error compiling: java.lang.NoSuchFieldError: Class com.sun.tools.javac.tree.JCTree$JCImport does not have member field 'com.sun.tools.javac.tree.JCTree qualid' -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoExecutionException
+Error response from daemon: The command '/bin/sh -c mvn clean install' returned a non-zero code: 1
+Failed to deploy '<unknown> Dockerfile: Dockerfile': Can't retrieve image ID from build stream
+
+pls fix
