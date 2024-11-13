@@ -1,2 +1,274 @@
-java.lang.IllegalStateException: Error starting child\n\t\tat org.apache.catalina.core.ContainerBase.addChildInternal(ContainerBase.java:602)\n\t\tat org.apache.catalina.core.ContainerBase.addChild(ContainerBase.java:571)\n\t\tat org.apache.catalina.core.StandardHost.addChild(StandardHost.java:654)\n\t\tat org.apache.catalina.startup.HostConfig.deployWAR(HostConfig.java:969)\n\t\tat org.apache.catalina.startup.HostConfig$DeployWar.run(HostConfig.java:1911)\n\t\tat java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:539)\n\t\tat java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)\n\t\tat org.apache.tomcat.util.threads.InlineExecutorService.execute(InlineExecutorService.java:75)\n\t\tat java.base/java.util.concurrent.AbstractExecutorService.submit(AbstractExecutorService.java:123)\n\t\tat org.apache.catalina.startup.HostConfig.deployWARs(HostConfig.java:771)\n\t\tat org.apache.catalina.startup.HostConfig.deployApps(HostConfig.java:423)\n\t\tat org.apache.catalina.startup.HostConfig.start(HostConfig.java:1629)\n\t\tat org.apache.catalina.startup.HostConfig.lifecycleEvent(HostConfig.java:303)\n\t\tat org.apache.catalina.util.LifecycleBase.fireLifecycleEvent(LifecycleBase.java:109)\n\t\tat org.apache.catalina.util.LifecycleBase.setStateInternal(LifecycleBase.java:389)\n\t\tat org.apache.catalina.util.LifecycleBase.setState(LifecycleBase.java:336)\n\t\tat org.apache.catalina.core.ContainerBase.startInternal(ContainerBase.java:776)\n\t\tat org.apache.catalina.core.StandardHost.startInternal(StandardHost.java:772)\n\t\tat org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164)\n\t\tat org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1203)\n\t\tat org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1193)\n\t\tat java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)\n\t\tat org.apache.tomcat.util.threads.InlineExecutorService.execute(InlineExecutorService.java:75)\n\t\tat java.base/java.util.concurrent.AbstractExecutorService.submit(AbstractExecutorService.java:145)\n\t\tat org.apache.catalina.core.ContainerBase.startInternal(ContainerBase.java:749)\n\t\tat org.apache.catalina.core.StandardEngine.startInternal(StandardEngine.java:203)\n\t\tat org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164)\n\t\tat org.apache.catalina.core.StandardService.startInternal(StandardService.java:415)\n\t\tat org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164)\n\t\tat org.apache.catalina.core.StandardServer.startInternal(StandardServer.java:870)\n\t\tat org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164)\n\t\tat org.apache.catalina.startup.Catalina.start(Catalina.java:757)\n\t\tat java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)\n\t\tat java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)\n\t\tat java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\n\t\tat java.base/java.lang.reflect.Method.invoke(Method.java:569)\n\t\tat org.apache.catalina.startup.Bootstrap.start(Bootstrap.java:345)\n\t\tat org.apache.catalina.startup.Bootstrap.main(Bootstrap.java:473)\n\tCaused by: org.apache.catalina.LifecycleException: Failed to start component [StandardEngine[Catalina].StandardHost[localhost].StandardContext[/planlibrary]]\n\t\tat org.apache.catalina.util.LifecycleBase.handleSubClassException(LifecycleBase.java:406)\n\t\tat org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:179)\n\t\tat org.apache.catalina.core.ContainerBase.addChildInternal(ContainerBase.java:599)\n\t\t... 37 more\n\tCaused by: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'pingSSOServiceImpl': Unsatisfied dependency expressed through field 'logService': Error creating bean with name 'logServiceImpl' defined in file [/usr/local/tomcat/webapps/planlibrary/WEB-INF/classes/com/uhc/ei/planlibrary/logservice/service/LogServiceImpl.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'logEventDaoImpl': Unsatisfied dependency expressed through field 'mongoTemplate': Error creating bean with name 'mongoTemplate' defined in class path resource [com/uhc/ei/planlibrary/config/MongoDbConfig.class]: Unsatisfied dependency expressed through method 'mongoTemplate' parameter 0: Error creating bean with name 'mongoDbFactory' defined in class path resource [com/uhc/ei/planlibrary/config/MongoDbConfig.class]: Unsatisfied dependency expressed through method 'mongoDbFactory' parameter 0: Error creating bean with name 'mongoSettingsProperties': Could not bind properties to 'MongoSettingsProperties' : prefix=spring.data.mongodb, ignoreInvalidFields=false, ignoreUnknownFields=true\n\t\tat org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor$AutowiredFieldElement.resolveFieldValue(AutowiredAnnotationBeanPostProcessor.java:788)\n\t\tat org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor$AutowiredFieldElement.inject(AutowiredAnnotationBeanPostProcessor.java:768)\n\t\tat org.springframework.beans.factory.annotation.InjectionMetadata.inject(InjectionMetadata.java:145)\n\t\tat org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor.postProcessProperties(AutowiredAnnotationBeanPostProcessor.java:509)\n\t\tat org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.populateBean(AbstractAutowireCapableBeanFactory.java:1439)\n\t\tat org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:599)\n\t\tat org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:522)\n\t\tat org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:337)\n\t\tat org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234)\n\t\tat org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:335)\n\t\tat org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:200)\n\t\tat org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingletons(DefaultListableBeanFactory.java:975)\n\t\tat org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:971)\n\t\tat org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:625)\n\t\tat org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:146)\n\t\tat org.springframework.boot.SpringApplication.refresh(SpringApplication.java:754)\n\t\tat org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:456)\n\t\tat org.springframework.boot.SpringApplication.run(SpringApplication.java:335)\n\t\tat org.springframework.boot.web.servlet.support.SpringBootServletInitializer.run(SpringBootServletInitializer.java:174)\n\t\tat org.springframework.boot.web.servlet.support.SpringBootServletInitializer.createRootApplicationContext(SpringBootServletInitializer.java:154)\n\t\tat org.springframework.boot.web.servlet.support.SpringBootServletInitializer.onStartup(SpringBootServletInitializer.java:96)\n\t\tat org.springframework.web.SpringServletContainerInitializer.onStartup(SpringServletContainerInitializer.java:171)\n\t\tat org.apache.catalina.core.StandardContext.startInternal(StandardContext.java:4426)\n\t\tat org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164)\n\t\t... 38 more\n\tCaused by: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'logServiceImpl' defined in file [/usr/local/tomcat/webapps/planlibrary/WEB-INF/classes/com/uhc/ei/planlibrary/logservice/service/LogServiceImpl.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'logEventDaoImpl': Unsatisfied dependency expressed through field 'mongoTemplate': Error creating bean with name 'mongoTemplate' defined in class path resource [com/uhc/ei/planlibrary/config/MongoDbConfig.class]: Unsatisfied dependency expressed through method 'mongoTemplate' parameter 0: Error creating bean with name 'mongoDbFactory' defined in class path resource [com/uhc/ei/planlibrary/config/MongoDbConfig.class]: Unsatisfied dependency expressed through method 'mongoDbFactory' parameter 0: Error creating bean with name 'mongoSettingsProperties': Could not bind properties to 'MongoSettingsProperties' : prefix=spring.data.mongodb, ignoreInvalidFields=false, ignoreUnknownFields=true\n\t\tat org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:795)\n\t\tat org.springframework.beans.factory.support.ConstructorResolver.autowireConstructor(ConstructorResolver.java:237)\n\t\tat org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.autowireConstructor(AbstractAutowireCapableBeanFactory.java:1375)\n\t\tat org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1212)\n\t\tat org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:562)\n\t\tat org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:522)\n\t\tat org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:337)\n\t\tat org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234)\n\t\tat org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:335)\n\t\tat org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:200)\n\t\tat org.springframework.beans.factory.config.DependencyDescriptor.resolveCandidate(DependencyDescriptor.java:254)\n\t\tat org.springframework.beans.factory.support.DefaultListableBeanFactory.doResolveDependency(DefaultListableBeanFactory.java:1443)\n\t\tat org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveDependency(DefaultListableBeanFactory.java:1353)\n\t\tat org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor$AutowiredFieldElement.resolveFieldValue(AutowiredAnnotationBeanPostProcessor.java:785)\n\t\t... 61 more\n\tCaused by: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'logEventDaoImpl': Unsatisfied dependency expressed through field 'mongoTemplate': Error creating bean with name 'mongoTemplate' defined in class path resource [com/uhc/ei/planlibrary/config/MongoDbConfig.class]: Unsatisfied dependency expressed through method 'mongoTemplate' parameter 0: Error creating bean with name 'mongoDbFactory' defined in class path resource [com/uhc/ei/planlibrary/config/MongoDbConfig.class]: Unsatisfied dependency expressed through method 'mongoDbFactory' parameter 0: Error creating bean with name 'mongoSettingsProperties': Could not bind properties to 'MongoSettingsProperties' : prefix=spring.data.mongodb, ignoreInvalidFields=false, ignoreUnknownFields=true\n\t\tat org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor$AutowiredFieldElement.resolveFieldValue(AutowiredAnnotationBeanPostProcessor.java:788)\n\t\tat org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor$AutowiredFieldElement.inject(AutowiredAnnotationBeanPostProcessor.java:768)\n\t\tat org.springframework.beans.factory.annotation.InjectionMetadata.inject(InjectionMetadata.java:145)\n\t\tat org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor.postProcessProperties(AutowiredAnnotationBeanPostProcessor.java:509)\n\t\tat org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.populateBean(AbstractAutowireCapableBeanFactory.java:1439)\n\t\tat org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:599)\n\t\tat org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:522)\n\t\tat org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:337)\n\t\tat org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234)\n\t\tat org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:335)\n\t\tat org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:200)\n\t\tat org.springframework.beans.factory.config.DependencyDescriptor.resolveCandidate(DependencyDescriptor.java:254)\n\t\tat org.springframework.beans.factory.support.DefaultListableBeanFactory.doResolveDependency(DefaultListableBeanFactory.java:1443)\n\t\tat org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveDependency(DefaultListableBeanFactory.java:1353)\n\t\tat org.springframework.beans.factory.support.ConstructorResolver.resolveAutowiredArgument(ConstructorResolver.java:904)\n\t\tat org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:782)\n\t\t... 74 more\n\tCaused by: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'mongoTemplate' defined in class path resource [com/uhc/ei/planlibrary/config/MongoDbConfig.class]: Unsatisfied dependency expressed through method 'mongoTemplate' parameter 0: Error creating bean with name 'mongoDbFactory' defined in class path resource [com/uhc/ei/planlibrary/config/MongoDbConfig.class]: Unsatisfied dependency expressed through method 'mongoDbFactory' parameter 0: Error creating bean with name 'mongoSettingsProperties': Could not bind properties to 'MongoSettingsProperties' : prefix=spring.data.mongodb, ignoreInvalidFields=false, ignoreUnknownFields=true\n\t\tat org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:795)\n\t\tat org.springframework.beans.factory.support.ConstructorResolver.instantiateUsingFactoryMethod(ConstructorResolver.java:542)\n\t\tat org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.instantiateUsingFactoryMethod(AbstractAutowireCapableBeanFactory.java:1355)\n\t\tat org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1185)\n\t\tat org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:562)\n\t\tat org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:522)\n\t\tat org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:337)\n\t\tat org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234)\n\t\tat org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:335)\n\t\tat org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:200)\n\t\tat org.springframework.beans.factory.config.DependencyDescriptor.resolveCandidate(DependencyDescriptor.java:254)\n\t\tat org.springframework.beans.factory.support.DefaultListableBeanFactory.doResolveDependency(DefaultListableBeanFactory.java:1443)\n\t\tat org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveDependency(DefaultListableBeanFactory.java:1353)\n\t\tat org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor$AutowiredFieldElement.resolveFieldValue(AutowiredAnnotationBeanPostProcessor.java:785)\n\t\t... 89 more\n\tCaused by: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'mongoDbFactory' defined in class path resource [com/uhc/ei/planlibrary/config/MongoDbConfig.class]: Unsatisfied dependency expressed through method 'mongoDbFactory' parameter 0: Error creating bean with name 'mongoSettingsProperties': Could not bind properties to 'MongoSettingsProperties' : prefix=spring.data.mongodb, ignoreInvalidFields=false, ignoreUnknownFields=true\n\t\tat org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:795)\n\t\tat org.springframework.beans.factory.support.ConstructorResolver.instantiateUsingFactoryMethod(ConstructorResolver.java:542)\n\t\tat org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.instantiateUsingFactoryMethod(AbstractAutowireCapableBeanFactory.java:1355)\n\t\tat org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1185)\n\t\tat org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:562)\n\t\tat org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:522)\n\t\tat org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:337)\n\t\tat org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234)\n\t\tat org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:335)\n\t\tat org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:200)\n\t\tat org.springframework.beans.factory.config.DependencyDescriptor.resolveCandidate(DependencyDescriptor.java:254)\n\t\tat org.springframework.beans.factory.support.DefaultListableBeanFactory.doResolveDependency(DefaultListableBeanFactory.java:1443)\n\t\tat org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveDependency(DefaultListableBeanFactory.java:1353)\n\t\tat org.springframework.beans.factory.support.ConstructorResolver.resolveAutowiredArgument(ConstructorResolver.java:904)\n\t\tat org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:782)\n\t\t... 102 more\n\tCaused by: org.springframework.boot.context.properties.ConfigurationPropertiesBindException: Error creating bean with name 'mongoSettingsProperties'
-getting this now
+package com.uhc.ei.planlibrary.config;
+
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
+
+@Component
+@ConfigurationProperties(prefix = "spring.data.mongodb")
+public class MongoSettingsProperties {
+
+	private String uri;
+	private List<String> address;
+	private String replicaSet;
+	private String database;
+	private String username;
+	private String password;
+	private Integer minConnectionsPerHost = 0;
+	private Integer maxConnectionsPerHost = 100;
+	private Integer threadsAllowedToBlockForConnectionMultiplier = 5;
+	private Integer serverSelectionTimeout = 30000;
+	private Integer maxWaitTime = 120000;
+	private Integer maxConnectionIdleTime = 0;
+	private Integer maxConnectionLifeTime = 0;
+	private Integer connectTimeout = 10000;
+	private Integer socketTimeout = 0;
+	private Boolean socketKeepAlive = false;
+	private Boolean sslEnabled = false;
+	private Boolean sslInvalidHostNameAllowed = false;
+	private Boolean alwaysUseMBeans = false;
+	private Integer heartbeatConnectTimeout = 20000;
+	private Integer heartbeatSocketTimeout = 20000;
+	private Integer minHeartbeatFrequency = 500;
+	private Integer heartbeatFrequency = 10000;
+	private Integer localThreshold = 15;
+	private String authenticationDatabase;
+
+
+	public List<String> getAddress() {
+		return address;
+	}
+	public void setAddress(List<String> address) {
+		this.address = address;
+	}
+	public String getReplicaSet() {
+		return replicaSet;
+	}
+	public void setReplicaSet(String replicaSet) {
+		this.replicaSet = replicaSet;
+	}
+	public String getDatabase() {
+		return database;
+	}
+	public void setDatabase(String database) {
+		this.database = database;
+	}
+	public String getUsername() {
+		return username;
+	}
+	public void setUsername(String username) {
+		this.username = username;
+	}
+	public String getPassword() {
+		return password;
+	}
+	public void setPassword(String password) {
+		this.password = password;
+	}
+	public Integer getMinConnectionsPerHost() {
+		return minConnectionsPerHost;
+	}
+	public void setMinConnectionsPerHost(Integer minConnectionsPerHost) {
+		this.minConnectionsPerHost = minConnectionsPerHost;
+	}
+	public Integer getMaxConnectionsPerHost() {
+		return maxConnectionsPerHost;
+	}
+	public void setMaxConnectionsPerHost(Integer maxConnectionsPerHost) {
+		this.maxConnectionsPerHost = maxConnectionsPerHost;
+	}
+	public Integer getThreadsAllowedToBlockForConnectionMultiplier() {
+		return threadsAllowedToBlockForConnectionMultiplier;
+	}
+	public void setThreadsAllowedToBlockForConnectionMultiplier(Integer threadsAllowedToBlockForConnectionMultiplier) {
+		this.threadsAllowedToBlockForConnectionMultiplier = threadsAllowedToBlockForConnectionMultiplier;
+	}
+	public Integer getServerSelectionTimeout() {
+		return serverSelectionTimeout;
+	}
+	public void setServerSelectionTimeout(Integer serverSelectionTimeout) {
+		this.serverSelectionTimeout = serverSelectionTimeout;
+	}
+	public Integer getMaxWaitTime() {
+		return maxWaitTime;
+	}
+	public void setMaxWaitTime(Integer maxWaitTime) {
+		this.maxWaitTime = maxWaitTime;
+	}
+	public Integer getMaxConnectionIdleTime() {
+		return maxConnectionIdleTime;
+	}
+	public void setMaxConnectionIdleTime(Integer maxConnectionIdleTime) {
+		this.maxConnectionIdleTime = maxConnectionIdleTime;
+	}
+	public Integer getMaxConnectionLifeTime() {
+		return maxConnectionLifeTime;
+	}
+	public void setMaxConnectionLifeTime(Integer maxConnectionLifeTime) {
+		this.maxConnectionLifeTime = maxConnectionLifeTime;
+	}
+	public Integer getConnectTimeout() {
+		return connectTimeout;
+	}
+	public void setConnectTimeout(Integer connectTimeout) {
+		this.connectTimeout = connectTimeout;
+	}
+	public Integer getSocketTimeout() {
+		return socketTimeout;
+	}
+	public void setSocketTimeout(Integer socketTimeout) {
+		this.socketTimeout = socketTimeout;
+	}
+	public Boolean getSocketKeepAlive() {
+		return socketKeepAlive;
+	}
+	public void setSocketKeepAlive(Boolean socketKeepAlive) {
+		this.socketKeepAlive = socketKeepAlive;
+	}
+	public Boolean getSslEnabled() {
+		return sslEnabled;
+	}
+	public void setSslEnabled(Boolean sslEnabled) {
+		this.sslEnabled = sslEnabled;
+	}
+	public Boolean getSslInvalidHostNameAllowed() {
+		return sslInvalidHostNameAllowed;
+	}
+	public void setSslInvalidHostNameAllowed(Boolean sslInvalidHostNameAllowed) {
+		this.sslInvalidHostNameAllowed = sslInvalidHostNameAllowed;
+	}
+	public Boolean getAlwaysUseMBeans() {
+		return alwaysUseMBeans;
+	}
+	public void setAlwaysUseMBeans(Boolean alwaysUseMBeans) {
+		this.alwaysUseMBeans = alwaysUseMBeans;
+	}
+	public Integer getHeartbeatConnectTimeout() {
+		return heartbeatConnectTimeout;
+	}
+	public void setHeartbeatConnectTimeout(Integer heartbeatConnectTimeout) {
+		this.heartbeatConnectTimeout = heartbeatConnectTimeout;
+	}
+	public Integer getHeartbeatSocketTimeout() {
+		return heartbeatSocketTimeout;
+	}
+	public void setHeartbeatSocketTimeout(Integer heartbeatSocketTimeout) {
+		this.heartbeatSocketTimeout = heartbeatSocketTimeout;
+	}
+	public Integer getMinHeartbeatFrequency() {
+		return minHeartbeatFrequency;
+	}
+	public void setMinHeartbeatFrequency(Integer minHeartbeatFrequency) {
+		this.minHeartbeatFrequency = minHeartbeatFrequency;
+	}
+	public Integer getHeartbeatFrequency() {
+		return heartbeatFrequency;
+	}
+	public void setHeartbeatFrequency(Integer heartbeatFrequency) {
+		this.heartbeatFrequency = heartbeatFrequency;
+	}
+	public Integer getLocalThreshold() {
+		return localThreshold;
+	}
+	public void setLocalThreshold(Integer localThreshold) {
+		this.localThreshold = localThreshold;
+	}
+	public String getAuthenticationDatabase() {
+		return authenticationDatabase;
+	}
+	public void setAuthenticationDatabase(String authenticationDatabase) {
+		this.authenticationDatabase = authenticationDatabase;
+	}
+
+	public String getUri() {
+		return uri;
+	}
+
+	public void setUri(String uri) {
+		this.uri = uri;
+	}
+}
+
+package com.uhc.ei.planlibrary.config;
+
+import com.mongodb.MongoClientSettings;
+import com.mongodb.MongoCredential;
+import com.mongodb.ServerAddress;
+import com.mongodb.client.MongoClients;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
+import org.springframework.data.mongodb.MongoDatabaseFactory;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.SimpleMongoClientDatabaseFactory;
+import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.util.StringUtils;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+@Configuration
+@EnableTransactionManagement
+@EnableMongoRepositories(basePackages = {"com.uhc.ei.planlibrary.mongodb.domain",
+        "com.uhc.ei.planlibrary.mongodb.repo"}, mongoTemplateRef = "mongoTemplate")
+public class MongoDbConfig {
+
+    private static final Logger logger = LoggerFactory.getLogger(MongoDbConfig.class);
+
+    // Override the default MongoDbFacotry Bean in the container
+    @Bean("mongoDbFactory")
+    @Autowired
+    @Primary
+    public MongoDatabaseFactory mongoDbFactory(MongoSettingsProperties properties) {
+        // connection authentication
+        if (!StringUtils.hasText(properties.getUri())){
+            MongoCredential mongoCredential = null;
+            if (properties.getUsername() != null) {
+                mongoCredential = MongoCredential.createScramSha1Credential(properties.getUsername(),
+                        properties.getAuthenticationDatabase() != null ? properties.getAuthenticationDatabase()
+                                : properties.getDatabase(),
+                        properties.getPassword().toCharArray());
+            }
+
+            List<ServerAddress> serverAddresses = new ArrayList<ServerAddress>();
+            for (String address : properties.getAddress()) {
+                String[] hostAndPort = address.split(":");
+                String host = hostAndPort[0];
+                Integer port = Integer.parseInt(hostAndPort[1]);
+                ServerAddress serverAddress = new ServerAddress(host, port);
+                serverAddresses.add(serverAddress);
+            }
+            MongoClientSettings settings = MongoClientSettings.builder().credential(mongoCredential)
+
+                    .applyToSocketSettings(
+                            builder -> builder.readTimeout(properties.getSocketTimeout().intValue(), TimeUnit.MILLISECONDS)
+                                    .connectTimeout(properties.getConnectTimeout().intValue(), TimeUnit.MILLISECONDS))
+                    .applyToClusterSettings(builder -> builder
+                            .hosts(serverAddresses)
+                            .requiredReplicaSetName(properties.getReplicaSet()))
+                    .build();
+
+
+            com.mongodb.client.MongoClient mongoClient= MongoClients.create(settings);
+
+            MongoDatabaseFactory mongoDbFactory = new SimpleMongoClientDatabaseFactory(mongoClient,  properties.getDatabase());
+            return mongoDbFactory;
+        }
+        return new SimpleMongoClientDatabaseFactory(MongoClients.create(properties.getUri()), properties.getDatabase());
+    }
+
+    @Bean(name = "mongoTemplate")
+    @Primary
+    public MongoTemplate mongoTemplate(@Qualifier("mongoDbFactory") MongoDatabaseFactory mongoDatabaseFactory) {
+        return new MongoTemplate(mongoDatabaseFactory);
+    }
+}
+
+
+here are the files please suggest what could be causing the error
