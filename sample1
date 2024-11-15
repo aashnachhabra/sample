@@ -1,4 +1,7 @@
-Error creating bean with name 'pingSSOServiceImpl': Unsatisfied dependency expressed through field 'logService': Error creating bean with name 'logServiceImpl' defined in file [/usr/local/tomcat/webapps/planlibrary/WEB-INF/classes/com/uhc/ei/planlibrary/logservice/service/LogServiceImpl.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'logEventDaoImpl': Unsatisfied dependency expressed through field 'mongoTemplate': Error creating bean with name 'mongoTemplate' defined in class path resource [com/uhc/ei/planlibrary/config/MongoDbConfig.class]: Unsatisfied dependency expressed through method 'mongoTemplate' parameter 0: Error creating bean with name 'mongoDbFactory' defined in class path resource [com/uhc/ei/planlibrary/config/MongoDbConfig.class]: Unsatisfied dependency expressed through method 'mongoDbFactory' parameter 0: Error creating bean with name 'mongoSettingsProperties': Could not bind properties to 'MongoSettingsProperties' : prefix=spring.data.mongodb, ignoreInvalidFields=false, ignoreUnknownFields=true
+fix these vulnerabilities please
 
-
-getthing this now pls suggest fixes
+CVE-2019-20444
+CVE-2019-20445
+CVE-2022-23457
+CVE-2022-46364
+CVE-2024-28752
