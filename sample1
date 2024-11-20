@@ -1,6 +1,13 @@
-org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'requestMappingHandlerMapping' defined in class path resource [org/springframework/boot/autoconfigure/web/servlet/WebMvcAutoConfiguration$EnableWebMvcConfiguration.class]: Failed to introspect Class [org.springdoc.webmvc.api.MultipleOpenApiWebMvcResource] from ClassLoader [ParallelWebappClassLoader"
-Caused by: java.lang.NoClassDefFoundError: javax/servlet/http/HttpServletRequest\n\tat java.base/java.lang.Class.getDeclaredMethods0(Native Method)\n\tat java.base/java.lang.Class.privateGetDeclaredMethods(Class.java:3402)\n\tat java.base/java.lang.Class.getDeclaredMethods(Class.java:2504)\n\tat org.springframework.util.ReflectionUtils.getDeclaredMethods(ReflectionUtils.java:465)\n\t... 66 common frames omitted\nCaused by: java.lang.ClassNotFoundException: javax.servlet.http.HttpServletRequest\n\tat org.apache.catalina.loader.WebappClassLoaderBase.loadClass(WebappClassLoaderBase.java:1364)\n\tat org.apache.catalina.loader.WebappClassLoaderBase.loadClass(WebappClassLoaderBase.java:1173)\n\t... 70 common frames omitted
-org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'requestMappingHandlerMapping' defined in class path resource [org/springframework/boot/autoconfigure/web/servlet/WebMvcAutoConfiguration$EnableWebMvcConfiguration.class]: Failed to introspect Class [org.springdoc.webmvc.api.MultipleOpenApiWebMvcResource] from ClassLoader [ParallelWebappClassLoader
-Caused by: java.lang.NoClassDefFoundError: javax/servlet/http/HttpServletRequest\n\tat java.base/java.lang.Class.getDeclaredMethods0(Native Method)\n\tat java.base/java.lang.Class.privateGetDeclaredMethods(Class.java:3402)\n\tat java.base/java.lang.Class.getDeclaredMethods(Class.java:2504)\n\tat org.springframework.util.ReflectionUtils.getDeclaredMethods(ReflectionUtils.java:465)\n\t... 66 common frames omitted\nCaused by: java.lang.ClassNotFoundException: javax.servlet.http.HttpServletRequest\n\tat org.apache.catalina.loader.WebappClassLoaderBase.loadClass(WebappClassLoaderBase.java:1364)\n\tat org.apache.catalina.loader.WebappClassLoaderBase.loadClass(WebappClassLoaderBase.java:1173)\n\t... 70 common frames omitted
+function validatePlans() {
+let checkedArray = datatable.getRows();
+for (var i = 0; i < checkedArray.length; i++) {
+        if (checkedArray[i][0].value === 'true') {
+        if(checkedArray[i][6].content !== 'Withdrawn')
+        $("#validatePlansCfrmBoxModal").modal("toggle");
+        else
+        $("#cannotValidateModal").modal("toggle")
+    }
+}
+}
 
-getting these errors on gcp not on local pls fix
+i can select multiple plans but if any of the plans have status withdrawn i want to show cannotValidateModal modal and if none are withdrawn status then show validatePlansCfrmBoxModal. Please fix the above function 
