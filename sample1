@@ -1,28 +1,104 @@
-function validatePlans() {
-   let checkedArray = datatable.getRows();
-   let hasWithdrawn = false;
-   for (var i = 0; i < checkedArray.length; i++) {
-       if (checkedArray[i][0].value === 'true') {
-           if (checkedArray[i][6].content === 'Withdrawn') {
-               hasWithdrawn = true;
-               break;
-           }
-       }
-   }
-   if (hasWithdrawn) {
-   document.getElementById("validatePlansCfrmBoxModalBody").innerHTML = "Are you sure you want to send all selected plan(s) to validate..? Note : Validation won't be performed on plans selected that are in a Withdrawn status"
-   $("#validatePlansCfrmBoxModal").modal("toggle");
-   } else {
-    document.getElementById("validatePlansCfrmBoxModalBody").innerHTML = "Are you sure you want to send all selected plan(s) to validate..?"
-       $("#validatePlansCfrmBoxModal").modal("toggle");
-   }
+function buildDatatable(inputdata) {
+    let checkFlag = false;
+    const datatable = new DataTable('#datatable', {
+        columns: [
+
+            {
+                name: 'Plan AssignmentId',
+                id: 'planManagementId',
+                editable: false,
+                dropdown: false,
+            },
+            {
+                name: 'Plan Code',
+                id: 'planCode',
+                editable: false,
+            },
+            {
+                name: 'COC Series',
+                id: 'cocSeries',
+                editable: false,
+            },
+            {
+                name: 'State',
+                id: 'stateAbbr',
+                editable: false,
+            },
+            {
+                name: 'License',
+                id: 'licenceCode',
+                editable: false,
+            },
+            {
+                name: 'Plan Status',
+                id: 'planStatus',
+                editable: false,
+            },
+            {
+                name: 'Sent To COM360?',
+                id: 'sentToCOM360',
+                editable: false
+            },
+            {
+                name: 'Published?',
+                id: 'published',
+                editable: false
+            },
+            {
+                name: 'Validated?',
+                id: 'planValidateStatus',
+                editable: false
+            },
+            {
+                name: 'Last Modified On',
+                id: 'lastModifiedOn',
+                editable: false,
+            },
+            {
+                name: 'Version',
+                id: 'version',
+                editable: false,
+            },
+            {
+                name: 'Parent Plan AssignmentId',
+                id: 'parentPlanManagementId',
+                hidden: true
+            },
+        ],
+        events: {
+            onCheckRow: () => {
+                let arrayrow = datatable.getRows();
+                for (var i = 0; i < arrayrow.length; i++) {
+                    arrayrow[i][0].value = "false";
+                }
+                this.checkedRows = this.datatable.rowmanager.getCheckedRows();
+
+                console.log("checked rows::::" + this.checkedRows);
+
+                if (this.checkedRows.length <= 0) {
+                    disabledButtons();
+                } else {
+                    for (var i = 0; i < this.checkedRows.length; i++) {
+                        arrayrow[this.checkedRows[i]][0].value = "true";
+                    }
+                    enableButtons();
+                }
+            }
+        },
+        data: inputdata,
+        checkboxColumn: true,
+        id: "planManagementId",
+        inlineFilters: true,
+        layout: 'fluid',
+        serialNoColumn: false,
+        noDataMessage: 'Awe Snap! No results returned. Please update your search criteria then try again.'
+    });
+    datatable.style.setStyle(`.dt-cell__content .dt-cell__content--header-0`, { padding: '0' });
+    datatable.style.setStyle(`.dt-cell--header .dt-cell__content`, { overflow: 'visible' });
+    datatable.style.setStyle(`.dt-cell__content--col-0`, { overflow: 'visible' });
+    datatable.style.setStyle(`.dt-toast`, { top: '40px' });
+    datatable.style.setStyle(`.dt-scrollable`, { 'border-bottom': '1px solid #d1d8dd !important' });
+    window.datatable = datatable;
 }
 
- <div class="col">
-                    <div class="d-grid gap-2">
-                        <button type="button" class="btn btn-outline-primary" id="validateButton" disabled="disabled"
-                   		    onclick="validatePlans();" role="button"> Validate</button>
-                    </div>
-                </div>
-
-suppose all the selected plan or plans have status withdrawn i want to disable the validate button
+i have this function can u not here only add a condition where if all plan or plans are withdrawn status the validate button shpuld be disbaled
