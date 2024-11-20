@@ -1,7 +1,6 @@
-fix these vulnerabilities please
+org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'requestMappingHandlerMapping' defined in class path resource [org/springframework/boot/autoconfigure/web/servlet/WebMvcAutoConfiguration$EnableWebMvcConfiguration.class]: Failed to introspect Class [org.springdoc.webmvc.api.MultipleOpenApiWebMvcResource] from ClassLoader [ParallelWebappClassLoader"
+Caused by: java.lang.NoClassDefFoundError: javax/servlet/http/HttpServletRequest\n\tat java.base/java.lang.Class.getDeclaredMethods0(Native Method)\n\tat java.base/java.lang.Class.privateGetDeclaredMethods(Class.java:3402)\n\tat java.base/java.lang.Class.getDeclaredMethods(Class.java:2504)\n\tat org.springframework.util.ReflectionUtils.getDeclaredMethods(ReflectionUtils.java:465)\n\t... 66 common frames omitted\nCaused by: java.lang.ClassNotFoundException: javax.servlet.http.HttpServletRequest\n\tat org.apache.catalina.loader.WebappClassLoaderBase.loadClass(WebappClassLoaderBase.java:1364)\n\tat org.apache.catalina.loader.WebappClassLoaderBase.loadClass(WebappClassLoaderBase.java:1173)\n\t... 70 common frames omitted
+org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'requestMappingHandlerMapping' defined in class path resource [org/springframework/boot/autoconfigure/web/servlet/WebMvcAutoConfiguration$EnableWebMvcConfiguration.class]: Failed to introspect Class [org.springdoc.webmvc.api.MultipleOpenApiWebMvcResource] from ClassLoader [ParallelWebappClassLoader
+Caused by: java.lang.NoClassDefFoundError: javax/servlet/http/HttpServletRequest\n\tat java.base/java.lang.Class.getDeclaredMethods0(Native Method)\n\tat java.base/java.lang.Class.privateGetDeclaredMethods(Class.java:3402)\n\tat java.base/java.lang.Class.getDeclaredMethods(Class.java:2504)\n\tat org.springframework.util.ReflectionUtils.getDeclaredMethods(ReflectionUtils.java:465)\n\t... 66 common frames omitted\nCaused by: java.lang.ClassNotFoundException: javax.servlet.http.HttpServletRequest\n\tat org.apache.catalina.loader.WebappClassLoaderBase.loadClass(WebappClassLoaderBase.java:1364)\n\tat org.apache.catalina.loader.WebappClassLoaderBase.loadClass(WebappClassLoaderBase.java:1173)\n\t... 70 common frames omitted
 
-CVE-2019-20444
-CVE-2019-20445
-CVE-2022-23457
-CVE-2022-46364
-CVE-2024-28752
+getting these errors on gcp not on local pls fix
