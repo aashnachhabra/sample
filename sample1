@@ -1,17 +1,28 @@
+function validatePlans() {
+   let checkedArray = datatable.getRows();
+   let hasWithdrawn = false;
+   for (var i = 0; i < checkedArray.length; i++) {
+       if (checkedArray[i][0].value === 'true') {
+           if (checkedArray[i][6].content === 'Withdrawn') {
+               hasWithdrawn = true;
+               break;
+           }
+       }
+   }
+   if (hasWithdrawn) {
+   document.getElementById("validatePlansCfrmBoxModalBody").innerHTML = "Are you sure you want to send all selected plan(s) to validate..? Note : Validation won't be performed on plans selected that are in a Withdrawn status"
+   $("#validatePlansCfrmBoxModal").modal("toggle");
+   } else {
+    document.getElementById("validatePlansCfrmBoxModalBody").innerHTML = "Are you sure you want to send all selected plan(s) to validate..?"
+       $("#validatePlansCfrmBoxModal").modal("toggle");
+   }
+}
 
-<div class="form-group">
-                <label for="planStatus" class="required">Plan Status</label>
-                <select class="form-select" ng-model="requestBody.planDetails.planStatus" id="planStatus"
-                        name="planStatus" ng-disabled="requestBody.parentPlanAssignmentID != null">
-                    <option value="">Select...</option>
-                    <option
-                            ng-repeat="(key, value) in portfolioEditorDDMapResponse.planStatusMap"
-                            ng-selected="requestBody.planDetails.planStatus == value" value="{{value}}">{{value}}
-                    </option>
-                </select>
-            </div>
+ <div class="col">
+                    <div class="d-grid gap-2">
+                        <button type="button" class="btn btn-outline-primary" id="validateButton" disabled="disabled"
+                   		    onclick="validatePlans();" role="button"> Validate</button>
+                    </div>
+                </div>
 
-<button type="button" class="btn btn-outline-primary" ng-cloak ng-show="requestBody.planAssignmentID != null" ng-click="sendToValidate()">Validate
-		                    </button>
-
-if planstatus is changed to Withdrawn i want to disable this validate button and its not Withdrawn then enable it
+suppose all the selected plan or plans have status withdrawn i want to disable the validate button
