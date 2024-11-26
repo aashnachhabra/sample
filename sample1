@@ -1,6 +1,26 @@
-    public void parse(File file) throws FileNotFoundException {
-        CompilationUnit cu = JavaParser.parse(file);
-        cu.accept(new ClassVisitor(), null);
+    public List<MethodDto> getMethods(CodeDocument codeDocument){
+        List<MethodDto> methods = new ArrayList<>();
+        String[] chunks = codeDocument.getCode().split("\\b(public|protected|private|static)\\b");
+        for (String chunk : chunks) {
+            // Skip chunks that contain class or interface definitions
+            if (chunk.contains("class") || chunk.contains("interface")) {
+                continue;
+            }
+            // Check if the chunk matches the method pattern
+            if (chunk.contains("(") && chunk.contains(")") && chunk.contains("{") && chunk.contains("}")) {
+                int lastIndex = chunk.lastIndexOf('}');
+                if (lastIndex != -1) {
+                    chunk = chunk.substring(0, lastIndex + 1);
+                }
+                MethodDto methodDto = new MethodDto();
+                methodDto.setParentClassName(codeDocument.getFileName());
+                //methodDto.setDocumentation(getDocumentationForMethod(chunk));
+                //methodDto.setVector(generateEmbeddingService.generateVector(methodDto.getDocumentation()));
+                methodDto.setCode(chunk);
+                methods.add(methodDto);
+            }
+        }
+        return methods;
     }
 
-same error here
+can u make this code using java parser
