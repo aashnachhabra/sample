@@ -1,7 +1,56 @@
-I have to give feedback for my manager, he works in software engineering, my director requested for it. I have to answer the following questions. Please suggest some answer short and to the point in simple language. It should not reflect very negatively
+package com.optum.cirrus.isl.altusgenie.utils;
+import com.github.javaparser.JavaParser;
+import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.body.MethodDeclaration;
+import com.optum.cirrus.isl.altusgenie.model.v1.CodeDocument;
+import com.optum.cirrus.isl.altusgenie.service.DocumentService;
+import lombok.AllArgsConstructor;
 
-Please describe the nature of the work I did with/for you.
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-Based on your observations, what did I do well?
+@AllArgsConstructor
+public class MethodExtractor {
 
-What could I have done better?
+    private static final String METHOD_REGEX = "\\w+\\s+\\w+\\s*\\([^)]*\\)\\s*\\{[^}]*\\}";
+    private static DocumentService documentService;
+    public static List<String> extractMethods(String javaFileContent) {
+        List<String> methods = new ArrayList<>();
+        String[] chunks = javaFileContent.split("\\b(public|protected|private|static)\\b");
+        for (String chunk : chunks) {
+            // Skip chunks that contain class or interface definitions
+            if (chunk.contains("class") || chunk.contains("interface")) {
+                continue;
+            }
+            // Check if the chunk matches the method pattern
+            if (chunk.contains("(") && chunk.contains(")") && chunk.contains("{") && chunk.contains("}")) {
+                methods.add(chunk);
+            }
+        }
+
+        return methods;
+    }
+    public static void main(String[] args) {
+        List<CodeDocument> codeDocuments = documentService.getAllDocuments();
+        Integer cnt =0;
+        for(CodeDocument codeDocument : codeDocuments) {
+            String javaFileContent = codeDocument.getCode();
+            System.out.println("filename"+codeDocument.getFileName());
+            List<String> methods = extractMethods(javaFileContent);
+            for (String method : methods) {
+                System.out.println(method);
+                System.out.println("--------------------------------------------------");
+            }
+            cnt++;
+            if(cnt>=5) {
+                break;
+            }
+        }
+    }
+}
+
+
+can u implement the extracting here using java parser or any other chunking library
