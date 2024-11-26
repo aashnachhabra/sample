@@ -1,2 +1,6 @@
-/Users/achhab16/Desktop/altus_genie/app/src/main/java/com/optum/cirrus/isl/altusgenie/utils/MethodExtractor.java:23:57
-java: non-static method parse(java.lang.String) cannot be referenced from a static context
+    public void parse(File file) throws FileNotFoundException {
+        CompilationUnit cu = JavaParser.parse(file);
+        cu.accept(new ClassVisitor(), null);
+    }
+
+same error here
