@@ -1,26 +1,25 @@
-    public List<MethodDto> getMethods(CodeDocument codeDocument){
-        List<MethodDto> methods = new ArrayList<>();
-        String[] chunks = codeDocument.getCode().split("\\b(public|protected|private|static)\\b");
-        for (String chunk : chunks) {
-            // Skip chunks that contain class or interface definitions
-            if (chunk.contains("class") || chunk.contains("interface")) {
-                continue;
+public CodeDocumentProcessResponse processCodeDocuments(List<String> filePaths) {
+        System.out.println("Entering processDocuments");
+        CodeDocumentProcessResponse response = new CodeDocumentProcessResponse();
+        for (String filePath : filePaths) {
+            try {
+                System.out.println("Processing Document with file path" + filePath);
+                CodeDocument document = new CodeDocument();
+                document.setFileName(filePath.substring(filePath.lastIndexOf("/") + 1));
+                document.setFileType("Code");
+                document.setDocumentation(getDocumentationUsingOpenAi(filePath, document));
+                document.setVector(generateEmbeddingService.generateVector(document.getDocumentation()));
+                codeDocumentRepository.save(document);
+                response.addProcessedFile(filePath);
+            } catch (Exception e) {
+                e.printStackTrace();
+                response.addUnprocessedFile(filePath);
             }
-            // Check if the chunk matches the method pattern
-            if (chunk.contains("(") && chunk.contains(")") && chunk.contains("{") && chunk.contains("}")) {
-                int lastIndex = chunk.lastIndexOf('}');
-                if (lastIndex != -1) {
-                    chunk = chunk.substring(0, lastIndex + 1);
-                }
-                MethodDto methodDto = new MethodDto();
-                methodDto.setParentClassName(codeDocument.getFileName());
-                //methodDto.setDocumentation(getDocumentationForMethod(chunk));
-                //methodDto.setVector(generateEmbeddingService.generateVector(methodDto.getDocumentation()));
-                methodDto.setCode(chunk);
-                methods.add(methodDto);
-            }
+
         }
-        return methods;
+        System.out.println("Exiting processDocuments");
+        return response;
     }
 
-can u make this code using java parser
+currently  i have this function which is generating vector based on the documentation created however my code document has another thing called code now i want to vectorize based on the code
+please rewrite this function. Name the function as processCode
