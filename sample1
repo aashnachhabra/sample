@@ -21,5 +21,31 @@ public CodeDocumentProcessResponse processCodeDocuments(List<String> filePaths) 
         return response;
     }
 
+package com.optum.cirrus.isl.altusgenie.model.v1;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.optum.cirrus.isl.altusgenie.constants.Constants;
+import lombok.Data;
+import org.bson.codecs.pojo.annotations.BsonId;
+import org.bson.codecs.pojo.annotations.BsonProperty;
+import org.bson.types.ObjectId;
+
+import java.util.List;
+
+@Data
+@org.springframework.data.mongodb.core.mapping.Document(collection = Constants.MONGO_CODE_DOCUMENT_COLLECTION_NAME)
+public class CodeDocument {
+
+    @BsonProperty("_id")
+    @BsonId
+    ObjectId id;
+    private String fileName;
+    private String documentation;
+    private String code;
+    private String fileType;
+    @JsonIgnore
+    private List<Double> vector;
+}
+
 currently  i have this function which is generating vector based on the documentation created however my code document has another thing called code now i want to vectorize based on the code
-please rewrite this function. Name the function as processCode
+please rewrite this function. Name the function as processCode. I have provided the interface currently vector is set based on code now replace it with vector generated based on code using getCode
