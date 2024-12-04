@@ -30,5 +30,5 @@
                 });
             </script>
 
-so i am generating a table here i have added a new key called columnNumbers which is a list of integers. I need to color that column red whichever number is in the array.
+so i am generating a table here i have added a new key called columnNumbers in each row ie spgReportObj.columnNumbers  which is a list of integers. I need to color that column red whichever number is in the array.
 eg [1] so 1st column of that row is to be colored background as red and text as white. if [] then no columns need to be updated. implement this
