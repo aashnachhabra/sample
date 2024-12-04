@@ -1,51 +1,34 @@
-public CodeDocumentProcessResponse processCodeDocuments(List<String> filePaths) {
-        System.out.println("Entering processDocuments");
-        CodeDocumentProcessResponse response = new CodeDocumentProcessResponse();
-        for (String filePath : filePaths) {
-            try {
-                System.out.println("Processing Document with file path" + filePath);
-                CodeDocument document = new CodeDocument();
-                document.setFileName(filePath.substring(filePath.lastIndexOf("/") + 1));
-                document.setFileType("Code");
-                document.setDocumentation(getDocumentationUsingOpenAi(filePath, document));
-                document.setVector(generateEmbeddingService.generateVector(document.getDocumentation()));
-                codeDocumentRepository.save(document);
-                response.addProcessedFile(filePath);
-            } catch (Exception e) {
-                e.printStackTrace();
-                response.addUnprocessedFile(filePath);
-            }
+<script>
 
-        }
-        System.out.println("Exiting processDocuments");
-        return response;
-    }
+                var spgReportData = [
+                    <c:forEach items="${spgReportDataList}" var="spgReportObj">
+                        ["${spgReportObj.planCode}", "${spgReportObj.cocSeries}", "${spgReportObj.state}", "${spgReportObj.productFamily}",
+                        "${spgReportObj.changeType}", "${spgReportObj.benefitCategory}", "${spgReportObj.levelValue}", "${spgReportObj.tier}",
+                        "${spgReportObj.oldValue}", "${spgReportObj.newValue}", "${spgReportObj.dedOldValue}", "${spgReportObj.dedNewValue}",
+                        "${spgReportObj.coinsOldValue}", "${spgReportObj.coinsNewValue}", "${spgReportObj.copayOldValue}",
+                        "${spgReportObj.copayNewValue}", "${spgReportObj.podOldValue}", "${spgReportObj.podNewValue}",
+                        "${spgReportObj.minCopayOldValue}","${spgReportObj.minCopayNewValue}",
+                        "${spgReportObj.maxCopayOldValue}","${spgReportObj.maxCopayNewValue}"],
+                    </c:forEach>
+                ];
+                const spgReportContainer = document.querySelector('#spgReportTable');
 
-package com.optum.cirrus.isl.altusgenie.model.v1;
+                const spgReportHot = new Handsontable(spgReportContainer, {
+                    data: spgReportData,
+                    rowHeaders: false,
+                    colHeaders: ['Plan Code', 'COC Series', 'State', 'Product Family', 'Change Type', 'Benefit Category', 'Level Value',
+                        'Tier', 'Old Value', 'New Value', 'DED Old Value', 'DED New Value', 'Coins Old Value', 'Coins New Value', 'Copay Old Value',
+                        'Copay New Value', 'POD Old Value', 'POD New Value', 'Min Copay Old Value', 'Min Copay New Value',
+                        'Max Copay Old Value', 'Max Copay New Value'],
+                    height: 'auto',
+                    autoWrapRow: true,
+                    autoWrapCol: true,
+                    readOnly: true,
+                    dropdownMenu: true,
+                    filters: true,
+                    licenseKey: '568da-e01fd-0b795-74d1d-4ba3c' // for non-commercial use only
+                });
+            </script>
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.optum.cirrus.isl.altusgenie.constants.Constants;
-import lombok.Data;
-import org.bson.codecs.pojo.annotations.BsonId;
-import org.bson.codecs.pojo.annotations.BsonProperty;
-import org.bson.types.ObjectId;
-
-import java.util.List;
-
-@Data
-@org.springframework.data.mongodb.core.mapping.Document(collection = Constants.MONGO_CODE_DOCUMENT_COLLECTION_NAME)
-public class CodeDocument {
-
-    @BsonProperty("_id")
-    @BsonId
-    ObjectId id;
-    private String fileName;
-    private String documentation;
-    private String code;
-    private String fileType;
-    @JsonIgnore
-    private List<Double> vector;
-}
-
-currently  i have this function which is generating vector based on the documentation created however my code document has another thing called code now i want to vectorize based on the code
-please rewrite this function. Name the function as processCode. I have provided the interface currently vector is set based on code now replace it with vector generated based on code using getCode
+so i am generating a table here i have added a new key called columnNumbers which is a list of integers. I need to color that column red whichever number is in the array.
+eg [1] so 1st column of that row is to be colored background as red and text as white. if [] then no columns need to be updated. implement this
