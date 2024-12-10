@@ -1,34 +1,148 @@
-<script>
+package com.optum.cirrus.isl.altusgenie.service;
 
-                var spgReportData = [
-                    <c:forEach items="${spgReportDataList}" var="spgReportObj">
-                        ["${spgReportObj.planCode}", "${spgReportObj.cocSeries}", "${spgReportObj.state}", "${spgReportObj.productFamily}",
-                        "${spgReportObj.changeType}", "${spgReportObj.benefitCategory}", "${spgReportObj.levelValue}", "${spgReportObj.tier}",
-                        "${spgReportObj.oldValue}", "${spgReportObj.newValue}", "${spgReportObj.dedOldValue}", "${spgReportObj.dedNewValue}",
-                        "${spgReportObj.coinsOldValue}", "${spgReportObj.coinsNewValue}", "${spgReportObj.copayOldValue}",
-                        "${spgReportObj.copayNewValue}", "${spgReportObj.podOldValue}", "${spgReportObj.podNewValue}",
-                        "${spgReportObj.minCopayOldValue}","${spgReportObj.minCopayNewValue}",
-                        "${spgReportObj.maxCopayOldValue}","${spgReportObj.maxCopayNewValue}"],
-                    </c:forEach>
-                ];
-                const spgReportContainer = document.querySelector('#spgReportTable');
+import com.optum.cirrus.isl.altusgenie.config.ValueConfig;
+import com.optum.cirrus.isl.altusgenie.constants.Constants;
+import com.optum.cirrus.isl.altusgenie.constants.Prompts;
+import com.optum.cirrus.isl.altusgenie.data.v1.ChatGPTRequest;
+import com.optum.cirrus.isl.altusgenie.data.v1.Message;
+import com.optum.cirrus.isl.altusgenie.utils.ChatBotAssistant;
+import com.optum.cirrus.isl.altusgenie.utils.ChatSession;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.AllArgsConstructor;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
-                const spgReportHot = new Handsontable(spgReportContainer, {
-                    data: spgReportData,
-                    rowHeaders: false,
-                    colHeaders: ['Plan Code', 'COC Series', 'State', 'Product Family', 'Change Type', 'Benefit Category', 'Level Value',
-                        'Tier', 'Old Value', 'New Value', 'DED Old Value', 'DED New Value', 'Coins Old Value', 'Coins New Value', 'Copay Old Value',
-                        'Copay New Value', 'POD Old Value', 'POD New Value', 'Min Copay Old Value', 'Min Copay New Value',
-                        'Max Copay Old Value', 'Max Copay New Value'],
-                    height: 'auto',
-                    autoWrapRow: true,
-                    autoWrapCol: true,
-                    readOnly: true,
-                    dropdownMenu: true,
-                    filters: true,
-                    licenseKey: '568da-e01fd-0b795-74d1d-4ba3c' // for non-commercial use only
-                });
-            </script>
 
-so i am generating a table here i have added a new key called columnNumbers in each row ie spgReportObj.columnNumbers  which is a list of integers. I need to color that column red whichever number is in the array.
-eg [1] so 1st column of that row is to be colored background as red and text as white. if [] then no columns need to be updated. implement this
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.*;
+import java.util.stream.Collectors;
+
+@Service
+@AllArgsConstructor
+public class ChatService {
+
+    private final ChatBotAssistant chatBotAssistant;
+    private final DocumentService documentService;
+    private final ChatSession chatSession;
+    private ValueConfig valueConfig;
+    private final QueryTransformationService queryTransformationService;
+    @Autowired
+    private HttpServletRequest request;
+
+//    public String processQuery(String query) {
+//
+//        /** TRANSFORMING QUERY */
+//        if (valueConfig.getQueryTransformation().equals(Boolean.TRUE))
+//            query = queryTransformationService.transformQuery(query);
+//
+//        /** FETCHING QUERY CONTEXT FROM VECTOR DB */
+//        List<String> relatedDocumentation = documentService.getClosestDocumentsAccordingToQuery(query);
+//        String contextBasedOnquery = getRelatedDocumentationBasedOnTokenLimit(relatedDocumentation);
+//
+//        /** CREATING REQUEST FROM HISTORIC CHAT IF EXISTS */
+//        List<Message> requestMsg = addAndGetHistoricMessages(Message.builder().role(Constants.USER).content(query).build());
+//        if (!CollectionUtils.isEmpty(relatedDocumentation))
+//            requestMsg.add(Message.builder().role(Constants.ASSISTANT).content(contextBasedOnquery).build());
+//        ChatGPTRequest chatGPTRequest = ChatGPTRequest.builder()
+//                .messages(requestMsg)
+//                .build();
+//
+//        /** GETTING RESPONSE AND STORING RESPONSE IN SESSION*/
+//        Message chatResponse = chatBotAssistant.processRequest(chatGPTRequest);
+//        addAndGetHistoricMessages(chatResponse);
+//        return chatResponse.getContent();
+//    }
+    // sequential processing
+    public String processQuery(String query) {
+
+        /** TRANSFORMING QUERY */
+        if (valueConfig.getQueryTransformation().equals(Boolean.TRUE))
+            query = queryTransformationService.transformQuery(query);
+
+        /** FETCHING QUERY CONTEXT FROM VECTOR DB */
+        List<String> relatedDocumentation = documentService.getClosestDocumentsAccordingToQuery(query);
+        /** PROCESSING IN BATCHES OF 2 */
+        int batchSize = 2;
+        List<String> intermediateResponses = new ArrayList<>();
+        for (int i = 0; i < relatedDocumentation.size(); i += batchSize) {
+            List<String> batch = relatedDocumentation.subList(i, Math.min(i + batchSize, relatedDocumentation.size()));
+            String contextBasedOnquery = getRelatedDocumentationBasedOnTokenLimit(batch);
+
+            /** CREATING REQUEST FROM HISTORIC CHAT IF EXISTS */
+            List<Message> requestMsg = addAndGetHistoricMessages(Message.builder().role(Constants.USER).content(query).build());
+            if (!CollectionUtils.isEmpty(batch))
+                requestMsg.add(Message.builder().role(Constants.ASSISTANT).content(contextBasedOnquery).build());
+            ChatGPTRequest chatGPTRequest = ChatGPTRequest.builder()
+                    .messages(requestMsg)
+                    .build();
+
+            /** GETTING RESPONSE AND STORING INTERMEDIATE RESPONSE */
+            Message chatResponse = chatBotAssistant.processRequest(chatGPTRequest);
+            intermediateResponses.add(chatResponse.getContent());
+        }
+
+        /** FINAL PROCESSING OF INTERMEDIATE RESPONSES */
+        String finalContext = String.join("\n", intermediateResponses);
+        List<Message> finalRequestMsg  = new ArrayList<>();
+        finalRequestMsg.add(Message.builder().role(Constants.USER).content(query).build());
+        finalRequestMsg.add(Message.builder().role(Constants.ASSISTANT).content(finalContext).build());
+        finalRequestMsg.add(Message.builder().role(Constants.SYSTEM).content(Prompts.COMBINING_PROMPT).build());
+        ChatGPTRequest finalChatGPTRequest = ChatGPTRequest.builder()
+                .messages(finalRequestMsg)
+                .build();
+        /** GETTING FINAL RESPONSE AND STORING RESPONSE IN SESSION */
+        Message finalChatResponse = chatBotAssistant.processRequest(finalChatGPTRequest);
+        return finalChatResponse.getContent();
+    }
+
+    //using multi-threading
+    
+    private String getRelatedDocumentationBasedOnTokenLimit(List<String> relatedDocumentation) {
+        StringBuilder documentationContextBasedOnquery = new StringBuilder();
+        relatedDocumentation.forEach(document -> documentationContextBasedOnquery.append(document).append("\n"));
+        String trimmedRelatedDocumentation = documentationContextBasedOnquery.length() > Integer.valueOf(valueConfig.getGptModelTokenSize())
+                ? documentationContextBasedOnquery.substring(0, Integer.valueOf(valueConfig.getGptModelTokenSize()))
+                : documentationContextBasedOnquery.toString();
+
+        /* LOGGER **/
+        if (documentationContextBasedOnquery.length() > Integer.valueOf(valueConfig.getGptModelTokenSize())) {
+            System.out.println("Context got trimmed. Original Length: " + documentationContextBasedOnquery.length() + " Trimmed Length: " + trimmedRelatedDocumentation.length());
+        } else {
+            System.out.println("Context is intact. Length: " + documentationContextBasedOnquery.length());
+        }
+        return trimmedRelatedDocumentation;
+    }
+
+    public String processTestQuery(String query) {
+        List<Message> requestMsg = addAndGetHistoricMessages(Message.builder().role(Constants.USER).content(query).build());
+        ChatGPTRequest chatGPTRequest = ChatGPTRequest.builder()
+                .messages(requestMsg)
+                .build();
+        Message chatResponse = chatBotAssistant.processRequest(chatGPTRequest);
+        addAndGetHistoricMessages(chatResponse);
+        return chatResponse.getContent();
+    }
+
+    private List<Message> addAndGetHistoricMessages(Message currentMessage) {
+        if (CollectionUtils.isEmpty(chatSession.getHistoricMessages())) {
+            chatSession.getHistoricMessages().add(
+                    Message.builder().role(Constants.SYSTEM).content(Prompts.PROMPT_USED_FOR_QUERY_RESPONSE).build());
+        }
+        chatSession.getHistoricMessages().add(currentMessage);
+        List<Message> deepCopy = chatSession.getHistoricMessages().stream()
+                .map(message -> Message.builder()
+                        .role(message.getRole())
+                        .content(message.getContent())
+                        .build())
+                .collect(Collectors.toList());
+        return deepCopy;
+    }
+}
+
+In process query function i am processing 2 files at a time to open ai and getting a response, at last 3 documents are synthesized to give a single response. Issue with this approach is that it is sequential and will take time to process of multiple files are there. i want to implement the same logic using multi threading (Executor service - Thread)
+implement this for the given code
