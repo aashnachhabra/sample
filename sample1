@@ -61,6 +61,8 @@ public String processQuery(String query) {
         System.out.println("Final response: " + finalChatResponse.getContent());
         return finalChatResponse.getContent();
     }
-so basically i want tp modify this code. for example if theres too many files say 12 and finally i have 6 docs if batchsize is 2 so String finalContext = String.join("\n", intermediateResponses);
-this piece of string would be very long and there is a token limit so a lot of fruitful data might not be processed. So now what i want to do is keep doing the multi threading on these intermediate responses also so that at the end only one response is left and i return it to make this code more scalable for more filed
-
+so basically i want to modify this code. for example if theres too many files say 12 and finally i have 6 docs if batchsize is 2 so String finalContext = String.join("\n", intermediateResponses);
+this piece of string would be very long and there is a token limit so a lot of fruitful data might not be processed. So now what i want to do is keep doing the multi threading on these intermediate responses also so that at the end only one response is left and i return it to make this code more scalable for more files
+For ref relatedDocumentation is list of string of codes from the files and intermediate responses are responses from chatgpt based on the processing of those files in batch size of 2
+only create a recursive call for intermediate responses for eg intermediate responses =[res1, res2, res3] i want to send res 1 and res 2 to chatgpt for processing and get a response say res 4. Now i want to process res 4 and res 3 and get a final response and return that response. You might wanna handle cases for even and odd number of responses
+do not disturb the code before         executorService.shutdown(); and only do recursive for intermediate responses
