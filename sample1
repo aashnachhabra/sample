@@ -1,4 +1,4 @@
- public String processQuery(String query) {
+public String processQuery(String query) {
         ExecutorService executorService = Executors.newFixedThreadPool(valueConfig.getPoolSize());
         List<Future<String>> futures = new ArrayList<>();
         /** TRANSFORMING QUERY */
@@ -12,9 +12,11 @@
         int batchSize = valueConfig.getBatchSize();
         for (int i = 0; i < relatedDocumentation.size(); i += batchSize) {
             List<String> batch = relatedDocumentation.subList(i, Math.min(i + batchSize, relatedDocumentation.size()));
+            System.out.println("Processing Batch: " + batch);
             Callable<String> task = () -> {
                 /** Generate context for the current batch */
                 String contextBasedOnquery = getRelatedDocumentationBasedOnTokenLimit(batch);
+                System.out.println("Context for batch: " + contextBasedOnquery);
                 /** Prepare requestMsg within the lambda */
                 List<Message> requestMsg = new ArrayList<>();
                 requestMsg.add(Message.builder().role(Constants.USER).content(finalQuery).build());
@@ -27,6 +29,7 @@
                         .build();
                 /** Process request and return response */
                 Message chatResponse = chatBotAssistant.processRequest(chatGPTRequest);
+                System.out.println("Response for batch: " + chatResponse);
                 return chatResponse.getContent();
             };
             /** Submit task to ExecutorService */
@@ -44,6 +47,7 @@
         /** FINAL PROCESSING OF INTERMEDIATE RESPONSES */
         executorService.shutdown();
         String finalContext = String.join("\n", intermediateResponses);
+        System.out.println("Final synthesized context: " + finalContext);
         /** Create final request message */
         List<Message> finalRequestMsg = new ArrayList<>();
         finalRequestMsg.add(Message.builder().role(Constants.USER).content(finalQuery).build());
@@ -54,7 +58,9 @@
                 .build();
         /** GETTING FINAL RESPONSE AND STORING RESPONSE IN SESSION */
         Message finalChatResponse = chatBotAssistant.processRequest(finalChatGPTRequest);
+        System.out.println("Final response: " + finalChatResponse.getContent());
         return finalChatResponse.getContent();
     }
+so basically i want tp modify this code. for example if theres too many files say 12 and finally i have 6 docs if batchsize is 2 so String finalContext = String.join("\n", intermediateResponses);
+this piece of string would be very long and there is a token limit so a lot of fruitful data might not be processed. So now what i want to do is keep doing the multi threading on these intermediate responses also so that at the end only one response is left and i return it to make this code more scalable for more filed
 
-do in this code i want to log the files that are being processed in the batches and what the response was of each batch. Please add logger or sys out statements to relevant parts of this function
