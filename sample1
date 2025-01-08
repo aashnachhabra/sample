@@ -48,4 +48,4 @@
         return finalChatResponse.getContent();
     }
 
-can you implement multithreading using executor service and callable so that loop can process files parallalely without disturbing the logic of the function
+can you implement multithreading using executor service thread callable so that loop can process files parallalely without disturbing the logic of the function
