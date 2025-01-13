@@ -1,51 +1,8 @@
-    public String processQuery(String query) throws Exception {
+https://github.com/uhc-tech-employer-individual/altus_genie
+this is the repo path
 
-        /** TRANSFORMING QUERY */
-        if (valueConfig.getQueryTransformation().equals(Boolean.TRUE))
-            query = queryTransformationService.transformQuery(query);
+and pat u can put as achhab_uhg
 
-        /** FETCHING QUERY CONTEXT FROM VECTOR DB */
-        List<CodeDocument> response = retrievalService.getClosestDocumentsAccordingToQuery(query);
-        List<String> relatedDocumentation = response.stream()
-                                                    .map(CodeDocument::getCode)
-                                                    .collect(Collectors.toList());
-        System.out.println("codes "+relatedDocumentation);
-        /** PROCESSING IN BATCHES OF 2 */
-        int batchSize = valueConfig.getBatchSize();;
-        List<String> intermediateResponses = new ArrayList<>();
-        for (int i = 0; i < relatedDocumentation.size(); i += batchSize) {
-            List<String> batch = relatedDocumentation.subList(i, Math.min(i + batchSize, relatedDocumentation.size()));
-            String contextBasedOnquery = getRelatedDocumentationBasedOnTokenLimit(batch);
+modify the code 
 
-            /** CREATING REQUEST FROM HISTORIC CHAT IF EXISTS */
-            List<Message> requestMsg = addAndGetHistoricMessages(Message.builder().role(Constants.USER).content(query).build());
-            if (!CollectionUtils.isEmpty(batch))
-                requestMsg.add(Message.builder().role(Constants.ASSISTANT).content(contextBasedOnquery).build());
-            ChatGPTRequest chatGPTRequest = ChatGPTRequest.builder()
-                    .messages(requestMsg)
-                    .build();
 
-            /** GETTING RESPONSE AND STORING INTERMEDIATE RESPONSE */
-            Message chatResponse = chatBotAssistant.processRequest(chatGPTRequest);
-            intermediateResponses.add(chatResponse.getContent());
-        }
-
-        /** FINAL PROCESSING OF INTERMEDIATE RESPONSES */
-        String finalContext = String.join("\n", intermediateResponses);
-        List<Message> finalRequestMsg  = new ArrayList<>();
-        finalRequestMsg.add(Message.builder().role(Constants.USER).content(query).build());
-        finalRequestMsg.add(Message.builder().role(Constants.ASSISTANT).content(finalContext).build());
-        finalRequestMsg.add(Message.builder().role(Constants.SYSTEM).content(Prompts.COMBINING_PROMPT).build());
-        System.out.println("Final finalRequestMsg "+finalRequestMsg);
-        ChatGPTRequest finalChatGPTRequest = ChatGPTRequest.builder()
-                .messages(finalRequestMsg)
-                .build();
-        System.out.println("Final finalChatGPTRequest "+finalChatGPTRequest);
-        /** GETTING FINAL RESPONSE AND STORING RESPONSE IN SESSION */
-        Message finalChatResponse = chatBotAssistant.processRequest(finalChatGPTRequest);
-        System.out.println("Final finalChatResponse "+finalChatResponse);
-        addAndGetHistoricMessages(finalChatResponse);
-        return finalChatResponse.getContent();
-    }
-
-can you implement multithreading using executor service thread callable so that loop can process files parallalely without disturbing the logic of the function
