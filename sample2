@@ -2,3 +2,22 @@ Changed files:
 ["/.github/workflows/pr-merged.yml","/app/src/main/java/com/optum/cirrus/isl/altusgenie/constants/Constants.java"]
 
 this is printing however i need the base git path also same as example given above
+      # Step 3: Get the files changed in the merged PR
+      - name: Fetch Changed Files
+        id: changed-files
+        run: |
+          # Get the PR number
+          PR_NUMBER=$(echo "${{ github.event.pull_request.number }}")
+ 
+          # Get the list of changed files for the PR
+          FILES=$(gh pr view $PR_NUMBER --json files --jq '.files[].path')
+ 
+          # Define the base repository URL
+          BASE_URL="https://github.com/${{ github.repository }}/blob/${{ github.event.pull_request.head.ref }}"
+ 
+          # Convert file paths to absolute URLs
+          ABSOLUTE_PATHS=$(echo "${FILES}" | jq -R -s -c 'split("\n") | map(select(length > 0) | env.BASE_URL + .)')
+ 
+          # Output the absolute file paths
+          echo "${ABSOLUTE_PATHS}" > changed_files.json
+          echo "::set-output name=files::${ABSOLUTE_PATHS}"
