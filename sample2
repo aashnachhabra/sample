@@ -50,4 +50,62 @@ jobs:
           -H "Content-Type: application/json" \
           -d @changed_files.json
 
-along with filepaths im trying to send status also like added deleted modified however its coming as null please fix
+along with filepaths im trying
+
+to send status also like added deleted modified however its coming as null please fix
+
+
+fixed
+
+name: Get Changed Files on PR Merge
+
+on:
+  pull_request:
+    types:
+      - closed
+
+jobs:
+  get-changed-files:
+    if: github.event.pull_request.merged == true
+    runs-on: uhg-runner
+
+    steps:
+      # Step 1: Authenticate with GitHub using PAT
+      - name: Authenticate with GitHub
+        run: echo "${{ secrets.GH_PAT }}" | gh auth login --with-token
+
+      # Step 2: Check out the repository
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      # Step 3: Get the files changed in the merged PR
+      - name: Fetch Changed Files
+        id: changed-files
+        run: |
+          # Get the PR number
+          PR_NUMBER="${{ github.event.pull_request.number }}"
+          
+          # Get the list of changed files for the PR with their status
+          FILES=$(gh pr view $PR_NUMBER --json files --jq '.files[] | {path: .path, status: .changeType}')
+          
+          # Construct the absolute paths with file status
+          REPO_URL="https://github.com/uhc-tech-employer-individual/altus_genie/blob/main"
+          ABSOLUTE_PATHS=$(echo $FILES | jq -c --arg REPO_URL "$REPO_URL" '[{path: ($REPO_URL + "/" + .path), status: .status}]')
+          
+          # Output the list of absolute file paths with their status
+          echo "${ABSOLUTE_PATHS}" > changed_files.json
+          echo "::set-output name=files::${ABSOLUTE_PATHS}"
+
+      # Step 4: Print the changed files
+      - name: Display Changed Files
+        run: |
+          echo "Changed files:"
+          cat changed_files.json
+
+      # Step 5: Make an API call with the file paths
+      - name: Send Changed Files to API
+        run: |
+          curl -X POST http://localhost:8900/api/documents/modifiedFilePathsFromGithub \
+          -H "Content-Type: application/json" \
+          -d @changed_files.json
+
