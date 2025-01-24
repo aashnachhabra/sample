@@ -1,46 +1,50 @@
-https://github.com/uhc-tech-employer-individual/altus_genie
-this is the repo path
-
-and pat u can put as achhab_uhg
-
 name: Get Changed Files on PR Merge
-
+ 
 on:
   pull_request:
     types:
       - closed
-
+ 
 jobs:
   get-changed-files:
     if: github.event.pull_request.merged == true
-    runs-on: ubuntu-latest
-
+    runs-on: uhg-runner
+ 
     steps:
-      # Step 1: Check out the repository
+      # Step 1: Authenticate with GitHub using PAT
+      - name: Authenticate with GitHub
+        run: echo "${{ secrets.GH_PAT }}" | gh auth login --with-token
+      
+      # Step 2: Check out the repository
       - name: Checkout Repository
         uses: actions/checkout@v3
-
-      # Step 2: Get the files changed in the merged PR
+ 
+ 
+      # Step 3: Get the files changed in the merged PR
       - name: Fetch Changed Files
         id: changed-files
         run: |
           # Get the PR number
           PR_NUMBER=$(echo "${{ github.event.pull_request.number }}")
-
+ 
           # Get the list of changed files for the PR
           FILES=$(gh pr view $PR_NUMBER --json files --jq '.files[].path')
-
+ 
           # Output the changed files
           echo "${FILES}" > changed_files.txt
           echo "::set-output name=files::$FILES"
-
-      # Step 3: Print the changed files
+ 
+      # Step 4: Print the changed files
       - name: Display Changed Files
         run: |
           echo "Changed files:"
           cat changed_files.txt
-
-      # Step 4: (Optional) Use the files for additional actions
+ 
+      # Step 5: (Optional) Use the files for additional actions
       # You can use the `changed-files` output for further steps
 
-
+this is my workflows script, I need to make an api call to http://localhost:8900/api/documents/modifiedFilePathsFromGithub and send the filepaths in the form of list of strings with absolute github path for example 
+yeah aashna
+ 
+["https://github.com/uhc-tech-employer-individual/cirrus-apps_cirrus-core/aso-funding/backbone/src/main/java/com/optum/cirrus/asofunding/backbone/migration/AsoFundingBackboneMigrationDefinition.java"]
+ 
