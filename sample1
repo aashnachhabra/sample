@@ -1,15 +1,15 @@
 name: Get Changed Files on PR Merge
- 
+
 on:
   pull_request:
     types:
       - closed
- 
+
 jobs:
   get-changed-files:
     if: github.event.pull_request.merged == true
     runs-on: uhg-runner
- 
+
     steps:
       # Step 1: Authenticate with GitHub using PAT
       - name: Authenticate with GitHub
@@ -18,33 +18,56 @@ jobs:
       # Step 2: Check out the repository
       - name: Checkout Repository
         uses: actions/checkout@v3
- 
- 
+
       # Step 3: Get the files changed in the merged PR
       - name: Fetch Changed Files
         id: changed-files
         run: |
           # Get the PR number
           PR_NUMBER=$(echo "${{ github.event.pull_request.number }}")
- 
-          # Get the list of changed files for the PR
-          FILES=$(gh pr view $PR_NUMBER --json files --jq '.files[].path')
- 
-          # Output the changed files
-          echo "${FILES}" > changed_files.txt
-          echo "::set-output name=files::$FILES"
- 
+          
+          # Get the list of changed files for the PR in JSON array format
+          FILES=$(gh pr view $PR_NUMBER --json files --jq '[.files[].path]')
+          
+          # Construct the absolute paths
+          REPO_URL="https://github.com/uhc-tech-employer-individual/altus_genie/blob/main"
+          ABSOLUTE_PATHS=$(echo $FILES | jq -r --arg REPO_URL "$REPO_URL" '[.[] | $REPO_URL + "/" + .]')
+          
+          # Output the list of absolute file paths
+          echo "${ABSOLUTE_PATHS}" > changed_files.json
+          echo "::set-output name=files::${ABSOLUTE_PATHS}"
+
       # Step 4: Print the changed files
       - name: Display Changed Files
         run: |
           echo "Changed files:"
-          cat changed_files.txt
- 
-      # Step 5: (Optional) Use the files for additional actions
-      # You can use the `changed-files` output for further steps
+          cat changed_files.json
 
-this is my workflows script, I need to make an api call to http://localhost:8900/api/documents/modifiedFilePathsFromGithub and send the filepaths in the form of list of strings with absolute github path for example 
-yeah aashna
- 
-["https://github.com/uhc-tech-employer-individual/cirrus-apps_cirrus-core/aso-funding/backbone/src/main/java/com/optum/cirrus/asofunding/backbone/migration/AsoFundingBackboneMigrationDefinition.java"]
- 
+      # Step 5: Make an API call with the file paths
+      - name: Send Changed Files to API
+        run: |
+          curl -X POST http://localhost:8900/api/documents/modifiedFilePathsFromGithub \
+          -H "Content-Type: application/json" \
+          -d @changed_files.json
+
+this is my action yml code to retrieve modified files in a merge pr
+on running this command
+ gh pr view 45 --json files 
+response is
+{
+  "files": [
+    {
+      "path": "app/src/main/java/com/optum/cirrus/isl/altusgenie/constants/Constants_clone.java",
+      "additions": 48,
+      "deletions": 0
+    }
+  ]
+}
+
+but i am only sending path i want my reponse to send path , addditions and deletions
+
+example of current output
+["https://github.com/uhc-tech-employer-individual/altus_genie/blob/main/app/src/main/java/com/optum/cirrus/isl/altusgenie/constants/Constants_clone.java"]
+
+how i want 
+[{path : "filepath",additions: 2,deletions: 4}]
