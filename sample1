@@ -1,4 +1,3 @@
-fix
 name: Get Changed Files on PR Merge
 
 on:
@@ -31,7 +30,7 @@ jobs:
           REPO_URL="https://github.com/uhc-tech-employer-individual/altus_genie/blob/main"
           
           # Get the list of changed files with additions, deletions, and absolute paths
-          FILES=$(gh pr view $PR_NUMBER --json files --jq "[.files[] | {path: \"${REPO_URL}/\" + .path, additions: .additions, deletions: .deletions}]")
+          FILES=$(gh pr view $PR_NUMBER --json files --jq "[.files[] | {path: \"${REPO_URL}/\(.path)\", additions: .additions, deletions: .deletions}]")
           
           # Save the JSON array to a file
           echo "${FILES}" > changed_files.json
@@ -44,8 +43,10 @@ jobs:
           cat changed_files.json
 
       # Step 5: Make an API call with the file paths, additions, and deletions
-      - name: Send Changed Files to API
-        run: |
-          curl -X POST http://localhost:8900/api/documents/modifiedFilePathsFromGithub \
-          -H "Content-Type: application/json" \
-          -d @changed_files.json
+#      - name: Send Changed Files to API
+#        run: |
+#          curl -X POST http://localhost:8900/api/documents/modifiedFilePathsFromGithub \
+#          -H "Content-Type: application/json" \
+#          -d @changed_files.json
+
+this is mt yml workflows code to get the files modified in a closed pr. Now using additions and deletions i want to check which .java file is modified, which is newly added file and which file is comepleted deleted. how do i acheieve this
