@@ -1,1 +1,51 @@
 fix
+name: Get Changed Files on PR Merge
+
+on:
+  pull_request:
+    types:
+      - closed
+
+jobs:
+  get-changed-files:
+    if: github.event.pull_request.merged == true
+    runs-on: uhg-runner
+
+    steps:
+      # Step 1: Authenticate with GitHub using PAT
+      - name: Authenticate with GitHub
+        run: echo "${{ secrets.GH_PAT }}" | gh auth login --with-token
+      
+      # Step 2: Check out the repository
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      # Step 3: Get the files changed in the merged PR
+      - name: Fetch Changed Files
+        id: changed-files
+        run: |
+          # Get the PR number
+          PR_NUMBER=$(echo "${{ github.event.pull_request.number }}")
+          
+          # Define the base repository URL for constructing absolute paths
+          REPO_URL="https://github.com/uhc-tech-employer-individual/altus_genie/blob/main"
+          
+          # Get the list of changed files with additions, deletions, and absolute paths
+          FILES=$(gh pr view $PR_NUMBER --json files --jq "[.files[] | {path: \"${REPO_URL}/\" + .path, additions: .additions, deletions: .deletions}]")
+          
+          # Save the JSON array to a file
+          echo "${FILES}" > changed_files.json
+          echo "::set-output name=files::${FILES}"
+
+      # Step 4: Print the changed files
+      - name: Display Changed Files
+        run: |
+          echo "Changed files:"
+          cat changed_files.json
+
+      # Step 5: Make an API call with the file paths, additions, and deletions
+      - name: Send Changed Files to API
+        run: |
+          curl -X POST http://localhost:8900/api/documents/modifiedFilePathsFromGithub \
+          -H "Content-Type: application/json" \
+          -d @changed_files.json
