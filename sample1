@@ -71,4 +71,4 @@ jobs:
 
 so i have written this code to get the files changed in a pr and give their status whether its modified or added or deleted. modified can be easily identified but for delete and add i have used logic
 like if additions > 0 and deletions =0 and is equal to lines of code of that file then its an added file and if additions >0 but not equal to lines fo code but deletions still 0 then its modified and if deletions > 0 and additions = 0 equal to lines of code of that file then its deleted
-but if deletions is greater than 0 but not equal to lines of code and additions = 0 then its modified and last case is if additions > 0 and deletions > 0 then modified
+but if deletions is greater than 0 but not equal to lines of code and additions = 0 then its modified and last case is if additions > 0 and deletions > 0 then modified. However the above code is not giving me correct output, so please check if code is ok or if modifications are needed
