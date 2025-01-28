@@ -32,9 +32,29 @@ jobs:
           # Get the list of changed files with additions, deletions, and absolute paths
           FILES=$(gh pr view $PR_NUMBER --json files --jq "[.files[] | {path: \"${REPO_URL}/\(.path)\", additions: .additions, deletions: .deletions}]")
           
-          # Save the JSON array to a file
-          echo "${FILES}" > changed_files.json
-          echo "::set-output name=files::${FILES}"
+          # Fetch the content of each file to count the number of lines
+          FILES_STATUS=$(echo "${FILES}" | jq -r '.[] | .path' | while read -r file; do
+            # Fetch the file content
+            CONTENT=$(curl -s "${file}")
+            # Count the number of lines
+            LINE_COUNT=$(echo "${CONTENT}" | wc -l)
+            # Get additions and deletions
+            ADDITIONS=$(echo "${FILES}" | jq -r --arg file "${file}" '.[] | select(.path == $file) | .additions')
+            DELETIONS=$(echo "${FILES}" | jq -r --arg file "${file}" '.[] | select(.path == $file) | .deletions')
+            # Determine the status of the file
+            if [ "${ADDITIONS}" -gt 0 ] && [ "${DELETIONS}" -eq 0 ] && [ "${ADDITIONS}" -eq "${LINE_COUNT}" ]; then
+              STATUS="added"
+            elif [ "${ADDITIONS}" -eq 0 ] && [ "${DELETIONS}" -gt 0 ] && [ "${DELETIONS}" -eq "${LINE_COUNT}" ]; then
+              STATUS="deleted"
+            else
+              STATUS="modified"
+            fi
+            echo "{\"path\": \"${file}\", \"additions\": ${ADDITIONS}, \"deletions\": ${DELETIONS}, \"status\": \"${STATUS}\"}"
+          done | jq -s '.')
+          
+          # Save the JSON array to a file.
+          echo "${FILES_STATUS}" > changed_files.json
+          echo "::set-output name=files::${FILES_STATUS}"
 
       # Step 4: Print the changed files
       - name: Display Changed Files
@@ -42,11 +62,13 @@ jobs:
           echo "Changed files:"
           cat changed_files.json
 
-      # Step 5: Make an API call with the file paths, additions, and deletions
+      # Step 5: Make an API call with the file paths, additions, deletions, and status
 #      - name: Send Changed Files to API
 #        run: |
 #          curl -X POST http://localhost:8900/api/documents/modifiedFilePathsFromGithub \
 #          -H "Content-Type: application/json" \
 #          -d @changed_files.json
 
-this is mt yml workflows code to get the files modified in a closed pr. Now using additions and deletions i want to check which .java file is modified, which is newly added file and which file is comepleted deleted. how do i acheieve this
+so i have written this code to get the files changed in a pr and give their status whether its modified or added or deleted. modified can be easily identified but for delete and add i have used logic
+like if additions > 0 and deletions =0 and is equal to lines of code of that file then its an added file and if additions >0 but not equal to lines fo code but deletions still 0 then its modified and if deletions > 0 and additions = 0 equal to lines of code of that file then its deleted
+but if deletions is greater than 0 but not equal to lines of code and additions = 0 then its modified and last case is if additions > 0 and deletions > 0 then modified
