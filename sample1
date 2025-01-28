@@ -1,1 +1,70 @@
 fix
+name: Get Changed Files on PR Merge
+
+on:
+  pull_request:
+    types:
+      - closed
+
+jobs:
+  get-changed-files:
+    if: github.event.pull_request.merged == true
+    runs-on: uhg-runner
+
+    steps:
+      # Step 1: Authenticate with GitHub using PAT
+      - name: Authenticate with GitHub
+        run: echo "${{ secrets.GH_PAT }}" | gh auth login --with-token
+      
+      # Step 2: Check out the repository
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      # Step 3: Get the files changed in the merged PR
+      - name: Fetch Changed Files
+        id: changed-files
+        run: |
+          # Get the PR number
+          PR_NUMBER=$(echo "${{ github.event.pull_request.number }}")
+          
+          # Base URL for constructing absolute paths
+          REPO_URL="https://raw.githubusercontent.com/uhc-tech-employer-individual/altus_genie/main"
+          
+          # Get the list of changed files with additions and deletions
+          FILES=$(gh pr view $PR_NUMBER --json files --jq "[.files[] | {path: .path, additions: .additions, deletions: .deletions}]")
+          
+          # Initialize an empty array for JSON output
+          FILES_STATUS="[]"
+
+          # Process each file to determine its status
+          echo "${FILES}" | jq -c '.[]' | while read -r file_data; do
+            FILE_PATH=$(echo "${file_data}" | jq -r '.path')
+            ADDITIONS=$(echo "${file_data}" | jq -r '.additions')
+            DELETIONS=$(echo "${file_data}" | jq -r '.deletions')
+
+            # Fetch the file content to determine the line count
+            FILE_CONTENT=$(curl -s "${REPO_URL}/${FILE_PATH}")
+            LINE_COUNT=$(echo "${FILE_CONTENT}" | wc -l)
+
+            # Determine file status
+            if [ "${ADDITIONS}" -gt 0 ] && [ "${DELETIONS}" -eq 0 ] && [ "${ADDITIONS}" -eq "${LINE_COUNT}" ]; then
+              STATUS="added"
+            elif [ "${ADDITIONS}" -eq 0 ] && [ "${DELETIONS}" -gt 0 ] && [ "${DELETIONS}" -eq "${LINE_COUNT}" ]; then
+              STATUS="deleted"
+            else
+              STATUS="modified"
+            fi
+
+            # Append the result to FILES_STATUS
+            FILES_STATUS=$(echo "${FILES_STATUS}" | jq -c --argjson new_file "{path: \"${FILE_PATH}\", additions: ${ADDITIONS}, deletions: ${DELETIONS}, status: \"${STATUS}\"}" '. + [$new_file]')
+          done
+
+          # Save the JSON array to a file
+          echo "${FILES_STATUS}" > changed_files.json
+          echo "::set-output name=files::${FILES_STATUS}"
+
+      # Step 4: Print the changed files
+      - name: Display Changed Files
+        run: |
+          echo "Changed files:"
+          cat changed_files.json
