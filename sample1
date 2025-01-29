@@ -1,1 +1,42 @@
+- name: Fetch Changed Files
+  id: changed-files
+  run: |
+    # Get the PR number
+    PR_NUMBER=$(echo "${{ github.event.pull_request.number }}")
 
+    # Get the list of changed files with additions, deletions, and paths
+    FILES=$(gh pr view $PR_NUMBER --json files --jq "[.files[] | {path: .path, additions: .additions, deletions: .deletions}]")
+
+    # Debug: Print FILES variable
+    echo "FILES: ${FILES}"
+
+    FILES_STATUS=$(echo "${FILES}" | jq -c '.[]' | while read -r file_info; do
+      # Extract details
+      FILE_PATH=$(echo "$file_info" | jq -r '.path')
+      ADDITIONS=$(echo "$file_info" | jq -r '.additions')
+      DELETIONS=$(echo "$file_info" | jq -r '.deletions')
+
+      # Check if the file existed in the base (main) branch before the merge
+      BASE_EXISTS=$(git show origin/main:$FILE_PATH > /dev/null 2>&1 && echo "1" || echo "0")
+
+      # Check if the file exists in the head (after merge)
+      HEAD_EXISTS=$(test -f "$FILE_PATH" && echo "1" || echo "0")
+
+      # Determine file status
+      if [[ "$BASE_EXISTS" -eq 0 && "$HEAD_EXISTS" -eq 1 ]]; then
+        STATUS="added"
+      elif [[ "$BASE_EXISTS" -eq 1 && "$HEAD_EXISTS" -eq 0 ]]; then
+        STATUS="deleted"
+      elif [[ "$BASE_EXISTS" -eq 1 && "$HEAD_EXISTS" -eq 1 ]]; then
+        STATUS="modified"
+      else
+        STATUS="unknown"
+      fi
+
+      # Construct JSON output
+      echo "{\"path\": \"$FILE_PATH\", \"additions\": $ADDITIONS, \"deletions\": $DELETIONS, \"status\": \"$STATUS\"}"
+    done | jq -s '.')
+
+    # Save JSON output
+    echo "${FILES_STATUS}" > changed_files.json
+    echo "::set-output name=files::${FILES_STATUS}"
