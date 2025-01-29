@@ -1,4 +1,3 @@
-fix
 name: Get Changed Files on PR Merge
 
 on:
@@ -15,7 +14,7 @@ jobs:
       # Step 1: Authenticate with GitHub using PAT
       - name: Authenticate with GitHub
         run: echo "${{ secrets.GH_PAT }}" | gh auth login --with-token
-      
+
       # Step 2: Check out the repository
       - name: Checkout Repository
         uses: actions/checkout@v3
@@ -27,39 +26,36 @@ jobs:
           # Get the PR number
           PR_NUMBER=$(echo "${{ github.event.pull_request.number }}")
           
-          # Base URL for constructing absolute paths
-          REPO_URL="https://raw.githubusercontent.com/uhc-tech-employer-individual/altus_genie/main"
+          # Define the base repository URL for constructing absolute paths
+          REPO_URL="https://github.com/uhc-tech-employer-individual/altus_genie/blob/main"
           
-          # Get the list of changed files with additions and deletions
-          FILES=$(gh pr view $PR_NUMBER --json files --jq "[.files[] | {path: .path, additions: .additions, deletions: .deletions}]")
+          # Get the list of changed files with additions, deletions, and absolute paths
+          FILES=$(gh pr view $PR_NUMBER --json files --jq "[.files[] | {path: \"${REPO_URL}/\(.path)\", additions: .additions, deletions: .deletions}]")
           
-          # Initialize an empty array for JSON output
-          FILES_STATUS="[]"
-
-          # Process each file to determine its status
-          echo "${FILES}" | jq -c '.[]' | while read -r file_data; do
-            FILE_PATH=$(echo "${file_data}" | jq -r '.path')
-            ADDITIONS=$(echo "${file_data}" | jq -r '.additions')
-            DELETIONS=$(echo "${file_data}" | jq -r '.deletions')
-
-            # Fetch the file content to determine the line count
-            FILE_CONTENT=$(curl -s "${REPO_URL}/${FILE_PATH}")
-            LINE_COUNT=$(echo "${FILE_CONTENT}" | wc -l)
-
-            # Determine file status
-            if [ "${ADDITIONS}" -gt 0 ] && [ "${DELETIONS}" -eq 0 ] && [ "${ADDITIONS}" -eq "${LINE_COUNT}" ]; then
+          # Debug: Print the FILES variable
+          echo "FILES: ${FILES}"
+          
+          # Determine the status of each file based on additions and deletions.
+          FILES_STATUS=$(echo "${FILES}" | jq -r '.[] | .path' | while read -r file; do
+            # Get additions and deletions
+            ADDITIONS=$(echo "${FILES}" | jq -r --arg file "${file}" '.[] | select(.path == $file) | .additions')
+            DELETIONS=$(echo "${FILES}" | jq -r --arg file "${file}" '.[] | select(.path == $file) | .deletions')
+            # Check if the file exists in the base branch
+            BASE_EXISTS=$(git ls-tree -r main --name-only | grep -c "${file}")
+            # Check if the file exists in the head branch
+            HEAD_EXISTS=$(git ls-tree -r HEAD --name-only | grep -c "${file}")
+            # Determine the status of the file
+            if [ "${ADDITIONS}" -gt 0 ] && [ "${DELETIONS}" -eq 0 ] && [ "${BASE_EXISTS}" -eq 0 ]; then
               STATUS="added"
-            elif [ "${ADDITIONS}" -eq 0 ] && [ "${DELETIONS}" -gt 0 ] && [ "${DELETIONS}" -eq "${LINE_COUNT}" ]; then
+            elif [ "${ADDITIONS}" -eq 0 ] && [ "${DELETIONS}" -gt 0 ] && [ "${HEAD_EXISTS}" -eq 0 ]; then
               STATUS="deleted"
             else
               STATUS="modified"
             fi
-
-            # Append the result to FILES_STATUS
-            FILES_STATUS=$(echo "${FILES_STATUS}" | jq -c --argjson new_file "{path: \"${FILE_PATH}\", additions: ${ADDITIONS}, deletions: ${DELETIONS}, status: \"${STATUS}\"}" '. + [$new_file]')
-          done
-
-          # Save the JSON array to a file
+            echo "{\"path\": \"${file}\", \"additions\": ${ADDITIONS}, \"deletions\": ${DELETIONS}, \"status\": \"${STATUS}\"}"
+          done | jq -s '.')
+          
+          # Save the JSON array to a file.
           echo "${FILES_STATUS}" > changed_files.json
           echo "::set-output name=files::${FILES_STATUS}"
 
@@ -68,3 +64,12 @@ jobs:
         run: |
           echo "Changed files:"
           cat changed_files.json
+
+      # Step 5: Make an API call with the file paths, additions, deletions, and status
+#      - name: Send Changed Files to API
+#        run: |
+#          curl -X POST http://localhost:8900/api/documents/modifiedFilePathsFromGithub \
+#          -H "Content-Type: application/json" \
+#          -d @changed_files.json
+
+this is my code to identify added modified deleted file because just additions and deletions key alone was not sufficient. If additions > 0 and deletions = 0 it gives added but it can also be modified because if i add a line of code to existing file there it will have same condition so i added conditions tto check if it existed in head or base branch but it still seems to not be working. Please debug and lemme know fixes
