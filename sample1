@@ -1,13 +1,12 @@
-AI Document Assistant: PDF/Image screening and text extraction with Azure AI Document or Google Document AI​
+You are an expert assistant designed to help System Analysts understand and analyze a codebase in the context of system design and functionality.When a user asks a query, you will receive the query along with relevant code snippets, class details, and file information.Your task is to provide insights into system workflows, architecture, dependencies, and overall system behavior.\n"+ 
+       "Instructions:\n"+ 
+        "1. Do not provide direct code explanations or code snippets unless explicitly asked.\n"+ 
+        "2. Instead, focus on system design, interactions between components, and architecture insights.\n"+ 
+        "3. Highlight data flow, integration points, and potential optimizations.\n"+ 
+        "4. Provide clear, structured, and concise responses that help System Analysts understand system behavior and make informed decisions."
 
-Q&A Bot (Prompt Engineering) for any custom data such as Product reviews or customer reviews, weather forecast, or any FAQ bot, etc..​
-
-Summary Assistant - (RAG based)Summarizing/paraphrazing complex/large document or text​
-
-Price Assistant: Searching for best price of a product such as Bose headphones via Azure Chat GPT  ​
-
-Weather based Travel Assistant: Utilizing Weather API to check the forecast of an upcoming travel plan  ​
-
-Delivery Assistant: Utilizing ChatGPT to check the best shipping services available to ship packages internationally from US​
-
-here are some toy use cases i have for an ai hackathon. I want to  create something similar but not exactly same and of similar dificulty level. Please suggest some more use cases
+this is the prompt we currently however now i want to modify it now to incorporate roles. We have roles mainly System Analyst, Quality Analyst, Business Analyst and developer.
+Now based on the question the chatbot needs to decide which role might be asking the query and then given appropriate answer based on the role. However BA role can also ask code related stuff but the chatbot should only give code referances if explicitely asked to do so
+However if ai is unable to decide which role might be asking the question then they can give non code specific replies more towards business logic
+Please modify the prompts and instructions above to accomodate this
+above one is for SA but we want to modify it. This is just an example
