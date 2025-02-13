@@ -101,36 +101,122 @@ def main():
 if __name__ == '__main__':
     main()
 app.py of a project im trying to run but getting error 
-requests.exceptions.SSLError: (MaxRetryError("HTTPSConnectionPool(host='huggingface.co', port=443): Max retries exceeded with url: /hkunlp/instructor-xl/resolve/main/adapter_config.json (Caused by SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1018)')))"), '(Request ID: 6e4177ac-98b2-4ae2-8fbe-775b98568f7b)')
-Traceback:
-File "/Users/achhab16/Desktop/ask-multiple-pdfs/venv/lib/python3.13/site-packages/streamlit/runtime/scriptrunner/exec_code.py", line 121, in exec_func_with_error_handling
+2025-02-13 22:39:02.202 Examining the path of torch.classes raised:
+Traceback (most recent call last):
+  File "/Users/achhab16/Desktop/ask-multiple-pdfs/venv/lib/python3.13/site-packages/streamlit/watcher/local_sources_watcher.py", line 217, in get_module_paths
+    potential_paths = extract_paths(module)
+  File "/Users/achhab16/Desktop/ask-multiple-pdfs/venv/lib/python3.13/site-packages/streamlit/watcher/local_sources_watcher.py", line 210, in <lambda>
+    lambda m: list(m.__path__._path),
+                   ^^^^^^^^^^^^^^^^
+  File "/Users/achhab16/Desktop/ask-multiple-pdfs/venv/lib/python3.13/site-packages/torch/_classes.py", line 13, in __getattr__
+    proxy = torch._C._get_custom_class_python_wrapper(self.name, attr)
+RuntimeError: Tried to instantiate class '__path__._path', but it does not exist! Ensure that it is registered via torch::class_
+No sentence-transformers model found with name hkunlp/instructor-xl. Creating a new one with mean pooling.
+2025-02-13 22:39:22.079 Uncaught app execution
+Traceback (most recent call last):
+  File "/Users/achhab16/Desktop/ask-multiple-pdfs/venv/lib/python3.13/site-packages/urllib3/connectionpool.py", line 464, in _make_request
+    self._validate_conn(conn)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/Users/achhab16/Desktop/ask-multiple-pdfs/venv/lib/python3.13/site-packages/urllib3/connectionpool.py", line 1093, in _validate_conn
+    conn.connect()
+    ~~~~~~~~~~~~^^
+  File "/Users/achhab16/Desktop/ask-multiple-pdfs/venv/lib/python3.13/site-packages/urllib3/connection.py", line 741, in connect
+    sock_and_verified = _ssl_wrap_socket_and_match_hostname(
+        sock=sock,
+    ...<14 lines>...
+        assert_fingerprint=self.assert_fingerprint,
+    )
+  File "/Users/achhab16/Desktop/ask-multiple-pdfs/venv/lib/python3.13/site-packages/urllib3/connection.py", line 920, in _ssl_wrap_socket_and_match_hostname
+    ssl_sock = ssl_wrap_socket(
+        sock=sock,
+    ...<8 lines>...
+        tls_in_tls=tls_in_tls,
+    )
+  File "/Users/achhab16/Desktop/ask-multiple-pdfs/venv/lib/python3.13/site-packages/urllib3/util/ssl_.py", line 460, in ssl_wrap_socket
+    ssl_sock = _ssl_wrap_socket_impl(sock, context, tls_in_tls, server_hostname)
+  File "/Users/achhab16/Desktop/ask-multiple-pdfs/venv/lib/python3.13/site-packages/urllib3/util/ssl_.py", line 504, in _ssl_wrap_socket_impl
+    return ssl_context.wrap_socket(sock, server_hostname=server_hostname)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/ssl.py", line 455, in wrap_socket
+    return self.sslsocket_class._create(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        sock=sock,
+        ^^^^^^^^^^
+    ...<5 lines>...
+        session=session
+        ^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/ssl.py", line 1076, in _create
+    self.do_handshake()
+    ~~~~~~~~~~~~~~~~~^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/ssl.py", line 1372, in do_handshake
+    self._sslobj.do_handshake()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+ssl.SSLCertVerificationError: [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1018)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/achhab16/Desktop/ask-multiple-pdfs/venv/lib/python3.13/site-packages/urllib3/connectionpool.py", line 787, in urlopen
+    response = self._make_request(
+        conn,
+    ...<10 lines>...
+        **response_kw,
+    )
+  File "/Users/achhab16/Desktop/ask-multiple-pdfs/venv/lib/python3.13/site-packages/urllib3/connectionpool.py", line 488, in _make_request
+    raise new_e
+urllib3.exceptions.SSLError: [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1018)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/achhab16/Desktop/ask-multiple-pdfs/venv/lib/python3.13/site-packages/requests/adapters.py", line 667, in send
+    resp = conn.urlopen(
+        method=request.method,
+    ...<9 lines>...
+        chunked=chunked,
+    )
+  File "/Users/achhab16/Desktop/ask-multiple-pdfs/venv/lib/python3.13/site-packages/urllib3/connectionpool.py", line 841, in urlopen
+    retries = retries.increment(
+        method, url, error=new_e, _pool=self, _stacktrace=sys.exc_info()[2]
+    )
+  File "/Users/achhab16/Desktop/ask-multiple-pdfs/venv/lib/python3.13/site-packages/urllib3/util/retry.py", line 519, in increment
+    raise MaxRetryError(_pool, url, reason) from reason  # type: ignore[arg-type]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+urllib3.exceptions.MaxRetryError: HTTPSConnectionPool(host='huggingface.co', port=443): Max retries exceeded with url: /hkunlp/instructor-xl/resolve/main/adapter_config.json (Caused by SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1018)')))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/achhab16/Desktop/ask-multiple-pdfs/venv/lib/python3.13/site-packages/streamlit/runtime/scriptrunner/exec_code.py", line 121, in exec_func_with_error_handling
     result = func()
-File "/Users/achhab16/Desktop/ask-multiple-pdfs/venv/lib/python3.13/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 591, in code_to_exec
+  File "/Users/achhab16/Desktop/ask-multiple-pdfs/venv/lib/python3.13/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 591, in code_to_exec
     exec(code, module.__dict__)
     ~~~~^^^^^^^^^^^^^^^^^^^^^^^
-File "/Users/achhab16/Desktop/ask-multiple-pdfs/app.py", line 102, in <module>
+  File "/Users/achhab16/Desktop/ask-multiple-pdfs/app.py", line 102, in <module>
     main()
     ~~~~^^
-File "/Users/achhab16/Desktop/ask-multiple-pdfs/app.py", line 96, in main
+  File "/Users/achhab16/Desktop/ask-multiple-pdfs/app.py", line 96, in main
     vectorstore = get_vectorstore(text_chunks)
-File "/Users/achhab16/Desktop/ask-multiple-pdfs/app.py", line 39, in get_vectorstore
+  File "/Users/achhab16/Desktop/ask-multiple-pdfs/app.py", line 39, in get_vectorstore
     model = SentenceTransformer("hkunlp/instructor-xl")
-File "/Users/achhab16/Desktop/ask-multiple-pdfs/venv/lib/python3.13/site-packages/sentence_transformers/SentenceTransformer.py", line 320, in __init__
+  File "/Users/achhab16/Desktop/ask-multiple-pdfs/venv/lib/python3.13/site-packages/sentence_transformers/SentenceTransformer.py", line 320, in __init__
     modules = self._load_auto_model(
         model_name_or_path,
     ...<7 lines>...
         config_kwargs=config_kwargs,
     )
-File "/Users/achhab16/Desktop/ask-multiple-pdfs/venv/lib/python3.13/site-packages/sentence_transformers/SentenceTransformer.py", line 1538, in _load_auto_model
+  File "/Users/achhab16/Desktop/ask-multiple-pdfs/venv/lib/python3.13/site-packages/sentence_transformers/SentenceTransformer.py", line 1538, in _load_auto_model
     transformer_model = Transformer(
         model_name_or_path,
     ...<4 lines>...
         backend=self.backend,
     )
-File "/Users/achhab16/Desktop/ask-multiple-pdfs/venv/lib/python3.13/site-packages/sentence_transformers/models/Transformer.py", line 80, in __init__
+  File "/Users/achhab16/Desktop/ask-multiple-pdfs/venv/lib/python3.13/site-packages/sentence_transformers/models/Transformer.py", line 80, in __init__
     config, is_peft_model = self._load_config(model_name_or_path, cache_dir, backend, config_args)
                             ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-File "/Users/achhab16/Desktop/ask-multiple-pdfs/venv/lib/python3.13/site-packages/sentence_transformers/models/Transformer.py", line 121, in _load_config
+  File "/Users/achhab16/Desktop/ask-multiple-pdfs/venv/lib/python3.13/site-packages/sentence_transformers/models/Transformer.py", line 121, in _load_config
     find_adapter_config_file(
     ~~~~~~~~~~~~~~~~~~~~~~~~^
         model_name_or_path,
@@ -140,27 +226,27 @@ File "/Users/achhab16/Desktop/ask-multiple-pdfs/venv/lib/python3.13/site-package
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     )
     ^
-File "/Users/achhab16/Desktop/ask-multiple-pdfs/venv/lib/python3.13/site-packages/transformers/utils/peft_utils.py", line 88, in find_adapter_config_file
+  File "/Users/achhab16/Desktop/ask-multiple-pdfs/venv/lib/python3.13/site-packages/transformers/utils/peft_utils.py", line 88, in find_adapter_config_file
     adapter_cached_filename = cached_file(
         model_id,
     ...<12 lines>...
         _raise_exceptions_for_connection_errors=False,
     )
-File "/Users/achhab16/Desktop/ask-multiple-pdfs/venv/lib/python3.13/site-packages/transformers/utils/hub.py", line 403, in cached_file
+  File "/Users/achhab16/Desktop/ask-multiple-pdfs/venv/lib/python3.13/site-packages/transformers/utils/hub.py", line 403, in cached_file
     resolved_file = hf_hub_download(
         path_or_repo_id,
     ...<10 lines>...
         local_files_only=local_files_only,
     )
-File "/Users/achhab16/Desktop/ask-multiple-pdfs/venv/lib/python3.13/site-packages/huggingface_hub/utils/_validators.py", line 114, in _inner_fn
+  File "/Users/achhab16/Desktop/ask-multiple-pdfs/venv/lib/python3.13/site-packages/huggingface_hub/utils/_validators.py", line 114, in _inner_fn
     return fn(*args, **kwargs)
-File "/Users/achhab16/Desktop/ask-multiple-pdfs/venv/lib/python3.13/site-packages/huggingface_hub/file_download.py", line 860, in hf_hub_download
+  File "/Users/achhab16/Desktop/ask-multiple-pdfs/venv/lib/python3.13/site-packages/huggingface_hub/file_download.py", line 860, in hf_hub_download
     return _hf_hub_download_to_cache_dir(
         # Destination
     ...<14 lines>...
         force_download=force_download,
     )
-File "/Users/achhab16/Desktop/ask-multiple-pdfs/venv/lib/python3.13/site-packages/huggingface_hub/file_download.py", line 923, in _hf_hub_download_to_cache_dir
+  File "/Users/achhab16/Desktop/ask-multiple-pdfs/venv/lib/python3.13/site-packages/huggingface_hub/file_download.py", line 923, in _hf_hub_download_to_cache_dir
     (url_to_download, etag, commit_hash, expected_size, head_call_error) = _get_metadata_or_catch_error(
                                                                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
         repo_id=repo_id,
@@ -170,34 +256,45 @@ File "/Users/achhab16/Desktop/ask-multiple-pdfs/venv/lib/python3.13/site-package
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     )
     ^
-File "/Users/achhab16/Desktop/ask-multiple-pdfs/venv/lib/python3.13/site-packages/huggingface_hub/file_download.py", line 1374, in _get_metadata_or_catch_error
+  File "/Users/achhab16/Desktop/ask-multiple-pdfs/venv/lib/python3.13/site-packages/huggingface_hub/file_download.py", line 1374, in _get_metadata_or_catch_error
     metadata = get_hf_file_metadata(
         url=url, proxies=proxies, timeout=etag_timeout, headers=headers, token=token
     )
-File "/Users/achhab16/Desktop/ask-multiple-pdfs/venv/lib/python3.13/site-packages/huggingface_hub/utils/_validators.py", line 114, in _inner_fn
+  File "/Users/achhab16/Desktop/ask-multiple-pdfs/venv/lib/python3.13/site-packages/huggingface_hub/utils/_validators.py", line 114, in _inner_fn
     return fn(*args, **kwargs)
-File "/Users/achhab16/Desktop/ask-multiple-pdfs/venv/lib/python3.13/site-packages/huggingface_hub/file_download.py", line 1294, in get_hf_file_metadata
+  File "/Users/achhab16/Desktop/ask-multiple-pdfs/venv/lib/python3.13/site-packages/huggingface_hub/file_download.py", line 1294, in get_hf_file_metadata
     r = _request_wrapper(
         method="HEAD",
     ...<5 lines>...
         timeout=timeout,
     )
-File "/Users/achhab16/Desktop/ask-multiple-pdfs/venv/lib/python3.13/site-packages/huggingface_hub/file_download.py", line 278, in _request_wrapper
+  File "/Users/achhab16/Desktop/ask-multiple-pdfs/venv/lib/python3.13/site-packages/huggingface_hub/file_download.py", line 278, in _request_wrapper
     response = _request_wrapper(
         method=method,
     ...<2 lines>...
         **params,
     )
-File "/Users/achhab16/Desktop/ask-multiple-pdfs/venv/lib/python3.13/site-packages/huggingface_hub/file_download.py", line 301, in _request_wrapper
+  File "/Users/achhab16/Desktop/ask-multiple-pdfs/venv/lib/python3.13/site-packages/huggingface_hub/file_download.py", line 301, in _request_wrapper
     response = get_session().request(method=method, url=url, **params)
-File "/Users/achhab16/Desktop/ask-multiple-pdfs/venv/lib/python3.13/site-packages/requests/sessions.py", line 589, in request
+  File "/Users/achhab16/Desktop/ask-multiple-pdfs/venv/lib/python3.13/site-packages/requests/sessions.py", line 589, in request
     resp = self.send(prep, **send_kwargs)
-File "/Users/achhab16/Desktop/ask-multiple-pdfs/venv/lib/python3.13/site-packages/requests/sessions.py", line 703, in send
+  File "/Users/achhab16/Desktop/ask-multiple-pdfs/venv/lib/python3.13/site-packages/requests/sessions.py", line 703, in send
     r = adapter.send(request, **kwargs)
-File "/Users/achhab16/Desktop/ask-multiple-pdfs/venv/lib/python3.13/site-packages/huggingface_hub/utils/_http.py", line 93, in send
+  File "/Users/achhab16/Desktop/ask-multiple-pdfs/venv/lib/python3.13/site-packages/huggingface_hub/utils/_http.py", line 93, in send
     return super().send(request, *args, **kwargs)
            ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
-File "/Users/achhab16/Desktop/ask-multiple-pdfs/venv/lib/python3.13/site-packages/requests/adapters.py", line 698, in send
+  File "/Users/achhab16/Desktop/ask-multiple-pdfs/venv/lib/python3.13/site-packages/requests/adapters.py", line 698, in send
     raise SSLError(e, request=request)
+requests.exceptions.SSLError: (MaxRetryError("HTTPSConnectionPool(host='huggingface.co', port=443): Max retries exceeded with url: /hkunlp/instructor-xl/resolve/main/adapter_config.json (Caused by SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1018)')))"), '(Request ID: 8046fe69-4378-4941-a088-145945308f9e)')
+2025-02-13 22:39:22.457 Examining the path of torch.classes raised:
+Traceback (most recent call last):
+  File "/Users/achhab16/Desktop/ask-multiple-pdfs/venv/lib/python3.13/site-packages/streamlit/watcher/local_sources_watcher.py", line 217, in get_module_paths
+    potential_paths = extract_paths(module)
+  File "/Users/achhab16/Desktop/ask-multiple-pdfs/venv/lib/python3.13/site-packages/streamlit/watcher/local_sources_watcher.py", line 210, in <lambda>
+    lambda m: list(m.__path__._path),
+                   ^^^^^^^^^^^^^^^^
+  File "/Users/achhab16/Desktop/ask-multiple-pdfs/venv/lib/python3.13/site-packages/torch/_classes.py", line 13, in __getattr__
+    proxy = torch._C._get_custom_class_python_wrapper(self.name, attr)
+RuntimeError: Tried to instantiate class '__path__._path', but it does not exist! Ensure that it is registered via torch::class_
 pls fix
 
