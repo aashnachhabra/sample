@@ -1,7 +1,7 @@
-uvicorn app:app --reload
+(venv) achhab16@LAMU0N62HHYPH2V langgraph-chatbot % uvicorn app:app --reload       
 INFO:     Will watch for changes in these directories: ['/Users/achhab16/Desktop/langgraph-chatbot']
 INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
-INFO:     Started reloader process [59102] using StatReload
+INFO:     Started reloader process [61668] using StatReload
 Process SpawnProcess-1:
 Traceback (most recent call last):
   File "/opt/homebrew/Cellar/python@3.13/3.13.1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/multiprocessing/process.py", line 313, in _bootstrap
@@ -44,14 +44,18 @@ Traceback (most recent call last):
   File "<frozen importlib._bootstrap>", line 935, in _load_unlocked
   File "<frozen importlib._bootstrap_external>", line 1026, in exec_module
   File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
-  File "/Users/achhab16/Desktop/langgraph-chatbot/app.py", line 2, in <module>
-    from fastapi import FastAPI, UploadFile, File
-  File "/Users/achhab16/Desktop/langgraph-chatbot/venv/lib/python3.13/site-packages/fastapi/__init__.py", line 7, in <module>
-    from .applications import FastAPI as FastAPI
-  File "/Users/achhab16/Desktop/langgraph-chatbot/venv/lib/python3.13/site-packages/fastapi/applications.py", line 16, in <module>
-    from fastapi import routing
-  File "/Users/achhab16/Desktop/langgraph-chatbot/venv/lib/python3.13/site-packages/fastapi/routing.py", line 22, in <module>
-    from fastapi import params
-  File "/Users/achhab16/Desktop/langgraph-chatbot/venv/lib/python3.13/site-packages/fastapi/params.py", line 4, in <module>
-    from pydantic.fields import FieldInfo, Undefined
-ImportError: cannot import name 'Undefined' from 'pydantic.fields' (/Users/achhab16/Desktop/langgraph-chatbot/venv/lib/python3.13/site-packages/pydantic/fields.py)
+  File "/Users/achhab16/Desktop/langgraph-chatbot/app.py", line 15, in <module>
+    chroma_db = Chroma(persist_directory=VECTOR_STORE_PATH, embedding_function=OpenAIEmbeddings())
+                                                                               ~~~~~~~~~~~~~~~~^^
+  File "/Users/achhab16/Desktop/langgraph-chatbot/venv/lib/python3.13/site-packages/pydantic/main.py", line 214, in __init__
+    validated_self = self.__pydantic_validator__.validate_python(data, self_instance=self)
+  File "/Users/achhab16/Desktop/langgraph-chatbot/venv/lib/python3.13/site-packages/langchain_openai/embeddings/base.py", line 338, in validate_environment
+    self.client = openai.OpenAI(**client_params, **sync_specific).embeddings  # type: ignore[arg-type]
+                  ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/achhab16/Desktop/langgraph-chatbot/venv/lib/python3.13/site-packages/openai/_client.py", line 110, in __init__
+    raise OpenAIError(
+        "The api_key client option must be set either by passing api_key to the client or by setting the OPENAI_API_KEY environment variable"
+    )
+openai.OpenAIError: The api_key client option must be set either by passing api_key to the client or by setting the OPENAI_API_KEY environment variable
+
+how to fix
