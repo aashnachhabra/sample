@@ -1,61 +1,68 @@
-fixed
-name: Get Changed Files on PR Merge
+(venv) achhab16@LAMU0N62HHYPH2V backend % uvicorn main:app --reload   
+INFO:     Will watch for changes in these directories: ['/Users/achhab16/Desktop/azure_chatbot/backend']
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [50286] using StatReload
+INFO:     Started server process [50288]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     127.0.0.1:62374 - "POST /upload/ HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "/Users/achhab16/Desktop/azure_chatbot/backend/venv/lib/python3.13/site-packages/uvicorn/protocols/http/h11_impl.py", line 403, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self.scope, self.receive, self.send
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/achhab16/Desktop/azure_chatbot/backend/venv/lib/python3.13/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/achhab16/Desktop/azure_chatbot/backend/venv/lib/python3.13/site-packages/fastapi/applications.py", line 1054, in __call__
+    await super().__call__(scope, receive, send)
+  File "/Users/achhab16/Desktop/azure_chatbot/backend/venv/lib/python3.13/site-packages/starlette/applications.py", line 112, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/achhab16/Desktop/azure_chatbot/backend/venv/lib/python3.13/site-packages/starlette/middleware/errors.py", line 187, in __call__
+    raise exc
+  File "/Users/achhab16/Desktop/azure_chatbot/backend/venv/lib/python3.13/site-packages/starlette/middleware/errors.py", line 165, in __call__
+    await self.app(scope, receive, _send)
+  File "/Users/achhab16/Desktop/azure_chatbot/backend/venv/lib/python3.13/site-packages/starlette/middleware/cors.py", line 93, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "/Users/achhab16/Desktop/azure_chatbot/backend/venv/lib/python3.13/site-packages/starlette/middleware/cors.py", line 144, in simple_response
+    await self.app(scope, receive, send)
+  File "/Users/achhab16/Desktop/azure_chatbot/backend/venv/lib/python3.13/site-packages/starlette/middleware/exceptions.py", line 62, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/Users/achhab16/Desktop/azure_chatbot/backend/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/achhab16/Desktop/azure_chatbot/backend/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/achhab16/Desktop/azure_chatbot/backend/venv/lib/python3.13/site-packages/starlette/routing.py", line 715, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/achhab16/Desktop/azure_chatbot/backend/venv/lib/python3.13/site-packages/starlette/routing.py", line 735, in app
+    await route.handle(scope, receive, send)
+  File "/Users/achhab16/Desktop/azure_chatbot/backend/venv/lib/python3.13/site-packages/starlette/routing.py", line 288, in handle
+    await self.app(scope, receive, send)
+  File "/Users/achhab16/Desktop/azure_chatbot/backend/venv/lib/python3.13/site-packages/starlette/routing.py", line 76, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/Users/achhab16/Desktop/azure_chatbot/backend/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/achhab16/Desktop/azure_chatbot/backend/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/achhab16/Desktop/azure_chatbot/backend/venv/lib/python3.13/site-packages/starlette/routing.py", line 73, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/Users/achhab16/Desktop/azure_chatbot/backend/venv/lib/python3.13/site-packages/fastapi/routing.py", line 301, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/Users/achhab16/Desktop/azure_chatbot/backend/venv/lib/python3.13/site-packages/fastapi/routing.py", line 212, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/achhab16/Desktop/azure_chatbot/backend/main.py", line 28, in upload_file
+    documents = f.read()
+  File "<frozen codecs>", line 325, in decode
+UnicodeDecodeError: 'utf-8' codec can't decode byte 0xfe in position 28: invalid start byte
 
-on:
-  pull_request:
-    types:
-      - closed
-
-jobs:
-  get-changed-files:
-    if: github.event.pull_request.merged == true
-    runs-on: uhg-runner
-
-    steps:
-      # Step 1: Authenticate with GitHub using PAT
-      - name: Authenticate with GitHub
-        run: echo "${{ secrets.GH_PAT }}" | gh auth login --with-token
-
-      # Step 2: Check out the repository
-      - name: Checkout Repository
-        uses: actions/checkout@v3
-
-      # Step 3: Get the files changed in the merged PR
-      - name: Fetch Changed Files
-        id: changed-files
-        run: |
-          # Get the PR number
-          PR_NUMBER="${{ github.event.pull_request.number }}"
-
-          # Get the list of changed files for the PR with their status (added, modified, deleted)
-          FILES=$(gh pr view $PR_NUMBER --json files --jq '.files[] | {path: .path, additions: .additions, deletions: .deletions}')
-
-          # Construct the absolute paths with status
-          REPO_URL="https://github.com/uhc-tech-employer-individual/altus_genie/blob/main"
-          ABSOLUTE_PATHS=$(echo "$FILES" | jq -c --arg REPO_URL "$REPO_URL" '
-            map(
-              .status = 
-                (if .additions > 0 and .deletions == 0 then "added"
-                 elif .additions == 0 and .deletions > 0 then "deleted"
-                 elif .additions > 0 or .deletions > 0 then "modified"
-                 else "unknown" end) |
-              {path: ($REPO_URL + "/" + .path), status: .status}
-            )
-          ')
-
-          # Output the list of absolute file paths with their status
-          echo "${ABSOLUTE_PATHS}" > changed_files.json
-          echo "::set-output name=files::${ABSOLUTE_PATHS}"
-
-      # Step 4: Print the changed files with status
-      - name: Display Changed Files
-        run: |
-          echo "Changed files:"
-          cat changed_files.json
-
-      # Step 5: Make an API call with the file paths
-      - name: Send Changed Files to API
-        run: |
-          curl -X POST http://localhost:8900/api/documents/modifiedFilePathsFromGithub \
-          -H "Content-Type: application/json" \
-          -d @changed_files.json
+getting this error when i process a file from frontend in the backend. pls fix
