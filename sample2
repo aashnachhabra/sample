@@ -1,11 +1,12 @@
-(venv) achhab16@LAMU0N62HHYPH2V backend % uvicorn main:app --reload   
+(venv) achhab16@LAMU0N62HHYPH2V backend % uvicorn main:app --reload
 INFO:     Will watch for changes in these directories: ['/Users/achhab16/Desktop/azure_chatbot/backend']
 INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
-INFO:     Started reloader process [50286] using StatReload
-INFO:     Started server process [50288]
+INFO:     Started reloader process [58386] using StatReload
+INFO:     Started server process [58388]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
-INFO:     127.0.0.1:62374 - "POST /upload/ HTTP/1.1" 500 Internal Server Error
+INFO:     127.0.0.1:50240 - "POST /upload/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50390 - "POST /chat/ HTTP/1.1" 500 Internal Server Error
 ERROR:    Exception in ASGI application
 Traceback (most recent call last):
   File "/Users/achhab16/Desktop/azure_chatbot/backend/venv/lib/python3.13/site-packages/uvicorn/protocols/http/h11_impl.py", line 403, in run_asgi
@@ -60,9 +61,24 @@ Traceback (most recent call last):
   File "/Users/achhab16/Desktop/azure_chatbot/backend/venv/lib/python3.13/site-packages/fastapi/routing.py", line 212, in run_endpoint_function
     return await dependant.call(**values)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/achhab16/Desktop/azure_chatbot/backend/main.py", line 28, in upload_file
-    documents = f.read()
-  File "<frozen codecs>", line 325, in decode
-UnicodeDecodeError: 'utf-8' codec can't decode byte 0xfe in position 28: invalid start byte
+  File "/Users/achhab16/Desktop/azure_chatbot/backend/main.py", line 40, in chat
+    response = openai.ChatCompletion.create(
+        engine="gpt-4",  # Change to your Azure deployment ID
+    ...<3 lines>...
+        ],
+    )
+  File "/Users/achhab16/Desktop/azure_chatbot/backend/venv/lib/python3.13/site-packages/openai/lib/_old_api.py", line 39, in __call__
+    raise APIRemovedInV1(symbol=self._symbol)
+openai.lib._old_api.APIRemovedInV1: 
 
-getting this error when i process a file from frontend in the backend. pls fix
+You tried to access openai.ChatCompletion, but this is no longer supported in openai>=1.0.0 - see the README at https://github.com/openai/openai-python for the API.
+
+You can run `openai migrate` to automatically upgrade your codebase to use the 1.0.0 interface. 
+
+Alternatively, you can pin your installation to the old version, e.g. `pip install openai==0.28`
+
+A detailed migration guide is available here: https://github.com/openai/openai-python/discussions/742
+
+file upload was successful but /chat api is throwing this error when i ask a question pls help and fix
+
+
