@@ -1,21 +1,22 @@
+existing main.py
+
 import os
 import shutil
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 import openai
-from openai import ChatCompletion
 import fitz  # PyMuPDF for PDF text extraction
+
 # Load environment variables from .env
 load_dotenv()
+
 # Initialize OpenAI Azure client
-# client = openai.AzureOpenAI(
-#    api_key=os.getenv("AZURE_OPENAI_API_KEY"),
-#    api_version="2023-07-01-preview",
-#    azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
-# )
-openai.api_key = os.getenv("AZURE_OPENAI_API_KEY")
+openai.api_type = "azure"
 openai.api_base = os.getenv("AZURE_OPENAI_ENDPOINT")
+openai.api_version = "2023-07-01-preview"  # Ensure this matches your deployment version
+openai.api_key = os.getenv("AZURE_OPENAI_API_KEY")
+
 app = FastAPI()
 
 # Enable CORS for frontend communication
@@ -66,26 +67,61 @@ def extract_text_from_pdf(pdf_path):
 
 @app.post("/chat/")
 async def chat(user_query: dict):
-    """Handles chat requests and generates responses using OpenAI API."""
-    global uploaded_text
-    if not uploaded_text:
-        raise HTTPException(status_code=400, detail="No document uploaded. Please upload a document first.")
-    try:
-        response = openai.ChatCompletion.create(
-            model="gpt-4",  # Ensure this matches your deployment name
-            messages=[
-                {"role": "system", "content": "You are a helpful assistant. Answer questions based on the uploaded document."},
-                {"role": "user", "content": f"Document: {uploaded_text}"},
-                {"role": "user", "content": user_query["query"]},
-            ],
-            temperature=0.5
-        )
-        return {"response": response.choices[0].message.content}
-    except Exception as e:
-        print(f"Chat API error: {str(e)}")  # Add logging here
-        raise HTTPException(status_code=500, detail=f"Chat API error: {str(e)}")
+   """Handles chat requests and generates responses using OpenAI API."""
+   global uploaded_text
+   if not uploaded_text:
+       raise HTTPException(status_code=400, detail="No document uploaded. Please upload a document first.")
+   try:
+       response = openai.ChatCompletion.create(
+           engine="gpt-4-deployment",  # ✅ Use 'engine' for Azure
+           messages=[
+               {"role": "system", "content": "You are an AI assistant that provides answers based on the provided document."},
+               {"role": "system", "content": f"Here is the document:\n\n{uploaded_text}"},  # ✅ Explicitly mark as system instruction
+               {"role": "user", "content": user_query["query"]},
+           ],
+           temperature=0.5
+       )
+       return {"response": response.choices[0].message.content}
+   except Exception as e:
+       print(f"Chat API error: {str(e)}")  # Add logging here
+       raise HTTPException(status_code=500, detail=f"Chat API error: {str(e)}")
 
-i am getting 500 error in /chat api with response
-{"detail":"Chat API error: Resource not found"}
-payload
-{query: "hi"}
+existing upload.js
+import React, { useState } from "react";
+import axios from "axios";
+const Upload = () => {
+   const [selectedFile, setSelectedFile] = useState(null);
+   const [message, setMessage] = useState("");
+   const handleFileChange = (event) => {
+       setSelectedFile(event.target.files[0]);
+   };
+   const handleUpload = async () => {
+       if (!selectedFile) {
+           setMessage("Please select a file first.");
+           return;
+       }
+       const formData = new FormData();
+       formData.append("file", selectedFile);
+       try {
+           const response = await axios.post("http://127.0.0.1:8000/upload/", formData, {
+               headers: {
+                   "Content-Type": "multipart/form-data",
+               },
+           });
+           setMessage(`File uploaded successfully: ${response.data.filename}`);
+       } catch (error) {
+           console.error("Upload error:", error);
+           setMessage("Failed to upload file.");
+       }
+   };
+   return (
+<div>
+<input type="file" onChange={handleFileChange} />
+<button onClick={handleUpload}>Upload</button>
+<p>{message}</p>
+</div>
+   );
+};
+export default Upload;
+
+make changes here so that i can upload multiple files and the responses can be answered from any of the pdfs. send updated file codes
