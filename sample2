@@ -1,10 +1,1 @@
-response = openai.ChatCompletion.create(
-    engine="gpt-4-deployment",  # ✅ Use 'engine' for Azure
-    messages=[
-        {"role": "system", "content": "You are an AI assistant that provides detailed information about health insurance plans based on JSON data."},
-        {"role": "system", "content": f"Here is the JSON data for the plan details:\n\n{combined_text}"},  # ✅ Include the JSON data
-        {"role": "user", "content": user_query["query"]},
-    ],
-    temperature=0.5
-)
-return {"response": response.choices[0].message.content}
+
