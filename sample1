@@ -1,35 +1,48 @@
-@app.post("/chat/")
-# async def chat(user_query: dict):
-#    """Handles chat requests and generates responses using OpenAI API."""
-#    global uploaded_texts, uploaded_json_data
-#    if not uploaded_texts and not uploaded_json_data:
-#        raise HTTPException(status_code=400, detail="No documents uploaded. Please upload documents first.")
-#    # Decide prompt format based on uploaded files
-#    if uploaded_json_data:
-#        # If JSON files are present, assume it's about health insurance plans
-#        formatted_json = "\n\n".join(uploaded_json_data)  # Combine JSON data
-#        messages = [
-#            {"role": "system", "content": "You are an AI assistant that provides detailed information about health insurance plans based on JSON data. Ensure your responses are well-formatted with proper indents, spaces, and line changes as necessary."},
-#            {"role": "system", "content": f"Here is the JSON data for the plan details:\n\n{formatted_json}"},
-#            {"role": "user", "content": user_query["query"]},
-#        ]
-#    else:
-#        # Default case for PDFs and text files
-#        combined_text = "\n\n".join(uploaded_texts)
-#        messages = [
-#            {"role": "system", "content": "You are an AI assistant that provides answers based on the provided documents. Ensure your responses are well-formatted with proper indents, spaces, and line changes as necessary."},
-#            {"role": "system", "content": f"Here are the uploaded documents:\n\n{combined_text}"},
-#            {"role": "user", "content": user_query["query"]},
-#        ]
-#    try:
-#        response = openai.ChatCompletion.create(
-#            engine="gpt-4-deployment",  # ✅ Use 'engine' for Azure
-#            messages=messages,
-#            temperature=0.5
-#        )
-#        return {"response": response.choices[0].message.content}
-#    except Exception as e:
-#        print(f"Chat API error: {str(e)}")  # Add logging here
-#        raise HTTPException(status_code=500, detail=f"Chat API error: {str(e)}")
+import React, { useState } from "react";
+import axios from "axios";
+const Upload = () => {
+   const [selectedFiles, setSelectedFiles] = useState([]);
+   const [message, setMessage] = useState("");
+   const handleFileChange = (event) => {
+       setSelectedFiles(event.target.files);
+   };
+   const handleUpload = async () => {
+       if (!selectedFiles.length) {
+           setMessage("Please select at least one file.");
+           return;
+       }
+       const formData = new FormData();
+       for (let i = 0; i < selectedFiles.length; i++) {
+           formData.append("files", selectedFiles[i]);
+       }
+       try {
+           const response = await axios.post("http://127.0.0.1:8000/upload/", formData, {
+               headers: { "Content-Type": "multipart/form-data" },
+           });
+           setMessage(`Files uploaded successfully: ${response.data.files.join(", ")}`);
+       } catch (error) {
+           console.error("Upload error:", error);
+           setMessage("Failed to upload files.");
+       }
+   };
+   const fetchJsonFromMongo = async () => {
+       try {
+           const response = await axios.get("http://127.0.0.1:8000/fetch-json/");
+           setMessage(`Fetched ${response.data.count} JSON documents from MongoDB`);
+       } catch (error) {
+           console.error("Fetch JSON error:", error);
+           setMessage("Failed to fetch JSON data from MongoDB.");
+       }
+   };
+   return (
+<div>
+<input type="file" multiple onChange={handleFileChange} />
+<button onClick={handleUpload}>Upload</button>
+<button onClick={fetchJsonFromMongo}>Fetch JSON from MongoDB</button>
+<p>{message}</p>
+</div>
+   );
+};
+export default Upload;
 
-so this is my original chat code. If a json is uploaded or i fetch json from mongodb i want the same kind of function and prompt to happen. 
+this is the existing code
