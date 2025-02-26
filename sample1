@@ -128,5 +128,5 @@ async def chat(user_query: dict):
        logging.error(f"Chat API error: {str(e)}")
        raise HTTPException(status_code=500, detail=f"Chat API error: {str(e)}")
 
-this is main.py code,
+this is main.py code, it supports uploading pdfs and json files and also importing json from mongodb. give appropriate messages
 please update upload.js based on this. 
