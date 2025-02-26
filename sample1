@@ -1,48 +1,239 @@
-import React, { useState } from "react";
-import axios from "axios";
-const Upload = () => {
-   const [selectedFiles, setSelectedFiles] = useState([]);
-   const [message, setMessage] = useState("");
-   const handleFileChange = (event) => {
-       setSelectedFiles(event.target.files);
-   };
-   const handleUpload = async () => {
-       if (!selectedFiles.length) {
-           setMessage("Please select at least one file.");
-           return;
-       }
-       const formData = new FormData();
-       for (let i = 0; i < selectedFiles.length; i++) {
-           formData.append("files", selectedFiles[i]);
-       }
-       try {
-           const response = await axios.post("http://127.0.0.1:8000/upload/", formData, {
-               headers: { "Content-Type": "multipart/form-data" },
-           });
-           setMessage(`Files uploaded successfully: ${response.data.files.join(", ")}`);
-       } catch (error) {
-           console.error("Upload error:", error);
-           setMessage("Failed to upload files.");
-       }
-   };
-   const fetchJsonFromMongo = async () => {
-       try {
-           const response = await axios.get("http://127.0.0.1:8000/fetch-json/");
-           setMessage(`Fetched ${response.data.count} JSON documents from MongoDB`);
-       } catch (error) {
-           console.error("Fetch JSON error:", error);
-           setMessage("Failed to fetch JSON data from MongoDB.");
-       }
-   };
-   return (
-<div>
-<input type="file" multiple onChange={handleFileChange} />
-<button onClick={handleUpload}>Upload</button>
-<button onClick={fetchJsonFromMongo}>Fetch JSON from MongoDB</button>
-<p>{message}</p>
-</div>
-   );
-};
-export default Upload;
+# import os
+# import shutil
+# import json
+# from typing import List
+# from fastapi import FastAPI, File, UploadFile, HTTPException
+# from fastapi.middleware.cors import CORSMiddleware
+# from dotenv import load_dotenv
+# import openai
+# import fitz  # PyMuPDF for PDF text extraction
+# # Load environment variables from .env
+# load_dotenv()
+# # Initialize OpenAI Azure client
+# openai.api_type = "azure"
+# openai.api_base = os.getenv("AZURE_OPENAI_ENDPOINT")
+# openai.api_version = "2023-07-01-preview"  # Ensure this matches your deployment version
+# openai.api_key = os.getenv("AZURE_OPENAI_API_KEY")
+# app = FastAPI()
+# # Enable CORS for frontend communication
+# app.add_middleware(
+#    CORSMiddleware,
+#    allow_origins=["*"],  # Change this to your frontend URL in production
+#    allow_credentials=True,
+#    allow_methods=["*"],
+#    allow_headers=["*"],
+# )
+# # Temporary storage for uploaded files
+# UPLOAD_DIR = "uploads"
+# os.makedirs(UPLOAD_DIR, exist_ok=True)
+# uploaded_texts = []  # Store extracted text from multiple files
+# uploaded_json_data = []  # Store parsed JSON content
+# @app.post("/upload/")
+# async def upload_files(files: List[UploadFile] = File(...)):
+#    """Handles multiple file uploads and extracts text from PDFs, text, and JSON files."""
+#    global uploaded_texts, uploaded_json_data
+#    uploaded_texts = []  # Reset previously uploaded texts
+#    uploaded_json_data = []  # Reset JSON data
+#    for file in files:
+#        file_location = os.path.join(UPLOAD_DIR, file.filename)
+#        with open(file_location, "wb") as f:
+#            shutil.copyfileobj(file.file, f)
+#        if file.filename.endswith(".pdf"):
+#            extracted_text = extract_text_from_pdf(file_location)
+#            uploaded_texts.append(extracted_text)
+#        elif file.filename.endswith(".json"):
+#            extracted_json = extract_json_data(file_location)
+#            uploaded_json_data.append(extracted_json)  # Store parsed JSON as dictionary
+#        else:
+#            with open(file_location, "r", encoding="utf-8", errors="ignore") as f:
+#                extracted_text = f.read()
+#            uploaded_texts.append(extracted_text)
+#    return {
+#        "message": "Files uploaded successfully",
+#        "text_file_count": len(uploaded_texts),
+#        "json_file_count": len(uploaded_json_data)
+#    }
+# def extract_text_from_pdf(pdf_path):
+#    """Extracts text from a PDF file."""
+#    text = ""
+#    try:
+#        doc = fitz.open(pdf_path)
+#        for page in doc:
+#            text += page.get_text("text")  # Extract text from each page
+#        return text.strip()
+#    except Exception as e:
+#        raise HTTPException(status_code=500, detail=f"Failed to extract text from PDF: {str(e)}")
+# def extract_json_data(json_path):
+#    """Reads and returns structured JSON data as a string."""
+#    try:
+#        with open(json_path, "r", encoding="utf-8") as f:
+#            data = json.load(f)
+#        return json.dumps(data, indent=2)  # Format JSON for readability
+#    except Exception as e:
+#        raise HTTPException(status_code=500, detail=f"Failed to extract JSON data: {str(e)}")
+# @app.post("/chat/")
+# async def chat(user_query: dict):
+#    """Handles chat requests and generates responses using OpenAI API."""
+#    global uploaded_texts, uploaded_json_data
+#    if not uploaded_texts and not uploaded_json_data:
+#        raise HTTPException(status_code=400, detail="No documents uploaded. Please upload documents first.")
+#    # Decide prompt format based on uploaded files
+#    if uploaded_json_data:
+#        # If JSON files are present, assume it's about health insurance plans
+#        formatted_json = "\n\n".join(uploaded_json_data)  # Combine JSON data
+#        messages = [
+#            {"role": "system", "content": "You are an AI assistant that provides detailed information about health insurance plans based on JSON data. Ensure your responses are well-formatted with proper indents, spaces, and line changes as necessary."},
+#            {"role": "system", "content": f"Here is the JSON data for the plan details:\n\n{formatted_json}"},
+#            {"role": "user", "content": user_query["query"]},
+#        ]
+#    else:
+#        # Default case for PDFs and text files
+#        combined_text = "\n\n".join(uploaded_texts)
+#        messages = [
+#            {"role": "system", "content": "You are an AI assistant that provides answers based on the provided documents. Ensure your responses are well-formatted with proper indents, spaces, and line changes as necessary."},
+#            {"role": "system", "content": f"Here are the uploaded documents:\n\n{combined_text}"},
+#            {"role": "user", "content": user_query["query"]},
+#        ]
+#    try:
+#        response = openai.ChatCompletion.create(
+#            engine="gpt-4-deployment",  # ✅ Use 'engine' for Azure
+#            messages=messages,
+#            temperature=0.5
+#        )
+#        return {"response": response.choices[0].message.content}
+#    except Exception as e:
+#        print(f"Chat API error: {str(e)}")  # Add logging here
+#        raise HTTPException(status_code=500, detail=f"Chat API error: {str(e)}")
 
-this is the existing code
+import os
+import shutil
+import json
+import logging
+from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from dotenv import load_dotenv
+import openai
+import fitz  # PyMuPDF for PDF text extraction
+from pymongo import MongoClient
+# Load environment variables
+load_dotenv()
+# Initialize OpenAI Azure client
+openai.api_type = "azure"
+openai.api_base = os.getenv("AZURE_OPENAI_ENDPOINT")
+openai.api_version = "2023-07-01-preview"
+openai.api_key = os.getenv("AZURE_OPENAI_API_KEY")
+# MongoDB Configuration
+MONGO_URI = os.getenv("MONGO_URI")
+DB_NAME = "planlibrary_api_db"
+COLLECTION_NAME = "planlibrary_med_api"
+# Connect to MongoDB
+try:
+   mongo_client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
+   db = mongo_client[DB_NAME]
+   collection = db[COLLECTION_NAME]
+   print("✅ Connected to MongoDB")
+except Exception as e:
+   print(f"❌ MongoDB Connection Error: {e}")
+app = FastAPI()
+# Enable CORS for frontend communication
+app.add_middleware(
+   CORSMiddleware,
+   allow_origins=["*"],  # Change this in production
+   allow_credentials=True,
+   allow_methods=["*"],
+   allow_headers=["*"],
+)
+# Storage for uploaded files
+UPLOAD_DIR = "uploads"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+uploaded_texts = []  # Stores extracted text from uploaded PDFs & text files
+uploaded_json_data = []  # Stores JSON data from uploaded files
+fetched_json_data = []  # Stores JSON data from MongoDB
+
+@app.post("/upload/")
+async def upload_files(files: list[UploadFile] = File(...)):
+   """Handles multiple file uploads (PDFs, text, JSON)."""
+   global uploaded_texts, uploaded_json_data
+   uploaded_texts.clear()
+   uploaded_json_data.clear()
+   for file in files:
+       file_location = os.path.join(UPLOAD_DIR, file.filename)
+       try:
+           with open(file_location, "wb") as f:
+               shutil.copyfileobj(file.file, f)
+           # Process based on file type
+           if file.filename.endswith(".pdf"):
+               uploaded_texts.append(extract_text_from_pdf(file_location))
+           elif file.filename.endswith(".json"):
+               with open(file_location, "r", encoding="utf-8") as f:
+                   json_data = json.load(f)
+                   uploaded_json_data.append(json_data)
+           else:
+               with open(file_location, "r", encoding="utf-8") as f:
+                   uploaded_texts.append(f.read())
+       except Exception as e:
+           raise HTTPException(status_code=500, detail=f"File processing failed: {str(e)}")
+   return {"message": "Files uploaded successfully", "uploaded_files": [file.filename for file in files]}
+
+def extract_text_from_pdf(pdf_path):
+   """Extracts text from a PDF file."""
+   text = ""
+   try:
+       doc = fitz.open(pdf_path)
+       for page in doc:
+           text += page.get_text("text") + "\n"
+       return text.strip()
+   except Exception as e:
+       raise HTTPException(status_code=500, detail=f"Failed to extract text from PDF: {str(e)}")
+
+@app.get("/fetch-json/")
+async def fetch_json_from_mongo():
+   """Fetches a limited number of JSON documents from MongoDB."""
+   global fetched_json_data
+   fetched_json_data.clear()
+   try:
+       fetched_json_data = list(collection.find({}, {"_id": 0}).limit(5))  # Fetch 5 JSON documents
+       if not fetched_json_data:
+           return {"message": "No JSON data found in MongoDB"}
+       return {"message": "Fetched JSON data successfully", "json_data": fetched_json_data}
+   except Exception as e:
+       raise HTTPException(status_code=500, detail=f"MongoDB fetch error: {str(e)}")
+
+@app.post("/chat/")
+async def chat(user_query: dict):
+   """Handles chat requests based on uploaded or fetched documents."""
+   global uploaded_texts, uploaded_json_data, fetched_json_data
+   # Determine available data source
+   all_json_data = uploaded_json_data + fetched_json_data  # Combine uploaded and fetched JSON
+   if not uploaded_texts and not all_json_data:
+       raise HTTPException(status_code=400, detail="No documents uploaded or fetched. Please upload or fetch data first.")
+   if all_json_data:
+       # Format JSON for prompt
+       formatted_json = json.dumps(all_json_data, indent=2)
+       messages = [
+           {"role": "system", "content": "You are an AI assistant that provides detailed information about health insurance plans based on JSON data."},
+           {"role": "system", "content": f"Here is the JSON data for the plan details:\n\n{formatted_json}"},
+           {"role": "user", "content": user_query["query"]},
+       ]
+   else:
+       # Use text-based documents
+       combined_text = "\n\n".join(uploaded_texts)
+       messages = [
+           {"role": "system", "content": "You are an AI assistant that provides answers based on the provided documents."},
+           {"role": "system", "content": f"Here are the uploaded documents:\n\n{combined_text}"},
+           {"role": "user", "content": user_query["query"]},
+       ]
+   # Call OpenAI API
+   try:
+       response = openai.ChatCompletion.create(
+           engine="gpt-4-deployment",
+           messages=messages,
+           temperature=0.5
+       )
+       return {"response": response.choices[0].message.content}
+   except Exception as e:
+       logging.error(f"Chat API error: {str(e)}")
+       raise HTTPException(status_code=500, detail=f"Chat API error: {str(e)}")
+
+this is main.py code,
+please update upload.js based on this. 
