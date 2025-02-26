@@ -1,1 +1,11 @@
 
+{
+    "detail": "MongoDB fetch error: localhost:27017: [Errno 61] Connection refused (configured timeouts: socketTimeoutMS: 20000.0ms, connectTimeoutMS: 20000.0ms), Timeout: 30s, Topology Description: <TopologyDescription id: 67bf0427464aba01241866f3, topology_type: Unknown, servers: [<ServerDescription ('localhost', 27017) server_type: Unknown, rtt: None, error=AutoReconnect('localhost:27017: [Errno 61] Connection refused (configured timeouts: socketTimeoutMS: 20000.0ms, connectTimeoutMS: 20000.0ms)')>]>"
+}
+
+getting this error. I have set mongo uri with the connection string i copied from mongodb compass which is mongodb://admin:sqg9dWDVuZ@rp000107722.uhc.com:27017,rp000107723.uhc.com:27017,rp000107724.uhc.com:27017/planlibrary_api_db?authSource=admin&connectTimeoutMS=300000&maxPoolSize=10&minPoolSize=0&maxIdleTimeMS=900000&readPreference=primary&ssl=false
+i want to fetch json of the planlibrary_api_db and collection is planlibrary_med_api
+
+getting the above error on api call
+
+
