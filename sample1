@@ -1,11 +1,35 @@
+@app.post("/chat/")
+# async def chat(user_query: dict):
+#    """Handles chat requests and generates responses using OpenAI API."""
+#    global uploaded_texts, uploaded_json_data
+#    if not uploaded_texts and not uploaded_json_data:
+#        raise HTTPException(status_code=400, detail="No documents uploaded. Please upload documents first.")
+#    # Decide prompt format based on uploaded files
+#    if uploaded_json_data:
+#        # If JSON files are present, assume it's about health insurance plans
+#        formatted_json = "\n\n".join(uploaded_json_data)  # Combine JSON data
+#        messages = [
+#            {"role": "system", "content": "You are an AI assistant that provides detailed information about health insurance plans based on JSON data. Ensure your responses are well-formatted with proper indents, spaces, and line changes as necessary."},
+#            {"role": "system", "content": f"Here is the JSON data for the plan details:\n\n{formatted_json}"},
+#            {"role": "user", "content": user_query["query"]},
+#        ]
+#    else:
+#        # Default case for PDFs and text files
+#        combined_text = "\n\n".join(uploaded_texts)
+#        messages = [
+#            {"role": "system", "content": "You are an AI assistant that provides answers based on the provided documents. Ensure your responses are well-formatted with proper indents, spaces, and line changes as necessary."},
+#            {"role": "system", "content": f"Here are the uploaded documents:\n\n{combined_text}"},
+#            {"role": "user", "content": user_query["query"]},
+#        ]
+#    try:
+#        response = openai.ChatCompletion.create(
+#            engine="gpt-4-deployment",  # ✅ Use 'engine' for Azure
+#            messages=messages,
+#            temperature=0.5
+#        )
+#        return {"response": response.choices[0].message.content}
+#    except Exception as e:
+#        print(f"Chat API error: {str(e)}")  # Add logging here
+#        raise HTTPException(status_code=500, detail=f"Chat API error: {str(e)}")
 
-{
-    "detail": "MongoDB fetch error: localhost:27017: [Errno 61] Connection refused (configured timeouts: socketTimeoutMS: 20000.0ms, connectTimeoutMS: 20000.0ms), Timeout: 30s, Topology Description: <TopologyDescription id: 67bf0427464aba01241866f3, topology_type: Unknown, servers: [<ServerDescription ('localhost', 27017) server_type: Unknown, rtt: None, error=AutoReconnect('localhost:27017: [Errno 61] Connection refused (configured timeouts: socketTimeoutMS: 20000.0ms, connectTimeoutMS: 20000.0ms)')>]>"
-}
-
-getting this error. I have set mongo uri with the connection string i copied from mongodb compass which is mongodb://admin:sqg9dWDVuZ@rp000107722.uhc.com:27017,rp000107723.uhc.com:27017,rp000107724.uhc.com:27017/planlibrary_api_db?authSource=admin&connectTimeoutMS=300000&maxPoolSize=10&minPoolSize=0&maxIdleTimeMS=900000&readPreference=primary&ssl=false
-i want to fetch json of the planlibrary_api_db and collection is planlibrary_med_api
-
-getting the above error on api call
-
-
+so this is my original chat code. If a json is uploaded or i fetch json from mongodb i want the same kind of function and prompt to happen. 
