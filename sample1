@@ -94,39 +94,44 @@ async def fetch_json_from_mongo():
 
 @app.post("/chat/")
 async def chat(user_query: dict):
-   """Handles chat requests based on uploaded or fetched documents."""
-   global uploaded_texts, uploaded_json_data, fetched_json_data
-   # Determine available data source
-   all_json_data = uploaded_json_data + fetched_json_data  # Combine uploaded and fetched JSON
-   if not uploaded_texts and not all_json_data:
-       raise HTTPException(status_code=400, detail="No documents uploaded or fetched. Please upload or fetch data first.")
-   if all_json_data:
-       # Format JSON for prompt
-       formatted_json = json.dumps(all_json_data, indent=2)
-       messages = [
-           {"role": "system", "content": "You are an AI assistant that provides detailed information about health insurance plans based on JSON data."},
-           {"role": "system", "content": f"Here is the JSON data for the plan details:\n\n{formatted_json}"},
-           {"role": "user", "content": user_query["query"]},
-       ]
-   else:
-       # Use text-based documents
-       combined_text = "\n\n".join(uploaded_texts)
-       messages = [
-           {"role": "system", "content": "You are an AI assistant that provides answers based on the provided documents."},
-           {"role": "system", "content": f"Here are the uploaded documents:\n\n{combined_text}"},
-           {"role": "user", "content": user_query["query"]},
-       ]
-   # Call OpenAI API
-   try:
-       response = openai.ChatCompletion.create(
-           engine="gpt-4-deployment",
-           messages=messages,
-           temperature=0.5
-       )
-       return {"response": response.choices[0].message.content}
-   except Exception as e:
-       logging.error(f"Chat API error: {str(e)}")
-       raise HTTPException(status_code=500, detail=f"Chat API error: {str(e)}")
+    """Handles chat requests based on uploaded or fetched documents."""
+    global uploaded_texts, uploaded_json_data, fetched_json_data
+    # Determine available data source
+    if not uploaded_texts and not uploaded_json_data and not fetched_json_data:
+        raise HTTPException(status_code=400, detail="No documents uploaded or fetched. Please upload or fetch data first.")
+    
+    if uploaded_json_data:
+        formatted_json = json.dumps(uploaded_json_data, indent=2)
+        messages = [
+            {"role": "system", "content": "You are an AI assistant that provides detailed information about health insurance plans based on JSON data."},
+            {"role": "system", "content": f"Here is the JSON data for the plan details:\n\n{formatted_json}"},
+            {"role": "user", "content": user_query["query"]},
+        ]
+    elif fetched_json_data:
+        formatted_json = json.dumps(fetched_json_data, indent=2)
+        messages = [
+            {"role": "system", "content": "You are an AI assistant that provides detailed information about health insurance plans based on JSON data."},
+            {"role": "system", "content": f"Here is the JSON data for the plan details:\n\n{formatted_json}"},
+            {"role": "user", "content": user_query["query"]},
+        ]
+    else:
+        combined_text = "\n\n".join(uploaded_texts)
+        messages = [
+            {"role": "system", "content": "You are an AI assistant that provides answers based on the provided documents."},
+            {"role": "system", "content": f"Here are the uploaded documents:\n\n{combined_text}"},
+            {"role": "user", "content": user_query["query"]},
+        ]
+    
+    # Call OpenAI API
+    try:
+        response = openai.ChatCompletion.create(
+            engine="gpt-4-deployment",
+            messages=messages,
+            temperature=0.5
+        )
+        return {"response": response.choices[0].message.content}
+    except Exception as e:
+        logging.error(f"Chat API error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Chat API error: {str(e)}")
 
-this is main.py code, it supports uploading pdfs and json files and also importing json from mongodb. give appropriate messages
-please update upload.js based on this. 
+this is my main.py code send updated file code
