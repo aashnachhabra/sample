@@ -1,137 +1,110 @@
-import os
-import shutil
-import json
-import logging
-from fastapi import FastAPI, File, UploadFile, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-from dotenv import load_dotenv
-import openai
-import fitz  # PyMuPDF for PDF text extraction
-from pymongo import MongoClient
-# Load environment variables
-load_dotenv()
-# Initialize OpenAI Azure client
-openai.api_type = "azure"
-openai.api_base = os.getenv("AZURE_OPENAI_ENDPOINT")
-openai.api_version = "2023-07-01-preview"
-openai.api_key = os.getenv("AZURE_OPENAI_API_KEY")
-# MongoDB Configuration
-MONGO_URI = os.getenv("MONGO_URI")
-DB_NAME = "planlibrary_api_db"
-COLLECTION_NAME = "planlibrary_med_api"
-# Connect to MongoDB
-try:
-   mongo_client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
-   db = mongo_client[DB_NAME]
-   collection = db[COLLECTION_NAME]
-   print("✅ Connected to MongoDB")
-except Exception as e:
-   print(f"❌ MongoDB Connection Error: {e}")
-app = FastAPI()
-# Enable CORS for frontend communication
-app.add_middleware(
-   CORSMiddleware,
-   allow_origins=["*"],  # Change this in production
-   allow_credentials=True,
-   allow_methods=["*"],
-   allow_headers=["*"],
-)
-# Storage for uploaded files
-UPLOAD_DIR = "uploads"
-os.makedirs(UPLOAD_DIR, exist_ok=True)
-uploaded_texts = []  # Stores extracted text from uploaded PDFs & text files
-uploaded_json_data = []  # Stores JSON data from uploaded files
-fetched_json_data = []  # Stores JSON data from MongoDB
+import React from "react";
+import Upload from "./Upload";
+import Chat from "./Chat";
+const App = () => {
+   return (
+<div>
+<h1>PDF/JSON Chatbot</h1>
+<Upload />
+<Chat />
+</div>
+   );
+};
+export default App;
 
-@app.post("/upload/")
-async def upload_files(files: list[UploadFile] = File(...)):
-   """Handles multiple file uploads (PDFs, text, JSON)."""
-   global uploaded_texts, uploaded_json_data
-   uploaded_texts.clear()
-   uploaded_json_data.clear()
-   for file in files:
-       file_location = os.path.join(UPLOAD_DIR, file.filename)
-       try:
-           with open(file_location, "wb") as f:
-               shutil.copyfileobj(file.file, f)
-           # Process based on file type
-           if file.filename.endswith(".pdf"):
-               uploaded_texts.append(extract_text_from_pdf(file_location))
-           elif file.filename.endswith(".json"):
-               with open(file_location, "r", encoding="utf-8") as f:
-                   json_data = json.load(f)
-                   uploaded_json_data.append(json_data)
-           else:
-               with open(file_location, "r", encoding="utf-8") as f:
-                   uploaded_texts.append(f.read())
-       except Exception as e:
-           raise HTTPException(status_code=500, detail=f"File processing failed: {str(e)}")
-   return {"message": "Files uploaded successfully", "uploaded_files": [file.filename for file in files]}
+import React, { useState } from "react";
+import axios from "axios";
+const Chat = () => {
+   const [query, setQuery] = useState("");
+   const [response, setResponse] = useState("");
+   const handleSendMessage = async () => {
+       try {
+           const res = await axios.post("http://127.0.0.1:8000/chat/", {
+               query: query,
+           });
+           setResponse(res.data.response);
+       } catch (error) {
+           console.error("Chat error:", error);
+           setResponse("Failed to fetch response.");
+       }
+   };
+   return (
+<div>
+<input
+               type="text"
+               value={query}
+               onChange={(e) => setQuery(e.target.value)}
+               placeholder="Ask a question..."
+           />
+<button onClick={handleSendMessage}>Send</button>
+<p>Response: {response}</p>
+</div>
+   );
+};
+export default Chat;
 
-def extract_text_from_pdf(pdf_path):
-   """Extracts text from a PDF file."""
-   text = ""
-   try:
-       doc = fitz.open(pdf_path)
-       for page in doc:
-           text += page.get_text("text") + "\n"
-       return text.strip()
-   except Exception as e:
-       raise HTTPException(status_code=500, detail=f"Failed to extract text from PDF: {str(e)}")
+import React, { useState } from "react";
+import axios from "axios";
+const Upload = ({ onUploadSuccess }) => {
+   const [selectedFiles, setSelectedFiles] = useState([]);
+   const [message, setMessage] = useState("");
+   const [docsUploaded, setDocsUploaded] = useState(false);
+   const [jsonFetched, setJsonFetched] = useState(false);
+   const handleFileChange = (event) => {
+       setSelectedFiles(event.target.files);
+   };
+   const handleUpload = async () => {
+       if (!selectedFiles.length) {
+           setMessage("❌ Please select at least one file.");
+           return;
+       }
+       const formData = new FormData();
+       for (let i = 0; i < selectedFiles.length; i++) {
+           formData.append("files", selectedFiles[i]);
+       }
+       try {
+           const response = await axios.post("http://127.0.0.1:8000/upload/", formData, {
+               headers: { "Content-Type": "multipart/form-data" },
+           });
+           setMessage(`✅ Files uploaded successfully: ${response.data.uploaded_files.join(", ")}`);
+           setDocsUploaded(true);
+           setJsonFetched(false);  // Reset JSON fetch status
+           onUploadSuccess && onUploadSuccess(true);  // Callback to update parent component
+       } catch (error) {
+           console.error("Upload error:", error);
+           setMessage("❌ Failed to upload files.");
+           setDocsUploaded(false);
+       }
+   };
+   const fetchJsonFromMongo = async () => {
+       try {
+           const response = await axios.get("http://127.0.0.1:8000/fetch-json/");
+           if (response.data.json_data) {
+               setMessage(`✅ Fetched ${response.data.json_data.length} JSON documents from MongoDB.`);
+               setJsonFetched(true);
+               setDocsUploaded(false);  // Reset uploaded documents status
+               onUploadSuccess && onUploadSuccess(true);  // Callback for successful fetch
+           } else {
+               setMessage("⚠️ No JSON data found in MongoDB.");
+               setJsonFetched(false);
+           }
+       } catch (error) {
+           console.error("Fetch JSON error:", error);
+           setMessage("❌ Failed to fetch JSON data from MongoDB.");
+           setJsonFetched(false);
+       }
+   };
+   return (
+<div>
+<input type="file" multiple onChange={handleFileChange} />
+<button onClick={handleUpload}>Upload Files</button><p> or </p>
+<button onClick={fetchJsonFromMongo}>Fetch JSON from MongoDB</button>
+<p>{message}</p>
+           {/* {docsUploaded && <p>✅ Documents uploaded successfully. You can now ask queries.</p>}
+           {jsonFetched && <p>✅ JSON data fetched successfully. You can now ask queries.</p>} */}
+</div>
+   );
+};
+export default Upload;
 
-@app.get("/fetch-json/")
-async def fetch_json_from_mongo():
-   """Fetches a limited number of JSON documents from MongoDB."""
-   global fetched_json_data
-   fetched_json_data.clear()
-   try:
-       fetched_json_data = list(collection.find({}, {"_id": 0}).limit(5))  # Fetch 5 JSON documents
-       if not fetched_json_data:
-           return {"message": "No JSON data found in MongoDB"}
-       return {"message": "Fetched JSON data successfully", "json_data": fetched_json_data}
-   except Exception as e:
-       raise HTTPException(status_code=500, detail=f"MongoDB fetch error: {str(e)}")
-
-@app.post("/chat/")
-async def chat(user_query: dict):
-    """Handles chat requests based on uploaded or fetched documents."""
-    global uploaded_texts, uploaded_json_data, fetched_json_data
-    # Determine available data source
-    if not uploaded_texts and not uploaded_json_data and not fetched_json_data:
-        raise HTTPException(status_code=400, detail="No documents uploaded or fetched. Please upload or fetch data first.")
-    
-    if uploaded_json_data:
-        formatted_json = json.dumps(uploaded_json_data, indent=2)
-        messages = [
-            {"role": "system", "content": "You are an AI assistant that provides detailed information about health insurance plans based on JSON data."},
-            {"role": "system", "content": f"Here is the JSON data for the plan details:\n\n{formatted_json}"},
-            {"role": "user", "content": user_query["query"]},
-        ]
-    elif fetched_json_data:
-        formatted_json = json.dumps(fetched_json_data, indent=2)
-        messages = [
-            {"role": "system", "content": "You are an AI assistant that provides detailed information about health insurance plans based on JSON data."},
-            {"role": "system", "content": f"Here is the JSON data for the plan details:\n\n{formatted_json}"},
-            {"role": "user", "content": user_query["query"]},
-        ]
-    else:
-        combined_text = "\n\n".join(uploaded_texts)
-        messages = [
-            {"role": "system", "content": "You are an AI assistant that provides answers based on the provided documents."},
-            {"role": "system", "content": f"Here are the uploaded documents:\n\n{combined_text}"},
-            {"role": "user", "content": user_query["query"]},
-        ]
-    
-    # Call OpenAI API
-    try:
-        response = openai.ChatCompletion.create(
-            engine="gpt-4-deployment",
-            messages=messages,
-            temperature=0.5
-        )
-        return {"response": response.choices[0].message.content}
-    except Exception as e:
-        logging.error(f"Chat API error: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Chat API error: {str(e)}")
-
-this is my main.py code send updated file code
+this is my frontend code for a chatbot, please create a beautiful and unique frontend for my frontend but keep the functionality intact
