@@ -1,157 +1,82 @@
-from deepeval import assert_test
-from deepeval.test_case import LLMTestCase, LLMTestCaseParams
-from deepeval.metrics import GEval
+FRunning teardown with pytest sessionfinish...
 
-def test_correctness():
-    correctness_metric = GEval(
-        name="Correctness",
-        criteria="Determine if the 'actual output' is correct based on the 'expected output'.",
-        evaluation_params=[LLMTestCaseParams.ACTUAL_OUTPUT, LLMTestCaseParams.EXPECTED_OUTPUT],
-        threshold=0.5
-    )
-    test_case = LLMTestCase(
-        input="I have a persistent cough and fever. Should I be worried?",
-        # Replace this with the actual output of your LLM application
-        actual_output="A persistent cough and fever could be a viral infection or something more serious. See a doctor if symptoms worsen or don’t improve in a few days.",
-        expected_output="A persistent cough and fever could indicate a range of illnesses, from a mild viral infection to more serious conditions like pneumonia or COVID-19. You should seek medical attention if your symptoms worsen, persist for more than a few days, or are accompanied by difficulty breathing, chest pain, or other concerning signs."
-    )
-    assert_test(test_case, [correctness_metric])
-this is the test file i ran however can u create a test case for my project which is a chatbot which gets trained based on thr pdf or json submitted usually of health insurance plans.
-please write test case and also tell me steps to run it
-this is my main.py file
-import os
-import shutil
-import json
-import logging
-from fastapi import FastAPI, File, UploadFile, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-from dotenv import load_dotenv
-import openai
-import fitz  # PyMuPDF for PDF text extraction
-from pymongo import MongoClient
-# Load environment variables
-load_dotenv()
-# Initialize OpenAI Azure client
-openai.api_type = "azure"
-openai.api_base = os.getenv("AZURE_OPENAI_ENDPOINT")
-openai.api_version = "2023-07-01-preview"
-openai.api_key = os.getenv("AZURE_OPENAI_API_KEY")
-# MongoDB Configuration
-MONGO_URI = os.getenv("MONGO_URI")
-DB_NAME = "planlibrary_api_db"
-COLLECTION_NAME = "planlibrary_med_api"
-# Connect to MongoDB
-try:
-   mongo_client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
-   db = mongo_client[DB_NAME]
-   collection = db[COLLECTION_NAME]
-   print("✅ Connected to MongoDB")
-except Exception as e:
-   print(f"❌ MongoDB Connection Error: {e}")
-app = FastAPI()
-# Enable CORS for frontend communication
-app.add_middleware(
-   CORSMiddleware,
-   allow_origins=["*"],  # Change this in production
-   allow_credentials=True,
-   allow_methods=["*"],
-   allow_headers=["*"],
-)
-# Storage for uploaded files
-UPLOAD_DIR = "uploads"
-os.makedirs(UPLOAD_DIR, exist_ok=True)
-uploaded_texts = []  # Stores extracted text from uploaded PDFs & text files
-uploaded_json_data = []  # Stores JSON data from uploaded files
-fetched_json_data = []  # Stores JSON data from MongoDB
+=================================================================== FAILURES ===================================================================
+___________________________________________________________ test_chatbot_correctness ___________________________________________________________
 
-@app.post("/upload/")
-async def upload_files(files: list[UploadFile] = File(...)):
-   """Handles multiple file uploads (PDFs, text, JSON)."""
-   global uploaded_texts, uploaded_json_data
-   uploaded_texts.clear()
-   uploaded_json_data.clear()
-   for file in files:
-       file_location = os.path.join(UPLOAD_DIR, file.filename)
-       try:
-           with open(file_location, "wb") as f:
-               shutil.copyfileobj(file.file, f)
-           # Process based on file type
-           if file.filename.endswith(".pdf"):
-               uploaded_texts.append(extract_text_from_pdf(file_location))
-           elif file.filename.endswith(".json"):
-               with open(file_location, "r", encoding="utf-8") as f:
-                   json_data = json.load(f)
-                   uploaded_json_data.append(json_data)
-           else:
-               with open(file_location, "r", encoding="utf-8") as f:
-                   uploaded_texts.append(f.read())
-       except Exception as e:
-           raise HTTPException(status_code=500, detail=f"File processing failed: {str(e)}")
-   return {"message": "Files uploaded successfully", "uploaded_files": [file.filename for file in files]}
+    def test_chatbot_correctness():
+>      correctness_metric = GEval(
+           name="Correctness",
+           criteria="Check if the chatbot provides accurate responses based on the uploaded health insurance plan document.",
+           evaluation_params=[LLMTestCaseParams.ACTUAL_OUTPUT, LLMTestCaseParams.EXPECTED_OUTPUT],
+           threshold=0.7  # Adjust based on required accuracy level
+       )
 
-def extract_text_from_pdf(pdf_path):
-   """Extracts text from a PDF file."""
-   text = ""
-   try:
-       doc = fitz.open(pdf_path)
-       for page in doc:
-           text += page.get_text("text") + "\n"
-       return text.strip()
-   except Exception as e:
-       raise HTTPException(status_code=500, detail=f"Failed to extract text from PDF: {str(e)}")
+test_example.py:5: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+venv/lib/python3.13/site-packages/deepeval/metrics/g_eval/g_eval.py:89: in __init__
+    self.model, self.using_native_model = initialize_model(model)
+venv/lib/python3.13/site-packages/deepeval/metrics/utils.py:283: in initialize_model
+    return GPTModel(model=model), True
+venv/lib/python3.13/site-packages/deepeval/models/gpt_model.py:165: in __init__
+    super().__init__(model_name)
+venv/lib/python3.13/site-packages/deepeval/models/base_model.py:35: in __init__
+    self.model = self.load_model(*args, **kwargs)
+venv/lib/python3.13/site-packages/deepeval/models/gpt_model.py:503: in load_model
+    return ChatOpenAI(
+venv/lib/python3.13/site-packages/langchain_core/load/serializable.py:125: in __init__
+    super().__init__(*args, **kwargs)
+venv/lib/python3.13/site-packages/langchain_openai/chat_models/base.py:577: in validate_environment
+    self.root_client = openai.OpenAI(**client_params, **sync_specific)  # type: ignore[arg-type]
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
-@app.get("/fetch-json/")
-async def fetch_json_from_mongo():
-   """Fetches a limited number of JSON documents from MongoDB."""
-   global fetched_json_data
-   fetched_json_data.clear()
-   try:
-       fetched_json_data = list(collection.find({}, {"_id": 0}).limit(5))  # Fetch 5 JSON documents
-       if not fetched_json_data:
-           return {"message": "No JSON data found in MongoDB"}
-       return {"message": "Fetched JSON data successfully", "json_data": fetched_json_data}
-   except Exception as e:
-       raise HTTPException(status_code=500, detail=f"MongoDB fetch error: {str(e)}")
+self = <openai.OpenAI object at 0x3008996a0>
 
-@app.post("/chat/")
-async def chat(user_query: dict):
-    """Handles chat requests based on uploaded or fetched documents."""
-    global uploaded_texts, uploaded_json_data, fetched_json_data
-    # Determine available data source
-    if not uploaded_texts and not uploaded_json_data and not fetched_json_data:
-        raise HTTPException(status_code=400, detail="No documents uploaded or fetched. Please upload or fetch data first.")
+    def __init__(
+        self,
+        *,
+        api_key: str | None = None,
+        organization: str | None = None,
+        base_url: str | httpx.URL | None = None,
+        timeout: Union[float, Timeout, None, NotGiven] = NOT_GIVEN,
+        max_retries: int = DEFAULT_MAX_RETRIES,
+        default_headers: Mapping[str, str] | None = None,
+        default_query: Mapping[str, object] | None = None,
+        # Configure a custom httpx client. See the [httpx documentation](https://www.python-httpx.org/api/#client) for more details.
+        http_client: httpx.Client | None = None,
+        # Enable or disable schema validation for data returned by the API.
+        # When enabled an error APIResponseValidationError is raised
+        # if the API responds with invalid data for the expected schema.
+        #
+        # This parameter may be removed or changed in the future.
+        # If you rely on this feature, please open a GitHub issue
+        # outlining your use-case to help us decide if it should be
+        # part of our public interface in the future.
+        _strict_response_validation: bool = False,
+    ) -> None:
+        """Construct a new synchronous openai client instance.
     
-    if uploaded_json_data:
-        formatted_json = json.dumps(uploaded_json_data, indent=2)
-        messages = [
-            {"role": "system", "content": "You are an AI assistant that provides detailed information about health insurance plans based on JSON data."},
-            {"role": "system", "content": f"Here is the JSON data for the plan details:\n\n{formatted_json}"},
-            {"role": "user", "content": user_query["query"]},
-        ]
-    elif fetched_json_data:
-        formatted_json = json.dumps(fetched_json_data, indent=2)
-        messages = [
-            {"role": "system", "content": "You are an AI assistant that provides detailed information about health insurance plans based on JSON data."},
-            {"role": "system", "content": f"Here is the JSON data for the plan details:\n\n{formatted_json}"},
-            {"role": "user", "content": user_query["query"]},
-        ]
-    else:
-        combined_text = "\n\n".join(uploaded_texts)
-        messages = [
-            {"role": "system", "content": "You are an AI assistant that provides answers based on the provided documents."},
-            {"role": "system", "content": f"Here are the uploaded documents:\n\n{combined_text}"},
-            {"role": "user", "content": user_query["query"]},
-        ]
-    
-    # Call OpenAI API
-    try:
-        response = openai.ChatCompletion.create(
-            engine="gpt-4-deployment",
-            messages=messages,
-            temperature=0.5
-        )
-        return {"response": response.choices[0].message.content}
-    except Exception as e:
-        logging.error(f"Chat API error: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Chat API error: {str(e)}")
+        This automatically infers the following arguments from their corresponding environment variables if they are not provided:
+        - `api_key` from `OPENAI_API_KEY`
+        - `organization` from `OPENAI_ORG_ID`
+        """
+        if api_key is None:
+            api_key = os.environ.get("OPENAI_API_KEY")
+        if api_key is None:
+>           raise OpenAIError(
+                "The api_key client option must be set either by passing api_key to the client or by setting the OPENAI_API_KEY environment variable"
+            )
+E           openai.OpenAIError: The api_key client option must be set either by passing api_key to the client or by setting the OPENAI_API_KEY environment variable
 
+venv/lib/python3.13/site-packages/openai/_client.py:93: OpenAIError
+============================================================= slowest 10 durations =============================================================
+0.02s call     test_example.py::test_chatbot_correctness
+
+(2 durations < 0.005s hidden.  Use -vv to show these durations.)
+=========================================================== short test summary info ============================================================
+FAILED test_example.py::test_chatbot_correctness - openai.OpenAIError: The api_key client option must be set either by passing api_key to the client or by setting the OPENAI_API_KEY environm...
+1 failed, 3 warnings in 0.21s
+No test cases found, please try again.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+E0000 00:00:1741588976.054899   53294 init.cc:232] grpc_wait_for_shutdown_with_timeout() timed out.
+
+getting this error when trying to run above test case
