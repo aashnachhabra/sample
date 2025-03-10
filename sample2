@@ -1,1 +1,193 @@
 
+import os
+import openai
+import logging
+import pytest
+from dotenv import load_dotenv
+from deepeval import assert_test
+from deepeval.test_case import LLMTestCase, LLMTestCaseParams
+from deepeval.metrics import GEval
+# Load environment variables
+load_dotenv()
+AZURE_OPENAI_ENDPOINT = "https://kgnwl0lm6yi5ugbopenai.openai.azure.com/"
+AZURE_OPENAI_API_KEY = "ebc6ea027367426a9c881498b8db690f"
+AZURE_OPENAI_MODEL_DEPLOYMENT = "gpt-4-deployment"
+# Check for missing API credentials
+if not AZURE_OPENAI_API_KEY or not AZURE_OPENAI_ENDPOINT:
+   logging.error("❌ Azure OpenAI API key or endpoint is missing!")
+   raise ValueError("Missing Azure OpenAI credentials. Check your .env file.")
+openai.api_type = "azure"
+openai.api_base = "https://kgnwl0lm6yi5ugbopenai.openai.azure.com/"
+openai.api_key = "ebc6ea027367426a9c881498b8db690f"
+
+def call_azure_openai(prompt):
+   """
+   Calls Azure OpenAI API to generate responses using the latest OpenAI API syntax.
+   """
+   try:
+       client = openai.AzureOpenAI(
+           api_key="ebc6ea027367426a9c881498b8db690f",
+           api_version="2023-07-01-preview",
+           azure_endpoint="https://kgnwl0lm6yi5ugbopenai.openai.azure.com/"  # Removed `proxies`
+       )
+       response = client.chat.completions.create(
+           model=AZURE_OPENAI_MODEL_DEPLOYMENT,
+           messages=[
+               {"role": "system", "content": "You are an AI assistant for health insurance queries."},
+               {"role": "user", "content": prompt}
+           ],
+           temperature=0.5
+       )
+       return response.choices[0].message.content  # Updated response format
+   except Exception as e:
+       logging.error(f"OpenAI API Error: {e}")
+       return None
+   """
+   Calls Azure OpenAI API to generate responses using the latest OpenAI API syntax.
+   """
+   try:
+       client = openai.AzureOpenAI(
+           api_key="ebc6ea027367426a9c881498b8db690f",
+           api_version="2023-07-01-preview",
+           azure_endpoint="https://kgnwl0lm6yi5ugbopenai.openai.azure.com/",
+       )
+       response = client.chat.completions.create(
+           engine=AZURE_OPENAI_MODEL_DEPLOYMENT,
+           messages=[
+               {"role": "system", "content": "You are an AI assistant for health insurance queries."},
+               {"role": "user", "content": prompt}
+           ],
+           temperature=0.5
+       )
+       return response.choices[0].message.content  # Updated syntax
+   except Exception as e:
+       logging.error(f"OpenAI API Error: {e}")
+       return None
+
+@pytest.mark.deepeval
+def test_chatbot_correctness():
+   """
+   Test case to check if the chatbot correctly answers health insurance queries.
+   """
+   user_question = "What is deductible for plan code BXAL for tier 2 COC Series 2023?"
+   expected_output = "Individual Ded is $4,000 and Family Ded is $8,000."
+   # Call Azure OpenAI to get actual output
+   actual_output = call_azure_openai(user_question)
+   assert actual_output is not None, "Azure OpenAI API call failed."
+   correctness_metric = GEval(
+       name="Correctness",
+       criteria="Check if the chatbot provides accurate responses based on the uploaded health insurance plan document.",
+       evaluation_params=[LLMTestCaseParams.ACTUAL_OUTPUT, LLMTestCaseParams.EXPECTED_OUTPUT],
+       threshold=0.7
+   )
+   test_case = LLMTestCase(
+       input=user_question,
+       actual_output=actual_output,
+       expected_output=expected_output
+   )
+   logging.info("Running test case for chatbot correctness...")
+   logging.info(f"User Question: {user_question}")
+   logging.info(f"Expected Output: {expected_output}")
+   logging.info(f"Actual Output: {actual_output}")
+   # Run the test case
+   assert_test(test_case, [correctness_metric])
+   for metric in test_case.metrics:
+       logging.info(f"{metric.name}: {metric.value}")
+
+if __name__ == "__main__":
+   pytest.main(["-s", "test_example.py"])
+
+i have explicitely added all the keys still same error
+ deepeval test run test_example.py
+FRunning teardown with pytest sessionfinish...
+
+=================================================================== FAILURES ===================================================================
+___________________________________________________________ test_chatbot_correctness ___________________________________________________________
+
+    @pytest.mark.deepeval
+    def test_chatbot_correctness():
+       """
+       Test case to check if the chatbot correctly answers health insurance queries.
+       """
+       user_question = "What is deductible for plan code BXAL for tier 2 COC Series 2023?"
+       expected_output = "Individual Ded is $4,000 and Family Ded is $8,000."
+       # Call Azure OpenAI to get actual output
+       actual_output = call_azure_openai(user_question)
+       assert actual_output is not None, "Azure OpenAI API call failed."
+>      correctness_metric = GEval(
+           name="Correctness",
+           criteria="Check if the chatbot provides accurate responses based on the uploaded health insurance plan document.",
+           evaluation_params=[LLMTestCaseParams.ACTUAL_OUTPUT, LLMTestCaseParams.EXPECTED_OUTPUT],
+           threshold=0.7
+       )
+
+test_example.py:76: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+venv/lib/python3.13/site-packages/deepeval/metrics/g_eval/g_eval.py:89: in __init__
+    self.model, self.using_native_model = initialize_model(model)
+venv/lib/python3.13/site-packages/deepeval/metrics/utils.py:283: in initialize_model
+    return GPTModel(model=model), True
+venv/lib/python3.13/site-packages/deepeval/models/gpt_model.py:148: in __init__
+    super().__init__(model_name)
+venv/lib/python3.13/site-packages/deepeval/models/base_model.py:35: in __init__
+    self.model = self.load_model(*args, **kwargs)
+venv/lib/python3.13/site-packages/deepeval/models/gpt_model.py:486: in load_model
+    return ChatOpenAI(
+venv/lib/python3.13/site-packages/langchain_core/load/serializable.py:125: in __init__
+    super().__init__(*args, **kwargs)
+venv/lib/python3.13/site-packages/langchain_openai/chat_models/base.py:551: in validate_environment
+    self.root_client = openai.OpenAI(**client_params, **sync_specific)  # type: ignore[arg-type]
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <openai.OpenAI object at 0x118652e40>
+
+    def __init__(
+        self,
+        *,
+        api_key: str | None = None,
+        organization: str | None = None,
+        project: str | None = None,
+        base_url: str | httpx.URL | None = None,
+        websocket_base_url: str | httpx.URL | None = None,
+        timeout: Union[float, Timeout, None, NotGiven] = NOT_GIVEN,
+        max_retries: int = DEFAULT_MAX_RETRIES,
+        default_headers: Mapping[str, str] | None = None,
+        default_query: Mapping[str, object] | None = None,
+        # Configure a custom httpx client.
+        # We provide a `DefaultHttpxClient` class that you can pass to retain the default values we use for `limits`, `timeout` & `follow_redirects`.
+        # See the [httpx documentation](https://www.python-httpx.org/api/#client) for more details.
+        http_client: httpx.Client | None = None,
+        # Enable or disable schema validation for data returned by the API.
+        # When enabled an error APIResponseValidationError is raised
+        # if the API responds with invalid data for the expected schema.
+        #
+        # This parameter may be removed or changed in the future.
+        # If you rely on this feature, please open a GitHub issue
+        # outlining your use-case to help us decide if it should be
+        # part of our public interface in the future.
+        _strict_response_validation: bool = False,
+    ) -> None:
+        """Construct a new synchronous OpenAI client instance.
+    
+        This automatically infers the following arguments from their corresponding environment variables if they are not provided:
+        - `api_key` from `OPENAI_API_KEY`
+        - `organization` from `OPENAI_ORG_ID`
+        - `project` from `OPENAI_PROJECT_ID`
+        """
+        if api_key is None:
+            api_key = os.environ.get("OPENAI_API_KEY")
+        if api_key is None:
+>           raise OpenAIError(
+                "The api_key client option must be set either by passing api_key to the client or by setting the OPENAI_API_KEY environment variable"
+            )
+E           openai.OpenAIError: The api_key client option must be set either by passing api_key to the client or by setting the OPENAI_API_KEY environment variable
+
+venv/lib/python3.13/site-packages/openai/_client.py:110: OpenAIError
+============================================================= slowest 10 durations =============================================================
+4.83s call     test_example.py::test_chatbot_correctness
+
+(2 durations < 0.005s hidden.  Use -vv to show these durations.)
+=========================================================== short test summary info ============================================================
+FAILED test_example.py::test_chatbot_correctness - openai.OpenAIError: The api_key client option must be set either by passing api_key to the client or by setting the OPENAI_API_KEY environm...
+1 failed, 3 warnings in 4.98s
+No test cases found, please try again.
