@@ -1,99 +1,37 @@
-import os
-import openai
-import logging
-from dotenv import load_dotenv
-from deepeval import assert_test
-from deepeval.test_case import LLMTestCase, LLMTestCaseParams
-from deepeval.metrics import GEval
+venv) achhab16@LAMU0N62HHYPH2V backend % deepeval test run test_example.py
+FRunning teardown with pytest sessionfinish...
 
-load_dotenv()
+=================================================================== FAILURES ===================================================================
+___________________________________________________________ test_chatbot_correctness ___________________________________________________________
 
-AZURE_OPENAI_ENDPOINT = os.getenv("AZURE_OPENAI_ENDPOINT")
-AZURE_OPENAI_API_KEY = os.getenv("AZURE_OPENAI_API_KEY")
-AZURE_OPENAI_MODEL_DEPLOYMENT = "gpt-4-deployment"
-if not AZURE_OPENAI_API_KEY or not AZURE_OPENAI_ENDPOINT:
-    logging.error("❌ Azure OpenAI API key or endpoint is missing!")
-    raise ValueError("Missing Azure OpenAI credentials. Check your .env file.")
+    @pytest.mark.deepeval
+    def test_chatbot_correctness():
+       """
+       Test case to check if the chatbot correctly answers health insurance queries.
+       """
+       user_question = "What is deductible for plan code BXAL for tier 2 COC Series 2023?"
+       expected_output = "Individual Ded is $4,000 and Family Ded is $8,000."
+       # Call Azure OpenAI to get actual output
+       actual_output = call_azure_openai(user_question)
+>      assert actual_output is not None, "Azure OpenAI API call failed."
+E      AssertionError: Azure OpenAI API call failed.
+E      assert None is not None
 
-openai.api_type = "azure"
-openai.api_base = AZURE_OPENAI_ENDPOINT
-openai.api_key = AZURE_OPENAI_API_KEY
+test_example.py:49: AssertionError
+-------------------------------------------------------------- Captured log call ---------------------------------------------------------------
+ERROR    root:test_example.py:37 OpenAI API Error: 
 
-def call_azure_openai(prompt):
-    """
-    Calls Azure OpenAI API to generate responses.
-    """
-    try:
-        response = openai.ChatCompletion.create(
-            model="gpt-4-deployment",
-            messages=[
-                {"role": "system", "content": "You are an AI assistant for health insurance queries."},
-                {"role": "user", "content": prompt}
-            ],
-            temperature=0.5
-        )
-        return response.choices[0].message["content"]
-    except Exception as e:
-        logging.error(f"OpenAI API Error: {e}")
-        return None
+You tried to access openai.ChatCompletion, but this is no longer supported in openai>=1.0.0 - see the README at https://github.com/openai/openai-python for the API.
 
-def test_chatbot_correctness():
-    """
-    Test case to check if the chatbot correctly answers health insurance queries.
-    """
-    user_question = "What is deductible for plan code BXAL for tier 2 COC Series 2023?"
-    # Call Azure OpenAI to get actual output
-    actual_output = call_azure_openai(user_question)
-    expected_output = "Individual Ded is $4,000 and Family Ded is $8,000."
-    if actual_output is None:
-        logging.error("Azure OpenAI API call failed. Skipping test.")
-        return
-    correctness_metric = GEval(
-        name="Correctness",
-        criteria="Check if the chatbot provides accurate responses based on the uploaded health insurance plan document.",
-        evaluation_params=[LLMTestCaseParams.ACTUAL_OUTPUT, LLMTestCaseParams.EXPECTED_OUTPUT],
-        threshold=0.7
-    )
-    test_case = LLMTestCase(
-        input=user_question,
-        actual_output=actual_output,
-        expected_output=expected_output
-    )
-    logging.info("Running test case for chatbot correctness...")
-    logging.info(f"User Question: {user_question}")
-    logging.info(f"Expected Output: {expected_output}")
-    logging.info(f"Actual Output: {actual_output}")
+You can run `openai migrate` to automatically upgrade your codebase to use the 1.0.0 interface. 
 
-    assert_test(test_case, [correctness_metric])
-    for metric in test_case.metrics:
-        logging.info(f"{metric.name}: {metric.value}")
+Alternatively, you can pin your installation to the old version, e.g. `pip install openai==0.28`
 
-if __name__ == "__main__":
-    test_chatbot_correctness()
-
-
-test code
-pytest -s test_example.py
-============================================================= test session starts ==============================================================
-platform darwin -- Python 3.13.1, pytest-8.3.5, pluggy-1.5.0
-rootdir: /Users/achhab16/Desktop/AI-Project/backend
-plugins: repeat-0.9.3, deepeval-2.5.2, anyio-3.7.1, xdist-3.6.1
-collected 1 item                                                                                                                               
-
-test_example.py .Running teardown with pytest sessionfinish...
-
-
-============================================================== 1 passed in 0.02s ===============================================================
-
-with deepeval 
-deepeval test run test_example.py
-.Running teardown with pytest sessionfinish...
-
+A detailed migration guide is available here: https://github.com/openai/openai-python/discussions/742
 ============================================================= slowest 10 durations =============================================================
 
 (3 durations < 0.005s hidden.  Use -vv to show these durations.)
-1 passed, 2 warnings in 0.05s
+=========================================================== short test summary info ============================================================
+FAILED test_example.py::test_chatbot_correctness - AssertionError: Azure OpenAI API call failed.
+1 failed, 3 warnings in 0.10s
 No test cases found, please try again.
-
-it just seeems like they are not able to detect the cases becaus no print statements are coming plz help me fix this
-
