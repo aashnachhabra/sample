@@ -1,110 +1,33 @@
-import React from "react";
-import Upload from "./Upload";
-import Chat from "./Chat";
-const App = () => {
-   return (
-<div>
-<h1>PDF/JSON Chatbot</h1>
-<Upload />
-<Chat />
-</div>
-   );
-};
-export default App;
+ deepeval test run test_example.py
+Traceback (most recent call last):
+  File "/Users/achhab16/Desktop/AI-Project/backend/venv/bin/deepeval", line 5, in <module>
+    from deepeval.cli.main import app
+  File "/Users/achhab16/Desktop/AI-Project/backend/venv/lib/python3.13/site-packages/deepeval/__init__.py", line 8, in <module>
+    from deepeval.event import track
+  File "/Users/achhab16/Desktop/AI-Project/backend/venv/lib/python3.13/site-packages/deepeval/event/__init__.py", line 1, in <module>
+    from .event import track
+  File "/Users/achhab16/Desktop/AI-Project/backend/venv/lib/python3.13/site-packages/deepeval/event/event.py", line 3, in <module>
+    from deepeval.monitor.monitor import monitor
+  File "/Users/achhab16/Desktop/AI-Project/backend/venv/lib/python3.13/site-packages/deepeval/monitor/__init__.py", line 1, in <module>
+    from .monitor import monitor, a_monitor
+  File "/Users/achhab16/Desktop/AI-Project/backend/venv/lib/python3.13/site-packages/deepeval/monitor/monitor.py", line 5, in <module>
+    from deepeval.test_run.hyperparameters import process_hyperparameters
+  File "/Users/achhab16/Desktop/AI-Project/backend/venv/lib/python3.13/site-packages/deepeval/test_run/__init__.py", line 1, in <module>
+    from .test_run import (
+    ...<6 lines>...
+    )
+  File "/Users/achhab16/Desktop/AI-Project/backend/venv/lib/python3.13/site-packages/deepeval/test_run/test_run.py", line 15, in <module>
+    from deepeval.metrics import BaseMetric
+  File "/Users/achhab16/Desktop/AI-Project/backend/venv/lib/python3.13/site-packages/deepeval/metrics/__init__.py", line 1, in <module>
+    from .base_metric import (
+    ...<3 lines>...
+    )
+  File "/Users/achhab16/Desktop/AI-Project/backend/venv/lib/python3.13/site-packages/deepeval/metrics/base_metric.py", line 10, in <module>
+    from deepeval.models import DeepEvalBaseLLM
+  File "/Users/achhab16/Desktop/AI-Project/backend/venv/lib/python3.13/site-packages/deepeval/models/__init__.py", line 7, in <module>
+    from deepeval.models.gpt_model import GPTModel, MultimodalGPTModel
+  File "/Users/achhab16/Desktop/AI-Project/backend/venv/lib/python3.13/site-packages/deepeval/models/gpt_model.py", line 2, in <module>
+    from openai import OpenAI, AsyncOpenAI
+ImportError: cannot import name 'OpenAI' from 'openai' (/Users/achhab16/Desktop/AI-Project/backend/venv/lib/python3.13/site-packages/openai/__init__.py)
 
-import React, { useState } from "react";
-import axios from "axios";
-const Chat = () => {
-   const [query, setQuery] = useState("");
-   const [response, setResponse] = useState("");
-   const handleSendMessage = async () => {
-       try {
-           const res = await axios.post("http://127.0.0.1:8000/chat/", {
-               query: query,
-           });
-           setResponse(res.data.response);
-       } catch (error) {
-           console.error("Chat error:", error);
-           setResponse("Failed to fetch response.");
-       }
-   };
-   return (
-<div>
-<input
-               type="text"
-               value={query}
-               onChange={(e) => setQuery(e.target.value)}
-               placeholder="Ask a question..."
-           />
-<button onClick={handleSendMessage}>Send</button>
-<p>Response: {response}</p>
-</div>
-   );
-};
-export default Chat;
-
-import React, { useState } from "react";
-import axios from "axios";
-const Upload = ({ onUploadSuccess }) => {
-   const [selectedFiles, setSelectedFiles] = useState([]);
-   const [message, setMessage] = useState("");
-   const [docsUploaded, setDocsUploaded] = useState(false);
-   const [jsonFetched, setJsonFetched] = useState(false);
-   const handleFileChange = (event) => {
-       setSelectedFiles(event.target.files);
-   };
-   const handleUpload = async () => {
-       if (!selectedFiles.length) {
-           setMessage("❌ Please select at least one file.");
-           return;
-       }
-       const formData = new FormData();
-       for (let i = 0; i < selectedFiles.length; i++) {
-           formData.append("files", selectedFiles[i]);
-       }
-       try {
-           const response = await axios.post("http://127.0.0.1:8000/upload/", formData, {
-               headers: { "Content-Type": "multipart/form-data" },
-           });
-           setMessage(`✅ Files uploaded successfully: ${response.data.uploaded_files.join(", ")}`);
-           setDocsUploaded(true);
-           setJsonFetched(false);  // Reset JSON fetch status
-           onUploadSuccess && onUploadSuccess(true);  // Callback to update parent component
-       } catch (error) {
-           console.error("Upload error:", error);
-           setMessage("❌ Failed to upload files.");
-           setDocsUploaded(false);
-       }
-   };
-   const fetchJsonFromMongo = async () => {
-       try {
-           const response = await axios.get("http://127.0.0.1:8000/fetch-json/");
-           if (response.data.json_data) {
-               setMessage(`✅ Fetched ${response.data.json_data.length} JSON documents from MongoDB.`);
-               setJsonFetched(true);
-               setDocsUploaded(false);  // Reset uploaded documents status
-               onUploadSuccess && onUploadSuccess(true);  // Callback for successful fetch
-           } else {
-               setMessage("⚠️ No JSON data found in MongoDB.");
-               setJsonFetched(false);
-           }
-       } catch (error) {
-           console.error("Fetch JSON error:", error);
-           setMessage("❌ Failed to fetch JSON data from MongoDB.");
-           setJsonFetched(false);
-       }
-   };
-   return (
-<div>
-<input type="file" multiple onChange={handleFileChange} />
-<button onClick={handleUpload}>Upload Files</button><p> or </p>
-<button onClick={fetchJsonFromMongo}>Fetch JSON from MongoDB</button>
-<p>{message}</p>
-           {/* {docsUploaded && <p>✅ Documents uploaded successfully. You can now ask queries.</p>}
-           {jsonFetched && <p>✅ JSON data fetched successfully. You can now ask queries.</p>} */}
-</div>
-   );
-};
-export default Upload;
-
-this is my frontend code for a chatbot, please create a beautiful and unique frontend for my frontend but keep the functionality intact
+getting this error on running deepeval test case on local. pls fix
