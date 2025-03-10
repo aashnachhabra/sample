@@ -1,4 +1,4 @@
-venv) achhab16@LAMU0N62HHYPH2V backend % deepeval test run test_example.py
+(venv) achhab16@LAMU0N62HHYPH2V backend % deepeval test run test_example.py
 FRunning teardown with pytest sessionfinish...
 
 =================================================================== FAILURES ===================================================================
@@ -13,25 +13,87 @@ ___________________________________________________________ test_chatbot_correct
        expected_output = "Individual Ded is $4,000 and Family Ded is $8,000."
        # Call Azure OpenAI to get actual output
        actual_output = call_azure_openai(user_question)
->      assert actual_output is not None, "Azure OpenAI API call failed."
-E      AssertionError: Azure OpenAI API call failed.
-E      assert None is not None
+       assert actual_output is not None, "Azure OpenAI API call failed."
+>      correctness_metric = GEval(
+           name="Correctness",
+           criteria="Check if the chatbot provides accurate responses based on the uploaded health insurance plan document.",
+           evaluation_params=[LLMTestCaseParams.ACTUAL_OUTPUT, LLMTestCaseParams.EXPECTED_OUTPUT],
+           threshold=0.7
+       )
 
-test_example.py:49: AssertionError
--------------------------------------------------------------- Captured log call ---------------------------------------------------------------
-ERROR    root:test_example.py:37 OpenAI API Error: 
+test_example.py:76: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+venv/lib/python3.13/site-packages/deepeval/metrics/g_eval/g_eval.py:89: in __init__
+    self.model, self.using_native_model = initialize_model(model)
+venv/lib/python3.13/site-packages/deepeval/metrics/utils.py:283: in initialize_model
+    return GPTModel(model=model), True
+venv/lib/python3.13/site-packages/deepeval/models/gpt_model.py:148: in __init__
+    super().__init__(model_name)
+venv/lib/python3.13/site-packages/deepeval/models/base_model.py:35: in __init__
+    self.model = self.load_model(*args, **kwargs)
+venv/lib/python3.13/site-packages/deepeval/models/gpt_model.py:486: in load_model
+    return ChatOpenAI(
+venv/lib/python3.13/site-packages/langchain_core/load/serializable.py:125: in __init__
+    super().__init__(*args, **kwargs)
+venv/lib/python3.13/site-packages/langchain_openai/chat_models/base.py:551: in validate_environment
+    self.root_client = openai.OpenAI(**client_params, **sync_specific)  # type: ignore[arg-type]
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
-You tried to access openai.ChatCompletion, but this is no longer supported in openai>=1.0.0 - see the README at https://github.com/openai/openai-python for the API.
+self = <openai.OpenAI object at 0x126452e40>
 
-You can run `openai migrate` to automatically upgrade your codebase to use the 1.0.0 interface. 
+    def __init__(
+        self,
+        *,
+        api_key: str | None = None,
+        organization: str | None = None,
+        project: str | None = None,
+        base_url: str | httpx.URL | None = None,
+        websocket_base_url: str | httpx.URL | None = None,
+        timeout: Union[float, Timeout, None, NotGiven] = NOT_GIVEN,
+        max_retries: int = DEFAULT_MAX_RETRIES,
+        default_headers: Mapping[str, str] | None = None,
+        default_query: Mapping[str, object] | None = None,
+        # Configure a custom httpx client.
+        # We provide a `DefaultHttpxClient` class that you can pass to retain the default values we use for `limits`, `timeout` & `follow_redirects`.
+        # See the [httpx documentation](https://www.python-httpx.org/api/#client) for more details.
+        http_client: httpx.Client | None = None,
+        # Enable or disable schema validation for data returned by the API.
+        # When enabled an error APIResponseValidationError is raised
+        # if the API responds with invalid data for the expected schema.
+        #
+        # This parameter may be removed or changed in the future.
+        # If you rely on this feature, please open a GitHub issue
+        # outlining your use-case to help us decide if it should be
+        # part of our public interface in the future.
+        _strict_response_validation: bool = False,
+    ) -> None:
+        """Construct a new synchronous OpenAI client instance.
+    
+        This automatically infers the following arguments from their corresponding environment variables if they are not provided:
+        - `api_key` from `OPENAI_API_KEY`
+        - `organization` from `OPENAI_ORG_ID`
+        - `project` from `OPENAI_PROJECT_ID`
+        """
+        if api_key is None:
+            api_key = os.environ.get("OPENAI_API_KEY")
+        if api_key is None:
+>           raise OpenAIError(
+                "The api_key client option must be set either by passing api_key to the client or by setting the OPENAI_API_KEY environment variable"
+            )
+E           openai.OpenAIError: The api_key client option must be set either by passing api_key to the client or by setting the OPENAI_API_KEY environment variable
 
-Alternatively, you can pin your installation to the old version, e.g. `pip install openai==0.28`
-
-A detailed migration guide is available here: https://github.com/openai/openai-python/discussions/742
+venv/lib/python3.13/site-packages/openai/_client.py:110: OpenAIError
 ============================================================= slowest 10 durations =============================================================
+7.30s call     test_example.py::test_chatbot_correctness
 
-(3 durations < 0.005s hidden.  Use -vv to show these durations.)
+(2 durations < 0.005s hidden.  Use -vv to show these durations.)
 =========================================================== short test summary info ============================================================
-FAILED test_example.py::test_chatbot_correctness - AssertionError: Azure OpenAI API call failed.
-1 failed, 3 warnings in 0.10s
-No test cases found, please try again.
+FAILED test_example.py::test_chatbot_correctness - openai.OpenAIError: The api_key client option must be set either by passing api_key to the client or by setting the OPENAI_API_KEY environm...
+1 failed, 3 warnings in 7.47s
+
+getting this error but my.env file has the keys
+
+AZURE_OPENAI_API_KEY="ebc6ea027367426a9c881498b8db690f"
+AZURE_OPENAI_ENDPOINT="https://kgnwl0lm6yi5ugbopenai.openai.azure.com/"
+MONGO_URI="mongodb://admin:sqg9dWDVuZ@rp000107722.uhc.com:27017,rp000107723.uhc.com:27017,rp000107724.uhc.com:27017/planlibrary_api_db?authSource=admin&connectTimeoutMS=300000&maxPoolSize=10&minPoolSize=0&maxIdleTimeMS=900000&readPreference=primary&ssl=false"
+
