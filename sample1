@@ -1,82 +1,17 @@
-FRunning teardown with pytest sessionfinish...
+venv) achhab16@LAMU0N62HHYPH2V backend % deepeval test run test_example.py
+/Users/achhab16/Desktop/AI-Project/backend/venv/lib/python3.13/site-packages/deepeval/__init__.py:54: UserWarning: You are using deepeval version 2.5.1, however version 2.5.2 is available. You should consider upgrading via the "pip install --upgrade deepeval" command.
+  warnings.warn(
+Running teardown with pytest sessionfinish...
 
-=================================================================== FAILURES ===================================================================
-___________________________________________________________ test_chatbot_correctness ___________________________________________________________
-
-    def test_chatbot_correctness():
->      correctness_metric = GEval(
-           name="Correctness",
-           criteria="Check if the chatbot provides accurate responses based on the uploaded health insurance plan document.",
-           evaluation_params=[LLMTestCaseParams.ACTUAL_OUTPUT, LLMTestCaseParams.EXPECTED_OUTPUT],
-           threshold=0.7  # Adjust based on required accuracy level
-       )
-
-test_example.py:5: 
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
-venv/lib/python3.13/site-packages/deepeval/metrics/g_eval/g_eval.py:89: in __init__
-    self.model, self.using_native_model = initialize_model(model)
-venv/lib/python3.13/site-packages/deepeval/metrics/utils.py:283: in initialize_model
-    return GPTModel(model=model), True
-venv/lib/python3.13/site-packages/deepeval/models/gpt_model.py:165: in __init__
-    super().__init__(model_name)
-venv/lib/python3.13/site-packages/deepeval/models/base_model.py:35: in __init__
-    self.model = self.load_model(*args, **kwargs)
-venv/lib/python3.13/site-packages/deepeval/models/gpt_model.py:503: in load_model
-    return ChatOpenAI(
-venv/lib/python3.13/site-packages/langchain_core/load/serializable.py:125: in __init__
-    super().__init__(*args, **kwargs)
-venv/lib/python3.13/site-packages/langchain_openai/chat_models/base.py:577: in validate_environment
-    self.root_client = openai.OpenAI(**client_params, **sync_specific)  # type: ignore[arg-type]
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
-
-self = <openai.OpenAI object at 0x3008996a0>
-
-    def __init__(
-        self,
-        *,
-        api_key: str | None = None,
-        organization: str | None = None,
-        base_url: str | httpx.URL | None = None,
-        timeout: Union[float, Timeout, None, NotGiven] = NOT_GIVEN,
-        max_retries: int = DEFAULT_MAX_RETRIES,
-        default_headers: Mapping[str, str] | None = None,
-        default_query: Mapping[str, object] | None = None,
-        # Configure a custom httpx client. See the [httpx documentation](https://www.python-httpx.org/api/#client) for more details.
-        http_client: httpx.Client | None = None,
-        # Enable or disable schema validation for data returned by the API.
-        # When enabled an error APIResponseValidationError is raised
-        # if the API responds with invalid data for the expected schema.
-        #
-        # This parameter may be removed or changed in the future.
-        # If you rely on this feature, please open a GitHub issue
-        # outlining your use-case to help us decide if it should be
-        # part of our public interface in the future.
-        _strict_response_validation: bool = False,
-    ) -> None:
-        """Construct a new synchronous openai client instance.
-    
-        This automatically infers the following arguments from their corresponding environment variables if they are not provided:
-        - `api_key` from `OPENAI_API_KEY`
-        - `organization` from `OPENAI_ORG_ID`
-        """
-        if api_key is None:
-            api_key = os.environ.get("OPENAI_API_KEY")
-        if api_key is None:
->           raise OpenAIError(
-                "The api_key client option must be set either by passing api_key to the client or by setting the OPENAI_API_KEY environment variable"
-            )
-E           openai.OpenAIError: The api_key client option must be set either by passing api_key to the client or by setting the OPENAI_API_KEY environment variable
-
-venv/lib/python3.13/site-packages/openai/_client.py:93: OpenAIError
-============================================================= slowest 10 durations =============================================================
-0.02s call     test_example.py::test_chatbot_correctness
-
-(2 durations < 0.005s hidden.  Use -vv to show these durations.)
+==================================================================== ERRORS ====================================================================
+_______________________________________________________ ERROR collecting test_example.py _______________________________________________________
+test_example.py:20: in <module>
+    azure_openai_model = GPTModel(
+venv/lib/python3.13/site-packages/deepeval/models/gpt_model.py:154: in __init__
+    raise ValueError(
+E   ValueError: Invalid model. Available GPT models: gpt-3.5-turbo, gpt-3.5-turbo-0125, gpt-3.5-turbo-1106, gpt-4-0125-preview, gpt-4-1106-preview, gpt-4-turbo, gpt-4-turbo-2024-04-09, gpt-4-turbo-preview, gpt-4o, gpt-4o-2024-05-13, gpt-4o-2024-08-06, gpt-4o-2024-11-20, gpt-4o-mini, gpt-4o-mini-2024-07-18, gpt-4-32k, gpt-4-32k-0613, o1, o1-preview, o1-2024-12-17, o3-mini, o3-mini-2025-01-31
 =========================================================== short test summary info ============================================================
-FAILED test_example.py::test_chatbot_correctness - openai.OpenAIError: The api_key client option must be set either by passing api_key to the client or by setting the OPENAI_API_KEY environm...
-1 failed, 3 warnings in 0.21s
+ERROR test_example.py - ValueError: Invalid model. Available GPT models: gpt-3.5-turbo, gpt-3.5-turbo-0125, gpt-3.5-turbo-1106, gpt-4-0125-preview, gpt-4-1106-prev...
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+3 warnings, 1 error in 0.13s
 No test cases found, please try again.
-WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
-E0000 00:00:1741588976.054899   53294 init.cc:232] grpc_wait_for_shutdown_with_timeout() timed out.
-
-getting this error when trying to run above test case
