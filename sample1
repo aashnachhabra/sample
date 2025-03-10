@@ -1,17 +1,75 @@
-venv) achhab16@LAMU0N62HHYPH2V backend % deepeval test run test_example.py
-/Users/achhab16/Desktop/AI-Project/backend/venv/lib/python3.13/site-packages/deepeval/__init__.py:54: UserWarning: You are using deepeval version 2.5.1, however version 2.5.2 is available. You should consider upgrading via the "pip install --upgrade deepeval" command.
+UserWarning: You are using deepeval version 2.5.1, however version 2.5.2 is available. You should consider upgrading via the "pip install --upgrade deepeval" command.
   warnings.warn(
-Running teardown with pytest sessionfinish...
+.Running teardown with pytest sessionfinish...
 
-==================================================================== ERRORS ====================================================================
-_______________________________________________________ ERROR collecting test_example.py _______________________________________________________
-test_example.py:20: in <module>
-    azure_openai_model = GPTModel(
-venv/lib/python3.13/site-packages/deepeval/models/gpt_model.py:154: in __init__
-    raise ValueError(
-E   ValueError: Invalid model. Available GPT models: gpt-3.5-turbo, gpt-3.5-turbo-0125, gpt-3.5-turbo-1106, gpt-4-0125-preview, gpt-4-1106-preview, gpt-4-turbo, gpt-4-turbo-2024-04-09, gpt-4-turbo-preview, gpt-4o, gpt-4o-2024-05-13, gpt-4o-2024-08-06, gpt-4o-2024-11-20, gpt-4o-mini, gpt-4o-mini-2024-07-18, gpt-4-32k, gpt-4-32k-0613, o1, o1-preview, o1-2024-12-17, o3-mini, o3-mini-2025-01-31
-=========================================================== short test summary info ============================================================
-ERROR test_example.py - ValueError: Invalid model. Available GPT models: gpt-3.5-turbo, gpt-3.5-turbo-0125, gpt-3.5-turbo-1106, gpt-4-0125-preview, gpt-4-1106-prev...
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-3 warnings, 1 error in 0.13s
+============================================================= slowest 10 durations =============================================================
+
+(3 durations < 0.005s hidden.  Use -vv to show these durations.)
+1 passed, 3 warnings in 0.01s
 No test cases found, please try again.
+
+import os
+import openai
+import logging
+from dotenv import load_dotenv
+from deepeval import assert_test
+from deepeval.test_case import LLMTestCase, LLMTestCaseParams
+from deepeval.metrics import GEval
+
+load_dotenv()
+
+AZURE_OPENAI_ENDPOINT = os.getenv("AZURE_OPENAI_ENDPOINT")
+AZURE_OPENAI_API_KEY = os.getenv("AZURE_OPENAI_API_KEY")
+AZURE_OPENAI_MODEL_DEPLOYMENT = "gpt-4-deployment" 
+AZURE_OPENAI_API_VERSION = "2023-07-01-preview"
+if not AZURE_OPENAI_API_KEY or not AZURE_OPENAI_ENDPOINT:
+   logging.error("❌ Azure OpenAI API key or endpoint is missing!")
+   raise ValueError("Missing Azure OpenAI credentials. Check your .env file.")
+def call_azure_openai(prompt):
+   """
+   Calls Azure OpenAI API to generate responses.
+   """
+   try:
+       response = openai.ChatCompletion.create(
+           engine=AZURE_OPENAI_MODEL_DEPLOYMENT,
+           messages=[
+               {"role": "system", "content": "You are an AI assistant for health insurance queries."},
+               {"role": "user", "content": prompt}
+           ],
+           temperature=0.5
+       )
+       return response.choices[0].message["content"]
+   except Exception as e:
+       logging.error(f"OpenAI API Error: {e}")
+       return None
+def test_chatbot_correctness():
+   """
+   Test case to check if the chatbot correctly answers health insurance queries.
+   """
+   user_question = "What is deductible for plan code BXAL for tier 2 COC Series 2023?"
+   # Call Azure OpenAI to get actual output
+   actual_output = call_azure_openai(user_question)
+   expected_output = "Individual Ded is $4,000 and Family Ded is $8,000."
+   if actual_output is None:
+       logging.error("Azure OpenAI API call failed. Skipping test.")
+       return
+   correctness_metric = GEval(
+       name="Correctness",
+       criteria="Check if the chatbot provides accurate responses based on the uploaded health insurance plan document.",
+       evaluation_params=[LLMTestCaseParams.ACTUAL_OUTPUT, LLMTestCaseParams.EXPECTED_OUTPUT],
+       threshold=0.7
+   )
+   test_case = LLMTestCase(
+       input=user_question,
+       actual_output=actual_output,
+       expected_output=expected_output
+   )
+   print("Running test case for chatbot correctness...")
+   print(f"User Question: {user_question}")
+   print(f"Expected Output: {expected_output}")
+   print(f"Actual Output: {actual_output}")
+   assert_test(test_case, [correctness_metric])
+   for metric in test_case.metrics:
+       print(f"{metric.name}: {metric.value}")
+this is code
+
