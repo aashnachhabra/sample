@@ -1,33 +1,157 @@
- deepeval test run test_example.py
-Traceback (most recent call last):
-  File "/Users/achhab16/Desktop/AI-Project/backend/venv/bin/deepeval", line 5, in <module>
-    from deepeval.cli.main import app
-  File "/Users/achhab16/Desktop/AI-Project/backend/venv/lib/python3.13/site-packages/deepeval/__init__.py", line 8, in <module>
-    from deepeval.event import track
-  File "/Users/achhab16/Desktop/AI-Project/backend/venv/lib/python3.13/site-packages/deepeval/event/__init__.py", line 1, in <module>
-    from .event import track
-  File "/Users/achhab16/Desktop/AI-Project/backend/venv/lib/python3.13/site-packages/deepeval/event/event.py", line 3, in <module>
-    from deepeval.monitor.monitor import monitor
-  File "/Users/achhab16/Desktop/AI-Project/backend/venv/lib/python3.13/site-packages/deepeval/monitor/__init__.py", line 1, in <module>
-    from .monitor import monitor, a_monitor
-  File "/Users/achhab16/Desktop/AI-Project/backend/venv/lib/python3.13/site-packages/deepeval/monitor/monitor.py", line 5, in <module>
-    from deepeval.test_run.hyperparameters import process_hyperparameters
-  File "/Users/achhab16/Desktop/AI-Project/backend/venv/lib/python3.13/site-packages/deepeval/test_run/__init__.py", line 1, in <module>
-    from .test_run import (
-    ...<6 lines>...
-    )
-  File "/Users/achhab16/Desktop/AI-Project/backend/venv/lib/python3.13/site-packages/deepeval/test_run/test_run.py", line 15, in <module>
-    from deepeval.metrics import BaseMetric
-  File "/Users/achhab16/Desktop/AI-Project/backend/venv/lib/python3.13/site-packages/deepeval/metrics/__init__.py", line 1, in <module>
-    from .base_metric import (
-    ...<3 lines>...
-    )
-  File "/Users/achhab16/Desktop/AI-Project/backend/venv/lib/python3.13/site-packages/deepeval/metrics/base_metric.py", line 10, in <module>
-    from deepeval.models import DeepEvalBaseLLM
-  File "/Users/achhab16/Desktop/AI-Project/backend/venv/lib/python3.13/site-packages/deepeval/models/__init__.py", line 7, in <module>
-    from deepeval.models.gpt_model import GPTModel, MultimodalGPTModel
-  File "/Users/achhab16/Desktop/AI-Project/backend/venv/lib/python3.13/site-packages/deepeval/models/gpt_model.py", line 2, in <module>
-    from openai import OpenAI, AsyncOpenAI
-ImportError: cannot import name 'OpenAI' from 'openai' (/Users/achhab16/Desktop/AI-Project/backend/venv/lib/python3.13/site-packages/openai/__init__.py)
+from deepeval import assert_test
+from deepeval.test_case import LLMTestCase, LLMTestCaseParams
+from deepeval.metrics import GEval
 
-getting this error on running deepeval test case on local. pls fix
+def test_correctness():
+    correctness_metric = GEval(
+        name="Correctness",
+        criteria="Determine if the 'actual output' is correct based on the 'expected output'.",
+        evaluation_params=[LLMTestCaseParams.ACTUAL_OUTPUT, LLMTestCaseParams.EXPECTED_OUTPUT],
+        threshold=0.5
+    )
+    test_case = LLMTestCase(
+        input="I have a persistent cough and fever. Should I be worried?",
+        # Replace this with the actual output of your LLM application
+        actual_output="A persistent cough and fever could be a viral infection or something more serious. See a doctor if symptoms worsen or don’t improve in a few days.",
+        expected_output="A persistent cough and fever could indicate a range of illnesses, from a mild viral infection to more serious conditions like pneumonia or COVID-19. You should seek medical attention if your symptoms worsen, persist for more than a few days, or are accompanied by difficulty breathing, chest pain, or other concerning signs."
+    )
+    assert_test(test_case, [correctness_metric])
+this is the test file i ran however can u create a test case for my project which is a chatbot which gets trained based on thr pdf or json submitted usually of health insurance plans.
+please write test case and also tell me steps to run it
+this is my main.py file
+import os
+import shutil
+import json
+import logging
+from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from dotenv import load_dotenv
+import openai
+import fitz  # PyMuPDF for PDF text extraction
+from pymongo import MongoClient
+# Load environment variables
+load_dotenv()
+# Initialize OpenAI Azure client
+openai.api_type = "azure"
+openai.api_base = os.getenv("AZURE_OPENAI_ENDPOINT")
+openai.api_version = "2023-07-01-preview"
+openai.api_key = os.getenv("AZURE_OPENAI_API_KEY")
+# MongoDB Configuration
+MONGO_URI = os.getenv("MONGO_URI")
+DB_NAME = "planlibrary_api_db"
+COLLECTION_NAME = "planlibrary_med_api"
+# Connect to MongoDB
+try:
+   mongo_client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
+   db = mongo_client[DB_NAME]
+   collection = db[COLLECTION_NAME]
+   print("✅ Connected to MongoDB")
+except Exception as e:
+   print(f"❌ MongoDB Connection Error: {e}")
+app = FastAPI()
+# Enable CORS for frontend communication
+app.add_middleware(
+   CORSMiddleware,
+   allow_origins=["*"],  # Change this in production
+   allow_credentials=True,
+   allow_methods=["*"],
+   allow_headers=["*"],
+)
+# Storage for uploaded files
+UPLOAD_DIR = "uploads"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+uploaded_texts = []  # Stores extracted text from uploaded PDFs & text files
+uploaded_json_data = []  # Stores JSON data from uploaded files
+fetched_json_data = []  # Stores JSON data from MongoDB
+
+@app.post("/upload/")
+async def upload_files(files: list[UploadFile] = File(...)):
+   """Handles multiple file uploads (PDFs, text, JSON)."""
+   global uploaded_texts, uploaded_json_data
+   uploaded_texts.clear()
+   uploaded_json_data.clear()
+   for file in files:
+       file_location = os.path.join(UPLOAD_DIR, file.filename)
+       try:
+           with open(file_location, "wb") as f:
+               shutil.copyfileobj(file.file, f)
+           # Process based on file type
+           if file.filename.endswith(".pdf"):
+               uploaded_texts.append(extract_text_from_pdf(file_location))
+           elif file.filename.endswith(".json"):
+               with open(file_location, "r", encoding="utf-8") as f:
+                   json_data = json.load(f)
+                   uploaded_json_data.append(json_data)
+           else:
+               with open(file_location, "r", encoding="utf-8") as f:
+                   uploaded_texts.append(f.read())
+       except Exception as e:
+           raise HTTPException(status_code=500, detail=f"File processing failed: {str(e)}")
+   return {"message": "Files uploaded successfully", "uploaded_files": [file.filename for file in files]}
+
+def extract_text_from_pdf(pdf_path):
+   """Extracts text from a PDF file."""
+   text = ""
+   try:
+       doc = fitz.open(pdf_path)
+       for page in doc:
+           text += page.get_text("text") + "\n"
+       return text.strip()
+   except Exception as e:
+       raise HTTPException(status_code=500, detail=f"Failed to extract text from PDF: {str(e)}")
+
+@app.get("/fetch-json/")
+async def fetch_json_from_mongo():
+   """Fetches a limited number of JSON documents from MongoDB."""
+   global fetched_json_data
+   fetched_json_data.clear()
+   try:
+       fetched_json_data = list(collection.find({}, {"_id": 0}).limit(5))  # Fetch 5 JSON documents
+       if not fetched_json_data:
+           return {"message": "No JSON data found in MongoDB"}
+       return {"message": "Fetched JSON data successfully", "json_data": fetched_json_data}
+   except Exception as e:
+       raise HTTPException(status_code=500, detail=f"MongoDB fetch error: {str(e)}")
+
+@app.post("/chat/")
+async def chat(user_query: dict):
+    """Handles chat requests based on uploaded or fetched documents."""
+    global uploaded_texts, uploaded_json_data, fetched_json_data
+    # Determine available data source
+    if not uploaded_texts and not uploaded_json_data and not fetched_json_data:
+        raise HTTPException(status_code=400, detail="No documents uploaded or fetched. Please upload or fetch data first.")
+    
+    if uploaded_json_data:
+        formatted_json = json.dumps(uploaded_json_data, indent=2)
+        messages = [
+            {"role": "system", "content": "You are an AI assistant that provides detailed information about health insurance plans based on JSON data."},
+            {"role": "system", "content": f"Here is the JSON data for the plan details:\n\n{formatted_json}"},
+            {"role": "user", "content": user_query["query"]},
+        ]
+    elif fetched_json_data:
+        formatted_json = json.dumps(fetched_json_data, indent=2)
+        messages = [
+            {"role": "system", "content": "You are an AI assistant that provides detailed information about health insurance plans based on JSON data."},
+            {"role": "system", "content": f"Here is the JSON data for the plan details:\n\n{formatted_json}"},
+            {"role": "user", "content": user_query["query"]},
+        ]
+    else:
+        combined_text = "\n\n".join(uploaded_texts)
+        messages = [
+            {"role": "system", "content": "You are an AI assistant that provides answers based on the provided documents."},
+            {"role": "system", "content": f"Here are the uploaded documents:\n\n{combined_text}"},
+            {"role": "user", "content": user_query["query"]},
+        ]
+    
+    # Call OpenAI API
+    try:
+        response = openai.ChatCompletion.create(
+            engine="gpt-4-deployment",
+            messages=messages,
+            temperature=0.5
+        )
+        return {"response": response.choices[0].message.content}
+    except Exception as e:
+        logging.error(f"Chat API error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Chat API error: {str(e)}")
+
