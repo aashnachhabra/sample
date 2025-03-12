@@ -1,477 +1,253 @@
- deepeval test run test_example.py
-Running teardown with pytest sessionfinish...
-
-==================================================================== ERRORS ====================================================================
-_______________________________________________________ ERROR collecting test_example.py _______________________________________________________
-test_example.py:5: in <module>
-    client = AzureOpenAI(api_key=AZURE_OPENAI_API_KEY,
-E   NameError: name 'AZURE_OPENAI_API_KEY' is not defined
-=========================================================== short test summary info ============================================================
-ERROR test_example.py - NameError: name 'AZURE_OPENAI_API_KEY' is not defined
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-2 warnings, 1 error in 0.18s
-No test cases found, please try again.
-WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
-E0000 00:00:1741775895.065772 1484237 init.cc:232] grpc_wait_for_shutdown_with_timeout() timed out.
-(venv) achhab16@LAMU0N62HHYPH2V backend % deepeval test run test_example.py
-Evaluating 1 test case(s) in parallel: |                                                           |  0% (0/1) [Time Taken: 00:00, ?test case/s]
-FRunning teardown with pytest sessionfinish...
-
-=================================================================== FAILURES ===================================================================
-___________________________________________________________ test_chatbot_correctness ___________________________________________________________
-
-    @pytest.mark.deepeval
-    def test_chatbot_correctness():
-       """
-       Test case to check if the chatbot correctly answers health insurance queries.
-       """
-       user_question = "What is deductible for plan code BXAL for tier 2 COC Series 2023?"
-       expected_output = "Individual Ded is $4,000 and Family Ded is $8,000."
-       # ✅ Ensure API call works
-       actual_output = call_azure_openai(user_question)
-       assert actual_output is not None, "Azure OpenAI API call failed."
-       correctness_metric = GEval(
-           name="Correctness",
-           criteria="Check if the chatbot provides accurate responses based on the uploaded health insurance plan document.",
-           evaluation_params=[LLMTestCaseParams.ACTUAL_OUTPUT, LLMTestCaseParams.EXPECTED_OUTPUT],
-           threshold=0.7  # ✅ No need to pass model_api_key
-       )
-       test_case = LLMTestCase(
-           input=user_question,
-           actual_output=actual_output,
-           expected_output=expected_output
-       )
-       # Run the test case
->      assert_test(test_case, [correctness_metric])
-
-test_example.py:66: 
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
-venv/lib/python3.13/site-packages/deepeval/evaluate.py:961: in assert_test
-    test_result = loop.run_until_complete(
-/opt/homebrew/Cellar/python@3.13/3.13.1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/base_events.py:720: in run_until_complete
-    return future.result()
-venv/lib/python3.13/site-packages/deepeval/evaluate.py:686: in a_execute_test_cases
-    await asyncio.gather(*tasks)
-venv/lib/python3.13/site-packages/deepeval/evaluate.py:582: in execute_with_semaphore
-    return await func(*args, **kwargs)
-venv/lib/python3.13/site-packages/deepeval/evaluate.py:793: in a_execute_llm_test_cases
-    await measure_metrics_with_indicator(
-venv/lib/python3.13/site-packages/deepeval/metrics/indicator.py:201: in measure_metrics_with_indicator
-    await asyncio.gather(*tasks)
-venv/lib/python3.13/site-packages/deepeval/metrics/indicator.py:211: in safe_a_measure
-    await metric.a_measure(tc, _show_indicator=False)
-venv/lib/python3.13/site-packages/deepeval/metrics/g_eval/g_eval.py:168: in a_measure
-    await self._a_generate_evaluation_steps()
-venv/lib/python3.13/site-packages/deepeval/metrics/g_eval/g_eval.py:197: in _a_generate_evaluation_steps
-    res, cost = await self.model.a_generate(prompt)
-venv/lib/python3.13/site-packages/tenacity/asyncio/__init__.py:189: in async_wrapped
-    return await copy(fn, *args, **kwargs)
-venv/lib/python3.13/site-packages/tenacity/asyncio/__init__.py:111: in __call__
-    do = await self.iter(retry_state=retry_state)
-venv/lib/python3.13/site-packages/tenacity/asyncio/__init__.py:153: in iter
-    result = await action(retry_state)
-venv/lib/python3.13/site-packages/tenacity/_utils.py:99: in inner
-    return call(*args, **kwargs)
-venv/lib/python3.13/site-packages/tenacity/__init__.py:398: in <lambda>
-    self._add_action_func(lambda rs: rs.outcome.result())
-/opt/homebrew/Cellar/python@3.13/3.13.1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/concurrent/futures/_base.py:449: in result
-    return self.__get_result()
-/opt/homebrew/Cellar/python@3.13/3.13.1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/concurrent/futures/_base.py:401: in __get_result
-    raise self._exception
-venv/lib/python3.13/site-packages/tenacity/asyncio/__init__.py:114: in __call__
-    result = await fn(*args, **kwargs)
-venv/lib/python3.13/site-packages/deepeval/models/gpt_model.py:299: in a_generate
-    res = await chat_model.ainvoke(prompt)
-venv/lib/python3.13/site-packages/langchain_core/language_models/chat_models.py:306: in ainvoke
-    llm_result = await self.agenerate_prompt(
-venv/lib/python3.13/site-packages/langchain_core/language_models/chat_models.py:871: in agenerate_prompt
-    return await self.agenerate(
-venv/lib/python3.13/site-packages/langchain_core/language_models/chat_models.py:831: in agenerate
-    raise exceptions[0]
-venv/lib/python3.13/site-packages/langchain_core/language_models/chat_models.py:999: in _agenerate_with_cache
-    result = await self._agenerate(
-venv/lib/python3.13/site-packages/langchain_openai/chat_models/base.py:860: in _agenerate
-    response = await self.async_client.create(**payload)
-venv/lib/python3.13/site-packages/openai/resources/chat/completions/completions.py:1927: in create
-    return await self._post(
-venv/lib/python3.13/site-packages/openai/_base_client.py:1767: in post
-    return await self.request(cast_to, opts, stream=stream, stream_cls=stream_cls)
-venv/lib/python3.13/site-packages/openai/_base_client.py:1461: in request
-    return await self._request(
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
-
-self = <openai.AsyncOpenAI object at 0x125ccb610>, cast_to = <class 'openai.types.chat.chat_completion.ChatCompletion'>
-options = FinalRequestOptions(method='post', url='/chat/completions', params={}, headers=NOT_GIVEN, max_retries=NOT_GIVEN, timeo...n}\n**\n\nJSON:\n', 'role': 'user'}], 'model': 'gpt-4o', 'n': 1, 'stream': False, 'temperature': 0.7}, extra_json=None)
-
-    async def _request(
-        self,
-        cast_to: Type[ResponseT],
-        options: FinalRequestOptions,
-        *,
-        stream: bool,
-        stream_cls: type[_AsyncStreamT] | None,
-        retries_taken: int,
-    ) -> ResponseT | _AsyncStreamT:
-        if self._platform is None:
-            # `get_platform` can make blocking IO calls so we
-            # execute it earlier while we are in an async context
-            self._platform = await asyncify(get_platform)()
-    
-        # create a copy of the options we were given so that if the
-        # options are mutated later & we then retry, the retries are
-        # given the original options
-        input_options = model_copy(options)
-    
-        cast_to = self._maybe_override_cast_to(cast_to, options)
-        options = await self._prepare_options(options)
-    
-        remaining_retries = options.get_max_retries(self.max_retries) - retries_taken
-        request = self._build_request(options, retries_taken=retries_taken)
-        await self._prepare_request(request)
-    
-        kwargs: HttpxSendArgs = {}
-        if self.custom_auth is not None:
-            kwargs["auth"] = self.custom_auth
-    
-        try:
-            response = await self._client.send(
-                request,
-                stream=stream or self._should_stream_response_body(request=request),
-                **kwargs,
-            )
-        except httpx.TimeoutException as err:
-            log.debug("Encountered httpx.TimeoutException", exc_info=True)
-    
-            if remaining_retries > 0:
-                return await self._retry_request(
-                    input_options,
-                    cast_to,
-                    retries_taken=retries_taken,
-                    stream=stream,
-                    stream_cls=stream_cls,
-                    response_headers=None,
-                )
-    
-            log.debug("Raising timeout error")
-            raise APITimeoutError(request=request) from err
-        except Exception as err:
-            log.debug("Encountered Exception", exc_info=True)
-    
-            if remaining_retries > 0:
-                return await self._retry_request(
-                    input_options,
-                    cast_to,
-                    retries_taken=retries_taken,
-                    stream=stream,
-                    stream_cls=stream_cls,
-                    response_headers=None,
-                )
-    
-            log.debug("Raising connection error")
-            raise APIConnectionError(request=request) from err
-    
-        log.debug(
-            'HTTP Request: %s %s "%i %s"', request.method, request.url, response.status_code, response.reason_phrase
-        )
-    
-        try:
-            response.raise_for_status()
-        except httpx.HTTPStatusError as err:  # thrown on 4xx and 5xx status code
-            log.debug("Encountered httpx.HTTPStatusError", exc_info=True)
-    
-            if remaining_retries > 0 and self._should_retry(err.response):
-                await err.response.aclose()
-                return await self._retry_request(
-                    input_options,
-                    cast_to,
-                    retries_taken=retries_taken,
-                    response_headers=err.response.headers,
-                    stream=stream,
-                    stream_cls=stream_cls,
-                )
-    
-            # If the response is streamed then we need to explicitly read the response
-            # to completion before attempting to access the response text.
-            if not err.response.is_closed:
-                await err.response.aread()
-    
-            log.debug("Re-raising status error")
->           raise self._make_status_error_from_response(err.response) from None
-E           openai.NotFoundError: Error code: 404 - {'error': {'code': '404', 'message': 'Resource not found'}}
-
-venv/lib/python3.13/site-packages/openai/_base_client.py:1562: NotFoundError
-============================================================= slowest 10 durations =============================================================
-6.30s call     test_example.py::test_chatbot_correctness
-
-(2 durations < 0.005s hidden.  Use -vv to show these durations.)
-=========================================================== short test summary info ============================================================
-FAILED test_example.py::test_chatbot_correctness - openai.NotFoundError: Error code: 404 - {'error': {'code': '404', 'message': 'Resource not found'}}
-1 failed, 4 warnings in 6.57s
-No test cases found, please try again.
-
-error
 import os
-import openai
-from openai import AzureOpenAI
-import pytest
-from dotenv import load_dotenv
-from deepeval import assert_test
-from deepeval.test_case import LLMTestCase, LLMTestCaseParams
-from deepeval.metrics import GEval
-# ✅ Load environment variables
-load_dotenv()
-# ✅ Read from environment variables
-AZURE_OPENAI_ENDPOINT = os.getenv("AZURE_OPENAI_ENDPOINT")
-AZURE_OPENAI_API_KEY = os.getenv("AZURE_OPENAI_API_KEY")
-AZURE_OPENAI_MODEL_DEPLOYMENT = os.getenv("AZURE_OPENAI_MODEL_DEPLOYMENT")
-# ✅ Set OpenAI API configurations (required by DeepEval)
-os.environ["OPENAI_API_KEY"] = AZURE_OPENAI_API_KEY
-os.environ["OPENAI_API_BASE"] = AZURE_OPENAI_ENDPOINT
-os.environ["OPENAI_API_VERSION"] = "2023-07-01-preview"
-os.environ["OPENAI_API_TYPE"] = "azure"
-client = AzureOpenAI(api_key=AZURE_OPENAI_API_KEY,
-api_version="2023-07-01-preview")
-# Check if credentials exist
-if not AZURE_OPENAI_API_KEY or not AZURE_OPENAI_ENDPOINT:
-   logging.error("❌ Azure OpenAI API key or endpoint is missing!")
-   raise ValueError("Missing Azure OpenAI credentials. Check your .env file.")
-def call_azure_openai(prompt):
-    """
-    Calls Azure OpenAI API to generate responses.
-    """
-    try:
-        # TODO: The 'openai.api_base' option isn't read in the client API. You will need to pass it when you instantiate the client, e.g. 'OpenAI(base_url=AZURE_OPENAI_ENDPOINT)'
-        # openai.api_base = AZURE_OPENAI_ENDPOINT
-
-        response = client.chat.completions.create(model=AZURE_OPENAI_MODEL_DEPLOYMENT,
-        messages=[
-            {"role": "system", "content": "You are an AI assistant for health insurance queries."},
-            {"role": "user", "content": prompt}
-        ],
-        temperature=0.5)
-        return response.choices[0].message.content
-    except Exception as e:
-        logging.error(f"OpenAI API Error: {e}")
-        return None
-@pytest.mark.deepeval
-def test_chatbot_correctness():
-   """
-   Test case to check if the chatbot correctly answers health insurance queries.
-   """
-   user_question = "What is deductible for plan code BXAL for tier 2 COC Series 2023?"
-   expected_output = "Individual Ded is $4,000 and Family Ded is $8,000."
-   # ✅ Ensure API call works
-   actual_output = call_azure_openai(user_question)
-   assert actual_output is not None, "Azure OpenAI API call failed."
-   correctness_metric = GEval(
-       name="Correctness",
-       criteria="Check if the chatbot provides accurate responses based on the uploaded health insurance plan document.",
-       evaluation_params=[LLMTestCaseParams.ACTUAL_OUTPUT, LLMTestCaseParams.EXPECTED_OUTPUT],
-       threshold=0.7  # ✅ No need to pass model_api_key
-   )
-   test_case = LLMTestCase(
-       input=user_question,
-       actual_output=actual_output,
-       expected_output=expected_output
-   )
-   # Run the test case
-   assert_test(test_case, [correctness_metric])
-   for metric in test_case.metrics:
-       logging.info(f"{metric.name}: {metric.value}")
-if __name__ == "__main__":
-   pytest.main(["-s", "test_example.py"])
-code
-
-
-import os
-import openai
+import shutil
+import json
 import logging
-import pytest
+from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
-from deepeval import assert_test
-from deepeval.test_case import LLMTestCase, LLMTestCaseParams
-from deepeval.metrics import GEval
+import openai
+import fitz  # PyMuPDF for PDF text extraction
+from pymongo import MongoClient
 # Load environment variables
 load_dotenv()
-AZURE_OPENAI_ENDPOINT = "https://kgnwl0lm6yi5ugbopenai.openai.azure.com/"
-AZURE_OPENAI_API_KEY = "ebc6ea027367426a9c881498b8db690f"
-AZURE_OPENAI_MODEL_DEPLOYMENT = "gpt-4-deployment"
-# Check for missing API credentials
-if not AZURE_OPENAI_API_KEY or not AZURE_OPENAI_ENDPOINT:
-   logging.error("❌ Azure OpenAI API key or endpoint is missing!")
-   raise ValueError("Missing Azure OpenAI credentials. Check your .env file.")
+# Initialize OpenAI Azure client
 openai.api_type = "azure"
-openai.api_base = "https://kgnwl0lm6yi5ugbopenai.openai.azure.com/"
-openai.api_key = "ebc6ea027367426a9c881498b8db690f"
+openai.api_base = os.getenv("AZURE_OPENAI_ENDPOINT")
+openai.api_version = "2023-07-01-preview"
+openai.api_key = os.getenv("AZURE_OPENAI_API_KEY")
+# MongoDB Configuration
+MONGO_URI = os.getenv("MONGO_URI")
+DB_NAME = "planlibrary_api_db"
+COLLECTION_NAME = "planlibrary_med_api"
+# Connect to MongoDB
+try:
+   mongo_client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
+   db = mongo_client[DB_NAME]
+   collection = db[COLLECTION_NAME]
+   print("✅ Connected to MongoDB")
+except Exception as e:
+   print(f"❌ MongoDB Connection Error: {e}")
+app = FastAPI()
+# Enable CORS for frontend communication
+app.add_middleware(
+   CORSMiddleware,
+   allow_origins=["*"],  # Change this in production
+   allow_credentials=True,
+   allow_methods=["*"],
+   allow_headers=["*"],
+)
+# Storage for uploaded files
+UPLOAD_DIR = "uploads"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+uploaded_texts = []  # Stores extracted text from uploaded PDFs & text files
+uploaded_json_data = []  # Stores JSON data from uploaded files
+fetched_json_data = []  # Stores JSON data from MongoDB
 
-def call_azure_openai(prompt):
-   """
-   Calls Azure OpenAI API to generate responses using the latest OpenAI API syntax.
-   """
+@app.post("/upload/")
+async def upload_files(files: list[UploadFile] = File(...)):
+   """Handles multiple file uploads (PDFs, text, JSON)."""
+   global uploaded_texts, uploaded_json_data
+   uploaded_texts.clear()
+   uploaded_json_data.clear()
+   for file in files:
+       file_location = os.path.join(UPLOAD_DIR, file.filename)
+       try:
+           with open(file_location, "wb") as f:
+               shutil.copyfileobj(file.file, f)
+           # Process based on file type
+           if file.filename.endswith(".pdf"):
+               uploaded_texts.append(extract_text_from_pdf(file_location))
+           elif file.filename.endswith(".json"):
+               with open(file_location, "r", encoding="utf-8") as f:
+                   json_data = json.load(f)
+                   uploaded_json_data.append(json_data)
+           else:
+               with open(file_location, "r", encoding="utf-8") as f:
+                   uploaded_texts.append(f.read())
+       except Exception as e:
+           raise HTTPException(status_code=500, detail=f"File processing failed: {str(e)}")
+   return {"message": "Files uploaded successfully", "uploaded_files": [file.filename for file in files]}
+
+def extract_text_from_pdf(pdf_path):
+   """Extracts text from a PDF file."""
+   text = ""
    try:
-       client = openai.AzureOpenAI(
-           api_key="ebc6ea027367426a9c881498b8db690f",
-           api_version="2023-07-01-preview",
-           azure_endpoint="https://kgnwl0lm6yi5ugbopenai.openai.azure.com/"  # Removed `proxies`
-       )
-       response = client.chat.completions.create(
-           model=AZURE_OPENAI_MODEL_DEPLOYMENT,
-           messages=[
-               {"role": "system", "content": "You are an AI assistant for health insurance queries."},
-               {"role": "user", "content": prompt}
-           ],
-           temperature=0.5
-       )
-       return response.choices[0].message.content  # Updated response format
+       doc = fitz.open(pdf_path)
+       for page in doc:
+           text += page.get_text("text") + "\n"
+       return text.strip()
    except Exception as e:
-       logging.error(f"OpenAI API Error: {e}")
-       return None
-   """
-   Calls Azure OpenAI API to generate responses using the latest OpenAI API syntax.
-   """
+       raise HTTPException(status_code=500, detail=f"Failed to extract text from PDF: {str(e)}")
+
+@app.get("/fetch-json/")
+async def fetch_json_from_mongo():
+   """Fetches a limited number of JSON documents from MongoDB."""
+   global fetched_json_data
+   fetched_json_data.clear()
    try:
-       client = openai.AzureOpenAI(
-           api_key="ebc6ea027367426a9c881498b8db690f",
-           api_version="2023-07-01-preview",
-           azure_endpoint="https://kgnwl0lm6yi5ugbopenai.openai.azure.com/",
-       )
-       response = client.chat.completions.create(
-           engine=AZURE_OPENAI_MODEL_DEPLOYMENT,
-           messages=[
-               {"role": "system", "content": "You are an AI assistant for health insurance queries."},
-               {"role": "user", "content": prompt}
-           ],
-           temperature=0.5
-       )
-       return response.choices[0].message.content  # Updated syntax
+       fetched_json_data = list(collection.find({}, {"_id": 0}).limit(5))  # Fetch 5 JSON documents
+       if not fetched_json_data:
+           return {"message": "No JSON data found in MongoDB"}
+       return {"message": "Fetched JSON data successfully", "json_data": fetched_json_data}
    except Exception as e:
-       logging.error(f"OpenAI API Error: {e}")
-       return None
+       raise HTTPException(status_code=500, detail=f"MongoDB fetch error: {str(e)}")
 
-@pytest.mark.deepeval
-def test_chatbot_correctness():
-   """
-   Test case to check if the chatbot correctly answers health insurance queries.
-   """
-   user_question = "What is deductible for plan code BXAL for tier 2 COC Series 2023?"
-   expected_output = "Individual Ded is $4,000 and Family Ded is $8,000."
-   # Call Azure OpenAI to get actual output
-   actual_output = call_azure_openai(user_question)
-   assert actual_output is not None, "Azure OpenAI API call failed."
-   correctness_metric = GEval(
-       name="Correctness",
-       criteria="Check if the chatbot provides accurate responses based on the uploaded health insurance plan document.",
-       evaluation_params=[LLMTestCaseParams.ACTUAL_OUTPUT, LLMTestCaseParams.EXPECTED_OUTPUT],
-       threshold=0.7
-   )
-   test_case = LLMTestCase(
-       input=user_question,
-       actual_output=actual_output,
-       expected_output=expected_output
-   )
-   logging.info("Running test case for chatbot correctness...")
-   logging.info(f"User Question: {user_question}")
-   logging.info(f"Expected Output: {expected_output}")
-   logging.info(f"Actual Output: {actual_output}")
-   # Run the test case
-   assert_test(test_case, [correctness_metric])
-   for metric in test_case.metrics:
-       logging.info(f"{metric.name}: {metric.value}")
-
-if __name__ == "__main__":
-   pytest.main(["-s", "test_example.py"])
-
-i have explicitely added all the keys still same error
- deepeval test run test_example.py
-FRunning teardown with pytest sessionfinish...
-
-=================================================================== FAILURES ===================================================================
-___________________________________________________________ test_chatbot_correctness ___________________________________________________________
-
-    @pytest.mark.deepeval
-    def test_chatbot_correctness():
-       """
-       Test case to check if the chatbot correctly answers health insurance queries.
-       """
-       user_question = "What is deductible for plan code BXAL for tier 2 COC Series 2023?"
-       expected_output = "Individual Ded is $4,000 and Family Ded is $8,000."
-       # Call Azure OpenAI to get actual output
-       actual_output = call_azure_openai(user_question)
-       assert actual_output is not None, "Azure OpenAI API call failed."
->      correctness_metric = GEval(
-           name="Correctness",
-           criteria="Check if the chatbot provides accurate responses based on the uploaded health insurance plan document.",
-           evaluation_params=[LLMTestCaseParams.ACTUAL_OUTPUT, LLMTestCaseParams.EXPECTED_OUTPUT],
-           threshold=0.7
-       )
-
-test_example.py:76: 
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
-venv/lib/python3.13/site-packages/deepeval/metrics/g_eval/g_eval.py:89: in __init__
-    self.model, self.using_native_model = initialize_model(model)
-venv/lib/python3.13/site-packages/deepeval/metrics/utils.py:283: in initialize_model
-    return GPTModel(model=model), True
-venv/lib/python3.13/site-packages/deepeval/models/gpt_model.py:148: in __init__
-    super().__init__(model_name)
-venv/lib/python3.13/site-packages/deepeval/models/base_model.py:35: in __init__
-    self.model = self.load_model(*args, **kwargs)
-venv/lib/python3.13/site-packages/deepeval/models/gpt_model.py:486: in load_model
-    return ChatOpenAI(
-venv/lib/python3.13/site-packages/langchain_core/load/serializable.py:125: in __init__
-    super().__init__(*args, **kwargs)
-venv/lib/python3.13/site-packages/langchain_openai/chat_models/base.py:551: in validate_environment
-    self.root_client = openai.OpenAI(**client_params, **sync_specific)  # type: ignore[arg-type]
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
-
-self = <openai.OpenAI object at 0x118652e40>
-
-    def __init__(
-        self,
-        *,
-        api_key: str | None = None,
-        organization: str | None = None,
-        project: str | None = None,
-        base_url: str | httpx.URL | None = None,
-        websocket_base_url: str | httpx.URL | None = None,
-        timeout: Union[float, Timeout, None, NotGiven] = NOT_GIVEN,
-        max_retries: int = DEFAULT_MAX_RETRIES,
-        default_headers: Mapping[str, str] | None = None,
-        default_query: Mapping[str, object] | None = None,
-        # Configure a custom httpx client.
-        # We provide a `DefaultHttpxClient` class that you can pass to retain the default values we use for `limits`, `timeout` & `follow_redirects`.
-        # See the [httpx documentation](https://www.python-httpx.org/api/#client) for more details.
-        http_client: httpx.Client | None = None,
-        # Enable or disable schema validation for data returned by the API.
-        # When enabled an error APIResponseValidationError is raised
-        # if the API responds with invalid data for the expected schema.
-        #
-        # This parameter may be removed or changed in the future.
-        # If you rely on this feature, please open a GitHub issue
-        # outlining your use-case to help us decide if it should be
-        # part of our public interface in the future.
-        _strict_response_validation: bool = False,
-    ) -> None:
-        """Construct a new synchronous OpenAI client instance.
+@app.post("/chat/")
+async def chat(user_query: dict):
+    """Handles chat requests based on uploaded or fetched documents."""
+    global uploaded_texts, uploaded_json_data, fetched_json_data
+    # Determine available data source
+    if not uploaded_texts and not uploaded_json_data and not fetched_json_data:
+        raise HTTPException(status_code=400, detail="No documents uploaded or fetched. Please upload or fetch data first.")
     
-        This automatically infers the following arguments from their corresponding environment variables if they are not provided:
-        - `api_key` from `OPENAI_API_KEY`
-        - `organization` from `OPENAI_ORG_ID`
-        - `project` from `OPENAI_PROJECT_ID`
-        """
-        if api_key is None:
-            api_key = os.environ.get("OPENAI_API_KEY")
-        if api_key is None:
->           raise OpenAIError(
-                "The api_key client option must be set either by passing api_key to the client or by setting the OPENAI_API_KEY environment variable"
-            )
-E           openai.OpenAIError: The api_key client option must be set either by passing api_key to the client or by setting the OPENAI_API_KEY environment variable
+    if uploaded_json_data:
+        formatted_json = json.dumps(uploaded_json_data, indent=2)
+        messages = [
+            {"role": "system", "content": "You are an AI assistant that provides detailed information about health insurance plans based on JSON data."},
+            {"role": "system", "content": f"Here is the JSON data for the plan details:\n\n{formatted_json}"},
+            {"role": "user", "content": user_query["query"]},
+        ]
+    elif fetched_json_data:
+        formatted_json = json.dumps(fetched_json_data, indent=2)
+        messages = [
+            {"role": "system", "content": "You are an AI assistant that provides detailed information about health insurance plans based on JSON data."},
+            {"role": "system", "content": f"Here is the JSON data for the plan details:\n\n{formatted_json}"},
+            {"role": "user", "content": user_query["query"]},
+        ]
+    else:
+        combined_text = "\n\n".join(uploaded_texts)
+        messages = [
+            {"role": "system", "content": "You are an AI assistant that provides answers based on the provided documents."},
+            {"role": "system", "content": f"Here are the uploaded documents:\n\n{combined_text}"},
+            {"role": "user", "content": user_query["query"]},
+        ]
+    
+    # Call OpenAI API
+    try:
+        response = openai.ChatCompletion.create(
+            engine="gpt-4-deployment",
+            messages=messages,
+            temperature=0.5
+        )
+        return {"response": response.choices[0].message.content}
+    except Exception as e:
+        logging.error(f"Chat API error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Chat API error: {str(e)}")
+import React, { useState } from "react";
+import axios from "axios";
 
-venv/lib/python3.13/site-packages/openai/_client.py:110: OpenAIError
-============================================================= slowest 10 durations =============================================================
-4.83s call     test_example.py::test_chatbot_correctness
+const Upload = ({ onUploadSuccess }) => {
+    const [selectedFiles, setSelectedFiles] = useState([]);
+    const [message, setMessage] = useState("");
+    const [uploading, setUploading] = useState(false);
+    const [fetching, setFetching] = useState(false);
 
-(2 durations < 0.005s hidden.  Use -vv to show these durations.)
-=========================================================== short test summary info ============================================================
-FAILED test_example.py::test_chatbot_correctness - openai.OpenAIError: The api_key client option must be set either by passing api_key to the client or by setting the OPENAI_API_KEY environm...
-1 failed, 3 warnings in 4.98s
-No test cases found, please try again.
+    const handleFileChange = (event) => {
+        setSelectedFiles(event.target.files);
+    };
+
+    const handleUpload = async () => {
+        if (!selectedFiles.length) {
+            setMessage("❌ Please select at least one file.");
+            return;
+        }
+
+        setMessage("");
+        setUploading(true);
+
+        const formData = new FormData();
+        for (let file of selectedFiles) {
+            formData.append("files", file);
+        }
+
+        try {
+            const response = await axios.post(
+                "http://127.0.0.1:8000/upload/",
+                formData,
+                {
+                    headers: { "Content-Type": "multipart/form-data" },
+                }
+            );
+
+            setMessage(
+                `✅ Files uploaded successfully: ${response.data.uploaded_files.join(", ")}`
+            );
+
+            onUploadSuccess && onUploadSuccess(true);
+        } catch (error) {
+            console.error("Upload error:", error);
+            setMessage("❌ Failed to upload files.");
+        } finally {
+            setUploading(false);
+        }
+    };
+
+    const fetchJsonFromMongo = async () => {
+        setMessage("");
+        setFetching(true);
+
+        try {
+            const response = await axios.get("http://127.0.0.1:8000/fetch-json/");
+
+            if (response.data.json_data) {
+                setMessage(
+                    `✅ Fetched ${response.data.json_data.length} JSON documents from MongoDB.`
+                );
+
+                onUploadSuccess && onUploadSuccess(true);
+            } else {
+                setMessage("⚠️ No JSON data found in MongoDB.");
+            }
+        } catch (error) {
+            console.error("Fetch JSON error:", error);
+            setMessage("❌ Failed to fetch JSON data from MongoDB.");
+        } finally {
+            setFetching(false);
+        }
+    };
+
+    return (
+        <div className="text-center">
+            <div className="bg-gray-100 p-4 rounded-md shadow-md mb-4">
+                <input
+                    type="file"
+                    multiple
+                    onChange={handleFileChange}
+                    className="border p-2 rounded w-full mb-2"
+                />
+                <div className="flex justify-center gap-4">
+                    <button
+                        onClick={handleUpload}
+                        className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition flex items-center justify-center"
+                        disabled={uploading}
+                    >
+                        {uploading ? "Uploading..." : "Upload Files"}
+                    </button>
+                    <button
+                        onClick={fetchJsonFromMongo}
+                        className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition flex items-center justify-center"
+                        disabled={fetching}
+                    >
+                        {fetching ? "Fetching..." : "Fetch JSON from MongoDB"}
+                    </button>
+                </div>
+            </div>
+
+            {message && (
+                <p
+                    className={`mt-3 text-lg ${
+                        message.includes("✅") ? "text-green-600" : "text-red-500"
+                    }`}
+                >
+                    {message}
+                </p>
+            )}
+        </div>
+    );
+};
+
+export default Upload;
+
+I have created a chatbot that gets trained on uploaded data , so we can either upload multiple jsons or pdfs or just fetch them from a mongodb connections. Issue now is that if the data is too big its either not processing it at all because of token limit or its taking too long. 
+Uploading heavy files and even fetching large data from mongodb is very time consuming in the current implementation. Can you maybe solve this problem by chunking or vector embeddings or vectorization? Please tell me all the changes needed to fix this issue
+
