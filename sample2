@@ -1,253 +1,74 @@
-import os
-import shutil
-import json
-import logging
-from fastapi import FastAPI, File, UploadFile, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-from dotenv import load_dotenv
-import openai
-import fitz  # PyMuPDF for PDF text extraction
-from pymongo import MongoClient
-# Load environment variables
-load_dotenv()
-# Initialize OpenAI Azure client
-openai.api_type = "azure"
-openai.api_base = os.getenv("AZURE_OPENAI_ENDPOINT")
-openai.api_version = "2023-07-01-preview"
-openai.api_key = os.getenv("AZURE_OPENAI_API_KEY")
-# MongoDB Configuration
-MONGO_URI = os.getenv("MONGO_URI")
-DB_NAME = "planlibrary_api_db"
-COLLECTION_NAME = "planlibrary_med_api"
-# Connect to MongoDB
-try:
-   mongo_client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
-   db = mongo_client[DB_NAME]
-   collection = db[COLLECTION_NAME]
-   print("✅ Connected to MongoDB")
-except Exception as e:
-   print(f"❌ MongoDB Connection Error: {e}")
-app = FastAPI()
-# Enable CORS for frontend communication
-app.add_middleware(
-   CORSMiddleware,
-   allow_origins=["*"],  # Change this in production
-   allow_credentials=True,
-   allow_methods=["*"],
-   allow_headers=["*"],
-)
-# Storage for uploaded files
-UPLOAD_DIR = "uploads"
-os.makedirs(UPLOAD_DIR, exist_ok=True)
-uploaded_texts = []  # Stores extracted text from uploaded PDFs & text files
-uploaded_json_data = []  # Stores JSON data from uploaded files
-fetched_json_data = []  # Stores JSON data from MongoDB
-
-@app.post("/upload/")
-async def upload_files(files: list[UploadFile] = File(...)):
-   """Handles multiple file uploads (PDFs, text, JSON)."""
-   global uploaded_texts, uploaded_json_data
-   uploaded_texts.clear()
-   uploaded_json_data.clear()
-   for file in files:
-       file_location = os.path.join(UPLOAD_DIR, file.filename)
-       try:
-           with open(file_location, "wb") as f:
-               shutil.copyfileobj(file.file, f)
-           # Process based on file type
-           if file.filename.endswith(".pdf"):
-               uploaded_texts.append(extract_text_from_pdf(file_location))
-           elif file.filename.endswith(".json"):
-               with open(file_location, "r", encoding="utf-8") as f:
-                   json_data = json.load(f)
-                   uploaded_json_data.append(json_data)
-           else:
-               with open(file_location, "r", encoding="utf-8") as f:
-                   uploaded_texts.append(f.read())
-       except Exception as e:
-           raise HTTPException(status_code=500, detail=f"File processing failed: {str(e)}")
-   return {"message": "Files uploaded successfully", "uploaded_files": [file.filename for file in files]}
-
-def extract_text_from_pdf(pdf_path):
-   """Extracts text from a PDF file."""
-   text = ""
-   try:
-       doc = fitz.open(pdf_path)
-       for page in doc:
-           text += page.get_text("text") + "\n"
-       return text.strip()
-   except Exception as e:
-       raise HTTPException(status_code=500, detail=f"Failed to extract text from PDF: {str(e)}")
-
-@app.get("/fetch-json/")
-async def fetch_json_from_mongo():
-   """Fetches a limited number of JSON documents from MongoDB."""
-   global fetched_json_data
-   fetched_json_data.clear()
-   try:
-       fetched_json_data = list(collection.find({}, {"_id": 0}).limit(5))  # Fetch 5 JSON documents
-       if not fetched_json_data:
-           return {"message": "No JSON data found in MongoDB"}
-       return {"message": "Fetched JSON data successfully", "json_data": fetched_json_data}
-   except Exception as e:
-       raise HTTPException(status_code=500, detail=f"MongoDB fetch error: {str(e)}")
-
-@app.post("/chat/")
-async def chat(user_query: dict):
-    """Handles chat requests based on uploaded or fetched documents."""
-    global uploaded_texts, uploaded_json_data, fetched_json_data
-    # Determine available data source
-    if not uploaded_texts and not uploaded_json_data and not fetched_json_data:
-        raise HTTPException(status_code=400, detail="No documents uploaded or fetched. Please upload or fetch data first.")
-    
-    if uploaded_json_data:
-        formatted_json = json.dumps(uploaded_json_data, indent=2)
-        messages = [
-            {"role": "system", "content": "You are an AI assistant that provides detailed information about health insurance plans based on JSON data."},
-            {"role": "system", "content": f"Here is the JSON data for the plan details:\n\n{formatted_json}"},
-            {"role": "user", "content": user_query["query"]},
-        ]
-    elif fetched_json_data:
-        formatted_json = json.dumps(fetched_json_data, indent=2)
-        messages = [
-            {"role": "system", "content": "You are an AI assistant that provides detailed information about health insurance plans based on JSON data."},
-            {"role": "system", "content": f"Here is the JSON data for the plan details:\n\n{formatted_json}"},
-            {"role": "user", "content": user_query["query"]},
-        ]
-    else:
-        combined_text = "\n\n".join(uploaded_texts)
-        messages = [
-            {"role": "system", "content": "You are an AI assistant that provides answers based on the provided documents."},
-            {"role": "system", "content": f"Here are the uploaded documents:\n\n{combined_text}"},
-            {"role": "user", "content": user_query["query"]},
-        ]
-    
-    # Call OpenAI API
-    try:
-        response = openai.ChatCompletion.create(
-            engine="gpt-4-deployment",
-            messages=messages,
-            temperature=0.5
-        )
-        return {"response": response.choices[0].message.content}
-    except Exception as e:
-        logging.error(f"Chat API error: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Chat API error: {str(e)}")
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import axios from "axios";
 
-const Upload = ({ onUploadSuccess }) => {
-    const [selectedFiles, setSelectedFiles] = useState([]);
-    const [message, setMessage] = useState("");
-    const [uploading, setUploading] = useState(false);
-    const [fetching, setFetching] = useState(false);
+const Chat = () => {
+    const [query, setQuery] = useState("");
+    const [chatHistory, setChatHistory] = useState([]); // Stores previous queries & responses
+    const [loading, setLoading] = useState(false);
+    const chatContainerRef = useRef(null); // To auto-scroll to latest message
 
-    const handleFileChange = (event) => {
-        setSelectedFiles(event.target.files);
-    };
-
-    const handleUpload = async () => {
-        if (!selectedFiles.length) {
-            setMessage("❌ Please select at least one file.");
-            return;
-        }
-
-        setMessage("");
-        setUploading(true);
-
-        const formData = new FormData();
-        for (let file of selectedFiles) {
-            formData.append("files", file);
-        }
-
+    const handleSendMessage = async () => {
+        if (!query.trim()) return; // Don't send empty messages
+        const newQuery = { sender: "user", text: query }; // User message
+        setChatHistory((prev) => [...prev, newQuery]); // Add user query to chat
+        setLoading(true);
+        setQuery(""); // Clear input after sending
         try {
-            const response = await axios.post(
-                "http://127.0.0.1:8000/upload/",
-                formData,
-                {
-                    headers: { "Content-Type": "multipart/form-data" },
-                }
-            );
-
-            setMessage(
-                `✅ Files uploaded successfully: ${response.data.uploaded_files.join(", ")}`
-            );
-
-            onUploadSuccess && onUploadSuccess(true);
+            const res = await axios.post("http://127.0.0.1:8000/chat/", { query });
+            const botResponse = { sender: "bot", text: res.data.response };
+            setChatHistory((prev) => [...prev, botResponse]); // Add bot response
         } catch (error) {
-            console.error("Upload error:", error);
-            setMessage("❌ Failed to upload files.");
+            console.error("Chat error:", error);
+            setChatHistory((prev) => [...prev, { sender: "bot", text: "❌ Failed to fetch response." }]);
         } finally {
-            setUploading(false);
+            setLoading(false);
         }
     };
 
-    const fetchJsonFromMongo = async () => {
-        setMessage("");
-        setFetching(true);
-
-        try {
-            const response = await axios.get("http://127.0.0.1:8000/fetch-json/");
-
-            if (response.data.json_data) {
-                setMessage(
-                    `✅ Fetched ${response.data.json_data.length} JSON documents from MongoDB.`
-                );
-
-                onUploadSuccess && onUploadSuccess(true);
-            } else {
-                setMessage("⚠️ No JSON data found in MongoDB.");
-            }
-        } catch (error) {
-            console.error("Fetch JSON error:", error);
-            setMessage("❌ Failed to fetch JSON data from MongoDB.");
-        } finally {
-            setFetching(false);
-        }
-    };
+    // Auto-scroll to latest message when chatHistory updates
+    useEffect(() => {
+        chatContainerRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, [chatHistory]);
 
     return (
-        <div className="text-center">
-            <div className="bg-gray-100 p-4 rounded-md shadow-md mb-4">
-                <input
-                    type="file"
-                    multiple
-                    onChange={handleFileChange}
-                    className="border p-2 rounded w-full mb-2"
-                />
-                <div className="flex justify-center gap-4">
-                    <button
-                        onClick={handleUpload}
-                        className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition flex items-center justify-center"
-                        disabled={uploading}
-                    >
-                        {uploading ? "Uploading..." : "Upload Files"}
-                    </button>
-                    <button
-                        onClick={fetchJsonFromMongo}
-                        className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition flex items-center justify-center"
-                        disabled={fetching}
-                    >
-                        {fetching ? "Fetching..." : "Fetch JSON from MongoDB"}
-                    </button>
-                </div>
+        <div className="mt-6 bg-gray-100 p-4 rounded-lg shadow-lg w-full max-w-3lg mx-auto">
+            <h2 className="text-lg font-semibold text-gray-800 mb-2">Chat with PDF/JSON Bot</h2>
+            {/* Chat History */}
+            <div className="h-64 overflow-y-auto bg-white p-3 rounded-lg shadow-inner">
+                {chatHistory.map((msg, index) => (
+                    <div key={index} className={`mb-2 flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}>
+                        <div className={`p-2 rounded-lg max-w-xs ${msg.sender === "user" ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-800"}`}>
+                            {msg.text}
+                        </div>
+                    </div>
+                ))}
+                {/* Show "Typing..." when waiting for response */}
+                {loading && (
+                    <div className="flex justify-start">
+                        <div className="p-2 bg-gray-200 text-gray-800 rounded-lg max-w-xs">Typing...</div>
+                    </div>
+                )}
+                {/* Auto-scroll reference */}
+                <div ref={chatContainerRef}></div>
             </div>
-
-            {message && (
-                <p
-                    className={`mt-3 text-lg ${
-                        message.includes("✅") ? "text-green-600" : "text-red-500"
-                    }`}
-                >
-                    {message}
-                </p>
-            )}
+            {/* Chat Input */}
+            <div className="flex gap-2 mt-3">
+                <input
+                    type="text"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="Ask a question..."
+                    className="flex-1 p-2 border rounded"
+                />
+                <button
+                    onClick={handleSendMessage}
+                    className="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600 transition"
+                >Send
+                </button>
+            </div>
         </div>
     );
 };
 
-export default Upload;
-
-I have created a chatbot that gets trained on uploaded data , so we can either upload multiple jsons or pdfs or just fetch them from a mongodb connections. Issue now is that if the data is too big its either not processing it at all because of token limit or its taking too long. 
-Uploading heavy files and even fetching large data from mongodb is very time consuming in the current implementation. Can you maybe solve this problem by chunking or vector embeddings or vectorization? Please tell me all the changes needed to fix this issue
-
+export default Chat;
+this is my chat code pls modify here
