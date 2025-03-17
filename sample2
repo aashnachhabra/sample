@@ -1,74 +1,12 @@
-import React, { useState, useRef, useEffect } from "react";
-import axios from "axios";
+ try:
+        response = openai.ChatCompletion.create(
+            engine="gpt-4-deployment",
+            messages=messages,
+            temperature=0.5
+        )
+        return {"response": response.choices[0].message.content}
+    except Exception as e:
+        logging.error(f"Chat API error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Chat API error: {str(e)}")
 
-const Chat = () => {
-    const [query, setQuery] = useState("");
-    const [chatHistory, setChatHistory] = useState([]); // Stores previous queries & responses
-    const [loading, setLoading] = useState(false);
-    const chatContainerRef = useRef(null); // To auto-scroll to latest message
-
-    const handleSendMessage = async () => {
-        if (!query.trim()) return; // Don't send empty messages
-        const newQuery = { sender: "user", text: query }; // User message
-        setChatHistory((prev) => [...prev, newQuery]); // Add user query to chat
-        setLoading(true);
-        setQuery(""); // Clear input after sending
-        try {
-            const res = await axios.post("http://127.0.0.1:8000/chat/", { query });
-            const botResponse = { sender: "bot", text: res.data.response };
-            setChatHistory((prev) => [...prev, botResponse]); // Add bot response
-        } catch (error) {
-            console.error("Chat error:", error);
-            setChatHistory((prev) => [...prev, { sender: "bot", text: "❌ Failed to fetch response." }]);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    // Auto-scroll to latest message when chatHistory updates
-    useEffect(() => {
-        chatContainerRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, [chatHistory]);
-
-    return (
-        <div className="mt-6 bg-gray-100 p-4 rounded-lg shadow-lg w-full max-w-3lg mx-auto">
-            <h2 className="text-lg font-semibold text-gray-800 mb-2">Chat with PDF/JSON Bot</h2>
-            {/* Chat History */}
-            <div className="h-64 overflow-y-auto bg-white p-3 rounded-lg shadow-inner">
-                {chatHistory.map((msg, index) => (
-                    <div key={index} className={`mb-2 flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}>
-                        <div className={`p-2 rounded-lg max-w-xs ${msg.sender === "user" ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-800"}`}>
-                            {msg.text}
-                        </div>
-                    </div>
-                ))}
-                {/* Show "Typing..." when waiting for response */}
-                {loading && (
-                    <div className="flex justify-start">
-                        <div className="p-2 bg-gray-200 text-gray-800 rounded-lg max-w-xs">Typing...</div>
-                    </div>
-                )}
-                {/* Auto-scroll reference */}
-                <div ref={chatContainerRef}></div>
-            </div>
-            {/* Chat Input */}
-            <div className="flex gap-2 mt-3">
-                <input
-                    type="text"
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    placeholder="Ask a question..."
-                    className="flex-1 p-2 border rounded"
-                />
-                <button
-                    onClick={handleSendMessage}
-                    className="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600 transition"
-                >Send
-                </button>
-            </div>
-        </div>
-    );
-};
-
-export default Chat;
-this is my chat code pls modify here
+rewrite this to make it compatible with openai v 1.2.3
