@@ -1,4 +1,4 @@
-CVE-2025-24813 	 Critical	9.8	Yes	Unspecified	org.apache.tomcat.embed:tomcat-embed-core
+
 CVE-2022-3509 	 High	7.5	Yes	Unspecified	com.google.protobuf:protobuf-java
 CVE-2021-40690 	 High	7.5	Yes	Unspecified	org.apache.santuario:xmlsec
 CVE-2024-7254 	 High	0	Yes	Unspecified	com.google.protobuf:protobuf-java
