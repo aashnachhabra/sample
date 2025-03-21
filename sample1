@@ -1,17 +1,37 @@
-
-CVE-2022-3509 	 High	7.5	Yes	Unspecified	com.google.protobuf:protobuf-java
-CVE-2021-40690 	 High	7.5	Yes	Unspecified	org.apache.santuario:xmlsec
-CVE-2024-7254 	 High	0	Yes	Unspecified	com.google.protobuf:protobuf-java
-CVE-2022-23457 	 High	9.8	Yes	Unspecified	org.owasp.esapi:esapi
-CVE-2021-22570 	 High	5.5	Yes	Unspecified	com.google.protobuf:protobuf-java
-CVE-2022-23596 	 High	7.5	Yes	Unspecified	com.github.junrar:junrar
-CVE-2021-22569 	 High	5.5	Yes	Unspecified	com.google.protobuf:protobuf-java
-CVE-2020-11987 	 High	8.2	Yes	Unspecified	org.apache.xmlgraphics:batik-svgbrowser
-GHSA-7c2q-5qmr-v76q 	 High	0	Yes	Unspecified	org.owasp.esapi:esapi
- CVE-2022-44729 	 High	7.1	Yes	Unspecified	org.apache.xmlgraphics:batik-bridge
-CVE-2022-3510 	 High	7.5	Yes	Unspecified	com.google.protobuf:protobuf-java
-CVE-2025-22228 	 High	0	Yes	Unspecified	org.springframework.security:spring-security-crypto
-CVE-2024-57699 	 High	0	Yes	Unspecified	net.minidev:json-smart
-
-please fix these vulnerabilities.
-i dont even have these dependencies directly in my pom how do i fix
+[INFO] |     \- org.springframework.security:spring-security-crypto:jar:6.3.3:compile
+[INFO] |  \- net.minidev:json-smart:jar:2.5.1:runtime
+[INFO] |  +- com.github.junrar:junrar:jar:4.0.0:compile
+[INFO] |  +- com.google.protobuf:protobuf-java:jar:3.11.4:compile
+[INFO] |  +- com.github.virtuald:curvesapi:jar:1.06:compile
+[INFO] |  +- org.apache.santuario:xmlsec:jar:2.2.1:compile
+[INFO] |  +- org.apache.xmlgraphics:batik-all:jar:1.13:compile
+[INFO] |  |  +- org.apache.xmlgraphics:batik-anim:jar:1.13:compile
+[INFO] |  |  |  +- org.apache.xmlgraphics:batik-shared-resources:jar:1.13:compile
+[INFO] |  |  +- org.apache.xmlgraphics:batik-awt-util:jar:1.13:compile
+[INFO] |  |  +- org.apache.xmlgraphics:batik-bridge:jar:1.13:compile
+[INFO] |  |  +- org.apache.xmlgraphics:batik-codec:jar:1.13:compile
+[INFO] |  |  +- org.apache.xmlgraphics:batik-constants:jar:1.13:compile
+[INFO] |  |  +- org.apache.xmlgraphics:batik-css:jar:1.13:compile
+[INFO] |  |  +- org.apache.xmlgraphics:batik-dom:jar:1.13:compile
+[INFO] |  |  +- org.apache.xmlgraphics:batik-ext:jar:1.13:compile
+[INFO] |  |  +- org.apache.xmlgraphics:batik-extension:jar:1.13:compile
+[INFO] |  |  +- org.apache.xmlgraphics:batik-gui-util:jar:1.13:compile
+[INFO] |  |  +- org.apache.xmlgraphics:batik-gvt:jar:1.13:compile
+[INFO] |  |  +- org.apache.xmlgraphics:batik-i18n:jar:1.13:compile
+[INFO] |  |  +- org.apache.xmlgraphics:batik-parser:jar:1.13:compile
+[INFO] |  |  +- org.apache.xmlgraphics:batik-rasterizer-ext:jar:1.13:compile
+[INFO] |  |  +- org.apache.xmlgraphics:batik-rasterizer:jar:1.13:compile
+[INFO] |  |  +- org.apache.xmlgraphics:batik-script:jar:1.13:compile
+[INFO] |  |  +- org.apache.xmlgraphics:batik-slideshow:jar:1.13:compile
+[INFO] |  |  +- org.apache.xmlgraphics:batik-squiggle-ext:jar:1.13:compile
+[INFO] |  |  +- org.apache.xmlgraphics:batik-squiggle:jar:1.13:compile
+[INFO] |  |  +- org.apache.xmlgraphics:batik-svg-dom:jar:1.13:compile
+[INFO] |  |  +- org.apache.xmlgraphics:batik-svgbrowser:jar:1.13:compile
+[INFO] |  |  +- org.apache.xmlgraphics:batik-svggen:jar:1.13:compile
+[INFO] |  |  +- org.apache.xmlgraphics:batik-svgpp:jar:1.13:compile
+[INFO] |  |  +- org.apache.xmlgraphics:batik-svgrasterizer:jar:1.13:compile
+[INFO] |  |  +- org.apache.xmlgraphics:batik-swing:jar:1.13:compile
+[INFO] |  |  +- org.apache.xmlgraphics:batik-transcoder:jar:1.13:compile
+[INFO] |  |  +- org.apache.xmlgraphics:batik-util:jar:1.13:compile
+[INFO] |  |  +- org.apache.xmlgraphics:batik-ttf2svg:jar:1.13:compile
+[INFO] |  |  \- org.apache.xmlgraphics:batik-xml:jar:1.13:compile
