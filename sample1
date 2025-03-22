@@ -1,37 +1,9 @@
-[INFO] |     \- org.springframework.security:spring-security-crypto:jar:6.3.3:compile
-[INFO] |  \- net.minidev:json-smart:jar:2.5.1:runtime
-[INFO] |  +- com.github.junrar:junrar:jar:4.0.0:compile
-[INFO] |  +- com.google.protobuf:protobuf-java:jar:3.11.4:compile
-[INFO] |  +- com.github.virtuald:curvesapi:jar:1.06:compile
-[INFO] |  +- org.apache.santuario:xmlsec:jar:2.2.1:compile
-[INFO] |  +- org.apache.xmlgraphics:batik-all:jar:1.13:compile
-[INFO] |  |  +- org.apache.xmlgraphics:batik-anim:jar:1.13:compile
-[INFO] |  |  |  +- org.apache.xmlgraphics:batik-shared-resources:jar:1.13:compile
-[INFO] |  |  +- org.apache.xmlgraphics:batik-awt-util:jar:1.13:compile
-[INFO] |  |  +- org.apache.xmlgraphics:batik-bridge:jar:1.13:compile
-[INFO] |  |  +- org.apache.xmlgraphics:batik-codec:jar:1.13:compile
-[INFO] |  |  +- org.apache.xmlgraphics:batik-constants:jar:1.13:compile
-[INFO] |  |  +- org.apache.xmlgraphics:batik-css:jar:1.13:compile
-[INFO] |  |  +- org.apache.xmlgraphics:batik-dom:jar:1.13:compile
-[INFO] |  |  +- org.apache.xmlgraphics:batik-ext:jar:1.13:compile
-[INFO] |  |  +- org.apache.xmlgraphics:batik-extension:jar:1.13:compile
-[INFO] |  |  +- org.apache.xmlgraphics:batik-gui-util:jar:1.13:compile
-[INFO] |  |  +- org.apache.xmlgraphics:batik-gvt:jar:1.13:compile
-[INFO] |  |  +- org.apache.xmlgraphics:batik-i18n:jar:1.13:compile
-[INFO] |  |  +- org.apache.xmlgraphics:batik-parser:jar:1.13:compile
-[INFO] |  |  +- org.apache.xmlgraphics:batik-rasterizer-ext:jar:1.13:compile
-[INFO] |  |  +- org.apache.xmlgraphics:batik-rasterizer:jar:1.13:compile
-[INFO] |  |  +- org.apache.xmlgraphics:batik-script:jar:1.13:compile
-[INFO] |  |  +- org.apache.xmlgraphics:batik-slideshow:jar:1.13:compile
-[INFO] |  |  +- org.apache.xmlgraphics:batik-squiggle-ext:jar:1.13:compile
-[INFO] |  |  +- org.apache.xmlgraphics:batik-squiggle:jar:1.13:compile
-[INFO] |  |  +- org.apache.xmlgraphics:batik-svg-dom:jar:1.13:compile
-[INFO] |  |  +- org.apache.xmlgraphics:batik-svgbrowser:jar:1.13:compile
-[INFO] |  |  +- org.apache.xmlgraphics:batik-svggen:jar:1.13:compile
-[INFO] |  |  +- org.apache.xmlgraphics:batik-svgpp:jar:1.13:compile
-[INFO] |  |  +- org.apache.xmlgraphics:batik-svgrasterizer:jar:1.13:compile
-[INFO] |  |  +- org.apache.xmlgraphics:batik-swing:jar:1.13:compile
-[INFO] |  |  +- org.apache.xmlgraphics:batik-transcoder:jar:1.13:compile
-[INFO] |  |  +- org.apache.xmlgraphics:batik-util:jar:1.13:compile
-[INFO] |  |  +- org.apache.xmlgraphics:batik-ttf2svg:jar:1.13:compile
-[INFO] |  |  \- org.apache.xmlgraphics:batik-xml:jar:1.13:compile
+CVE-2022-23457 and GHSA-7c2q-5qmr-v76q:
+how to fix these
+currently have this is pom
+<dependency>
+            <groupId>org.owasp.esapi</groupId>
+            <artifactId>esapi</artifactId>
+            <version>2.5.2.0</version>
+        </dependency>
+
