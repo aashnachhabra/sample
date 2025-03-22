@@ -1,9 +1,3 @@
-CVE-2022-23457 and GHSA-7c2q-5qmr-v76q:
-how to fix these
-currently have this is pom
-<dependency>
-            <groupId>org.owasp.esapi</groupId>
-            <artifactId>esapi</artifactId>
-            <version>2.5.2.0</version>
-        </dependency>
-
+mvn dependency:tree | grep esapi
+[INFO] |  +- com.github.virtuald:curvesapi:jar:1.06:compile
+[INFO] \- org.owasp.esapi:esapi:jar:2.5.3.1:compile
