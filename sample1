@@ -1,3 +1,7 @@
-mvn dependency:tree | grep esapi
+ mvn dependency:tree | grep -B 5 "curvesapi"
+[INFO] |  +- org.apache.commons:commons-math3:jar:3.6.1:compile
+[INFO] |  \- com.zaxxer:SparseBitSet:jar:1.2:compile
+[INFO] +- org.apache.poi:poi-ooxml:jar:5.0.0:compile
+[INFO] |  +- org.apache.poi:poi-ooxml-lite:jar:5.0.0:compile
+[INFO] |  |  \- org.apache.xmlbeans:xmlbeans:jar:4.0.0:compile
 [INFO] |  +- com.github.virtuald:curvesapi:jar:1.06:compile
-[INFO] \- org.owasp.esapi:esapi:jar:2.5.3.1:compile
