@@ -1,64 +1,27 @@
-name: Get Changed Files on PR Merge
+I have an excel sheet which has columns and it has multiple entries
+chatHistoryID	frontendStartTime	backendStartTime	agentResponseTime	agent reponse time (sec)	total response time	backendEndTime	request	response	status	Pass	Fail	createUserID			
 
-on:
-  pull_request:
-    types:
-      - closed
+I need to write a python codw which reads this excely and makes an api post call to http://localhost:8080/deepeval/geval and reqest body in this format
+{
+        "question": "Where is Paris",
+        "llm_genrated_ans": "Europe",
+        "ground_ans": "France"
+    }
 
-jobs:
-  get-changed-files:
-    if: github.event.pull_request.merged == true
-    runs-on: uhg-runner
+for question we need to pick column "request" for llm_genrated_ans and also ground_ans column response should be picked. 
+The response from api call would be in this format
+ {
+        "reason": "The Actual Output 'Europe' does not match the Expected Output 'France', which is a major error in coverage status.",
+        "score": 0.0
+    }
 
-    steps:
-      # Step 1: Authenticate with GitHub using PAT
-      - name: Authenticate with GitHub
-        run: echo "${{ secrets.GH_PAT }}" | gh auth login --with-token
+add a column in the excel named "Deepeval test"
+if score is >= 0.7 then put Deepeval test cell for that entry to be "Passed" otherwise put "Failed"
+Please write the code in python
 
-      # Step 2: Check out the repository
-      - name: Checkout Repository
-        uses: actions/checkout@v3
 
-      # Step 3: Get the files changed in the merged PR
-      - name: Fetch Changed Files
-        id: changed-files
-        run: |
-          # Get the PR number
-          PR_NUMBER=$(echo "${{ github.event.pull_request.number }}")
 
-          # Fetch the list of changed files using the GitHub REST API
-          FILES=$(curl -s -H "Authorization: token ${{ secrets.GH_PAT }}" \
-            "https://api.github.com/repos/${{ github.repository }}/pulls/$PR_NUMBER/files" \
-            | jq '[.[] | {path: .filename, additions: .additions, deletions: .deletions, status: .status}]')
 
-          # Debug: Print FILES variable
-          echo "FILES: ${FILES}"
 
-          FILES_STATUS=$(echo "${FILES}" | jq -c '.[]' | while read -r file_info; do
-            # Extract details
-            FILE_PATH=$(echo "$file_info" | jq -r '.path')
-            ADDITIONS=$(echo "$file_info" | jq -r '.additions')
-            DELETIONS=$(echo "$file_info" | jq -r '.deletions')
-            STATUS=$(echo "$file_info" | jq -r '.status')
 
-            # Construct JSON output
-            echo "{\"path\": \"$FILE_PATH\", \"additions\": $ADDITIONS, \"deletions\": $DELETIONS, \"status\": \"$STATUS\"}"
-          done | jq -s '.')
 
-          # Save JSON output
-          echo "${FILES_STATUS}" > changed_files.json
-          echo "::set-output name=files::${FILES_STATUS}"
-      # Step 4: Print the changed files
-      - name: Display Changed Files
-        run: |
-          echo "Changed files:"
-          cat changed_files.json
-
-      # Step 5: Make an API call with the file paths, additions, deletions, and status
-#      - name: Send Changed Files to API
-#        run: |
-#          curl -X POST http://localhost:8900/api/documents/modifiedFilePathsFromGithub \
-#          -H "Content-Type: application/json" \
-#          -d @changed_files.json
-
-this is a workflow code i have written can you explain this code? and what it exactly does
