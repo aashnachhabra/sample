@@ -1,27 +1,163 @@
-I have an excel sheet which has columns and it has multiple entries
-chatHistoryID	frontendStartTime	backendStartTime	agentResponseTime	agent reponse time (sec)	total response time	backendEndTime	request	response	status	Pass	Fail	createUserID			
+import os
+import shutil
+import json
+import logging
+import requests  # Import requests module
+from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from dotenv import load_dotenv
+import openai
+import fitz  # PyMuPDF for PDF text extraction
+from pymongo import MongoClient
+import markdown
+# Load environment variables
+load_dotenv()
 
-I need to write a python codw which reads this excely and makes an api post call to http://localhost:8080/deepeval/geval and reqest body in this format
+# Initialize OpenAI Azure client
+openai.api_type = "azure"
+openai.api_base = os.getenv("AZURE_OPENAI_ENDPOINT")
+openai.api_version = "2023-07-01-preview"
+openai.api_key = os.getenv("AZURE_OPENAI_API_KEY")
+
+# MongoDB Configuration
+MONGO_URI = os.getenv("MONGO_URI")
+DB_NAME = "planlibrary_api_db"
+COLLECTION_NAME = "planlibrary_med_api"
+
+# Connect to MongoDB
+try:
+    mongo_client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
+    db = mongo_client[DB_NAME]
+    collection = db[COLLECTION_NAME]
+    print("✅ Connected to MongoDB")
+except Exception as e:
+    print(f"❌ MongoDB Connection Error: {e}")
+
+app = FastAPI()
+
+# Enable CORS for frontend communication
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Change this in production
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Storage for uploaded files
+UPLOAD_DIR = "uploads"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+uploaded_texts = []  # Stores extracted text from uploaded PDFs & text files
+uploaded_json_data = []  # Stores JSON data from uploaded files
+fetched_json_data = []  # Stores JSON data from MongoDB
+
+@app.post("/upload/")
+async def upload_files(files: list[UploadFile] = File(...)):
+    """Handles multiple file uploads (PDFs, text, JSON)."""
+    global uploaded_texts, uploaded_json_data
+    uploaded_texts.clear()
+    uploaded_json_data.clear()
+    for file in files:
+        file_location = os.path.join(UPLOAD_DIR, file.filename)
+        try:
+            with open(file_location, "wb") as f:
+                shutil.copyfileobj(file.file, f)
+            # Process based on file type
+            if file.filename.endswith(".pdf"):
+                uploaded_texts.append(extract_text_from_pdf(file_location))
+            elif file.filename.endswith(".json"):
+                with open(file_location, "r", encoding="utf-8") as f:
+                    json_data = json.load(f)
+                    uploaded_json_data.append(json_data)
+            else:
+                with open(file_location, "r", encoding="utf-8") as f:
+                    uploaded_texts.append(f.read())
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"File processing failed: {str(e)}")
+    return {"message": "Files uploaded successfully", "uploaded_files": [file.filename for file in files]}
+
+def extract_text_from_pdf(pdf_path):
+    """Extracts text from a PDF file."""
+    text = ""
+    try:
+        doc = fitz.open(pdf_path)
+        for page in doc:
+            text += page.get_text("text") + "\n"
+        return text.strip()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to extract text from PDF: {str(e)}")
+
+@app.get("/fetch-json/")
+async def fetch_json_from_mongo():
+    """Fetches a limited number of JSON documents from MongoDB."""
+    global fetched_json_data
+    fetched_json_data.clear()
+    try:
+        fetched_json_data = list(collection.find({}, {"_id": 0}).limit(5))  # Fetch 5 JSON documents
+        if not fetched_json_data:
+            return {"message": "No JSON data found in MongoDB"}
+        return {"message": "Fetched JSON data successfully", "json_data": fetched_json_data}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"MongoDB fetch error: {str(e)}")
+
+@app.post("/chat/")
+async def chat(user_query: dict):
+    """Handles chat requests based on uploaded or fetched documents."""
+    global uploaded_texts, uploaded_json_data, fetched_json_data
+    # Determine available data source
+    if not uploaded_texts and not uploaded_json_data and not fetched_json_data:
+        raise HTTPException(status_code=400, detail="No documents uploaded or fetched. Please upload or fetch data first.")
+    
+    if uploaded_json_data:
+        formatted_json = json.dumps(uploaded_json_data, indent=2)
+        messages = [
+            {"role": "system", "content": "You are an AI assistant that provides detailed information about health insurance plans based on JSON data."},
+            {"role": "system", "content": f"Here is the JSON data for the plan details:\n\n{formatted_json}"},
+            {"role": "user", "content": user_query["query"]},
+        ]
+    elif fetched_json_data:
+        formatted_json = json.dumps(fetched_json_data, indent=2)
+        messages = [
+            {"role": "system", "content": "You are an AI assistant that provides detailed information about health insurance plans based on JSON data."},
+            {"role": "system", "content": f"Here is the JSON data for the plan details:\n\n{formatted_json}"},
+            {"role": "user", "content": user_query["query"]},
+        ]
+    else:
+        combined_text = "\n\n".join(uploaded_texts)
+        messages = [
+            {"role": "system", "content": "You are an AI assistant that provides answers based on the provided documents."},
+            {"role": "system", "content": f"Here are the uploaded documents:\n\n{combined_text}"},
+            {"role": "user", "content": user_query["query"]},
+        ]
+    
+    # Call OpenAI API
+    try:
+        response = openai.chat.completions.create(
+            model="gpt-4-deployment",
+            messages=messages,
+            temperature=0.5
+        )
+        return {"response": response.choices[0].message.content}
+      
+        logging.error(f"Chat API error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Chat API error: {str(e)}")
+
+i want to create a similar file where my upload takes a excel file from my local machine and trains the model on it and then i want to connect it to an excel sheet which has columns question and expected answer . It should pick question from the excel and pass to the trained llm and store the response. After thats done i want it to make an api post  call to  http://localhost:8080/deepeval/geval
+which has request body like
 {
-        "question": "Where is Paris",
-        "llm_genrated_ans": "Europe",
-        "ground_ans": "France"
+        "question": "What is the dental deductible for plan code 1V7?",
+        "llm_genrated_ans": "EurThe dental deductible for plan code 1V7 is included in your medical deductible for Out-of-Network (Tier 3).Click here <425884>,<486661> to view the json files.ope",
+        "ground_ans": "The dental deductible for plan code 1V7 is included in your medical deductible for Out-of-Network (Tier 3).Click here <425884>,<486661> to view the json files."
     }
 
-for question we need to pick column "request" for llm_genrated_ans and also ground_ans column response should be picked. 
-The response from api call would be in this format
- {
-        "reason": "The Actual Output 'Europe' does not match the Expected Output 'France', which is a major error in coverage status.",
-        "score": 0.0
-    }
+question and ground ans it should pick from excel from question and expected answer columns respectively and llm answer that it generated it should pass. Then it should update the excel with the llm response
+response is in format
+{
+    "reason": "The Actual Output contains an extra word 'Eur' which appears to be a typo but does not change the meaning of the coverage information. Coverage status and cost-shares match the Expected Output.",
+    "score": 0.9
+}
+it should create column gEval score and reason and Test passed/failed
 
-add a column in the excel named "Deepeval test"
-if score is >= 0.7 then put Deepeval test cell for that entry to be "Passed" otherwise put "Failed"
-Please write the code in python
+all this should happen when i run this code file
 
-
-
-
-
-
-
+geval score should be picked from score and reason from reason of response and column Test passed/failed should be conditional if geval score is greater than equal to 0.7 it should be passed else failed. Generate the code for me
