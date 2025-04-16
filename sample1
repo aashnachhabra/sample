@@ -1,31 +1,126 @@
-need to add a navbar instead of written united health group
-this is jsp code for header make using react tailwind and where to add
-<div class="container-fluid">
-        <a onclick="releaseLock(event, false)" href="${pageContext.servletContext.contextPath }/home"> <img id="clickUHGLogoIconV2" src="assets/UHC_Lockup_wht_RGB.png"
-                                                                        alt="UHC Logo" class="img-fluid" width="150"
-                                                                        height="50">
-        </a>
-        <button class="navbar-toggler" type="button"
-                data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
-                aria-controls="navbarSupportedContent" aria-expanded="false"
-                aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <li class="nav-item dropdown"></li>
-            </ul>
-            <div class="d-flex nav-form">
+import os
+import shutil
+import json
+import logging
+import requests
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+from dotenv import load_dotenv
+import openai
+import fitz  # PyMuPDF
+from pymongo import MongoClient
+import markdown
+# Load environment variables
+load_dotenv()
+# OpenAI Azure config
+openai.api_type = "azure"
+openai.api_base = os.getenv("AZURE_OPENAI_ENDPOINT")
+openai.api_version = "2023-07-01-preview"
+openai.api_key = os.getenv("AZURE_OPENAI_API_KEY")
+# MongoDB config
+MONGO_URI = os.getenv("MONGO_URI")
+DB_NAME = "planlibrary_api_db"
+COLLECTION_NAME = "planlibrary_med_api"
+# Connect to MongoDB
+try:
+   mongo_client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
+   db = mongo_client[DB_NAME]
+   collection = db[COLLECTION_NAME]
+   print("✅ Connected to MongoDB")
+except Exception as e:
+   print(f"❌ MongoDB Connection Error: {e}")
+app = Flask(__name__)
+CORS(app)
+UPLOAD_DIR = "uploads"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+uploaded_texts = []
+uploaded_json_data = []
+fetched_json_data = []
+def extract_text_from_pdf(pdf_path):
+   """Extract text from a PDF."""
+   try:
+       text = ""
+       doc = fitz.open(pdf_path)
+       for page in doc:
+           text += page.get_text("text") + "\n"
+       return text.strip()
+   except Exception as e:
+       raise Exception(f"Failed to extract text from PDF: {str(e)}")
+@app.route("/upload/", methods=["POST"])
+def upload_files():
+   global uploaded_texts, uploaded_json_data
+   uploaded_texts.clear()
+   uploaded_json_data.clear()
+   files = request.files.getlist("files")
+   if not files:
+       return jsonify({"error": "No files provided"}), 400
+   try:
+       for file in files:
+           file_location = os.path.join(UPLOAD_DIR, file.filename)
+           file.save(file_location)
+           if file.filename.endswith(".pdf"):
+               uploaded_texts.append(extract_text_from_pdf(file_location))
+           elif file.filename.endswith(".json"):
+               with open(file_location, "r", encoding="utf-8") as f:
+                   json_data = json.load(f)
+                   uploaded_json_data.append(json_data)
+           else:
+               with open(file_location, "r", encoding="utf-8") as f:
+                   uploaded_texts.append(f.read())
+       return jsonify({"message": "Files uploaded successfully", "uploaded_files": [file.filename for file in files]})
+   except Exception as e:
+       return jsonify({"error": str(e)}), 500
+@app.route("/fetch-json/", methods=["GET"])
+def fetch_json_from_mongo():
+   global fetched_json_data
+   fetched_json_data.clear()
+   try:
+       fetched_json_data = list(collection.find({}, {"_id": 0}).limit(5))
+       if not fetched_json_data:
+           return jsonify({"message": "No JSON data found in MongoDB"})
+       return jsonify({"message": "Fetched JSON data successfully", "json_data": fetched_json_data})
+   except Exception as e:
+       return jsonify({"error": f"MongoDB fetch error: {str(e)}"}), 500
+@app.route("/chat/", methods=["POST"])
+def chat():
+   global uploaded_texts, uploaded_json_data, fetched_json_data
+   user_query = request.get_json()
+   if not user_query or "query" not in user_query:
+       return jsonify({"error": "Missing query in request"}), 400
+   if not uploaded_texts and not uploaded_json_data and not fetched_json_data:
+       return jsonify({"error": "No documents uploaded or fetched. Please upload or fetch data first."}), 400
+   try:
+       if uploaded_json_data:
+           formatted_json = json.dumps(uploaded_json_data, indent=2)
+           messages = [
+               {"role": "system", "content": "You are an AI assistant that provides detailed information about health insurance plans based on JSON data."},
+               {"role": "system", "content": f"Here is the JSON data for the plan details:\n\n{formatted_json}"},
+               {"role": "user", "content": user_query["query"]},
+           ]
+       elif fetched_json_data:
+           formatted_json = json.dumps(fetched_json_data, indent=2)
+           messages = [
+               {"role": "system", "content": "You are an AI assistant that provides detailed information about health insurance plans based on JSON data."},
+               {"role": "system", "content": f"Here is the JSON data for the plan details:\n\n{formatted_json}"},
+               {"role": "user", "content": user_query["query"]},
+           ]
+       else:
+           combined_text = "\n\n".join(uploaded_texts)
+           messages = [
+               {"role": "system", "content": "You are an AI assistant that provides answers based on the provided documents."},
+               {"role": "system", "content": f"Here are the uploaded documents:\n\n{combined_text}"},
+               {"role": "user", "content": user_query["query"]},
+           ]
+       response = openai.chat.completions.create(
+           model="gpt-4-deployment",
+           messages=messages,
+           temperature=0.5
+       )
+       return jsonify({"response": response.choices[0].message.content})
+   except Exception as e:
+       logging.error(f"Chat API error: {str(e)}")
+       return jsonify({"error": f"Chat API error: {str(e)}"}), 500
+if __name__ == "__main__":
+   app.run(debug=True, port=5000)
 
-                <input class="form-control me-2" type="text" placeholder="Search"
-                       id="searchtext" onKeyPress="searchOnEnter(event);"
-                       aria-label="Search">
-                <button class="btn btn-success " onClick="kibanaSearchPage();"
-                        type="button" style='margin-right: 10px'>Search
-                </button>
-                <a  onclick="releaseLock(event, false)" href="${pageContext.servletContext.contextPath }/logout"
-                   class="btn btn-warning ml-2">Logout</a>
-
-            </div>
-        </div>
-    </div>
+my chatbot responses are not properly structured is there a way we can achieve it via code here
