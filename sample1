@@ -1,218 +1,31 @@
-i have these code files for frontend react i need to change all the ui to something which is united health group aesthetic compatible.Attaching image of a chatbot i want it to look similar to
-keeping the logic of my code intact
+need to add a navbar instead of written united health group
+this is jsp code for header make using react tailwind and where to add
+<div class="container-fluid">
+        <a onclick="releaseLock(event, false)" href="${pageContext.servletContext.contextPath }/home"> <img id="clickUHGLogoIconV2" src="assets/UHC_Lockup_wht_RGB.png"
+                                                                        alt="UHC Logo" class="img-fluid" width="150"
+                                                                        height="50">
+        </a>
+        <button class="navbar-toggler" type="button"
+                data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false"
+                aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item dropdown"></li>
+            </ul>
+            <div class="d-flex nav-form">
 
-import React, { useState } from "react";
-import Upload from "./Upload";
-import Chat from "./Chat";
-const App = () => {
- const [chatEnabled, setChatEnabled] = useState(false);
- return (
-<div className="min-h-screen bg-gradient-to-r from-blue-500 to-purple-600 flex flex-col items-center justify-center p-6">
-<div className="bg-white shadow-lg rounded-lg p-8 w-full max-w-3xl">
-<h1 className="text-3xl font-bold text-center text-gray-800 mb-6">
-         PDF/JSON Chatbot
-</h1>
-<Upload onUploadSuccess={() => setChatEnabled(true)} />
-       {chatEnabled && <Chat />}
-</div>
-</div>
- );
-};
-export default App;
-
-import React, { useState, useRef, useEffect } from "react";
-import axios from "axios";
-
-const Chat = () => {
-    const [query, setQuery] = useState("");
-    const [chatHistory, setChatHistory] = useState([]); // Stores previous queries & responses
-    const [loading, setLoading] = useState(false);
-    const chatContainerRef = useRef(null); // To auto-scroll to latest message
-
-    const handleSendMessage = async () => {
-        if (!query.trim()) return; // Don't send empty messages
-        const newQuery = { sender: "user", text: query }; // User message
-        setChatHistory((prev) => [...prev, newQuery]); // Add user query to chat
-        setLoading(true);
-        setQuery(""); // Clear input after sending
-        try {
-            const res = await axios.post("http://127.0.0.1:5000/chat/", { query });
-            const botResponse = { sender: "bot", text: res.data.response };
-            //const evalResponse = { sender: "bot", text: `<strong>Testing Response:</strong><pre>${JSON.stringify(res.data.evaluation, null, 2)}</pre>` };
-           // setChatHistory((prev) => [...prev, botResponse, evalResponse]); // Add bot response and evaluation response
-           setChatHistory((prev) => [...prev, botResponse]);
-        } catch (error) {
-            console.error("Chat error:", error);
-            setChatHistory((prev) => [...prev, { sender: "bot", text: "❌ Failed to fetch response." }]);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    // Auto-scroll to latest message when chatHistory updates
-    useEffect(() => {
-        chatContainerRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, [chatHistory]);
-
-    return (
-        <div className="mt-6 bg-gray-100 p-4 rounded-lg shadow-lg w-full max-w-7xl mx-auto">
-            <h2 className="text-lg font-semibold text-gray-800 mb-2">Chat with PDF/JSON chatbot</h2>
-            {/* Chat History */}
-            <div className="h-[600px] overflow-y-auto bg-white p-3 rounded-lg shadow-inner">
-                {chatHistory.map((msg, index) => (
-                    <div key={index} className={`mb-2 flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}>
-                        <div className={`p-2 rounded-lg max-w-s ${msg.sender === "user" ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-800"}`}>
-                            {msg.sender === "bot" ? (
-                                <div dangerouslySetInnerHTML={{ __html: msg.text }} /> // Render bot response using dangerouslySetInnerHTML
-                            ) : (
-                                msg.text
-                            )}
-                        </div>
-                    </div>
-                ))}
-                {/* Show "Typing..." when waiting for response */}
-                {loading && (
-                    <div className="flex justify-start">
-                        <div className="p-2 bg-gray-200 text-gray-800 rounded-lg max-w-xs">Typing...</div>
-                    </div>
-                )}
-                {/* Auto-scroll reference */}
-                <div ref={chatContainerRef}></div>
-            </div>
-            {/* Chat Input */}
-            <div className="flex gap-2 mt-3">
-                <input
-                    type="text"
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    placeholder="Ask a question..."
-                    className="flex-1 p-2 border rounded"
-                />
-                <button
-                    onClick={handleSendMessage}
-                    className="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600 transition"
-                >Send
+                <input class="form-control me-2" type="text" placeholder="Search"
+                       id="searchtext" onKeyPress="searchOnEnter(event);"
+                       aria-label="Search">
+                <button class="btn btn-success " onClick="kibanaSearchPage();"
+                        type="button" style='margin-right: 10px'>Search
                 </button>
+                <a  onclick="releaseLock(event, false)" href="${pageContext.servletContext.contextPath }/logout"
+                   class="btn btn-warning ml-2">Logout</a>
+
             </div>
         </div>
-    );
-};
-
-export default Chat;
-
-import React, { useState } from "react";
-import axios from "axios";
-
-const Upload = ({ onUploadSuccess }) => {
-    const [selectedFiles, setSelectedFiles] = useState([]);
-    const [message, setMessage] = useState("");
-    const [uploading, setUploading] = useState(false);
-    const [fetching, setFetching] = useState(false);
-
-    const handleFileChange = (event) => {
-        setSelectedFiles(event.target.files);
-    };
-
-    const handleUpload = async () => {
-        if (!selectedFiles.length) {
-            setMessage("❌ Please select at least one file.");
-            return;
-        }
-
-        setMessage("");
-        setUploading(true);
-
-        const formData = new FormData();
-        for (let file of selectedFiles) {
-            formData.append("files", file);
-        }
-
-        try {
-            const response = await axios.post(
-                "http://127.0.0.1:5000/upload/",
-                formData,
-                {
-                    headers: { "Content-Type": "multipart/form-data" },
-                }
-            );
-
-            setMessage(
-                `✅ Files uploaded successfully: ${response.data.uploaded_files.join(", ")}`
-            );
-
-            onUploadSuccess && onUploadSuccess(true);
-        } catch (error) {
-            console.error("Upload error:", error);
-            setMessage("❌ Failed to upload files.");
-        } finally {
-            setUploading(false);
-        }
-    };
-
-    const fetchJsonFromMongo = async () => {
-        setMessage("");
-        setFetching(true);
-
-        try {
-            const response = await axios.get("http://127.0.0.1:5000/fetch-json/");
-
-            if (response.data.json_data) {
-                setMessage(
-                    `✅ Fetched ${response.data.json_data.length} JSON documents from MongoDB.`
-                );
-
-                onUploadSuccess && onUploadSuccess(true);
-            } else {
-                setMessage("⚠️ No JSON data found in MongoDB.");
-            }
-        } catch (error) {
-            console.error("Fetch JSON error:", error);
-            setMessage("❌ Failed to fetch JSON data from MongoDB.");
-        } finally {
-            setFetching(false);
-        }
-    };
-
-    return (
-        <div className="text-center">
-            <div className="bg-gray-100 p-4 rounded-md shadow-md mb-4">
-                <input
-                    type="file"
-                    multiple
-                    onChange={handleFileChange}
-                    className="border p-2 rounded w-full mb-2"
-                />
-                <div className="flex justify-center gap-4">
-                    <button
-                        onClick={handleUpload}
-                        className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition flex items-center justify-center"
-                        disabled={uploading}
-                    >
-                        {uploading ? "Uploading..." : "Upload Files"}
-                    </button>
-                    <button
-                        onClick={fetchJsonFromMongo}
-                        className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition flex items-center justify-center"
-                        disabled={fetching}
-                    >
-                        {fetching ? "Fetching..." : "Fetch JSON from MongoDB"}
-                    </button>
-                </div>
-            </div>
-
-            {message && (
-                <p
-                    className={`mt-3 text-lg ${
-                        message.includes("✅") ? "text-green-600" : "text-red-500"
-                    }`}
-                >
-                    {message}
-                </p>
-            )}
-        </div>
-    );
-};
-
-export default Upload;
-
-add or update as many components are you want and u can use any css style library but it should look like a united health group project
+    </div>
