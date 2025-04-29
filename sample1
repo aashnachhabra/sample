@@ -1,112 +1,64 @@
-import React, { useState } from "react";
-import axios from "axios";
-import { useNavigate } from "react-router-dom";
-function UploadForm() {
-  const [file, setFile] = useState(null);
-  const [llmEndpoint, setLlmEndpoint] = useState("");
-  const [threshold, setThreshold] = useState(0.7);
-  const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!file || !llmEndpoint) {
-      alert("All fields are required");
-      return;
-    }
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("llmEndpoint", llmEndpoint);
-    formData.append("threshold", threshold);
-    try {
-      setLoading(true);
-      const res = await axios.post("http://localhost:5000/process", formData, {
-        responseType: "blob",
-      });
-      const blob = new Blob([res.data]);
-      const fileURL = URL.createObjectURL(blob);
-      navigate("/results", { state: { fileURL } });
-    } catch (err) {
-      alert("Something went wrong.");
-    } finally {
-      setLoading(false);
-    }
-  };
+import React, { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
+import * as XLSX from "xlsx";
+import Spreadsheet from "react-spreadsheet";
+import "./ExcelViewer.css"; // Import your CSS file for custom styles
+
+function ExcelViewer() {
+  const location = useLocation();
+  const [spreadsheetData, setSpreadsheetData] = useState([]);
+  const [downloadUrl, setDownloadUrl] = useState("");
+
+  useEffect(() => {
+    if (!location.state?.fileURL) return;
+    const fetchExcel = async () => {
+      const res = await fetch(location.state.fileURL);
+      const blob = await res.blob();
+      setDownloadUrl(location.state.fileURL);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const workbook = XLSX.read(e.target.result, { type: "binary" });
+        const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+        const formattedData = jsonData.map((row, rowIndex) =>
+          row.map((cell) => ({
+            value: cell,
+            readOnly: rowIndex === 0, // Make the first row read-only
+            className: rowIndex === 0 ? "header-cell" : "", // Add class to the first row
+          }))
+        );
+        setSpreadsheetData(formattedData);
+      };
+      reader.readAsBinaryString(blob);
+    };
+    fetchExcel();
+  }, [location]);
+
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
-      <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-lg">
-        <h2 className="text-3xl font-bold text-center mb-8 text-blue-900">
-          DeepEval Testing
-        </h2>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label className="block mb-2 text-gray-700 font-semibold">
-              Upload Excel
-            </label>
-            <input
-              type="file"
-              accept=".xlsx"
-              onChange={(e) => setFile(e.target.files[0])}
-              className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          <div>
-            <label className="block mb-2 text-gray-700 font-semibold">
-              LLM Endpoint
-            </label>
-            <input
-              type="text"
-              value={llmEndpoint}
-              onChange={(e) => setLlmEndpoint(e.target.value)}
-              className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter LLM API Endpoint"
-            />
-          </div>
-          <div>
-            <label className="block mb-2 text-gray-700 font-semibold">
-              Threshold (0 - 1)
-            </label>
-            <input
-              type="number"
-              min="0"
-              max="1"
-              step="0.01"
-              value={threshold}
-              onChange={(e) => setThreshold(e.target.value)}
-              className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full flex justify-center items-center bg-blue-900 text-white font-semibold py-3 rounded-md hover:bg-blue-800 transition disabled:opacity-70"
+    <div className="p-6 bg-gray-100 min-h-[calc(100vh-64px)]">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-semibold text-blue-900">Evaluation Results</h2>
+        {downloadUrl && (
+          <a
+            href={downloadUrl}
+            download="deepeval_results.xlsx"
+            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md font-semibold transition"
           >
-            {loading ? (
-              <svg
-                className="animate-spin h-5 w-5 mr-3 text-white"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                  fill="none"
-                ></circle>
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8v8H4z"
-                ></path>
-              </svg>
-            ) : (
-              "Submit"
-            )}
-          </button>
-        </form>
+            Download
+          </a>
+        )}
+      </div>
+      <div className="bg-white p-4 rounded-md shadow overflow-auto">
+        {spreadsheetData.length > 0 ? (
+          <Spreadsheet data={spreadsheetData} />
+        ) : (
+          <p className="text-gray-600 text-center">Loading spreadsheet...</p>
+        )}
       </div>
     </div>
   );
 }
-export default UploadForm;
+
+export default ExcelViewer;
+
+can u also fix this ui of excel and add icons where you may need to. Make the excel more user friendly the columns are too wide they should nbe appropriately set and make the ui more better and crisp yet profrssional and should be according to uhg standards and do not affect logic just ui
