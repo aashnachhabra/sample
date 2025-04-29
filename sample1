@@ -1,64 +1,268 @@
+import React, { useState } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import { FaFileUpload, FaLink, FaSlidersH } from "react-icons/fa";
+function UploadForm() {
+ const [file, setFile] = useState(null);
+ const [llmEndpoint, setLlmEndpoint] = useState("");
+ const [threshold, setThreshold] = useState(0.7);
+ const [loading, setLoading] = useState(false);
+ const navigate = useNavigate();
+ const handleSubmit = async (e) => {
+   e.preventDefault();
+   if (!file || !llmEndpoint) {
+     alert("All fields are required");
+     return;
+   }
+   const formData = new FormData();
+   formData.append("file", file);
+   formData.append("llmEndpoint", llmEndpoint);
+   formData.append("threshold", threshold);
+   try {
+     setLoading(true);
+     const res = await axios.post("http://localhost:5000/process", formData, {
+       responseType: "blob",
+     });
+     const blob = new Blob([res.data]);
+     const fileURL = URL.createObjectURL(blob);
+     navigate("/results", { state: { fileURL } });
+   } catch (err) {
+     alert("Something went wrong.");
+   } finally {
+     setLoading(false);
+   }
+ };
+ return (
+<div className="min-h-screen bg-gray-100 flex items-center justify-center px-4 py-12">
+<div className="max-w-xl w-full bg-white p-12 rounded-2xl shadow-xl border border-gray-200">
+<h2 className="text-center text-3xl font-extrabold text-blue-900 mb-10">
+         DeepEval Testing
+</h2>
+<form onSubmit={handleSubmit} className="space-y-7">
+         {/* Upload File */}
+<div>
+<label className="block text-sm font-medium text-gray-700 mb-2">
+<div className="flex items-center gap-2">
+<FaFileUpload className="text-blue-700" />
+               Upload Excel
+</div>
+</label>
+<div className="relative">
+<label
+               htmlFor="file-upload"
+               className="flex items-center justify-center gap-2 cursor-pointer px-4 py-2 border border-dashed border-blue-400 rounded-lg text-blue-700 bg-blue-50 hover:bg-blue-100 transition text-sm"
+>
+<FaFileUpload />
+               {file ? file.name : "Choose File"}
+</label>
+<input
+               id="file-upload"
+               type="file"
+               accept=".xlsx"
+               onChange={(e) => setFile(e.target.files[0])}
+               className="sr-only"
+             />
+</div>
+</div>
+         {/* LLM Endpoint */}
+<div>
+<label className="block text-sm font-medium text-gray-700 mb-2">
+<div className="flex items-center gap-2">
+<FaLink className="text-blue-700" />
+               LLM Endpoint
+</div>
+</label>
+<input
+             type="text"
+             value={llmEndpoint}
+             onChange={(e) => setLlmEndpoint(e.target.value)}
+             placeholder="Enter LLM API Endpoint"
+             className="block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+           />
+</div>
+         {/* Threshold */}
+<div>
+<label className="block text-sm font-medium text-gray-700 mb-2">
+<div className="flex items-center gap-2">
+<FaSlidersH className="text-blue-700" />
+               Threshold (0 - 1)
+</div>
+</label>
+<input
+             type="number"
+             min="0"
+             max="1"
+             step="0.01"
+             value={threshold}
+             onChange={(e) => setThreshold(e.target.value)}
+             className="block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+           />
+</div>
+         {/* Submit Button */}
+<button
+           type="submit"
+           disabled={loading}
+           className="w-full flex justify-center items-center bg-blue-900 text-white font-semibold py-3 rounded-lg hover:bg-blue-800 transition-all duration-200 disabled:opacity-60"
+>
+           {loading ? (
+<svg
+               className="animate-spin h-5 w-5 mr-3 text-white"
+               viewBox="0 0 24 24"
+>
+<circle
+                 className="opacity-25"
+                 cx="12"
+                 cy="12"
+                 r="10"
+                 stroke="currentColor"
+                 strokeWidth="4"
+                 fill="none"
+></circle>
+<path
+                 className="opacity-75"
+                 fill="currentColor"
+                 d="M4 12a8 8 0 018-8v8H4z"
+></path>
+</svg>
+           ) : (
+             "Submit"
+           )}
+</button>
+</form>
+</div>
+</div>
+ );
+}
+export default UploadForm;
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import * as XLSX from "xlsx";
-import Spreadsheet from "react-spreadsheet";
-import "./ExcelViewer.css"; // Import your CSS file for custom styles
+import { HotTable } from "@handsontable/react";
+import "handsontable/dist/handsontable.full.min.css";
+import { FaDownload } from "react-icons/fa";
+import { AiOutlineFileExcel } from "react-icons/ai";
 
 function ExcelViewer() {
   const location = useLocation();
-  const [spreadsheetData, setSpreadsheetData] = useState([]);
+  const [data, setData] = useState([]);
+  const [columns, setColumns] = useState([]);
   const [downloadUrl, setDownloadUrl] = useState("");
 
   useEffect(() => {
     if (!location.state?.fileURL) return;
+
     const fetchExcel = async () => {
       const res = await fetch(location.state.fileURL);
       const blob = await res.blob();
       setDownloadUrl(location.state.fileURL);
+
       const reader = new FileReader();
       reader.onload = (e) => {
         const workbook = XLSX.read(e.target.result, { type: "binary" });
         const worksheet = workbook.Sheets[workbook.SheetNames[0]];
         const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-        const formattedData = jsonData.map((row, rowIndex) =>
-          row.map((cell) => ({
-            value: cell,
-            readOnly: rowIndex === 0, // Make the first row read-only
-            className: rowIndex === 0 ? "header-cell" : "", // Add class to the first row
-          }))
-        );
-        setSpreadsheetData(formattedData);
+        const headers = jsonData[0]?.map((h) => ({ title: h })) || [];
+        setColumns(headers);
+        setData(jsonData.slice(1));
       };
       reader.readAsBinaryString(blob);
     };
+
     fetchExcel();
   }, [location]);
 
   return (
-    <div className="p-6 bg-gray-100 min-h-[calc(100vh-64px)]">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-semibold text-blue-900">Evaluation Results</h2>
-        {downloadUrl && (
-          <a
-            href={downloadUrl}
-            download="deepeval_results.xlsx"
-            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md font-semibold transition"
-          >
-            Download
-          </a>
-        )}
-      </div>
-      <div className="bg-white p-4 rounded-md shadow overflow-auto">
-        {spreadsheetData.length > 0 ? (
-          <Spreadsheet data={spreadsheetData} />
-        ) : (
-          <p className="text-gray-600 text-center">Loading spreadsheet...</p>
-        )}
+    <div className="min-h-screen bg-gray-50 px-4 py-10">
+      <div className="w-full h-full">
+        <div className="flex justify-between items-center mb-6 px-2">
+          <h2 className="text-3xl font-bold text-blue-900 flex items-center">
+            <AiOutlineFileExcel className="mr-2 text-blue-900" /> Evaluation Results
+          </h2>
+          {downloadUrl && (
+            <a
+              href={downloadUrl}
+              download="deepeval_results.xlsx"
+              className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition flex items-center"
+            >
+              <FaDownload className="mr-2" /> Download
+            </a>
+          )}
+        </div>
+        <div className="bg-white border border-gray-200 rounded-md shadow overflow-auto h-full">
+          <HotTable
+            data={data}
+            colHeaders={columns.map((col) => col.title)}
+            rowHeaders={true}
+            stretchH="all"
+            colWidths={columns.length ? window.innerWidth / columns.length : 100}
+            width="100%"
+            height="calc(100vh - 150px)"
+            className="htCenter"
+            licenseKey="non-commercial-and-evaluation"
+            manualColumnResize={true}
+            manualRowResize={true}
+          />
+        </div>
       </div>
     </div>
   );
 }
 
 export default ExcelViewer;
-
-can u also fix this ui of excel and add icons where you may need to. Make the excel more user friendly the columns are too wide they should nbe appropriately set and make the ui more better and crisp yet profrssional and should be according to uhg standards and do not affect logic just ui
+.custom-table .htCore thead th {
+    background-color: #4caf50;
+    color: white;
+    font-weight: bold;
+    text-align: center;
+    border: 1px solid #ddd;
+  }
+  
+  .custom-table .htCore tbody td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+  }
+  
+  .custom-table .htCore tbody tr:nth-child(even) {
+    background-color: #f2f2f2;
+  }
+  
+  .custom-table .htCore tbody tr:hover {
+    background-color: #ddd;
+  }
+  
+  .custom-table .htCore {
+    border-collapse: collapse;
+    width: 100%;
+  }
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import UploadForm from './components/UploadForm';
+import ExcelViewer from './components/ExcelViewer';
+import Navbar from './components/Navbar';
+function App() {
+ return (
+<Router>
+<Navbar />
+<Routes>
+<Route path="/" element={<UploadForm />} />
+<Route path="/results" element={<ExcelViewer />} />
+</Routes>
+</Router>
+ );
+}
+export default App;
+i have this project where i have to uplad  things then a deepeval excel is generated. here i am using a form. however i wanna use the mui stepper to do these steps, 1st step is to upload excel, next to give llm endpoint, next to set threshold after all that is succesfully added i want the stepper to more to evaluation result . logic should be same with use mui stepper for these steps 
+make ui same as united health group aesthetics. navbar should be the same and similar color aesthetic for entire project. make ui beautiful smooth yet professional
+import React from 'react';
+import uhcLogo from '../assets/UHC_Lockup_wht_RGB.png'; // Correct path
+const Navbar = () => {
+ return (
+<nav className="w-full bg-blue-900 text-white px-6 py-3 shadow-md flex items-center justify-between">
+<a href="/" className="flex items-center space-x-2">
+<img src={uhcLogo} alt="UHC Logo" className="h-10 w-auto object-contain" />
+</a>
+</nav>
+ );
+};
+export default Navbar;
