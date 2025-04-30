@@ -1,126 +1,123 @@
- else if (totalTiers == 2 && tierPlans.get(0).getTierNumber() == 1 && tierPlans.get(1).getTierNumber() == 2) {
-						benefitIndicator = "TIERED";
-						Double individualDed = getDedAmt(tierPlans.get(0).getIndividualDed());
-						Double familyDed = getDedAmt(tierPlans.get(0).getFamilyDed());
-						int tierNumber = tierPlans.get(0).getTierNumber().intValue();
-						medDedList = savePLDed(benefitIndicator, individualDed, familyDed, medDeductObj, userName, tierNumber, medDedList, pdpdId);
+package com.optum.eni.core.rules.engine.config;
 
-						Double individualDedT2 = getDedAmt(tierPlans.get(1).getIndividualDed());
-						Double familyDedT2 = getDedAmt(tierPlans.get(1).getFamilyDed());
-						int tierNumberT2 = tierPlans.get(1).getTierNumber().intValue();
-						medDedList = savePLDed(benefitIndicator, individualDedT2, familyDedT2, medDeductObj, userName, tierNumberT2, medDedList, pdpdId);
-					}
-i have this code and in condition else if (totalTiers == 2 && tierPlans.get(0).getTierNumber() == 1 && tierPlans.get(1).getTierNumber() == 2) {
-						benefitIndicator = "TIERED";
-i want the first savePLded unchanged and i do not want the next saveplded instead i want to create a similar saveplded which accepts the plDedID of the first save and pldedid of next save entry should be same rest of the function should also be logically same they just need to have same pldedid
-private List<PlDedPdpdIdDTO> savePLDed(String benefitIndicator, Double individualDed, Double familyDed, MedicalDeductible medDeductObj, String userName, int tierNumber, List<PlDedPdpdIdDTO> medDedList, String pdpdId) {
-		if (individualDed != null && familyDed != null) {
-			PlDedPdpdIdDTO plDedPdpdIdDTO = new PlDedPdpdIdDTO();
-			PlDed plDed = new PlDed();
-			plDed.setEmbeddedType(medDeductObj.getEmbeddedType());
-			plDed.setRxDedType(medDeductObj.getRxDedType());
-			plDed.setCrossApplies(medDeductObj.getCrossApplies());
-			if(null != medDeductObj.getCarryover() && !medDeductObj.getCarryover().trim().isEmpty())plDed.setCarryover(Integer.parseInt(medDeductObj.getCarryover()));
-			plDed.setTierNumber(tierNumber);
-			plDed.setIndividualDed(individualDed.intValue());
-			plDed.setFamilyDed(familyDed.intValue());
-			plDed.setCreatedBy(userName);
-			plDed.setBenefitIndicator(benefitIndicator);
-			plDed.setCreatedOn(DateUtil.getCurrentDateToFormat("yyyy-MM-dd HH:mm:ss"));
-			plDed.setIsCurrent(Constants.ISCURRENT);
-			plDedPdpdIdDTO.setPlDed(plDed);
-			plDedPdpdIdDTO.setPdpdId(pdpdId);
-			medDedList.add(plDedPdpdIdDTO);
+import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpHost;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.nio.client.HttpAsyncClientBuilder;
+import org.elasticsearch.client.RestClient;
+import org.elasticsearch.client.RestClientBuilder;
+import org.elasticsearch.client.RestHighLevelClient;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.ElasticsearchRestTemplate;
+import org.springframework.data.elasticsearch.repository.config.EnableElasticsearchRepositories;
+
+@Configuration
+@EnableElasticsearchRepositories(basePackages = "com.optum.eni.core.rules.engine.elasticlibrary")
+@ComponentScan(basePackages = { "com.optum.eni.core.rules.engine.elasticlibrary" })
+public class ElasticConfiguration {
+
+	@Autowired
+	private Environment environment;
+
+
+	@Bean
+	public RestHighLevelClient client() {
+
+    	String host = environment.getProperty("elasticsearch.host");
+
+	    String portString = environment.getProperty("elasticsearch.port");
+
+		String userName = environment.getProperty("elasticsearch.userName");
+
+	    String password = environment.getProperty("elasticsearch.password");
+
+		int port = 9300;
+
+		if (!StringUtils.isEmpty(portString)) {
+			port = Integer.valueOf(portString);
 		}
-		return medDedList;
+
+		final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+		credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(userName, password));
+
+		RestClientBuilder builder = RestClient.builder(new HttpHost(host, port))
+				.setRequestConfigCallback(new RestClientBuilder.RequestConfigCallback() {
+					@Override
+					public RequestConfig.Builder customizeRequestConfig(RequestConfig.Builder requestConfigBuilder) {
+						return requestConfigBuilder.setConnectTimeout(5000).setSocketTimeout(60000);
+					}
+				}).setHttpClientConfigCallback(new RestClientBuilder.HttpClientConfigCallback()
+					 {
+
+					 @Override public HttpAsyncClientBuilder
+					 customizeHttpClient(HttpAsyncClientBuilder httpClientBuilder) { return
+					 httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider); } });
+
+		return new RestHighLevelClient(builder);
 	}
 
-package com.uhc.ei.abb.abbDb.domain;
+	@Bean
+	public ElasticsearchOperations elasticsearchTemplate() {
+		return new ElasticsearchRestTemplate(client());
+	}
 
-import java.io.Serializable;
-import java.util.Date;
-import java.util.Objects;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
-
-import com.uhc.ei.abb.mongodb.domain.TierPlans;
-
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-@Table(name = "plded", schema = "automatedbenefitbuilder")
-@Entity
-@NoArgsConstructor
-@AllArgsConstructor
-@Data
-public class PlDed implements Serializable{
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-	
-	@Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "plDedID", unique = true, nullable = false)
-    private Integer plDedID;
-	
-	@Column(name = "embeddedType")
-    private String embeddedType;
-	
-	@Column(name = "rxDedType")
-    private String rxDedType;
-	
-	@Column(name = "crossApplies")
-    private Integer crossApplies;
-	
-	@Column(name = "carryover")
-    private Integer carryover;
-	
-	@Column(name = "tierNumber")
-    private Integer tierNumber;
-	
-	@Column(name = "individualDed")
-    private Integer individualDed;
-	
-	@Column(name = "familyDed")
-    private Integer familyDed;
-	
-	@Column(name = "createdBy")
-    private String createdBy;
-
-    @Column(name = "createdOn")
-    private Date createdOn;
-
-    @Column(name = "modifiedBy")
-    private String modifiedBy;
-
-    @Column(name = "modifiedOn")
-    private String modifiedOn;
-
-    @Column(name = "isCurrent")
-    private Boolean isCurrent;
-
-	@Column(name = "benefitIndicator")
-	private String benefitIndicator;
-
-	 @Override
-	 public boolean equals(Object o) {
-	     if (this == o) return true;
-	     if (o == null || getClass() != o.getClass()) return false;
-	     PlDed p = (PlDed) o;
-	     return Objects.equals(tierNumber, p.tierNumber) && Objects.equals(individualDed, p.individualDed)
-	    		   &&  Objects.equals(familyDed, p.familyDed) &&  Objects.equals(rxDedType, p.rxDedType)
-				 && Objects.equals(benefitIndicator, p.benefitIndicator);
-	 }
-	 @Override
-	 public int hashCode() {
-	 return Objects.hash(tierNumber, individualDed,familyDed,rxDedType);
-
-	 }
 }
+error: cannot find symbol line import org.springframework.data.elasticsearch.core.ElasticsearchRestTemplate;
+pom 
+<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-elasticsearch</artifactId>
+			<version>3.1.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.elasticsearch.client</groupId>
+			<artifactId>elasticsearch-rest-high-level-client</artifactId>
+			<version>7.17.10</version>
+		</dependency>
+		<dependency>
+			<groupId>org.elasticsearch.client</groupId>
+			<artifactId>elasticsearch-rest-client</artifactId>
+			<version>7.17.10</version>
+		</dependency>
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>3.3.4</version>
+		<relativePath /> <!-- lookup parent from repository -->
+	</parent>
+	<groupId>com.optum</groupId>
+	<artifactId>core-rules-engine</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<packaging>war</packaging>
+	<name>core-rules-engine</name>
+	<description>core-rules-engine application</description>
+	<properties>
+		<java.version>17</java.version>
+		<maven-jar-plugin.version>3.1.1</maven-jar-plugin.version>
+		<avro.version>1.12.0</avro.version>
+		<confluent.version>7.4.0</confluent.version>
+		<groovy.version>4.0.21</groovy.version>
+	</properties>
+
+	<repositories>
+		<repository>
+			<id>confluent</id>
+			<url>https://packages.confluent.io/maven/</url>
+		</repository>
+	</repositories>
+
