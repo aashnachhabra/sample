@@ -12,3 +12,24 @@ else if (totalTiers == 2 && tierPlans.get(0).getTierNumber() == 1 && tierPlans.g
 					}
 
 here i am saving it twice as 2 separate entries, i want to save as one entry only both of them make code changes
+ same here also
+if (state.equalsIgnoreCase(Constants.STATE_COLORADO) && pdpdId != null && !(pdpdId.isEmpty()) && pdpdId.length() <= 8) {
+				if (null != tierPlans && !tierPlans.isEmpty()) {
+					int totalTiers = tierPlans.size();
+					// CO state has only tier 1 and tier 2 values
+					if (totalTiers == 2 && tierPlans.get(0).getTierNumber() == 1 && tierPlans.get(1).getTierNumber() == 2) {
+						benefitIndicator = "TIERED";
+						Double individualDed = getDedAmt(tierPlans.get(0).getIndividualDed());
+						Double familyDed = getDedAmt(tierPlans.get(0).getFamilyDed());
+						int tierNumber = tierPlans.get(0).getTierNumber().intValue();
+						medDedCOList = savePLDed(benefitIndicator, individualDed, familyDed, medDeductObj, userName, tierNumber, medDedCOList, pdpdId);
+
+						Double individualDedT2 = getDedAmt(tierPlans.get(1).getIndividualDed());
+						Double familyDedT2 = getDedAmt(tierPlans.get(1).getFamilyDed());
+						int tierNumberT2 = tierPlans.get(1).getTierNumber().intValue();
+						medDedCOList = savePLDed(benefitIndicator, individualDedT2, familyDedT2, medDeductObj, userName, tierNumberT2, medDedCOList, pdpdId);
+					}
+				}
+			}
+
+ send updated code of both functions
