@@ -1,3 +1,40 @@
+ else if (totalTiers == 2 && tierPlans.get(0).getTierNumber() == 1 && tierPlans.get(1).getTierNumber() == 2) {
+						benefitIndicator = "TIERED";
+						Double individualDed = getDedAmt(tierPlans.get(0).getIndividualDed());
+						Double familyDed = getDedAmt(tierPlans.get(0).getFamilyDed());
+						int tierNumber = tierPlans.get(0).getTierNumber().intValue();
+						medDedList = savePLDed(benefitIndicator, individualDed, familyDed, medDeductObj, userName, tierNumber, medDedList, pdpdId);
+
+						Double individualDedT2 = getDedAmt(tierPlans.get(1).getIndividualDed());
+						Double familyDedT2 = getDedAmt(tierPlans.get(1).getFamilyDed());
+						int tierNumberT2 = tierPlans.get(1).getTierNumber().intValue();
+						medDedList = savePLDed(benefitIndicator, individualDedT2, familyDedT2, medDeductObj, userName, tierNumberT2, medDedList, pdpdId);
+					}
+i have this code and in condition else if (totalTiers == 2 && tierPlans.get(0).getTierNumber() == 1 && tierPlans.get(1).getTierNumber() == 2) {
+						benefitIndicator = "TIERED";
+i want the first savePLded unchanged and i do not want the next saveplded instead i want to create a similar saveplded which accepts the plDedID of the first save and pldedid of next save entry should be same rest of the function should also be logically same they just need to have same pldedid
+private List<PlDedPdpdIdDTO> savePLDed(String benefitIndicator, Double individualDed, Double familyDed, MedicalDeductible medDeductObj, String userName, int tierNumber, List<PlDedPdpdIdDTO> medDedList, String pdpdId) {
+		if (individualDed != null && familyDed != null) {
+			PlDedPdpdIdDTO plDedPdpdIdDTO = new PlDedPdpdIdDTO();
+			PlDed plDed = new PlDed();
+			plDed.setEmbeddedType(medDeductObj.getEmbeddedType());
+			plDed.setRxDedType(medDeductObj.getRxDedType());
+			plDed.setCrossApplies(medDeductObj.getCrossApplies());
+			if(null != medDeductObj.getCarryover() && !medDeductObj.getCarryover().trim().isEmpty())plDed.setCarryover(Integer.parseInt(medDeductObj.getCarryover()));
+			plDed.setTierNumber(tierNumber);
+			plDed.setIndividualDed(individualDed.intValue());
+			plDed.setFamilyDed(familyDed.intValue());
+			plDed.setCreatedBy(userName);
+			plDed.setBenefitIndicator(benefitIndicator);
+			plDed.setCreatedOn(DateUtil.getCurrentDateToFormat("yyyy-MM-dd HH:mm:ss"));
+			plDed.setIsCurrent(Constants.ISCURRENT);
+			plDedPdpdIdDTO.setPlDed(plDed);
+			plDedPdpdIdDTO.setPdpdId(pdpdId);
+			medDedList.add(plDedPdpdIdDTO);
+		}
+		return medDedList;
+	}
+
 package com.uhc.ei.abb.abbDb.domain;
 
 import java.io.Serializable;
@@ -87,5 +124,3 @@ public class PlDed implements Serializable{
 
 	 }
 }
-
-this is pl ded how t handle this
