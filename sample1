@@ -1,326 +1,462 @@
-package com.optum.eni.core.rules.engine.service.impl;
+<nav class="navbar navbar-expand-lg navbar-light">
+    <script>
+        $(function () {
+            $('[data-toggle="tooltip"]').tooltip();
 
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+        });
 
-import com.optum.eni.core.rules.engine.event.*;
-import com.optum.eni.core.rules.engine.service.ChildRuleApiService;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.action.search.SearchRequest;
-import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.client.RequestOptions;
-import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.MatchQueryBuilder;
-import org.elasticsearch.index.query.Operator;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.builder.SearchSourceBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jayway.jsonpath.DocumentContext;
-import com.jayway.jsonpath.JsonPath;
-import com.optum.eni.core.rules.engine.config.stargate.EnvConfigService;
-import com.optum.eni.core.rules.engine.coremongodb.domain.ChildRule;
-import com.optum.eni.core.rules.engine.coremongodb.repo.ChildRuleRepository;
-import com.optum.eni.core.rules.engine.elasticlibrary.entity.ParentAppliesto;
-import com.optum.eni.core.rules.engine.elasticlibrary.entity.ParentCocSeries;
-import com.optum.eni.core.rules.engine.elasticlibrary.entity.ParentLicense;
-import com.optum.eni.core.rules.engine.elasticlibrary.entity.ParentOrganization;
-import com.optum.eni.core.rules.engine.elasticlibrary.entity.ParentRule;
-import com.optum.eni.core.rules.engine.elasticlibrary.entity.ParentSegment;
-import com.optum.eni.core.rules.engine.elasticlibrary.entity.RuleHeaderDetails;
-import com.optum.eni.core.rules.engine.model.ChildRuleModel;
-import com.optum.eni.core.rules.engine.model.ConditionModel;
-import com.optum.eni.core.rules.engine.model.LibrarySearchResult;
-import com.optum.eni.core.rules.engine.model.ParentRuleRequest;
-import com.optum.eni.core.rules.engine.model.RulesModel;
-import com.optum.eni.core.rules.engine.mongodb.domain.ChildValidation;
-import com.optum.eni.core.rules.engine.mongodb.domain.FieldValidationMessage;
-import com.optum.eni.core.rules.engine.service.CoreConnectorService;
-
-@Component
-public class CoreConnectorServiceImpl implements CoreConnectorService {
-
-    private static final Logger logger = LoggerFactory.getLogger(CoreConnectorServiceImpl.class);
-
-    private ObjectMapper mapper = new ObjectMapper();
-
-    private ChildRuleRepository childRuleRepository;
-
-    private static final String NULL_VALUE = "null";
-
-    private static final String BENEFITS = "Benefits";
-
-    private RestHighLevelClient client;
-
-    @Autowired
-    ChildRuleApiService childRuleApiService;
-
-    @Value("${ece.index.name}")
-    private String eceIndexName;
-
-    @Value("${child.rules.api.url}")
-    private String childRulesApiUrl;
-
-    /**
-     * Instantiates a new CoreConnector service.
-     *
-     * @param envConfigService the env config service transformer service
-     */
-    @Autowired
-    public CoreConnectorServiceImpl(RestHighLevelClient client, ChildRuleRepository childRuleRepository) {
-        this.client = client;
-        this.childRuleRepository = childRuleRepository;
-    }
-
-    public CoreConnectorServiceImpl(EnvConfigService envConfigService, RestTemplate restTemplate, ObjectMapper mapper2,
-                                    ChildRuleRepository childRuleRepository2) {
-        // TODO Auto-generated constructor stub
-    }
-
-    @Override
-    public List<LibrarySearchResult> fetchParentRules(ParentRuleRequest parentRuleRequest) {
-
-        logger.info("**** Inside fetchParentRules ****");
-
-        return parentRules(parentRuleRequest);
-    }
-
-    public List<LibrarySearchResult> parentRules(ParentRuleRequest parentRuleRequest) {
-
-        List<LibrarySearchResult> librarySearchList = new ArrayList<>();
-
-        SearchRequest searchRequest = new SearchRequest();
-
-        searchRequest.indices(eceIndexName);
-
-        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-
-        final BoolQueryBuilder finalBoolQuery = new BoolQueryBuilder();
-
-        /**
-         * Rupe Type Filter
-         */
-        BoolQueryBuilder ruleTypeBoolQuery = QueryBuilders.boolQuery();
-
-		/*if (parentRuleRequest.getRuleTypeIn() != null && !parentRuleRequest.getRuleTypeIn().isEmpty()) {
-
-			if (!"0".equals(parentRuleRequest.getRuleTypeIn())) {
-				ruleTypeBoolQuery
-						.should(QueryBuilders.matchQuery("parentType.parentTypeID", parentRuleRequest.getRuleTypeIn()));
-			}
-			finalBoolQuery.must(ruleTypeBoolQuery);
-		}*/
-
-        MatchQueryBuilder matchNotDeletedQueryBuilder = QueryBuilders.matchQuery("isDeleted", false)
-                .operator(Operator.AND);
-
-        finalBoolQuery.must(matchNotDeletedQueryBuilder);
-
-        /**
-         * benefitCategory filter
-         */
-
-        if (parentRuleRequest.getBenCat() != null && !parentRuleRequest.getBenCat().isEmpty()) {
-
-            BoolQueryBuilder benefitCategoryBoolQuery = QueryBuilders.boolQuery();
-
-            benefitCategoryBoolQuery
-                    .should(QueryBuilders.matchQuery("benefitCategory.benCatName", parentRuleRequest.getBenCat()));
-
-            finalBoolQuery.must(benefitCategoryBoolQuery);
+        function logoutfunction() {
+            window.location.href = "${pageContext.servletContext.contextPath }/logout";
         }
+        function enableAndDisableCards() {
+            var roleId = "${pageContext.session.getAttribute('roleId')}";
+            var abbId = "${pageContext.session.getAttribute('abbId')}";
+            var reportingId = "${pageContext.session.getAttribute('reportingId')}";
+            var ifpRoleId = "${pageContext.session.getAttribute('ifpRoleId')}";
+            var nonIfpRoleId = "${pageContext.session.getAttribute('nonIfpRoleId')}";
+            var sbcRoleId = "${pageContext.session.getAttribute('sbcRoleId')}";
+            var iceRoleId = "${pageContext.session.getAttribute('iceRoleId')}";
+            var isIceEnable = "${pageContext.session.getAttribute('iceEnable')}";
+            var coreId = "${pageContext.session.getAttribute('coreId')}";
+            var dbsId = "${pageContext.session.getAttribute('dbsId')}";
+            var ticSchedulerId = "${pageContext.session.getAttribute('ticSchedulerGroup')}";
+            var dentalVisionRoleId = "${pageContext.session.getAttribute('dentalVisionRoleId')}";
+            var byofId="${pageContext.session.getAttribute('byofId')}";
+            var isByofEnable = "${pageContext.session.getAttribute('byofEnable')}";
+            var env = "${pageContext.session.getAttribute('env')}";
+            var documentButton = document.getElementById('documents');
+            var transformButton = document.getElementById('transform');
+            var ideateButton = document.getElementById('ideate');
+            documentButton.dataset.bsTarget = "#docManagementModal";
+            transformButton.dataset.bsTarget ="#teModal";
+            $('#EI').css('display', 'none');
+            $('#AI').css('display', 'none');
+            $('#EITransform').css('display', 'none');
+            $('#AITransform').css('display', 'none');
+            $('#individual-family-plans-card').css('display', 'none');
+            if ($('#lineOfBusiness option:selected').text() == "E&I - United Strategic Platform") {
+                ideateButton.dataset.bsTarget ="#portfolioModalGftr";
+                $('#EI').css('display', 'block');
+                $('#AI').css('display', 'none');
+                $('#EITransform').css('display', 'block');
+                $('#AITransform').css('display', 'none');
+                
+                if (ticSchedulerId == 2) {
+                    document.getElementById('consume').disabled = false;
+                }
+                if (roleId != 8 && roleId != 9 && roleId != 10) {
+                    document.getElementById('transform').disabled = false;
+                }
+                if (roleId == 4 || reportingId == 1) {
+                    document.getElementById('vizualize').disabled = false;
+                }
+                if (nonIfpRoleId == 35 || nonIfpRoleId == 36 || nonIfpRoleId == 37 || nonIfpRoleId == 4) {
+                    document.getElementById('ideate').disabled = false;
+                } else {
+                    document.getElementById('ideate').disabled = true;
+                }
+                if (sbcRoleId == 11 || sbcRoleId == 12 || sbcRoleId == 13) {
 
-        /**
-         * plan filter
-         */
-
-		/*if (parentRuleRequest.getPlanIn() != null && !parentRuleRequest.getPlanIn().isEmpty()) {
-
-			BoolQueryBuilder planBoolQuery = QueryBuilders.boolQuery();
-
-			planBoolQuery
-					.should(QueryBuilders.matchQuery("planType.planTypeName", parentRuleRequest.getPlanIn()));
-
-			finalBoolQuery.must(planBoolQuery);
-
-		}*/
-
-        /**
-         * cocSeries Filter
-         */
-
-		/*if (parentRuleRequest.getCocseriesIn() != null && !parentRuleRequest.getCocseriesIn().isEmpty()) {
-
-			BoolQueryBuilder cocseriesBoolQuery = QueryBuilders.boolQuery();
-
-			cocseriesBoolQuery.should(
-					QueryBuilders.matchQuery("parentCocSeries.cocSeriesName", parentRuleRequest.getCocseriesIn()));
-
-			finalBoolQuery.must(cocseriesBoolQuery);
-
-		}*/
-
-        /**
-         * org Filter
-         */
-
-        if (parentRuleRequest.getOrgIn() != null && !parentRuleRequest.getOrgIn().isEmpty()) {
-
-            BoolQueryBuilder orgBoolQuery = QueryBuilders.boolQuery();
-
-            orgBoolQuery
-                    .should(QueryBuilders.matchQuery("parentOrganization.orgName", parentRuleRequest.getOrgIn()));
-
-            finalBoolQuery.must(orgBoolQuery);
-
-        }
-
-        /**
-         * state Filter
-         */
-
-        if (parentRuleRequest.getStateIn() != null && !parentRuleRequest.getStateIn().isEmpty()) {
-            List<String> statelist = new ArrayList<>();
-            statelist.add(parentRuleRequest.getStateIn());
-            statelist.add("AS"); //Consider parent rules with All States
-
-            BoolQueryBuilder stateBoolQuery = QueryBuilders.boolQuery();
-            for (String state : statelist) {
-                stateBoolQuery.should(QueryBuilders.matchQuery("parentState.stateShortName", state));
-            }
-
-            finalBoolQuery.must(stateBoolQuery);
-
-        }
-
-        /**
-         * segment Filter
-         */
-
-        if (parentRuleRequest.getSegmentIn() != null && !parentRuleRequest.getSegmentIn().isEmpty()) {
-
-            BoolQueryBuilder segmentBoolQuery = QueryBuilders.boolQuery();
-
-            segmentBoolQuery.should(
-                    QueryBuilders.matchQuery("parentSegmentList.segmentShortName", parentRuleRequest.getSegmentIn()));
-
-            finalBoolQuery.must(segmentBoolQuery);
-
-        }
-
-        /**
-         * license Filter
-         */
-
-        if (parentRuleRequest.getLicenseIn() != null && !parentRuleRequest.getLicenseIn().isEmpty()) {
-
-            BoolQueryBuilder licenseBoolQuery = QueryBuilders.boolQuery();
-
-            licenseBoolQuery.should(
-                    QueryBuilders.matchQuery("parentLicense.licenseShortName", parentRuleRequest.getLicenseIn()));
-
-            finalBoolQuery.must(licenseBoolQuery);
-
-        }
-
-        /**
-         * Status Filter
-         */
-
-        BoolQueryBuilder statusBoolQuery = QueryBuilders.boolQuery();
-        statusBoolQuery.should(QueryBuilders.matchQuery("status", "Published"));
-        finalBoolQuery.must(statusBoolQuery);
-
-        searchSourceBuilder.query(finalBoolQuery);
-
-        int start = 0;
-
-        int recordsPerPage = 10;
-
-        searchSourceBuilder.from(start);
-
-        searchSourceBuilder.size(recordsPerPage);
-
-        searchRequest.source(searchSourceBuilder);
-
-        try {
-
-            SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
-
-            SearchHit[] searchHit = searchResponse.getHits().getHits();
-
-            ObjectMapper mapper = getObjectMapper();
-
-            for (SearchHit hit : searchHit) {
-
-                ParentRule parentRule = mapper.convertValue(hit.getSourceAsMap(), ParentRule.class);
-
-                LibrarySearchResult librarySearchResult = convert(parentRule);
-
-                if (librarySearchResult.getRuleId() != null) {
-
-                    librarySearchList.add(librarySearchResult);
+                    document.getElementById('documents').disabled = false;
+                }
+                if (ifpRoleId == 8 || ifpRoleId == 9 || ifpRoleId == 10 || roleId == 4) {
+                    document.getElementById('track').disabled = false;
                 }
 
-            }
-
-            Long totalRecords = searchResponse.getHits().getTotalHits().value;
-
-            logger.info("Total  Records {} ", totalRecords);
-
-            int count = recordsPerPage;
-
-            while ((long) count < totalRecords) {
-
-                searchSourceBuilder.from(count);
-
-                searchSourceBuilder.size(recordsPerPage);
-
-                searchRequest.source(searchSourceBuilder);
-
-                searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
-
-                searchHit = searchResponse.getHits().getHits();
-
-                mapper = getObjectMapper();
-
-                for (SearchHit hit : searchHit) {
-
-                    ParentRule parentRule = mapper.convertValue(hit.getSourceAsMap(), ParentRule.class);
-
-                    LibrarySearchResult librarySearchResult = convert(parentRule);
-
-                    if (librarySearchResult.getRuleId() != null) {
-
-                        librarySearchList.add(librarySearchResult);
+                if (isIceEnable) {
+                    if (iceRoleId == 12 || iceRoleId == 13 || iceRoleId == 14) {
+                        document.getElementById('certify').disabled = false;
                     }
-
                 }
 
-                count = count + recordsPerPage;
+                if(coreId == 1) {
+                    document.getElementById('validate').disabled = false;
+                }
+                if(dbsId == 1) {
+                    document.getElementById('shop').disabled = false;
+                }
+
+                 document.getElementById("card-UMR").style.display="none";
+                 document.getElementById("allCards").style.display="block";
+                 document.getElementById("bsmIdeatePortfolioMgmtBtn").style.display="none";
+                 document.getElementById("card-Regulatory").style.display="none";
             }
 
-        } catch (Exception ex) {
+            if ($('#lineOfBusiness option:selected').text() == "E&I - ACIS") {
+                document.getElementById('consume').disabled = true;
+                document.getElementById('transform').disabled = true;
+                if (roleId == 4 || reportingId == 1) {
+                    document.getElementById('vizualize').disabled = false;
+                }
+                document.getElementById('ideate').disabled = true;
 
-            logger.error("Exception while reading the data from elastic search ex {}  ", ex);
+                if (sbcRoleId == 11 || sbcRoleId == 12 || sbcRoleId == 13) {
+                    document.getElementById('documents').disabled = false;
+                }
+                document.getElementById('track').disabled = true;
+                document.getElementById('certify').disabled = true;
+                if(coreId == 1) {
+                    document.getElementById('validate').disabled = false;
+                }
+                if(dbsId == 1) {
+                    document.getElementById('shop').disabled = false;
+                }
+
+                 document.getElementById("card-UMR").style.display="none";
+                 document.getElementById("allCards").style.display="block";
+                 document.getElementById("bsmIdeatePortfolioMgmtBtn").style.display="none";
+                 document.getElementById("card-Regulatory").style.display="none";
+            }
+
+            if ($('#lineOfBusiness option:selected').text() == "E&I - Global Solutions") {
+                document.getElementById('consume').disabled = true;
+                document.getElementById('transform').disabled = true;
+                if (roleId == 4 || reportingId == 1) {
+                    document.getElementById('vizualize').disabled = false;
+                }
+                document.getElementById('ideate').disabled = true;
+                document.getElementById('documents').disabled = true;
+                document.getElementById('track').disabled = true;
+                document.getElementById('certify').disabled = true;
+                document.getElementById('validate').disabled = true;
+                if(dbsId == 1) {
+                    document.getElementById('shop').disabled = false;
+                }
+
+                 document.getElementById("card-UMR").style.display="none";
+                 document.getElementById("allCards").style.display="block";
+                 document.getElementById("bsmIdeatePortfolioMgmtBtn").style.display="none";
+                 document.getElementById("card-Regulatory").style.display="none";
+            }
+
+            if ($('#lineOfBusiness option:selected').text() == "A&I - Dental/Vision/FPP") {
+            	 $('#EITransform').css('display', 'block');
+                 $('#AITransform').css('display', 'none');
+                documentButton.dataset.bsTarget = "#denVisManagementModal";
+                if (dentalVisionRoleId == 3 || dentalVisionRoleId == 5 || dentalVisionRoleId == 7) {
+                    documentButton.dataset.bsTarget = "#visManagementModal";
+                }
+                if (dentalVisionRoleId == 2 || dentalVisionRoleId == 4 || dentalVisionRoleId == 6) {
+                    documentButton.dataset.bsTarget = "#denManagementModal";
+                }
+                document.getElementById('consume').disabled = true;
+                document.getElementById('transform').disabled = false;
+
+                if (roleId == 4 || reportingId == 1) {
+                    document.getElementById('vizualize').disabled = false;
+                }
+                document.getElementById('ideate').disabled = true;
+                document.getElementById('documents').disabled = false;
+                document.getElementById('track').disabled = true;
+                document.getElementById('certify').disabled = true;
+                document.getElementById('validate').disabled = true;
+                if(dbsId == 1) {
+                    document.getElementById('shop').disabled = false;
+                }
+
+                 document.getElementById("card-UMR").style.display="none";
+                 document.getElementById("allCards").style.display="block";
+                 document.getElementById("bsmIdeatePortfolioMgmtBtn").style.display="none";
+                 document.getElementById("card-Regulatory").style.display="none";
+            }
+
+            if ($('#lineOfBusiness option:selected').text() == "A&I - Individual & Family Plans") {
+            	 $('#EI').css('display', 'none');
+                 $('#AI').css('display', 'block');
+                 $('#EITransform').css('display', 'none');
+                 $('#AITransform').css('display', 'block');
+                 $('#individual-family-plans-card').css('display', 'block');
+                document.getElementById('consume').disabled = true;
+                ideateButton.dataset.bsTarget ="#portfolioModal";
+                if ((abbId == 19 || abbId == 20 || abbId == 21 || roleId == 4) && env != 'Production') {
+                    document.getElementById('transform').disabled = false;
+                    transformButton.dataset.bsTarget = "#abbModal";
+                }else{
+                    document.getElementById('transform').disabled = true;
+                    }
+                document.getElementById('vizualize').disabled = false;
+                if (ifpRoleId == 8 || ifpRoleId == 9 || ifpRoleId == 10 || roleId == 4) {
+                    document.getElementById('ideate').disabled = false;
+                }
+                if (sbcRoleId == 11 || sbcRoleId == 12 || sbcRoleId == 13) {
+                    document.getElementById('documents').disabled = false;
+                }
+                document.getElementById('track').disabled = true;
+                document.getElementById('certify').disabled = true;
+                if(coreId == 1) {
+                    document.getElementById('validate').disabled = false;
+                }
+                document.getElementById('shop').disabled = true;
+
+                 document.getElementById("card-UMR").style.display="none";
+                 document.getElementById("allCards").style.display="block";
+                 document.getElementById("bsmIdeatePortfolioMgmtBtn").style.display="none";
+                 document.getElementById("card-Regulatory").style.display="none";
+            }
+
+            if ($('#lineOfBusiness option:selected').text() == "UHG - Transparency In Coverage") {
+                if (ticSchedulerId == 2) {
+                    document.getElementById('consume').disabled = false;
+                }
+                document.getElementById('transform').disabled = true;
+                document.getElementById('vizualize').disabled = false;
+                document.getElementById('ideate').disabled = true;
+                document.getElementById('documents').disabled = true;
+                document.getElementById('track').disabled = true;
+                document.getElementById('certify').disabled = true;
+                document.getElementById('validate').disabled = true;
+                document.getElementById('shop').disabled = true;
+
+                 document.getElementById("card-UMR").style.display="none";
+                 document.getElementById("allCards").style.display="block";
+                 document.getElementById("bsmIdeatePortfolioMgmtBtn").style.display="none";
+                 document.getElementById("card-Regulatory").style.display="none";
+            }
+
+             if ($('#lineOfBusiness option:selected').text() == "E&I - UMR") {
+
+
+               document.getElementById("allCards").style.display="none";
+                document.getElementById("card-Regulatory").style.display="none";
+
+               if(isByofEnable=="true")
+               {
+               document.getElementById("card-UMR").style.display="block";
+
+                    if (byofId == 31 || byofId == 32 || byofId == 33 || byofId == 34)
+                    document.getElementById('UMRbtn').disabled = false;
+                    else document.getElementById('UMRbtn').disabled = true;
+               }
+                else {
+                 document.getElementById("card-UMR").style.display="none";
+                 }
+
+            }
+
+            if ($('#lineOfBusiness option:selected').text() == "C&S - Medicaid") {
+                            document.getElementById('consume').disabled = true;
+                            document.getElementById('transform').disabled = true;
+                            document.getElementById('vizualize').disabled = false;
+                            document.getElementById('ideate').disabled = false;
+                            document.getElementById('documents').disabled = true;
+                            document.getElementById('track').disabled = true;
+                            document.getElementById('certify').disabled = true;
+                            document.getElementById('validate').disabled = true;
+                            document.getElementById('shop').disabled = true;
+                            document.getElementById("ideate").style.display = "none";
+                            document.getElementById("card-UMR").style.display="none";
+                            document.getElementById("allCards").style.display="block";
+                            document.getElementById("bsmIdeatePortfolioMgmtBtn").style.display="block";
+            }
+
+             if ($('#lineOfBusiness option:selected').text() == "E&I - Regulatory Affairs") {
+                document.getElementById("allCards").style.display="none";
+                document.getElementById("bsmIdeatePortfolioMgmtBtn").style.display="none";
+                document.getElementById("card-UMR").style.display="none";
+                document.getElementById("card-Regulatory").style.display="block";
+            }
         }
 
-        return librarySearchList;
+        function changeDefault() {
+            var defaultBusiness = "${pageContext.session.getAttribute('defaultBusiness')}";
+            var dd = document.getElementById("defaultLineOfBusiness");
+            dd.selectedIndex = [...dd.options].findIndex (option => option.text === defaultBusiness);
+            $("#defaultBusinessModal").show();
+        }
 
-    }
-can u rewrite all this code with new pom changes so that logic remains unchanged
+        function setDefault() {
+            var defaultBusiness = "${pageContext.session.getAttribute('defaultBusiness')}";
+            if(defaultBusiness == null || defaultBusiness == '') {
+                $("#defaultBusinessModal").show();
+            } else {
+                var dd = document.getElementById("lineOfBusiness");
+                dd.selectedIndex = [...dd.options].findIndex (option => option.text === defaultBusiness);
+                enableAndDisableCards();
+            }
+        }
+
+        function hideModal() {
+            $("#defaultBusinessModal").removeClass("in");
+            $(".modal-backdrop").remove();
+            $("#defaultBusinessModal").hide();
+        }
+
+        function setDefaultBusiness() {
+            let defaultBusiness = $('#defaultLineOfBusiness option:selected').text();
+            $.ajax({
+                type: "post",
+                contentType: "application/json",
+                url: "updateDefaultBusiness?defaultBusiness=" + encodeURIComponent(defaultBusiness),
+                success: function (res) {
+                    hideModal();
+                    location.reload();
+                },
+                error: function (xhr) {
+                    hideModal();
+                    console.log(xhr);
+                    alert("Error while updating default Business");
+                }
+            });
+        }
+    </script>
+    <script>
+        var ctxPath = "<%=request.getContextPath()%>";
+        var ctxPathsso = "<%=request.getContextPath()%>";
+        var secondsBeforeExpire = ${pageContext.session.maxInactiveInterval};
+    </script>
+    <script src="<c:url value="/js/sessionUtil.js" />"></script>
+    <body onload="setDefault()">
+    <div class="container-fluid">
+        <a onclick="releaseLock(event, false)" href="${pageContext.servletContext.contextPath }/home"> <img
+                src="assets/UHC_Lockup_wht_RGB.png"
+                alt="UHC Logo" class="img-fluid" width="150"
+                height="50">
+        </a>
+        <button class="navbar-toggler" type="button"
+                data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false"
+                aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item dropdown"></li>
+            </ul>
+            <div class="d-flex nav-form">
+
+                <a onclick="changeDefault()" class="btn text-white" style='margin-right: 10px'>
+                    <i class="fa-solid fa-xl fa-user-gear fa-fw"></i>
+                </a>
+
+                <select class="form-select form-select-sm" id="lineOfBusiness" aria-label="lineOfBusiness"
+                        onchange=enableAndDisableCards(this);>
+                    <option value="0" selected>E&I - United Strategic Platform</option>
+                    <option value="1">E&I - ACIS</option>
+                    <option value="4">E&I - Global Solutions</option>
+                    <option value="2">A&I - Dental/Vision/FPP</option>
+                    <option value="3">A&I - Individual & Family Plans</option>
+                    <option value="5">UHG - Transparency In Coverage</option>
+                    <option value="6">E&I - UMR</option>
+                    <option value="7">C&S - Medicaid</option>
+                    <option value="8">E&I - Regulatory Affairs</option>
+                </select>
+
+                <a onclick="releaseLock(event, false)" href="${pageContext.servletContext.contextPath }/logout"
+                   class="btn btn-warning ml-2">Logout</a>
+
+            </div>
+        </div>
+    </div>
+    </body>
+
+    <div class="modal fade" id="session-expire-warning-modal" aria-hidden="true" data-keyboard="false"
+         data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div
+                class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="quickSearchModalLabel">Session Expire Warning</h5>
+                </div>
+                <div class="modal-body">
+                    Your session will expire in <span id="seconds-timer"></span> . Do you want to extend the session?
+
+                </div>
+
+                <div class="modal-footer">
+
+                    <button id="btnOk" type="button" class="btn btn-default"
+                            style="padding: 6px 12px; margin-bottom: 0; font-size: 14px; font-weight: normal; border: 1px solid transparent; border-radius: 4px;  background-color: #428bca; color: #FFF;">
+                        Ok
+                    </button>
+
+                    <button id="btnLogoutNow" type="button" class="btn btn-default"
+                            style="padding: 6px 12px; margin-bottom: 0; font-size: 14px; font-weight: normal; border: 1px solid transparent; border-radius: 4px;  background-color: #428bca; color: #FFF;">
+                        Logout now
+                    </button>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal fade" id="session-expired-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+
+        <div class="modal-dialog" role="document">
+
+            <div class="modal-content">
+
+                <div class="modal-header">
+
+                    <h4 class="modal-title">Session Expired</h4>
+
+                </div>
+
+                <div class="modal-body">
+
+                    Your session is expired.
+
+                </div>
+
+                <div class="modal-footer">
+
+                    <button id="btnExpiredOk" onclick="sessionExpiredRedirect()" type="button" class="btn btn-primary"
+                            data-dismiss="modal"
+                            style="padding: 6px 12px; margin-bottom: 0; font-size: 14px; font-weight: normal; border: 1px solid transparent; border-radius: 4px; background-color: #428bca; color: #FFF;">
+                        Ok
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="modal" id="defaultBusinessModal" tabindex="-1" role="dialog" aria-labelledby="defaultBusinessModalLabel"  aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+
+                    <h5><span id="lblWarnTitle" class="modal-title text-danger"> Default Business </span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"  onclick="hideModal()" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                            <select class="form-select form-select-sm" id="defaultLineOfBusiness" aria-label="defaultLineOfBusiness">
+                                <option value="0" selected>E&I - United Strategic Platform</option>
+                                <option value="1">E&I - ACIS</option>
+                                <option value="4">E&I - Global Solutions</option>
+                                <option value="2">A&I - Dental/Vision/FPP</option>
+                                <option value="3">A&I - Individual & Family Plans</option>
+                                <option value="5">UHG - Transparency In Coverage</option>
+                                <option value="6">E&I - UMR</option>
+                                <option value="7">C&S - Medicaid</option>
+                            </select>
+                    <div class="modal-footer">
+                        <button  type="button" class="btn btn-outline-danger" data-bs-dismiss="modal" onclick="hideModal()">Cancel</button>
+                        <button onclick="setDefaultBusiness()" id="defaultBusinessConfirm"  class="btn btn-outline-success" data-bs-dismiss="modal" >Set Default</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</nav>
+
+this is my code files, when i am setting default business <select class="form-select form-select-sm" id="lineOfBusiness" aria-label="lineOfBusiness"
+                        onchange=enableAndDisableCards(this);>
+                    <option value="0" selected>E&I - United Strategic Platform</option>
+                    <option value="1">E&I - ACIS</option>
+                    <option value="4">E&I - Global Solutions</option>
+                    <option value="2">A&I - Dental/Vision/FPP</option>
+                    <option value="3">A&I - Individual & Family Plans</option>
+                    <option value="5">UHG - Transparency In Coverage</option>
+                    <option value="6">E&I - UMR</option>
+                    <option value="7">C&S - Medicaid</option>
+                    <option value="8">E&I - Regulatory Affairs</option>
+                </select>
+this component should also set that default business value and then call the onchange and rest functionality should be carried out the same way. make that fix pls
