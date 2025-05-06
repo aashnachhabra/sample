@@ -1,37 +1,4 @@
-<nav class="navbar navbar-expand-lg navbar-light">
-    <script>
-        $(function () {
-            $('[data-toggle="tooltip"]').tooltip();
-
-        });
-
-        function logoutfunction() {
-            window.location.href = "${pageContext.servletContext.contextPath }/logout";
-        }
-        function enableAndDisableCards() {
-            var roleId = "${pageContext.session.getAttribute('roleId')}";
-            var abbId = "${pageContext.session.getAttribute('abbId')}";
-            var reportingId = "${pageContext.session.getAttribute('reportingId')}";
-            var ifpRoleId = "${pageContext.session.getAttribute('ifpRoleId')}";
-            var nonIfpRoleId = "${pageContext.session.getAttribute('nonIfpRoleId')}";
-            var sbcRoleId = "${pageContext.session.getAttribute('sbcRoleId')}";
-            var iceRoleId = "${pageContext.session.getAttribute('iceRoleId')}";
-            var isIceEnable = "${pageContext.session.getAttribute('iceEnable')}";
-            var coreId = "${pageContext.session.getAttribute('coreId')}";
-            var dbsId = "${pageContext.session.getAttribute('dbsId')}";
-            var ticSchedulerId = "${pageContext.session.getAttribute('ticSchedulerGroup')}";
-            var dentalVisionRoleId = "${pageContext.session.getAttribute('dentalVisionRoleId')}";
-            var byofId="${pageContext.session.getAttribute('byofId')}";
-            var isByofEnable = "${pageContext.session.getAttribute('byofEnable')}";
-            var env = "${pageContext.session.getAttribute('env')}";
-            var documentButton = document.getElementById('documents');
-            var transformButton = document.getElementById('transform');
-            var ideateButton = document.getElementById('ideate');
-            documentButton.dataset.bsTarget = "#docManagementModal";
-            transformButton.dataset.bsTarget ="#teModal";
-            $('#EI').css('display', 'none');
-            $('#AI').css('display', 'none');
-            $('#EITransform')<script>
+<script>
         var ctxPath = "<%=request.getContextPath()%>";
         var ctxPathsso = "<%=request.getContextPath()%>";
         var secondsBeforeExpire = ${pageContext.session.maxInactiveInterval};
@@ -179,5 +146,30 @@
     </div>
 </nav>
 
+in this code when i hit set default business when the modal open it should also set the same value in the component
+ <div class="d-flex nav-form">
 
-this component should also set that default business value and then call the onchange and rest functionality should be carried out the same way. make that fix pls
+                <a onclick="changeDefault()" class="btn text-white" style='margin-right: 10px'>
+                    <i class="fa-solid fa-xl fa-user-gear fa-fw"></i>
+                </a>
+
+                <select class="form-select form-select-sm" id="lineOfBusiness" aria-label="lineOfBusiness"
+                        onchange=enableAndDisableCards(this);>
+                    <option value="0" selected>E&I - United Strategic Platform</option>
+                    <option value="1">E&I - ACIS</option>
+                    <option value="4">E&I - Global Solutions</option>
+                    <option value="2">A&I - Dental/Vision/FPP</option>
+                    <option value="3">A&I - Individual & Family Plans</option>
+                    <option value="5">UHG - Transparency In Coverage</option>
+                    <option value="6">E&I - UMR</option>
+                    <option value="7">C&S - Medicaid</option>
+                    <option value="8">E&I - Regulatory Affairs</option>
+                </select>
+
+                <a onclick="releaseLock(event, false)" href="${pageContext.servletContext.contextPath }/logout"
+                   class="btn btn-warning ml-2">Logout</a>
+
+            </div>
+and then the onchange function should be triggered as it is supposed to work
+
+
