@@ -1,25 +1,4 @@
-<nav class="navbar navbar-expand-lg navbar-light">
-    <script>
-        $(function () {
-            $('[data-toggle="tooltip"]').tooltip();
-
-        });
-
-        function logoutfunction() {
-            window.location.href = "${pageContext.servletContext.contextPath }/logout";
-        }
-        function enableAndDisableCards() {
-            var roleId = "${pageContext.session.getAttribute('roleId')}";
-            var abbId = "${pageContext.session.getAttribute('abbId')}";
-            var reportingId = "${pageContext.session.getAttribute('reportingId')}";
-            var ifpRoleId = "${pageContext.session.getAttribute('ifpRoleId')}";
-            var nonIfpRoleId = "${pageContext.session.getAttribute('nonIfpRoleId')}";
-            var sbcRoleId = "${pageContext.session.getAttribute('sbcRoleId')}";
-            var iceRoleId = "${pageContext.session.getAttribute('iceRoleId')}";
-            var isIceEnable = "${pageContext.session.getAttribute('iceEnable')}";
-            var coreId = "${pageContext.session.getAttribute('coreId')}";
-            var dbsId = "${pageContext.session.getAttribute('dbsId')}";
-            var ticSchedulerId = "${pageContext.session.getAttribute('ticSchedulerGroup')}";script>
+<script>
         var ctxPath = "<%=request.getContextPath()%>";
         var ctxPathsso = "<%=request.getContextPath()%>";
         var secondsBeforeExpire = ${pageContext.session.maxInactiveInterval};
@@ -166,6 +145,7 @@
 
     </div>
 </nav>
+
 
 and this is controller
 package com.uhc.ei.planlibrary.controller;
