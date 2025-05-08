@@ -1,192 +1,170 @@
-function changeDefault() {
-            var defaultBusiness = "${pageContext.session.getAttribute('defaultBusiness')}";
-            var dd = document.getElementById("defaultLineOfBusiness");
-            dd.selectedIndex = [...dd.options].findIndex (option => option.text === defaultBusiness);
-            $("#defaultBusinessModal").show();
-        }
+package com.uhc.ei.planlibrary.controller;
 
-        function setDefault() {
-            var defaultBusiness = "${pageContext.session.getAttribute('defaultBusiness')}";
-            if(defaultBusiness == null || defaultBusiness == '') {
-                $("#defaultBusinessModal").show();
-            } else {
-                var dd = document.getElementById("lineOfBusiness");
-                dd.selectedIndex = [...dd.options].findIndex (option => option.text === defaultBusiness);
-                enableAndDisableCards();
-            }
-        }
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
 
-        function hideModal() {
-            $("#defaultBusinessModal").removeClass("in");
-            $(".modal-backdrop").remove();
-            $("#defaultBusinessModal").hide();
-        }
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
-        function setDefaultBusiness() {
-                           let defaultBusiness = $('#defaultLineOfBusiness option:selected').text();
-                           $.ajax({
-                               type: "GET",
-                               contentType: "application/json",
-                               url: "updateDefaultBusiness?defaultBusiness=" + encodeURIComponent(defaultBusiness),
-                               success: function (res) {
-                                   hideModal();
-                                   var dd = document.getElementById("lineOfBusiness");
-                                   dd.selectedIndex = [...dd.options].findIndex(option => option.text === defaultBusiness);
-                                   enableAndDisableCards();
-                               },
-                               error: function (xhr) {
-                                   hideModal();
-                                   console.log(xhr);
-                                   alert("Error while updating default Business");
-                               }
-                           });
-                        }
-    </script>
-    <script>
-        var ctxPath = "<%=request.getContextPath()%>";
-        var ctxPathsso = "<%=request.getContextPath()%>";
-        var secondsBeforeExpire = ${pageContext.session.maxInactiveInterval};
-    </script>
-    <script src="<c:url value="/js/sessionUtil.js" />"></script>
-    <body onload="setDefault()">
-    <div class="container-fluid">
-        <a onclick="releaseLock(event, false)" href="${pageContext.servletContext.contextPath }/home"> <img
-                src="assets/UHC_Lockup_wht_RGB.png"
-                alt="UHC Logo" class="img-fluid" width="150"
-                height="50">
-        </a>
-        <button class="navbar-toggler" type="button"
-                data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
-                aria-controls="navbarSupportedContent" aria-expanded="false"
-                aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <li class="nav-item dropdown"></li>
-            </ul>
-            <div class="d-flex nav-form">
+import com.uhc.ei.planlibrary.constants.SessionConstants;
+import com.uhc.ei.planlibrary.service.HomeService;
+import org.apache.commons.lang3.StringUtils;
+import org.joda.time.DateTime;
+import org.owasp.encoder.Encode;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.*;
 
-                <a onclick="changeDefault()" class="btn text-white" style='margin-right: 10px'>
-                    <i class="fa-solid fa-xl fa-user-gear fa-fw"></i>
-                </a>
+import com.uhc.ei.planlibrary.kafka.publisher.PublishMedicalLibraryCollection;
+import com.uhc.ei.planlibrary.mongodb.domain.TicPlanData;
+import com.uhc.ei.planlibrary.mongodb.repo.TicPlanDataRepository;
 
-                <select class="form-select form-select-sm" id="lineOfBusiness" aria-label="lineOfBusiness"
-                        onchange=enableAndDisableCards(this);>
-                    <option value="0" selected>E&I - United Strategic Platform</option>
-                    <option value="1">E&I - ACIS</option>
-                    <option value="4">E&I - Global Solutions</option>
-                    <option value="2">A&I - Dental/Vision/FPP</option>
-                    <option value="3">A&I - Individual & Family Plans</option>
-                    <option value="5">UHG - Transparency In Coverage</option>
-                    <option value="6">E&I - UMR</option>
-                    <option value="7">C&S - Medicaid</option>
-                    <option value="8">E&I - Regulatory Affairs</option>
-                </select>
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 
-                <a onclick="releaseLock(event, false)" href="${pageContext.servletContext.contextPath }/logout"
-                   class="btn btn-warning ml-2">Logout</a>
+@Controller
+public class HomeController {
 
-            </div>
-        </div>
-    </div>
-    </body>
+	@Autowired
+	private TicPlanDataRepository ticPlanDataRepository;
+	
+	@Autowired
+	private PublishMedicalLibraryCollection publishMedicalLibraryCollection;
 
-    <div class="modal fade" id="session-expire-warning-modal" aria-hidden="true" data-keyboard="false"
-         data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-        <div
-                class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="quickSearchModalLabel">Session Expire Warning</h5>
-                </div>
-                <div class="modal-body">
-                    Your session will expire in <span id="seconds-timer"></span> . Do you want to extend the session?
+	@Autowired
+	private HomeService homeService;
 
-                </div>
+	@RequestMapping("/")
+	public String home(ModelMap map, HttpSession session) {
+		TicData data = new TicData();
+		data.setSourceSystem("Test");
+		return "home";
+	}
 
-                <div class="modal-footer">
+	@RequestMapping("/Tic")
+	@ResponseBody
+	public List<TicPlanData> getTicData(Model model, HttpSession session) {
+		List<TicPlanData> list = ticPlanDataRepository.findAll();
+		return list;
+	}
 
-                    <button id="btnOk" type="button" class="btn btn-default"
-                            style="padding: 6px 12px; margin-bottom: 0; font-size: 14px; font-weight: normal; border: 1px solid transparent; border-radius: 4px;  background-color: #428bca; color: #FFF;">
-                        Ok
-                    </button>
+	@PostMapping(value = { "/UpdateTic" })
+	@ResponseBody
+	public String update(Model model, HttpSession session, @RequestBody TicData ticData) {
+		TicPlanData data = ticPlanDataRepository.findBySourceSystem(ticData.getSourceSystem());
+		if (ticData.getNextRunDate() != null && ticData.getNextRunDate().length() > 0) {
+			if (isDateFuture(ticData.getNextRunDate(), "yyyy-MM-dd")) {
+				data.setNextScheduledLoadDate(ticData.getNextRunDate());
+				data.setEmail(ticData.getEmail());
+				data.setUserName(ticData.getUserName());
+				data.setUpdatedOn(new DateTime().toString());
+				ticPlanDataRepository.save(data);
+				return "Reload";
+			} else {
+				return "R";
+			}
+		}
+		return "Reload";
+	}
 
-                    <button id="btnLogoutNow" type="button" class="btn btn-default"
-                            style="padding: 6px 12px; margin-bottom: 0; font-size: 14px; font-weight: normal; border: 1px solid transparent; border-radius: 4px;  background-color: #428bca; color: #FFF;">
-                        Logout now
-                    </button>
+	@PostMapping(value = { "/runTic" })
+	@ResponseBody
+	public String run(Model model, HttpSession session, @RequestBody TicData ticData) {
+		TicPlanData data = ticPlanDataRepository.findBySourceSystem(ticData.getSourceSystem());
+		data.setEmail(ticData.getEmail());
+		data.setUserName(ticData.getUserName());
+		if (data.getStatus().equals("Run")) {
+			return "R";
+		}
+		data.setStatus("Run");
+		ticPlanDataRepository.save(data);
+		data.setUpdatedOn(new DateTime().toString());
+		return "Reload";
+	}
 
-                </div>
+	@PostMapping(value = { "/removeTic" })
+	public String remove(Model model, HttpSession session, @RequestBody TicData ticData) {
+		TicPlanData data = ticPlanDataRepository.findBySourceSystem(ticData.getSourceSystem());
+		if (data.getNextScheduledLoadDate() != null && data.getNextScheduledLoadDate().length() > 0) {
+			LocalDate currentDate = LocalDate.now();
+			int dayOfMonth = currentDate.getDayOfMonth();
+			int month = currentDate.getMonthValue();
+			int y = currentDate.getYear();
+			String date = "";
+			if (dayOfMonth <= 24) {
+				date = y + "-" + month + "-" + "24";
+			} else {
+				month = month + 1;
+				date = y + "-" + month + "-" + "24";
+			}
+			data.setNextScheduledLoadDate(date);
+			data.setEmail(ticData.getEmail());
+			data.setUserName(ticData.getUserName());
+			data.setUpdatedOn(new DateTime().toString());
+			ticPlanDataRepository.save(data);
+		}
+		return "Reload";
+	}
 
-            </div>
-        </div>
-    </div>
+	public static boolean isDateFuture(final String date, final String dateFormat) {
+		LocalDate localDate = LocalDate.now(ZoneId.systemDefault());
+		DateTimeFormatter dtf = DateTimeFormatter.ofPattern(dateFormat);
+		LocalDate inputDate = LocalDate.parse(date, dtf);
 
+		return inputDate.isAfter(localDate);
+	}
 
-    <div class="modal fade" id="session-expired-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	@RequestMapping("/RuleManagement")
+	public String ruleManagement() {
+		return "RuleManagement";
+	}
 
-        <div class="modal-dialog" role="document">
+	@RequestMapping("/TemplateManagement")
+	public String templateManagement() {
+		return "TemplateManagement";
+	}
+	
+	
+	@CrossOrigin
+	@PostMapping(value = "/publish/medicalLibrary", name = "Publish MedicalLibrary API Collection records", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = "Ok/Success.The requested resource was created successfully."),
+			@ApiResponse(code = 400, message = "Bad Request. Incorrect header or junk request data."),
+			@ApiResponse(code = 500, message = "Internal Server Error.") })
+	public ResponseEntity<List<ResponseCommand>> publisMedicalLibraryh(Model model, HttpSession session, @RequestBody List<RequestCommand> commands) {
 
-            <div class="modal-content">
+		return ResponseEntity.status(HttpStatus.OK).body(this.publishMedicalLibraryCollection.publisMedicalLibraryh(commands));
+		
+	}
 
-                <div class="modal-header">
+	private String validateRequest(String defaultBusiness) {
+		if (StringUtils.isNotEmpty(defaultBusiness)) {
+			return Encode.forJava(defaultBusiness);
+		} else {
+			return null;
+		}
+	}
 
-                    <h4 class="modal-title">Session Expired</h4>
+	@GetMapping("/updateDefaultBusiness")
+	@ResponseBody
+	public ResponseEntity<Object> updateDataPointerStatus(HttpServletRequest request, @RequestParam("defaultBusiness") String defaultBusiness) {
+		HttpSession session = request.getSession();
+		String username = (String) session.getAttribute(SessionConstants.USER_NAME);
+		homeService.updateDefaultBusiness(username, defaultBusiness);
+		if(defaultBusiness != null && validBusiness(defaultBusiness)) {
+			session.setAttribute(SessionConstants.DEFAULT_BUSINESS, validateRequest(defaultBusiness));
+		}
+		return ResponseEntity.status(HttpStatus.OK).body("Successfully updated Default Business");
+	}
 
-                </div>
-
-                <div class="modal-body">
-
-                    Your session is expired.
-
-                </div>
-
-                <div class="modal-footer">
-
-                    <button id="btnExpiredOk" onclick="sessionExpiredRedirect()" type="button" class="btn btn-primary"
-                            data-dismiss="modal"
-                            style="padding: 6px 12px; margin-bottom: 0; font-size: 14px; font-weight: normal; border: 1px solid transparent; border-radius: 4px; background-color: #428bca; color: #FFF;">
-                        Ok
-                    </button>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <div class="modal" id="defaultBusinessModal" tabindex="-1" role="dialog" aria-labelledby="defaultBusinessModalLabel"  aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-
-                    <h5><span id="lblWarnTitle" class="modal-title text-danger"> Default Business </span></h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"  onclick="hideModal()" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                            <select class="form-select form-select-sm" id="defaultLineOfBusiness" aria-label="defaultLineOfBusiness">
-                                <option value="0" selected>E&I - United Strategic Platform</option>
-                                <option value="1">E&I - ACIS</option>
-                                <option value="4">E&I - Global Solutions</option>
-                                <option value="2">A&I - Dental/Vision/FPP</option>
-                                <option value="3">A&I - Individual & Family Plans</option>
-                                <option value="5">UHG - Transparency In Coverage</option>
-                                <option value="6">E&I - UMR</option>
-                                <option value="7">C&S - Medicaid</option>
-                            </select>
-                    <div class="modal-footer">
-                        <button  type="button" class="btn btn-outline-danger" data-bs-dismiss="modal" onclick="hideModal()">Cancel</button>
-                        <button onclick="setDefaultBusiness()" id="defaultBusinessConfirm"  class="btn btn-outline-success" data-bs-dismiss="modal" >Set Default</button>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-
-    </div>
-</nav>
-on page reload my set default business that is applied goes away and only if i go to incognito and sign in again do i see the default updated setting, i feel it has something to do with session. can u fix
+	private boolean validBusiness(String business){
+		return business.matches("[a-zA-Z0-9]+");
+	}
+}
