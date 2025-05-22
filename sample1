@@ -1,3 +1,31 @@
+<script>
+       document.addEventListener("DOMContentLoaded", function () {
+           const ruleInput = document.getElementById("serviceRule");
+           const saveButton = document.getElementById("saveButton");
+           toggleSaveButton();
+           ruleInput.addEventListener("input", toggleSaveButton);
+           function toggleSaveButton() {
+               const isEmpty = ruleInput.value.trim() === "";
+               saveButton.disabled = isEmpty;
+           }
+       });
+    </script>
+	<script>
+		$(function () {
+			$('[data-toggle="tooltip"]').tooltip()
+		})
+		var abbRoleId = "${pageContext.session.getAttribute('abbRoleId')}";
+    </script>
+ <script src="js/app/serviceIdMapping.js"></script>
+    <link href="https://unpkg.com/frappe-datatable@0.0.5/dist/frappe-datatable.min.css" rel="stylesheet">
+</head>
+<body>
+	<%@include file="loader.jsp"%>
+	<%@include file="header.jsp"%>
+    <div class="text-primary" style="margin: 2em;">
+		<h1><i class="fa-solid fa-circle-dollar-to-slot"></i> Service Rule Editor</h1>
+	</div>
+    <div class="shadow-lg p-3 mb-5 bg-white rounded" style="margin:2em">
         <form>
             <div class="row">
                 <div class="col">
@@ -126,9 +154,8 @@
             <div class="row">
                 <div class="col">
                     <div class="mb-3">
-                          <label class="form-label">Rule</label>
-                       	  <input type="text" class="form-control" list="seseRuleList" id="serviceRuleIdMap" name="serviceRuleIdMap" placeholder="" oninput="handleRuleFieldInput()"
-                       		  value="${serviceRuleManagementDTO.serviceRule}">
+                          <label class="form-label">Rule<span style="color: red;">*</span></label>
+                          <input type="text" class="form-control required-field" name="serviceRule" id="serviceRule" value="${serviceRuleManagementDTO.serviceRule}">
                        		<datalist id="seseRuleList">
                        		   <c:forEach var="relPerDefMap" items="${serviceMgmtDDMap.serviceRuleIdMap}">
                        				 <option id="${relPerDefMap.key}" name="${relPerDefMap.value}">${relPerDefMap.value}</option>
@@ -319,11 +346,42 @@
                 </div>
                 <div class="col">
                     <div class="d-grid gap-2">
-                        <button type="button" id="saveButton" name="saveButton" class="btn btn-outline-primary"  onclick="saveOrUpdateServiceRuleRecordData();"><i class="fa-solid fa-floppy-disk"></i> Save</button>
+                        <button type="button" id="saveButton" name="saveButton" class="btn btn-outline-primary" onclick="saveOrUpdateServiceRuleRecordData();" disabled>
+                        <i class="fa-solid fa-floppy-disk"></i> Save
+                        </button>
                     </div>
                 </div>
             </div>
         </form>
+here is js function
+function saveOrUpdateServiceRuleRecordData() {
+	if (saveOrUpdateServiceRuleRecordRequest() != null) {
+		var request = saveOrUpdateServiceRuleRecordRequest();
+		showAndHide();
+		$.ajax({
+			type: "POST",
+			contentType: "application/json",
+			url: "saveOrUpdateServiceRuleRecord",
+			data: JSON.stringify(request),
+			dataType: 'json',
+			success: function (response) {
+				if (response.serviceRuleMsg == "SUCCESS") {
+					var serviceRuleID = request["serviceRuleID"];
+					if (serviceRuleID != null) {
+						document.getElementById("SaveSuccessMessage").innerHTML = 'Successfully Save Service Rule Record';
+						$("#sucessBoxModal").modal("toggle");
+					} else {
+						document.getElementById("SaveSuccessMessage").innerHTML = 'Successfully Save Service Rule Record';
+						$("#sucessBoxModal").modal("toggle");
+					}
+				}
+				showAndHide();
+			},
+			error: function (xhr) {
+				alert("Something went wrong while saving the Service Rule Record, please try again..!");
+			}
+		});
+	}
+}
+u can use this and then suggest fixes
 
-i want to disable                         <button type="button" id="saveButton" name="saveButton" class="btn btn-outline-primary"  onclick="saveOrUpdateServiceRuleRecordData();"><i class="fa-solid fa-floppy-disk"></i> Save</button>
-if in put box rule is empty and also add asterisk type stuff to show mandatory field
