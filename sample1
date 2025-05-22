@@ -1,387 +1,161 @@
-<script>
-       document.addEventListener("DOMContentLoaded", function () {
-           const ruleInput = document.getElementById("serviceRule");
-           const saveButton = document.getElementById("saveButton");
-           toggleSaveButton();
-           ruleInput.addEventListener("input", toggleSaveButton);
-           function toggleSaveButton() {
-               const isEmpty = ruleInput.value.trim() === "";
-               saveButton.disabled = isEmpty;
-           }
-       });
-    </script>
-	<script>
-		$(function () {
-			$('[data-toggle="tooltip"]').tooltip()
-		})
-		var abbRoleId = "${pageContext.session.getAttribute('abbRoleId')}";
-    </script>
- <script src="js/app/serviceIdMapping.js"></script>
-    <link href="https://unpkg.com/frappe-datatable@0.0.5/dist/frappe-datatable.min.css" rel="stylesheet">
-</head>
-<body>
-	<%@include file="loader.jsp"%>
-	<%@include file="header.jsp"%>
-    <div class="text-primary" style="margin: 2em;">
-		<h1><i class="fa-solid fa-circle-dollar-to-slot"></i> Service Rule Editor</h1>
-	</div>
-    <div class="shadow-lg p-3 mb-5 bg-white rounded" style="margin:2em">
-        <form>
-            <div class="row">
-                <div class="col">
-                    <h4 class="text-primary">Cost Share Found in Plan Library:</h4>
-                </div>
-            </div>
-             <input type="hidden" name="costShareMapIDs" id="costShareMapIDs" value="${serviceRuleManagementDTO.costShareMapIDs}">
-              <input type="hidden" name="plCostShareIDs" id="plCostShareIDs" value="${serviceRuleManagementDTO.plCostShareIDs}">
-              <input type="hidden" name="costShareAdminIDs" id="costShareAdminIDs" value="${serviceRuleManagementDTO.costShareAdminIDs}">
-              <input type="hidden" name="paymentLineCount" id="paymentLineCount" value="${serviceRuleManagementDTO.paymentLineCount}">
-              <input type="hidden" name="serviceRuleID" id="serviceRuleID" value="${serviceRuleManagementDTO.serviceRuleID}">
-              <input type="hidden" name="serviceRuleSerlID" id="serviceRuleSerlID" value="${serviceRuleManagementDTO.serviceRuleSerlDTO[0].serviceRuleSerlID}">
-              <input type="hidden" name="serviceRuleExpCode" id="serviceRuleExpCode" value="${serviceRuleManagementDTO.serviceRuleExpCodeDTO[0].excdId}">
-            <div class="row">
-                <div class="col">
-                    <table class="table table-dark table-sm">
-                        <thead>
-                           <tr>
-                                 <c:set var="paymentLine" value="${serviceRuleManagementDTO.plCostShareDTO[0].paymentLine}"/>
-                                    <c:if test="${ fn:containsIgnoreCase(paymentLine, 'Visits')}">
-                                       <th>Benefit Category</th>
-                                        <th>Level</th>
-                                    </c:if>
-                                    <c:if test="${not fn:containsIgnoreCase(paymentLine, 'Visits')  && pageContext.session.getAttribute('ifpRoleId') == 4}">
-                                       <th>Benefit Category</th>
-                                       <th>Level</th>
-                                    </c:if>
-                                       <th>Network Tier</th>
-                                       <th>Coinsurance</th>
-                                       <th>Copayment</th>
-                                       <th>Max Copayment</th>
-                                       <th>Deductible Applies</th>
-                                       <th>Covered</th>
-                                       <th>Per Occurance Deductible</th>
-                                       <th>Med/Rx Deductibles Combined</th>
-                                       <th>Benefit Indicator</th>
-                                    <c:if test="${pageContext.session.getAttribute('ifpRoleId') == 4 }">
-                                       <th>Depending Upon POS</th>
-                                       <th>Split Cost Share</th>
-                                       <th>HSA Eligible</th>
-                                       <th>Plan Code</th>
-                                       <th>Product ID</th>
+function saveOrUpdateServiceRuleRecordRequest() {
+	var request = {};
+	var serviceRule = null;
+	var serviceType = null;
+	var description = null;
+	var serviceCalcMethod = null;
+	var serviceAgeMin = null;
+	var serviceAgeMax = null;
+	var serviceGender = null;
+	var expCode = null;
+
+	var serviceRuleID = $("#serviceRuleID").val();
+	request["serviceRuleID"] = serviceRuleID;
+
+	var costShareMapID = $("#costShareMapIDs").val();
+	if (costShareMapID) {
+		request["costShareMapIDs"] = JSON.parse(costShareMapID);
+	} else {
+		request["costShareMapIDs"] = [];
+	}
+	var plCostShareID = $("#plCostShareIDs").val();
+	if (plCostShareID) {
+		request["plCostShareIDs"] = JSON.parse(plCostShareID);
+	} else {
+		request["plCostShareIDs"] = [];
+	}
+	var costShareAdminID = $("#costShareAdminIDs").val();
+	if (costShareAdminID) {
+		request["costShareAdminIDs"] = JSON.parse(costShareAdminID);
+	} else {
+		request["costShareAdminIDs"] = [];
+	}
 
 
-                                         <th> </th>
-                                   </c:if>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        	<c:choose>
-                               <c:when test="${not fn:containsIgnoreCase(paymentLine, 'Visits') && pageContext.session.getAttribute('ifpRoleId') != 4}">
-                                   <td>${serviceRuleManagementDTO.plCostShareDTO[0].tierNumber}</td>
-                                   <td>${serviceRuleManagementDTO.plCostShareDTO[0].coins}</td>
-                                   <td>${serviceRuleManagementDTO.plCostShareDTO[0].copayStr}</td>
-                                   <td>${serviceRuleManagementDTO.plCostShareDTO[0].copayMax}</td>
-                                   <td>${serviceRuleManagementDTO.plCostShareDTO[0].dedApplies}</td>
-                                   <td>${serviceRuleManagementDTO.plCostShareDTO[0].isCovered}</td>
-                                   <td>${serviceRuleManagementDTO.plCostShareDTO[0].pod}</td>
-                                   <td>${serviceRuleManagementDTO.plCostShareDTO[0].rxIndicator}</td>
-                                   <td>${serviceRuleManagementDTO.plCostShareDTO[0].benefitIndicator}</td>
-                              </c:when>
-                              <c:otherwise>
-                                    <c:forEach var="plCostShare" items="${serviceRuleManagementDTO.plCostShareDTO}" varStatus="loop">
-                                       <tr>
-                                          <c:if test="${ fn:containsIgnoreCase(plCostShare.paymentLine, 'Visits')}">
-                                            <td>${plCostShare.benefitCategory}</td>
-                                            <td>${plCostShare.paymentLine}</td>
-                                         </c:if>
-                                         <c:if test="${ not fn:containsIgnoreCase(plCostShare.paymentLine, 'Visits') && pageContext.session.getAttribute('ifpRoleId') == 4 }">
-                                           <td>${plCostShare.benefitCategory}</td>
-                                           <td>${plCostShare.paymentLine}</td>
-                                         </c:if>
-                                           <td>${plCostShare.tierNumber}</td>
-                                           <td>${plCostShare.coins}</td>
-                                           <td>${plCostShare.copayStr}</td>
-                                           <td>${plCostShare.copayMax}</td>
-                                           <td>${plCostShare.dedApplies}</td>
-                                           <td>${plCostShare.isCovered}</td>
-                                           <td>${plCostShare.pod}</td>
-                                           <td>${plCostShare.rxIndicator}</td>
-                                           <td>${plCostShare.benefitIndicator}</td>
-                                        <c:if test="${pageContext.session.getAttribute('ifpRoleId') == 4 }">
-                                          <td>${plCostShare.depPOS}</td>
-                                          <td>${plCostShare.splitCostShare}</td>
-                                          <td>${plCostShare.hsaEligible}</td>
-                                          <td>${plCostShare.planCode}</td>
-                                          <td>${plCostShare.pdpdId}</td>
+	var serviceTypeList = document.getElementById('serviceTypeList');
+	if (serviceTypeList.value != '') {
+		request["serviceType"] = serviceTypeList.options.namedItem(serviceTypeList.value).id;
+	} else {
+		request["serviceType"] = "";
+	}
+	serviceType = request["serviceType"];
 
-                                              <td>
-                                                    <div class="btn-group" role="group" id="buttons" aria-label="Basic example">
-                                                      <button type="button" id="splitBtn" name="splitButton" title="Split" data-toggle="tooltip" class="btn btn-outline-light"
-                                                         onclick="splitServiceRuleMgmt(`${plCostShare.plCostShareID}`,`${plCostShare.benefitCategory}`);">
-                                                         <i class="fa-solid fa-arrows-split-up-and-left"></i>
-                                                       </button>
-                                                       <button type="button" id="greenDropBtn" name="greenDropBtn" title="Drop" data-toggle="tooltip" class="btn btn-outline-success"
-                                                           onclick="dropServiceRuleMgmt(`${plCostShare.plCostShareID}`);" disabled>
-                                                           <i class="fa-solid fa-link-slash"></i>
-                                                      </button>
-                                                      <button type="button" id="copyBtn" name="copyBtn" title="Copy" data-toggle="tooltip" class="btn btn-outline-warning"
-                                                         onclick="copyServiceRuleMgmt(`${plCostShare.plCostShareID}`);" disabled>
-                                                         <i class="fa-regular fa-copy"></i>
-                                                      </button>
-                                                      <button type="button" id="deleteBtn" name="deleteBtn" title="Delete" data-toggle="tooltip" class="btn btn-outline-danger"
-                                                          onclick="deleteServiceRuleMgmt(`${plCostShare.plCostShareID}`,`${plCostShare.benefitCategory}`);">
-                                                           <i class="fa-solid fa-trash"></i>
-                                                      </button>
-                                                    </div>
-                                               </td>
-                                           </c:if>
-                                           </tr>
-                                         </c:forEach>
-                                    </c:otherwise>
-                               </c:choose>
-                        </tbody>
-                    </table>
-                    <c:if test="${ empty serviceRuleManagementDTO.plCostShareDTO && serviceRuleManagementDTO.plCostShareDTO.size() == 0}">
-            				<div><p align="center">No PL Records found..!</p></div>
-        			</c:if>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col">
-                    <h4 class="text-primary">Service Rule Record:</h4>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col">
-                    <div class="mb-3">
-                          <label class="form-label">Rule<span style="color: red;">*</span></label>
-                          <input type="text" class="form-control required-field" name="serviceRule" id="serviceRule" value="${serviceRuleManagementDTO.serviceRule}">
-                       		<datalist id="seseRuleList">
-                       		   <c:forEach var="relPerDefMap" items="${serviceMgmtDDMap.serviceRuleIdMap}">
-                       				 <option id="${relPerDefMap.key}" name="${relPerDefMap.value}">${relPerDefMap.value}</option>
-                       		   </c:forEach>
-                       		</datalist>
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="mb-3">
-                        <label for="serviceDescription" class="form-label">Description</label>
-                        <input type="text" class="form-control" id="description" name="description" placeholder="" value="${serviceRuleManagementDTO.description}"  maxlength="70">
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col">
-                    <div class="mb-3">
-                        <label class="form-label">Type</label>
-                        <div class="form-floating">
-                            <select class="form-select" id="serviceTypeList" onchange="getEnabledOrDisabled();">
-                                <c:forEach var="type" items="${serviceMgmtDDMap.serviceRuleTypeMap}">
-                                    <option id="${type.key}" name="${type.value}" value="${type.value}" ${type.value== (serviceRuleManagementDTO.serviceTypeStr != null ? serviceRuleManagementDTO.serviceTypeStr : 'C - Counter') ? 'selected' : ''}>
-                                        ${type.value}
-                                    </option>
-                                </c:forEach>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="mb-3">
-                     <label class="form-label">Calc Type</label>
-                           <div class="form-floating">
-                               <select class="form-select" id="serviceCalcMethodList">
-                                 <c:forEach var="serviceCalc" items="${serviceMgmtDDMap.serviceRuleCalcTypeMap}">
-                                   <option id="${serviceCalc.key}" name="${serviceCalc.value}" ${serviceCalc.value== (serviceRuleManagementDTO.serviceCalcMethodStr != null ? serviceRuleManagementDTO.serviceCalcMethodStr : 'T - Traditional') ? 'selected' : ''}>
-                                     ${serviceCalc.value}
-                                     </option>
-                                   </c:forEach>
-                                 </select>
-                           </div>
-                     </div>
-            	</div>
-            </div>
-            <div class="row">
-                <div class="col">
-                      <div class="mb-3">
-                         <label class="form-label">Gender</label>
-                          <div class="form-floating">
-                             <select class="form-select" id="serviceGenderList">
-                                 <c:forEach var="gender" items="${serviceMgmtDDMap.genderMap}">
-                                    <option id="${gender.key}" name="${gender.value}" value="${gender.value}" ${gender.value== ( serviceRuleManagementDTO.serviceGenderStr != null ?  serviceRuleManagementDTO.serviceGenderStr : 'B - Both') ? 'selected' : ''}>
-                                    ${gender.value}
-                                     </option>
-                                 </c:forEach>
-                              </select>
-                          </div>
-                     </div>
-            	</div>
-                <div class="col">
-                     <div class="mb-3">
-                        <label for="expCode" class="form-label"></label>
-                         <div class="form-floating">
-                             <input type="text" class="form-control" list="expCodeList" id="expCode" name="expCode" placeholder=""
-                                    value="${serviceRuleManagementDTO.expCode != null ? serviceRuleManagementDTO.expCode : ""}" onchange="resetIfInvalid(this);"
-                                    disabled="disabled">
-                             <label for="expCode" class="form-label">Explanation Code</label>
-                                 <datalist id="expCodeList">
-                                     <c:forEach var="code" items="${serviceMgmtDDMap.explanationCodeMap}">
-                                         <option id="${code.key}" name="${code.value}">${code.value}</option>
-                                     </c:forEach>
-                                 </datalist>
-                     </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col">
-                    <div class="mb-3">
-                        <label for="serviceAgeMin" class="form-label">Age Minimum</label>
-                        <input type="text" class="form-control" id="serviceAgeMin" name="serviceAgeMin" placeholder="" value="${serviceRuleManagementDTO.serviceAgeMinInt != null ? serviceRuleManagementDTO.serviceAgeMinInt : 0}" onkeypress="return validateNumber(event)" maxlength="5">
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="mb-3">
-                        <label for="serviceAgeMax" class="form-label">Age Maximum</label>
-                        <input type="text" class="form-control" id="serviceAgeMax" name="serviceAgeMax" placeholder="" value="${serviceRuleManagementDTO.serviceAgeMaxInt != null ? serviceRuleManagementDTO.serviceAgeMaxInt : 999}" onkeypress="return validateNumber(event)" maxlength="5">
-                    </div>
-                </div>
-            </div>
-            <div class="text-primary">
-                <h4>Service Rule Tier Records:</h4>
-            </div>
-            <div class="row">
-                <div class="col">
-                    <table class="table table-sm table-striped" id="serviceTier_table" class="table" data-toggle="table" data-mobile-responsive="true">
-                        <thead>
-                            <tr>
-                                <th>Service Tier</th>
-                                <th>Deductible Accumulator</th>
-                                <th>Type</th>
-                                <th>Tier Excess Amount Per Counter</th>
-                                <th>Allowable Counter</th>
-                                <th>Allowable Amount</th>
-                                <th>Coinsurance</th>
-                                <th>Copayment</th>
-                                <th> </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <input type="hidden" id="serviceRuleTierData" name="serviceRuleTierData" value="${serviceRuleManagementDTO.serviceRuleTierDTO}"/>
-                        	<c:forEach var="serviceRuleTier" items="${serviceRuleManagementDTO.serviceRuleTierDTO}" varStatus="loop">
-                            <tr>
-                                <td>${serviceRuleTier.codeInt}</td>
-                                <td>${serviceRuleTier.accumulatorCodeInt}</td>
-                                <td>${serviceRuleTier.type}</td>
-                                <td>${serviceRuleTier.tierExAmtPerCounter}</td>
-                                <td>${serviceRuleTier.minStr}</td>
-                                <td>${serviceRuleTier.maxStr}</td>
-                                <td>${serviceRuleTier.coinsuranceStr}</td>
-                                <td>${serviceRuleTier.copaymentStr}</td>
-                                <td>
-                                	<div class="btn-group" role="group" aria-label="Basic example">
-                                        <button type="button" title="Edit" id="edit" name="edit" data-toggle="tooltip" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#serviceRuleTierModal"
-                                        	onclick="serviceRuleTierDetails('${serviceRuleTier.serviceRuleTierID}','${serviceRuleManagementDTO.serviceRuleID}','${serviceRuleTier.codeInt}','${serviceRuleTier.accumulatorCodeInt}','${serviceRuleManagementDTO.serviceTypeStr}','${serviceRuleTier.tierExAmtPerCounter}','${serviceRuleTier.minStr}','${serviceRuleTier.maxStr}','${serviceRuleTier.coinsuranceStr}','${serviceRuleTier.copaymentStr}')">
-                                        	<i class="fa-solid fa-pen-to-square"></i>
-                                        </button>
-                                        <button type=button title="Delete" id="delete" name="delete" class="btn btn-outline-danger" data-toggle="tooltip" data-placement="bottom"
-                                        	onclick="serviceRuleTierDelete('${serviceRuleTier.serviceRuleTierID}','${serviceRuleManagementDTO.serviceRuleID}')">
-                                        	<i class='fas fa-trash'></i>
-                                        </button>
-                                   	</div>
-                                </td>
-                            </tr>
-                            
-                           </c:forEach> 
-                        </tbody>
-                    </table>
-                    <!--
-                    <c:if test="${ empty serviceRuleManagementDTO.serviceRuleTierDTO && serviceRuleManagementDTO.serviceRuleTierDTO.size() == 0}">
-            				<div><p>No Service Rule Tier Records found..! Please click on "<B>+ Add Service Rule Tier</B>" button to add new service Rule Tiers.</p></div>
-        			</c:if>
-        			-->
-                </div>
-            </div>
-             <div class="text-primary">
-                     <h4>Associated SERL:</h4>
-                        </div>
-                        <div class="row">
-                              <div class="col">
-                                <div class="mb-3">
-                                  <div class="form-floating">
-                                      <input type="text" class="form-control" list="relatedServicesIdMapList" id="relatedServicesIdMap" name="relatedServicesIdMap" placeholder=""
-                                          value="${serviceRuleManagementDTO.serlRelIdDescr!= null ? serviceRuleManagementDTO.serlRelIdDescr: ""}" onchange="resetIfInvalid(this);">
-                                       <label for="relatedServicesIdMap" class="form-label">Related Services ID</label>
-                                        <datalist id="relatedServicesIdMapList">
-                                           <c:forEach var="relPerDefMap" items="${serviceMgmtDDMap.relatedServicesIdMap}">
-                                                 <option id="${relPerDefMap.key}" name="${relPerDefMap.value}">${relPerDefMap.value}</option>
-                                           </c:forEach>
-                                        </datalist>
-                                  </div>
-                              </div>
-                              </div>
-                        </div>
-            <div class="row">
-                <div class="col">
-                    <!-- 
-                    <c:if test="${ empty serviceRuleManagementDTO.serviceMapDTO && serviceRuleManagementDTO.serviceMapDTO.size() == 0}">
-            				<div><p>No Service ID Records found..! Please click on "<B>+ Add Service ID</B>" button to add new service ID's.</p></div>
-        			</c:if>
-        			-->
-                </div>
-            </div>
-            <div class="row" style="margin-top: 1em;">
-                <div class="col">
-                    <div class="d-grid gap-2">
-                        <button type="button" id="addServiceRuleTierButton" name="addServiceRuleTierButton" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#serviceRuleTierModal" disabled><i class="fa-solid fa-plus"></i> Add Service Rule Tier</button>
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="d-grid gap-2">
-                        <a role="button" class="btn btn-outline-warning" href="./serviceRuleMgmt"><i class="fa-solid fa-ban"></i> Cancel</a>
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="d-grid gap-2">
-                        <button type="button" id="deleteEditButton" name="deleteEditButton" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal" ><i class="fa-solid fa-trash"></i>Delete</button>
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="d-grid gap-2">
-                        <button type="button" id="saveButton" name="saveButton" class="btn btn-outline-primary" onclick="saveOrUpdateServiceRuleRecordData();" disabled>
-                        <i class="fa-solid fa-floppy-disk"></i> Save
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </form>
-here is js function
-function saveOrUpdateServiceRuleRecordData() {
-	if (saveOrUpdateServiceRuleRecordRequest() != null) {
-		var request = saveOrUpdateServiceRuleRecordRequest();
-		showAndHide();
-		$.ajax({
-			type: "POST",
-			contentType: "application/json",
-			url: "saveOrUpdateServiceRuleRecord",
-			data: JSON.stringify(request),
-			dataType: 'json',
-			success: function (response) {
-				if (response.serviceRuleMsg == "SUCCESS") {
-					var serviceRuleID = request["serviceRuleID"];
-					if (serviceRuleID != null) {
-						document.getElementById("SaveSuccessMessage").innerHTML = 'Successfully Save Service Rule Record';
-						$("#sucessBoxModal").modal("toggle");
-					} else {
-						document.getElementById("SaveSuccessMessage").innerHTML = 'Successfully Save Service Rule Record';
-						$("#sucessBoxModal").modal("toggle");
-					}
-				}
-				showAndHide();
-			},
-			error: function (xhr) {
-				alert("Something went wrong while saving the Service Rule Record, please try again..!");
-			}
-		});
+
+	var serviceCalcMethodList = document.getElementById('serviceCalcMethodList');
+	if (serviceCalcMethodList.value != '') {
+		request["serviceCalcMethod"] = serviceCalcMethodList.options.namedItem(serviceCalcMethodList.value).id;
+	} else {
+		request["serviceCalcMethod"] = "";
+	}
+	serviceCalcMethod = request["serviceCalcMethod"];
+
+
+	var serviceGenderList = document.getElementById('serviceGenderList');
+	if (serviceGenderList.value != '') {
+		request["serviceGender"] = serviceGenderList.options.namedItem(serviceGenderList.value).id;
+	} else {
+		request["serviceGender"] = "";
+	}
+	serviceGender = request["serviceGender"];
+
+    var expCode = document.getElementById('expCode');
+
+    if (expCode.value != '') {
+        var expCodeList = document.getElementById('expCodeList');
+        if(expCodeList.value != '' && expCodeList.value != 'undefined' && expCodeList.value != null){
+            request["expCode"] = expCodeList.options.namedItem(expCode.value).id;
+        }
+    } else {
+         request["expCode"] = "";
+    }
+    expCode = request["expCode"];
+
+    var serviceRule = document.getElementById('serviceRuleIdMap').value;
+    if(serviceRule != ''){
+    var serviceRuleList = document.getElementById('seseRuleList');
+    if(serviceRuleList.value != '' && serviceRuleList.value != 'undefined' && serviceRuleList.value != null){
+                request["serviceRule"] = serviceRuleList.options.namedItem(serviceRule).name;
+     }
+     }
+    serviceRule = request["serviceRule"];
+  if (serviceRuleID != "") {
+		//Edit Service Record
+		costShareMapID = $("#costShareMapIDs").val();
+		serviceRuleID = $("#serviceRuleID").val();
+		plCostShareID = $("#plCostShareIDs").val();
+		serviceRule = $("#serviceRuleIdMap").val();
+		description = $('#description').val();
+		serviceAgeMin = $('#serviceAgeMin').val();
+		serviceAgeMax = $('#serviceAgeMax').val();
+		expCode = $('#expCode').val();
+
+	} else {
+		//New  Service Record
+		serviceRule = $("#serviceRuleIdMap").val();
+		description = $('#description').val();
+		serviceAgeMin = $('#serviceAgeMin').val();
+		serviceAgeMax = $('#serviceAgeMax').val();
+		expCode = $('#expCode').val();
+
+	}
+	if (serviceRule == "" && serviceType == "" && description == "" && serviceCalcMethod == "" && serviceAgeMin == "" && serviceAgeMax == "" && serviceGender == "") {
+		if (serviceRuleID != "") {
+			document.getElementById("WarningMesssage").innerHTML = 'Please fill atleast 1 field data for Service Rule Record';
+			$("#warningModal").modal("toggle");
+		} else {
+			document.getElementById("ErrorMesssage").innerHTML = 'Please fill atleast 1 field data Service Rule Record';
+			$("#errorModal").modal("toggle");
+		}
+	} else {
+		if (costShareMapID) {
+			request["costShareMapIDs"] = JSON.parse(costShareMapID);
+		} else {
+			request["costShareMapIDs"] = [];
+		}
+		if (plCostShareID) {
+			request["plCostShareIDs"] = JSON.parse(plCostShareID);
+		} else {
+			request["plCostShareIDs"] = [];
+		}
+		request["serviceRuleID"] = serviceRuleID;
+		request["serviceRule"] = serviceRule;
+		request["description"] = description;
+		request["serviceAgeMin"] = serviceAgeMin;
+		request["serviceAgeMax"] = serviceAgeMax;
+		request["expCode"] = expCode;
+
+        //Service Rule Tier Data
+         let serviceRuleTierRequest = [];
+          var TierTable = document.getElementById("serviceTier_table");
+          var rowCount = TierTable.rows.length;
+          for(var i=1; i<rowCount; i++){
+          row = TierTable.getElementsByTagName("tr")[i]
+          var code = row.getElementsByTagName("td")[0].innerHTML;
+          var accumulatorCode = row.getElementsByTagName("td")[1].innerHTML;
+          var type = row.getElementsByTagName("td")[2].innerHTML;
+          var tierExAmtPerCounter = row.getElementsByTagName("td")[3].innerHTML;
+            if (tierExAmtPerCounter == "true") {
+                tierExAmtPerCounter = true;
+            }
+            else {
+                tierExAmtPerCounter = false;
+            }
+          var min = row.getElementsByTagName("td")[4].innerHTML;
+          var max = row.getElementsByTagName("td")[5].innerHTML;
+          var coinsurance = row.getElementsByTagName("td")[6].innerHTML;
+          var copayment = row.getElementsByTagName("td")[7].innerHTML;
+             serviceRuleTierRequest.push({ code: code, accumulatorCode: accumulatorCode, type: type, tierExAmtPerCounter: tierExAmtPerCounter, min: min, max: max, coinsurance: coinsurance, copayment: copayment });
+          }
+          request["serviceRuleTierRequestList"] = serviceRuleTierRequest;
+         //Service Rule Type(Serl) Data
+         var relatedServicesIdMap = document.getElementById('relatedServicesIdMap');
+         if (relatedServicesIdMap.value != '') {
+         var relatedServicesIdMapList = document.getElementById('relatedServicesIdMapList');
+         request["serlRelId"] = relatedServicesIdMapList.options.namedItem(relatedServicesIdMap.value).id;
+         } else {
+             request["serlRelId"] = "";
+         }
+
+		return request;
 	}
 }
-u can use this and then suggest fixes
-
