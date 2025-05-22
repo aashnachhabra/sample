@@ -1,3 +1,1509 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn"%>
+<!doctype html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<link rel="stylesheet" href="css/UHCcustom.css">
+	<link rel="stylesheet" href="css/bootstrap.css">
+	<link rel="stylesheet" href="css/css/fontawesome.min.css">
+	<link rel="stylesheet" href="css/css/brands.min.css">
+	<link rel="stylesheet" href="css/css/solid.min.css">
+	<link rel="stylesheet" href="css/loader.css">
+	<link href="https://unpkg.com/frappe-datatable@1.16.2/dist/frappe-datatable.min.css" rel="stylesheet">
+	<link rel="stylesheet" href="css/servicerule-management.css">
+	<script src="js/jquery-3.3.1.min.js"></script>
+    <script src="js/popper.min.js"></script>
+	<script src="js/UHCcustom.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/loader.js"></script>
+     <!-- include the dependencies -->
+    <script src="https://unpkg.com/sortablejs@1.7.0/Sortable.min.js"></script>
+    <script src="https://unpkg.com/clusterize.js@0.18.0/clusterize.min.js"></script>
+    <!-- include the lib -->
+   	<script src="js/frappe-datatable.min.js"></script>
+    <script src="js/app/serviceRuleMgmt.js"></script>
+	<title>Service Rule Edit Management</title>
+	<link rel="icon" href="assets/PlanBuilderFavIcon.png">
+	<script src="js/jquery-3.2.1.min.js"></script>
+	<script>
+		$(function () {
+			$('[data-toggle="tooltip"]').tooltip()
+		})
+		var abbRoleId = "${pageContext.session.getAttribute('abbRoleId')}";
+    </script>
+ <script src="js/app/serviceIdMapping.js"></script>
+    <link href="https://unpkg.com/frappe-datatable@0.0.5/dist/frappe-datatable.min.css" rel="stylesheet">
+</head>
+<body>
+	<%@include file="loader.jsp"%>
+	<%@include file="header.jsp"%>
+    <div class="text-primary" style="margin: 2em;">
+		<h1><i class="fa-solid fa-circle-dollar-to-slot"></i> Service Rule Editor</h1>
+	</div>
+    <div class="shadow-lg p-3 mb-5 bg-white rounded" style="margin:2em">
+        <form>
+            <div class="row">
+                <div class="col">
+                    <h4 class="text-primary">Cost Share Found in Plan Library:</h4>
+                </div>
+            </div>
+             <input type="hidden" name="costShareMapIDs" id="costShareMapIDs" value="${serviceRuleManagementDTO.costShareMapIDs}">
+              <input type="hidden" name="plCostShareIDs" id="plCostShareIDs" value="${serviceRuleManagementDTO.plCostShareIDs}">
+              <input type="hidden" name="costShareAdminIDs" id="costShareAdminIDs" value="${serviceRuleManagementDTO.costShareAdminIDs}">
+              <input type="hidden" name="paymentLineCount" id="paymentLineCount" value="${serviceRuleManagementDTO.paymentLineCount}">
+              <input type="hidden" name="serviceRuleID" id="serviceRuleID" value="${serviceRuleManagementDTO.serviceRuleID}">
+              <input type="hidden" name="serviceRuleSerlID" id="serviceRuleSerlID" value="${serviceRuleManagementDTO.serviceRuleSerlDTO[0].serviceRuleSerlID}">
+              <input type="hidden" name="serviceRuleExpCode" id="serviceRuleExpCode" value="${serviceRuleManagementDTO.serviceRuleExpCodeDTO[0].excdId}">
+            <div class="row">
+                <div class="col">
+                    <table class="table table-dark table-sm">
+                        <thead>
+                           <tr>
+                                 <c:set var="paymentLine" value="${serviceRuleManagementDTO.plCostShareDTO[0].paymentLine}"/>
+                                    <c:if test="${ fn:containsIgnoreCase(paymentLine, 'Visits')}">
+                                       <th>Benefit Category</th>
+                                        <th>Level</th>
+                                    </c:if>
+                                    <c:if test="${not fn:containsIgnoreCase(paymentLine, 'Visits')  && pageContext.session.getAttribute('ifpRoleId') == 4}">
+                                       <th>Benefit Category</th>
+                                       <th>Level</th>
+                                    </c:if>
+                                       <th>Network Tier</th>
+                                       <th>Coinsurance</th>
+                                       <th>Copayment</th>
+                                       <th>Max Copayment</th>
+                                       <th>Deductible Applies</th>
+                                       <th>Covered</th>
+                                       <th>Per Occurance Deductible</th>
+                                       <th>Med/Rx Deductibles Combined</th>
+                                       <th>Benefit Indicator</th>
+                                    <c:if test="${pageContext.session.getAttribute('ifpRoleId') == 4 }">
+                                       <th>Depending Upon POS</th>
+                                       <th>Split Cost Share</th>
+                                       <th>HSA Eligible</th>
+                                       <th>Plan Code</th>
+                                       <th>Product ID</th>
+
+
+                                         <th> </th>
+                                   </c:if>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        	<c:choose>
+                               <c:when test="${not fn:containsIgnoreCase(paymentLine, 'Visits') && pageContext.session.getAttribute('ifpRoleId') != 4}">
+                                   <td>${serviceRuleManagementDTO.plCostShareDTO[0].tierNumber}</td>
+                                   <td>${serviceRuleManagementDTO.plCostShareDTO[0].coins}</td>
+                                   <td>${serviceRuleManagementDTO.plCostShareDTO[0].copayStr}</td>
+                                   <td>${serviceRuleManagementDTO.plCostShareDTO[0].copayMax}</td>
+                                   <td>${serviceRuleManagementDTO.plCostShareDTO[0].dedApplies}</td>
+                                   <td>${serviceRuleManagementDTO.plCostShareDTO[0].isCovered}</td>
+                                   <td>${serviceRuleManagementDTO.plCostShareDTO[0].pod}</td>
+                                   <td>${serviceRuleManagementDTO.plCostShareDTO[0].rxIndicator}</td>
+                                   <td>${serviceRuleManagementDTO.plCostShareDTO[0].benefitIndicator}</td>
+                              </c:when>
+                              <c:otherwise>
+                                    <c:forEach var="plCostShare" items="${serviceRuleManagementDTO.plCostShareDTO}" varStatus="loop">
+                                       <tr>
+                                          <c:if test="${ fn:containsIgnoreCase(plCostShare.paymentLine, 'Visits')}">
+                                            <td>${plCostShare.benefitCategory}</td>
+                                            <td>${plCostShare.paymentLine}</td>
+                                         </c:if>
+                                         <c:if test="${ not fn:containsIgnoreCase(plCostShare.paymentLine, 'Visits') && pageContext.session.getAttribute('ifpRoleId') == 4 }">
+                                           <td>${plCostShare.benefitCategory}</td>
+                                           <td>${plCostShare.paymentLine}</td>
+                                         </c:if>
+                                           <td>${plCostShare.tierNumber}</td>
+                                           <td>${plCostShare.coins}</td>
+                                           <td>${plCostShare.copayStr}</td>
+                                           <td>${plCostShare.copayMax}</td>
+                                           <td>${plCostShare.dedApplies}</td>
+                                           <td>${plCostShare.isCovered}</td>
+                                           <td>${plCostShare.pod}</td>
+                                           <td>${plCostShare.rxIndicator}</td>
+                                           <td>${plCostShare.benefitIndicator}</td>
+                                        <c:if test="${pageContext.session.getAttribute('ifpRoleId') == 4 }">
+                                          <td>${plCostShare.depPOS}</td>
+                                          <td>${plCostShare.splitCostShare}</td>
+                                          <td>${plCostShare.hsaEligible}</td>
+                                          <td>${plCostShare.planCode}</td>
+                                          <td>${plCostShare.pdpdId}</td>
+
+                                              <td>
+                                                    <div class="btn-group" role="group" id="buttons" aria-label="Basic example">
+                                                      <button type="button" id="splitBtn" name="splitButton" title="Split" data-toggle="tooltip" class="btn btn-outline-light"
+                                                         onclick="splitServiceRuleMgmt(`${plCostShare.plCostShareID}`,`${plCostShare.benefitCategory}`);">
+                                                         <i class="fa-solid fa-arrows-split-up-and-left"></i>
+                                                       </button>
+                                                       <button type="button" id="greenDropBtn" name="greenDropBtn" title="Drop" data-toggle="tooltip" class="btn btn-outline-success"
+                                                           onclick="dropServiceRuleMgmt(`${plCostShare.plCostShareID}`);" disabled>
+                                                           <i class="fa-solid fa-link-slash"></i>
+                                                      </button>
+                                                      <button type="button" id="copyBtn" name="copyBtn" title="Copy" data-toggle="tooltip" class="btn btn-outline-warning"
+                                                         onclick="copyServiceRuleMgmt(`${plCostShare.plCostShareID}`);" disabled>
+                                                         <i class="fa-regular fa-copy"></i>
+                                                      </button>
+                                                      <button type="button" id="deleteBtn" name="deleteBtn" title="Delete" data-toggle="tooltip" class="btn btn-outline-danger"
+                                                          onclick="deleteServiceRuleMgmt(`${plCostShare.plCostShareID}`,`${plCostShare.benefitCategory}`);">
+                                                           <i class="fa-solid fa-trash"></i>
+                                                      </button>
+                                                    </div>
+                                               </td>
+                                           </c:if>
+                                           </tr>
+                                         </c:forEach>
+                                    </c:otherwise>
+                               </c:choose>
+                        </tbody>
+                    </table>
+                    <c:if test="${ empty serviceRuleManagementDTO.plCostShareDTO && serviceRuleManagementDTO.plCostShareDTO.size() == 0}">
+            				<div><p align="center">No PL Records found..!</p></div>
+        			</c:if>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <h4 class="text-primary">Service Rule Record:</h4>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <div class="mb-3">
+                          <label class="form-label">Rule<span style="color: red;">*</span></label>
+                          <input type="text" class="form-control required-field" name="serviceRule" id="serviceRule" value="${serviceRuleManagementDTO.serviceRule}">
+                       		<datalist id="seseRuleList">
+                       		   <c:forEach var="relPerDefMap" items="${serviceMgmtDDMap.serviceRuleIdMap}">
+                       				 <option id="${relPerDefMap.key}" name="${relPerDefMap.value}">${relPerDefMap.value}</option>
+                       		   </c:forEach>
+                       		</datalist>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="mb-3">
+                        <label for="serviceDescription" class="form-label">Description</label>
+                        <input type="text" class="form-control" id="description" name="description" placeholder="" value="${serviceRuleManagementDTO.description}"  maxlength="70">
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <div class="mb-3">
+                        <label class="form-label">Type</label>
+                        <div class="form-floating">
+                            <select class="form-select" id="serviceTypeList" onchange="getEnabledOrDisabled();">
+                                <c:forEach var="type" items="${serviceMgmtDDMap.serviceRuleTypeMap}">
+                                    <option id="${type.key}" name="${type.value}" value="${type.value}" ${type.value== (serviceRuleManagementDTO.serviceTypeStr != null ? serviceRuleManagementDTO.serviceTypeStr : 'C - Counter') ? 'selected' : ''}>
+                                        ${type.value}
+                                    </option>
+                                </c:forEach>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="mb-3">
+                     <label class="form-label">Calc Type</label>
+                           <div class="form-floating">
+                               <select class="form-select" id="serviceCalcMethodList">
+                                 <c:forEach var="serviceCalc" items="${serviceMgmtDDMap.serviceRuleCalcTypeMap}">
+                                   <option id="${serviceCalc.key}" name="${serviceCalc.value}" ${serviceCalc.value== (serviceRuleManagementDTO.serviceCalcMethodStr != null ? serviceRuleManagementDTO.serviceCalcMethodStr : 'T - Traditional') ? 'selected' : ''}>
+                                     ${serviceCalc.value}
+                                     </option>
+                                   </c:forEach>
+                                 </select>
+                           </div>
+                     </div>
+            	</div>
+            </div>
+            <div class="row">
+                <div class="col">
+                      <div class="mb-3">
+                         <label class="form-label">Gender</label>
+                          <div class="form-floating">
+                             <select class="form-select" id="serviceGenderList">
+                                 <c:forEach var="gender" items="${serviceMgmtDDMap.genderMap}">
+                                    <option id="${gender.key}" name="${gender.value}" value="${gender.value}" ${gender.value== ( serviceRuleManagementDTO.serviceGenderStr != null ?  serviceRuleManagementDTO.serviceGenderStr : 'B - Both') ? 'selected' : ''}>
+                                    ${gender.value}
+                                     </option>
+                                 </c:forEach>
+                              </select>
+                          </div>
+                     </div>
+            	</div>
+                <div class="col">
+                     <div class="mb-3">
+                        <label for="expCode" class="form-label"></label>
+                         <div class="form-floating">
+                             <input type="text" class="form-control" list="expCodeList" id="expCode" name="expCode" placeholder=""
+                                    value="${serviceRuleManagementDTO.expCode != null ? serviceRuleManagementDTO.expCode : ""}" onchange="resetIfInvalid(this);"
+                                    disabled="disabled">
+                             <label for="expCode" class="form-label">Explanation Code</label>
+                                 <datalist id="expCodeList">
+                                     <c:forEach var="code" items="${serviceMgmtDDMap.explanationCodeMap}">
+                                         <option id="${code.key}" name="${code.value}">${code.value}</option>
+                                     </c:forEach>
+                                 </datalist>
+                     </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <div class="mb-3">
+                        <label for="serviceAgeMin" class="form-label">Age Minimum</label>
+                        <input type="text" class="form-control" id="serviceAgeMin" name="serviceAgeMin" placeholder="" value="${serviceRuleManagementDTO.serviceAgeMinInt != null ? serviceRuleManagementDTO.serviceAgeMinInt : 0}" onkeypress="return validateNumber(event)" maxlength="5">
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="mb-3">
+                        <label for="serviceAgeMax" class="form-label">Age Maximum</label>
+                        <input type="text" class="form-control" id="serviceAgeMax" name="serviceAgeMax" placeholder="" value="${serviceRuleManagementDTO.serviceAgeMaxInt != null ? serviceRuleManagementDTO.serviceAgeMaxInt : 999}" onkeypress="return validateNumber(event)" maxlength="5">
+                    </div>
+                </div>
+            </div>
+            <div class="text-primary">
+                <h4>Service Rule Tier Records:</h4>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <table class="table table-sm table-striped" id="serviceTier_table" class="table" data-toggle="table" data-mobile-responsive="true">
+                        <thead>
+                            <tr>
+                                <th>Service Tier</th>
+                                <th>Deductible Accumulator</th>
+                                <th>Type</th>
+                                <th>Tier Excess Amount Per Counter</th>
+                                <th>Allowable Counter</th>
+                                <th>Allowable Amount</th>
+                                <th>Coinsurance</th>
+                                <th>Copayment</th>
+                                <th> </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <input type="hidden" id="serviceRuleTierData" name="serviceRuleTierData" value="${serviceRuleManagementDTO.serviceRuleTierDTO}"/>
+                        	<c:forEach var="serviceRuleTier" items="${serviceRuleManagementDTO.serviceRuleTierDTO}" varStatus="loop">
+                            <tr>
+                                <td>${serviceRuleTier.codeInt}</td>
+                                <td>${serviceRuleTier.accumulatorCodeInt}</td>
+                                <td>${serviceRuleTier.type}</td>
+                                <td>${serviceRuleTier.tierExAmtPerCounter}</td>
+                                <td>${serviceRuleTier.minStr}</td>
+                                <td>${serviceRuleTier.maxStr}</td>
+                                <td>${serviceRuleTier.coinsuranceStr}</td>
+                                <td>${serviceRuleTier.copaymentStr}</td>
+                                <td>
+                                	<div class="btn-group" role="group" aria-label="Basic example">
+                                        <button type="button" title="Edit" id="edit" name="edit" data-toggle="tooltip" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#serviceRuleTierModal"
+                                        	onclick="serviceRuleTierDetails('${serviceRuleTier.serviceRuleTierID}','${serviceRuleManagementDTO.serviceRuleID}','${serviceRuleTier.codeInt}','${serviceRuleTier.accumulatorCodeInt}','${serviceRuleManagementDTO.serviceTypeStr}','${serviceRuleTier.tierExAmtPerCounter}','${serviceRuleTier.minStr}','${serviceRuleTier.maxStr}','${serviceRuleTier.coinsuranceStr}','${serviceRuleTier.copaymentStr}')">
+                                        	<i class="fa-solid fa-pen-to-square"></i>
+                                        </button>
+                                        <button type=button title="Delete" id="delete" name="delete" class="btn btn-outline-danger" data-toggle="tooltip" data-placement="bottom"
+                                        	onclick="serviceRuleTierDelete('${serviceRuleTier.serviceRuleTierID}','${serviceRuleManagementDTO.serviceRuleID}')">
+                                        	<i class='fas fa-trash'></i>
+                                        </button>
+                                   	</div>
+                                </td>
+                            </tr>
+                            
+                           </c:forEach> 
+                        </tbody>
+                    </table>
+                    <!--
+                    <c:if test="${ empty serviceRuleManagementDTO.serviceRuleTierDTO && serviceRuleManagementDTO.serviceRuleTierDTO.size() == 0}">
+            				<div><p>No Service Rule Tier Records found..! Please click on "<B>+ Add Service Rule Tier</B>" button to add new service Rule Tiers.</p></div>
+        			</c:if>
+        			-->
+                </div>
+            </div>
+             <div class="text-primary">
+                     <h4>Associated SERL:</h4>
+                        </div>
+                        <div class="row">
+                              <div class="col">
+                                <div class="mb-3">
+                                  <div class="form-floating">
+                                      <input type="text" class="form-control" list="relatedServicesIdMapList" id="relatedServicesIdMap" name="relatedServicesIdMap" placeholder=""
+                                          value="${serviceRuleManagementDTO.serlRelIdDescr!= null ? serviceRuleManagementDTO.serlRelIdDescr: ""}" onchange="resetIfInvalid(this);">
+                                       <label for="relatedServicesIdMap" class="form-label">Related Services ID</label>
+                                        <datalist id="relatedServicesIdMapList">
+                                           <c:forEach var="relPerDefMap" items="${serviceMgmtDDMap.relatedServicesIdMap}">
+                                                 <option id="${relPerDefMap.key}" name="${relPerDefMap.value}">${relPerDefMap.value}</option>
+                                           </c:forEach>
+                                        </datalist>
+                                  </div>
+                              </div>
+                              </div>
+                        </div>
+            <div class="row">
+                <div class="col">
+                    <!-- 
+                    <c:if test="${ empty serviceRuleManagementDTO.serviceMapDTO && serviceRuleManagementDTO.serviceMapDTO.size() == 0}">
+            				<div><p>No Service ID Records found..! Please click on "<B>+ Add Service ID</B>" button to add new service ID's.</p></div>
+        			</c:if>
+        			-->
+                </div>
+            </div>
+            <div class="row" style="margin-top: 1em;">
+                <div class="col">
+                    <div class="d-grid gap-2">
+                        <button type="button" id="addServiceRuleTierButton" name="addServiceRuleTierButton" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#serviceRuleTierModal" disabled><i class="fa-solid fa-plus"></i> Add Service Rule Tier</button>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="d-grid gap-2">
+                        <a role="button" class="btn btn-outline-warning" href="./serviceRuleMgmt"><i class="fa-solid fa-ban"></i> Cancel</a>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="d-grid gap-2">
+                        <button type="button" id="deleteEditButton" name="deleteEditButton" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal" ><i class="fa-solid fa-trash"></i>Delete</button>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="d-grid gap-2">
+                        <button type="button" id="saveButton" name="saveButton" class="btn btn-outline-primary" onclick="saveOrUpdateServiceRuleRecordData();" disabled>
+                        <i class="fa-solid fa-floppy-disk"></i> Save
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+	</div>
+	<%@include file="footer.html"%>
+    <!-- Designed by Connor Ripley for United HealthCare Services, Inc. All Rights Reserved. Copyright 2018. -->
+    <!-- Service Rule Tier Edit Modal -->
+    <div class="modal fade" id="serviceRuleTierModal" tabindex="-1" aria-labelledby="serviceRuleTierModalLabel" aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="serviceRuleTierModalLabel">Service Rule Tier</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="clearServiceRuleTierFields();"></button>
+                </div>
+                <div class="modal-body">
+                    <form> 
+                    	<input type="hidden" name="serviceRuleTierID" id="serviceRuleTierID" value=""/>
+                		<input type="hidden" name="serviceRuleID" id="serviceRuleID" value=""/>
+                        <div class="row">
+                            <div class="col">
+                                <div class="mb-3">
+                                    <label for="code" class="form-label">Service Tier</label>
+                                    
+                                    <input type="text" class="form-control" id="code" name="code" maxlength="5" placeholder="" onkeypress="return validateNumber(event)">
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="mb-3">
+                                    <label for="accumulatorCode" class="form-label">Deductible Accumulator</label>
+                                    <input type="text" class="form-control" id="accumulatorCode" name="accumulatorCode" placeholder="" maxlength="5" onkeypress="return validateNumber(event)">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <div class="mb-3">
+                                  <label for="type" class="form-label">Type</label>
+                                  <input type="text" class="form-control" id="type" name="type" disabled="disabled" value = "${serviceRuleManagementDTO.serviceTypeStr}" placeholder="" maxlength="20" onkeypress="return validateNumber(event)">
+                                </div>
+                            </div>
+                            <div class="col"></div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                               <div class="form-check">
+                                     <input class="form-check-input" type="checkbox" checked="checked" id="tierExAmtPerCounter" name="tierExAmtPerCounter">
+                                     <label class="form-check-label" for="tierExAmtPerCounter">Tier Excess Amount Per Counter</label>
+                               </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <div class="mb-3">
+                                    <label for="min" class="form-label">Allowable Counter</label>
+                                    <input type="text" class="form-control" id="min" name="min" placeholder="" onkeypress="return validateNumber(event)" maxlength="18">
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="mb-3">
+                                    <label for="max" class="form-label">Allowable Amount</label>
+                                    <input type="text" class="form-control" id="max" name="max" placeholder="" onkeypress="return validateNumber(event)" maxlength="18">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <div class="mb-3">
+                                    <label for="coinsurance" class="form-label">Coinsurance</label>
+                                    <input type="text" class="form-control" id="coinsurance" name="coinsurance" placeholder="" onkeypress="return validateNumber(event)" maxlength="18">
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="mb-3">
+                                    <label for="copayment" class="form-label">Copayment</label>
+                                    <input type="text" class="form-control" id="copayment" name="copayment" placeholder="" onkeypress="return validateNumber(event)" maxlength="18">
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-warning" data-bs-dismiss="modal" onclick="clearServiceRuleTierFields();"><i class="fa-solid fa-ban"></i> Cancel</button>
+                    <button type="button" name="serviceRuleTierBtn" id="serviceRuleTierBtn" class="btn btn-primary" onclick="saveOrUpdateServiceRuleTierData();"><i class="fa-solid fa-floppy-disk"></i> Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Service Rule Tier Edit Modal -->
+    <div class="modal fade" id="serviceMapModal" tabindex="-1" aria-labelledby="serviceMapModalLabel" aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="serviceMapModalLabel">Service Rule Map</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="clearServiceMapFields();"></button>
+                </div>
+                <div class="modal-body">
+                    <form> 
+                        <div class="row">
+                            <div class="col">
+                    <div class="mb-3">
+                        <div class="form-floating">
+		               		<input type="text" class="form-control" list="serviceMapList" id="serviceMap" name="serviceMap" placeholder="" onchange="resetIfInvalid(this);">
+		                    <label for="serviceMap" class="form-label">Service Tier</label>
+		                    <datalist id="serviceMapList">							
+		                        <c:forEach var="serMap" items="${serviceMgmtDDMap.serviceMap}">
+				                       <option id="${serMap.key}" name="${serMap.value}">${serMap.value}</option>
+				                </c:forEach>
+		                    </datalist>
+	                 	</div>
+                    </div>
+            	</div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-warning" data-bs-dismiss="modal"  onclick="clearServiceMapFields();"><i class="fa-solid fa-ban"></i> Cancel</button>
+                    <button type="button" class="btn btn-primary"  name="serviceAssBtn" id="serviceAssBtn" onclick="serviceMapAdd();"><i class="fa-solid fa-floppy-disk"></i> Add</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+<form action="./serviceRuleMgmt" id="serviceRuleManagement" method="get" autocomplete="off"> 
+<div class="modal fade" id="sucessBoxModal" tabindex="-1" role="dialog" aria-labelledby="sucessBoxModalLabel"  aria-hidden="true" data-bs-backdrop="static">
+       <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5><span id="lblWarnTitle" class="modal-title text-success"> Success </span></h5>
+                <!-- button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button-->
+            </div>
+            <div class="modal-body" id="SaveSuccessMessage">                
+            </div>
+            <div class="modal-footer">                	
+                <button type="submit" id="serviceRuleManagement" class="btn btn-outline-success" data-dismiss="modal">OK</a>
+            </div>
+        </div>
+	</div>
+</div>
+</form>
+
+ <form action="./serviceRuleMgmt" id="dserMgmt" method="get" autocomplete="off"> 
+<div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="errorModalLabel"  aria-hidden="true" data-bs-backdrop="static">
+       <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5><span id="ErrorClose" class="modal-title text-danger"> Error </span></h5>
+                <!-- button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button-->
+            </div>
+            <div class="modal-body" id="ErrorMesssage">                
+            </div>
+            <div class="modal-footer">                	
+                <button type="submit" id="serMgmt" class="btn btn-outline-success" data-dismiss="modal">OK</a>
+            </div>
+        </div>
+	</div>
+</div>
+</form>
+
+ <form action="./getServiceRuleMgmtDetails" id="serviceMgmtWarning" method="get" autocomplete="off"> 
+<div class="modal fade" id="warningModal" tabindex="-1" role="dialog" aria-labelledby="warningModalLabel"  aria-hidden="true" data-bs-backdrop="static">
+       <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5><span id="warningClose" class="modal-title text-danger"> Warning </span></h5>
+                <!-- button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button-->
+            </div>
+            <div class="modal-body" id="WarningMesssage">                
+            </div>
+            <div class="modal-footer">                	
+                <button type="submit" id="serviceMgmtWarningOk" class="btn btn-outline-success" data-dismiss="modal">OK</a>
+            </div>
+        </div>
+	</div>
+</div>
+</form>
+
+<form action="./getServiceRuleMgmtDetails" id="serviceRuleMgmt" method="get" autocomplete="off"> 
+<div class="modal fade" id="sucessBoxRowModal" tabindex="-1" role="dialog" aria-labelledby="sucessBoxRowModalLabel"  aria-hidden="true" data-bs-backdrop="static">
+       <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5><span id="lblWarnTitle" class="modal-title text-success"> Success </span></h5>
+                <!-- button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button-->
+            </div>
+            <div class="modal-body" id="successMessage">                
+            </div>
+            <div class="modal-footer">                	
+                <button type="submit" id="serviceRuleMgmt" class="btn btn-outline-success" data-dismiss="modal">OK</a>
+            </div>
+        </div>
+	</div>
+</div>
+</form>
+
+
+<!-- Delete Warning Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title text-danger" id="deleteModalLabel">Warning</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="costShareMapIDs" id="costShareMapIDs" value="${serviceRuleManagementDTO.costShareMapIDs}">
+                    <input type="hidden" name="plCostShareIDs" id="plCostShareIDs" value="${serviceRuleManagementDTO.plCostShareIDs}">
+                    <input type="hidden" name="costShareAdminIDs" id="costShareAdminIDs" value="${serviceRuleManagementDTO.costShareAdminIDs}">
+                    <input type="hidden" name="paymentLineCount" id="paymentLineCount" value="${serviceRuleManagementDTO.paymentLineCount}">
+                    <input type="hidden" name="serviceRuleID" id="serviceRuleID" value="${serviceRuleManagementDTO.serviceRuleID}">
+                    <input type="hidden" name="serviceRuleSerlID" id="serviceRuleSerlID" value="${serviceRuleManagementDTO.serviceRuleSerlDTO[0].serviceRuleSerlID}">
+                    <form> 
+                        <div class="row">
+                            <div class="col">
+                                <h5 class="text-danger">Please confirm that you'd like to delete this entry. Once deleted it cannot be restored.</h5>
+                            </div>
+                        </div>
+                        <div class="row" style="padding-top: 1em;">
+                            <div class="col">
+                                <div class="d-grid gap-2">
+                                    <button type="button" class="btn btn-danger" onclick="serviceRuleDeleteEditRequest();">Confirm & Delete</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal fade" id="deleteRowModal" tabindex="-1" aria-labelledby="deleteRowModalLabel" aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title text-danger" id="deleteRowModalLabel">Warning</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                	<input type="hidden" name="serviceRuleTierID" id="serviceRuleTierID" value=""/>
+                	<input type="hidden" name="serviceRuleID" id="serviceRuleID" value=""/>
+                    <form> 
+                        <div class="row">
+                            <div class="col">
+                                <h5 class="text-danger">Please confirm that you'd like to delete this entry. Once deleted it cannot be restored.</h5>
+                            </div>
+                        </div>
+                        <div class="row" style="padding-top: 1em;">
+                            <div class="col">
+                                <div class="d-grid gap-2">
+                                    <button type="button" class="btn btn-danger" onclick="deleteServiceRuleTierRowData();">Confirm & Delete</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal fade" id="deleteMapRowModal" tabindex="-1" aria-labelledby="deleteMapRowModalLabel" aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title text-danger" id="deleteMapRowModalLabel">Warning</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                	<input type="hidden" name="serviceMapID" id="serviceMapID" value=""/>
+                	<input type="hidden" name="serviceRuleID" id="serviceRuleID" value=""/>
+                    <form> 
+                        <div class="row">
+                            <div class="col">
+                                <h5 class="text-danger">Please confirm that you'd like to delete this entry. Once deleted it cannot be restored.</h5>
+                            </div>
+                        </div>
+                        <div class="row" style="padding-top: 1em;">
+                            <div class="col">
+                                <div class="d-grid gap-2">
+                                    <button type="button" class="btn btn-danger" onclick="deleteServiceAssocistedRowData();">Confirm & Delete</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal fade" id="splitModal" tabindex="-1" aria-labelledby="splitModalLabel" aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title text-warning" id="splitModalLabel">Confirm</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                	<input type="hidden" name="plCostShareID" id="plCostShareID" value=""/>
+
+                    <form> 
+                        <div class="row">
+                            <div class="col">
+                            	<!-- h5 class="text-body">Please confirm that you'd like to split this entry</h5-->
+                            	<h5 class="text-body" id="splitMessage"></h5>
+                            </div>
+                        </div>
+                        <div class="row" style="padding-top: 1em;">
+                            <div class="col">
+                                <div class="d-grid gap-2">
+                                    <button type="button" class="btn btn-outline-success" onclick="splitServiceRuleMgmtRecord();">Confirm & Split</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal fade" id="deleteBenCatModal" tabindex="-1" aria-labelledby="deleteBenCatModelLabel" aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title text-warning" id="deleteBenCatModelLabel">Confirm</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                	<input type="hidden" name="plCostShareID" id="plCostShareID" value=""/>
+                	<input type="hidden" name="costShareMapID" id="costShareMapID" value=""/>
+                	<input type="hidden" name="serviceRuleID" id="serviceRuleID" value=""/>
+                	<form> 
+                        <div class="row">
+                            <div class="col">
+                                <!-- h5 class="text-body">Please confirm that you'd like to Delete this entry</h5-->
+                                <h5 class="text-body" id="deleteMessage"></h5>
+                            </div>
+                        </div>
+                        <div class="row" style="padding-top: 1em;">
+                            <div class="col">
+                                <div class="d-grid gap-2">
+                                    <button type="button" class="btn btn-outline-success" onclick="deleteServiceRuleMgmtRecord();">Confirm & Delete </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal fade" id="copyModal" tabindex="-1" aria-labelledby="copyModelLabel" aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title text-warning" id="copyModelLabel">Confirm</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                	<input type="hidden" name="plCostShareID" id="plCostShareID" value=""/>
+                	<input type="hidden" name="costShareMapID" id="costShareMapID" value=""/>
+                	<input type="hidden" name="serviceRuleID" id="serviceRuleID" value=""/>
+                	<form> 
+                        <div class="row">
+                            <div class="col">
+                                <!-- h5 class="text-body">Please confirm that you'd like to Copy this entry</h5-->
+                                <h5 class="text-body" id="copyMessage"></h5>
+                            </div>
+                        </div>
+                        <div class="row" style="padding-top: 1em;">
+                            <div class="col">
+                                <div class="d-grid gap-2">
+                                    <button type="button" class="btn btn-outline-success" onclick="copyServiceRuleMgmtRecord();">Confirm & Copy </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+  	</div>
+        
+    <div class="modal fade" id="dropModal" tabindex="-1" aria-labelledby="dropModelLabel" aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title text-warning" id="dropModelLabel">Confirm</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                	<input type="hidden" name="plCostShareID" id="plCostShareID" value=""/>
+                	<input type="hidden" name="costShareMapID" id="costShareMapID" value=""/>
+                	<input type="hidden" name="costShareAdminID" id="costShareAdminID" value=""/>
+                	<input type="hidden" name="serviceRuleID" id="serviceRuleID" value=""/>
+                	<form> 
+                        <div class="row">
+                            <div class="col">
+                                <!-- h5 class="text-body">Please confirm that you'd like to Drop this Benefit Category</h5-->
+                                <h5 class="text-body" id="dropMessage"></h5>
+                            </div>
+                        </div>
+                        <div class="row" style="padding-top: 1em;">
+                            <div class="col">
+                                <div class="d-grid gap-2">
+                                    <button type="button" class="btn btn-outline-success" onclick="dropServiceRuleMgmtRecord();">Confirm & Drop </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <form action="./getServiceRuleMgmtDetails" id="serviceRuleMgmt" method="get" autocomplete="off"> 
+		<div class="modal fade" id="sucessBoxCopyModal" tabindex="-1" role="dialog" aria-labelledby="sucessBoxCopyModalLabel"  aria-hidden="true" data-bs-backdrop="static">
+       		<div class="modal-dialog modal-dialog-centered" role="document">
+        		<div class="modal-content">
+            		<div class="modal-header">
+		                <h5><span id="lblWarnTitle" class="modal-title text-success"> Success </span></h5>
+		                <!-- button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button-->
+            		</div>
+            		<div class="modal-body" id="successCopyMessage"></div>
+            		<div class="modal-footer">                	
+                		<button type="submit" id="serviceRuleMgmt" class="btn btn-outline-success" data-dismiss="modal"  onclick="targetCopyTab();">OK</a>
+            		</div>
+        		</div>
+			</div>
+		</div>
+	</form>
+	
+	<form action="./getServiceRuleMgmtDetails" id="serviceRuleMgmt" method="get" autocomplete="off"> 
+		<div class="modal fade" id="sucessBoxDropModal" tabindex="-1" role="dialog" aria-labelledby="sucessBoxDropModalLabel"  aria-hidden="true" data-bs-backdrop="static">
+       		<div class="modal-dialog modal-dialog-centered" role="document">
+        		<div class="modal-content">
+            		<div class="modal-header">
+		                <h5><span id="lblWarnTitle" class="modal-title text-success"> Success </span></h5>
+		                <!-- button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button-->
+            		</div>
+            		<div class="modal-body" id="successDropMessage"></div>
+            		<div class="modal-footer">                	
+                		<button type="submit" id="serviceRuleMgmt" class="btn btn-outline-success" data-dismiss="modal" onclick="targetDropTab();">OK</a>
+            		</div>
+        		</div>
+			</div>
+		</div>
+</form>
+</body>
+</html>
+
+
+JS
+
+function getServiceRuleManagementData() {
+	showAndHide();
+	$.ajax({
+		type: "GET",
+		contentType: "application/json",
+		url: "serviceRuleManagementResponseTable",
+		dataType: 'json',
+		success: function (response) {
+			if (response.length !== 0) {
+				$('#datatable').css('display', 'block');
+				$('#noResult').css('display', 'none');
+				setServiceRuleManagementDatatable(response);
+			} else {
+				$('#noResult').css('display', 'block');
+				$('#datatable').css('display', 'none');
+			}
+			showAndHide();
+		},
+		error: function (xhr) {
+			$('#datatable').css('display', 'none');
+			$('#noResult').css('display', 'block');
+		}
+	});
+	document.getElementById('editButton').disabled = true;
+	document.getElementById('deleteButton').disabled = true;
+	document.getElementById('exportButton').disabled = true;
+};
+
+function setServiceRuleManagementDatatable(inputData) {
+	const datatable = new DataTable('#datatable', {
+		columns: [
+			{
+				name: 'costShareMapIDs',
+				id: 'costShareMapIDs',
+				editable: false,
+				dropdown: false,
+
+			},
+			{
+				name: 'costShareAdminIDs',
+				id: 'costShareAdminIDs',
+				editable: false,
+				dropdown: false,
+			},
+			{
+				name: 'plCostShareIDs',
+				id: 'plCostShareIDs',
+				editable: false,
+				dropdown: false,
+			},
+			{
+				name: 'serviceRuleID',
+				id: 'serviceRuleID',
+				editable: false,
+				dropdown: false,
+			},
+			{
+				name: 'Rule',
+				id: 'serviceRule',
+				editable: false,
+			},
+			{
+				name: 'Description',
+				id: 'description',
+				editable: false,
+			},
+			{
+				name: 'Calculation Method',
+				id: 'serviceCalcMethod',
+				editable: false,
+			},
+			{
+				name: 'Cost Share Assigned',
+				id: 'deductibleAssigned',
+				editable: false,
+			},
+		],
+		events: {
+			onCheckRow: () => {
+				let arrayrow = datatable.getRows();
+				for (var i = 0; i < arrayrow.length; i++) {
+					arrayrow[i][0].value = "false";
+				}
+				this.checkedRows = this.datatable.rowmanager.getCheckedRows();
+				if (this.checkedRows.length <= 0) {
+					document.getElementById('editButton').disabled = true;
+					document.getElementById('deleteButton').disabled = true;
+					document.getElementById('exportButton').disabled = true;
+				} else {
+					for (var i = 0; i < this.checkedRows.length; i++) {
+						arrayrow[this.checkedRows[i]][0].value = "true";
+					}
+					if (this.checkedRows.length >= 2) {
+						document.getElementById('editButton').disabled = true;
+						document.getElementById('exportButton').disabled = false;
+						if (abbRoleId != 19) { //is user role not as just view: ifp_abb_view user.
+							document.getElementById('deleteButton').disabled = false;
+						}
+					} else {
+						document.getElementById('editButton').disabled = false;
+						document.getElementById('exportButton').disabled = false;
+						if (abbRoleId != 19) { //is user role not as just view: ifp_abb_view user.
+							document.getElementById('deleteButton').disabled = false;
+						}
+					}
+				}
+			}
+		},
+		data: inputData,
+		checkboxColumn: true,
+		id: "costShareMapID",
+		inlineFilters: true,
+		layout: 'fluid',
+		serialNoColumn: true,
+		noDataMessage: 'Awe Snap! No results, please create new Sevice Rule to display.'
+	});
+	datatable.style.setStyle(`.dt-cell__content .dt-cell__content--header-0`, { padding: '0' });
+	datatable.style.setStyle(`.dt-cell--header .dt-cell__content`, { overflow: 'visible' });
+	datatable.style.setStyle(`.dt-cell__content--col-0`, { overflow: 'visible' });
+	datatable.style.setStyle(`.dt-toast`, { top: '40px' });
+	datatable.style.setStyle(`.dt-scrollable`, { 'border-bottom': '1px solid #d1d8dd !important' });
+	window.datatable = datatable;
+	$(".dt-cell__content--header-1 > .sort-indicator").text("S. No.");
+}
+
+function setTitle() {
+	$('.dt-cell__content').each(function (i, obj) {
+		if ($(this).children('input').attr('type') != 'checkbox' && ($(this).text()).trim()) {
+			$(this).attr("title", $(this).text());
+			$(this).attr("data-toggle", "tooltip");
+			$(this).tooltip({ placement: 'top' });
+			$(this).attr("data-title", $(this).attr("title"));
+			$(this).removeAttr("title");
+		}
+	});
+}
+
+setInterval(function () {
+	$('.bs-tooltip-end').css('display', 'none');
+}, 0);
+
+setInterval(function () {
+	setTitle();
+}, 1000);
+
+$(document).ready(function () {
+	var serviceRuleID = $("#serviceRuleID").val();
+	var costShareMapID = $("#costShareMapIDs").val();
+	var plCostShareID = $("#plCostShareIDs").val();
+	var paymentLineCount = $("#paymentLineCount").val();
+	if (costShareMapID == "" && serviceRuleID == "" && plCostShareID == "" && paymentLineCount == "") {
+		// for ADD Btn or New page
+		document.getElementById('deleteEditButton').disabled = true;
+		document.getElementById('addSerivceRuleTierButton').disabled = true;
+		//		document.getElementById('addSerivceIDButton').disabled = true;
+	}
+
+	if (paymentLineCount == 1 && costShareMapID != "") {
+		document.getElementById('splitBtn').disabled = true;
+		//		document.getElementById('greenDropBtn').disabled = true;
+		document.getElementById('deleteBtn').disabled = true;
+		//		document.getElementById('copyBtn').disabled=true;
+	} else if (paymentLineCount > 1 && costShareMapID != "") {
+		if (abbRoleId != 19) {
+			document.getElementById('splitBtn').disabled = false;
+			//			document.getElementById('greenDropBtn').disabled = false;
+			document.getElementById('deleteBtn').disabled = false;
+			//document.getElementById('copyBtn').disabled=false;
+		} else {
+			document.getElementById('splitBtn').disabled = true;
+			//			document.getElementById('greenDropBtn').disabled = true;
+			document.getElementById('deleteBtn').disabled = true;
+			//document.getElementById('copyBtn').disabled=true;
+		}
+	}
+
+	// for EDIT Btn or New page
+	if (paymentLineCount > 0 && serviceRuleID != "" && costShareMapID != "") {
+		if (abbRoleId != 19) {
+			document.getElementById('addSerivceRuleTierButton').disabled = false;
+		} else {
+			document.getElementById('addSerivceRuleTierButton').disabled = true;
+		}
+	} else if (paymentLineCount > 0 && serviceRuleID == "" && costShareMapID != "") {
+		document.getElementById('addSerivceRuleTierButton').disabled = true;
+	} else if (paymentLineCount == "0" && serviceRuleID != "" && costShareMapID != "") {
+		document.getElementById('addSerivceRuleTierButton').disabled = true;
+	}
+
+	//disable explanation code dropdown if service rule Type is not Disallow
+    var serviceTypeList = document.getElementById('serviceTypeList');
+    if (serviceTypeList.value != '') {
+        var serviceType = serviceTypeList.options.namedItem(serviceTypeList.value).id;
+        if(serviceType == 1 || serviceType == 2) {
+        	$("#expCode").prop('disabled', true);
+        } else if(serviceType == 3) {
+            $("#expCode").prop('disabled', false);
+        }
+    }
+});
+
+function getEnabledOrDisabled() {
+    var serviceTypeList = document.getElementById('serviceTypeList');
+    if (serviceTypeList.value != '') {
+        var serviceType = serviceTypeList.options.namedItem(serviceTypeList.value).id;
+        if(serviceType == 1 || serviceType == 2) {
+            $("#expCode").val("");
+        	$("#expCode").prop('disabled', true);
+        } else if(serviceType == 3) {
+        	$("#expCode").prop('disabled', false);
+        	var serviceRuleID = $("#serviceRuleID").val();
+        	if(serviceRuleID != "") {
+        		var expCodeEdit = $("#serviceRuleExpCode").val();
+        		$("#expCode").val(expCodeEdit);
+        	}
+        }
+    }
+}
+
+
+function serviceRuleEditManagement() {
+	let request = {}
+	let checkedArray = datatable.getRows();
+	datatable.clearToastMessage();
+	let serviceRuleID = null;
+	let costShareMapIDArray = []
+	let costShareAdminIDArray = []
+	let plCostShareIDArray = []
+	for (var i = 0; i < checkedArray.length; i++) {
+		if (checkedArray[i][0].value === 'true') {
+			costShareMapIDArray = Object.entries(checkedArray[i][2]).filter(([key, value]) => !isNaN(key) && typeof value === 'number')
+				.map(([key, value]) => value);
+			costShareAdminIDArray = Object.entries(checkedArray[i][3]).filter(([key, value]) => !isNaN(key) && typeof value === 'number')
+				.map(([key, value]) => value);
+			plCostShareIDArray = Object.entries(checkedArray[i][4]).filter(([key, value]) => !isNaN(key) && typeof value === 'number')
+				.map(([key, value]) => value);
+			serviceRuleID = checkedArray[i][5].content;
+			request = {
+				costShareMapIDs: costShareMapIDArray,
+				costShareAdminIDs: costShareAdminIDArray,
+				plCostShareIDs: plCostShareIDArray,
+				serviceRuleID: serviceRuleID,
+				serviceRule: null,
+				serviceType: null,
+				description: null,
+				serviceCalcMethod: null,
+				serviceAgeMin: null,
+				serviceAgeMax: null,
+				serviceGender: null
+			}
+		}
+	}
+	var myHeaders = new Headers();
+	myHeaders.append("Content-Type", "application/json");
+	showAndHide();
+	$.ajax({
+		type: "POST",
+		contentType: "application/json",
+		url: "setCostShareMapID",
+		data: JSON.stringify(request),
+		dataType: 'json',
+		success: function (response) {
+			if (response.serviceRuleMsg == "SUCCESS") {
+				window.location.href = "./getServiceRuleMgmtDetails";
+			}
+			showAndHide();
+		},
+		error: function (xhr) {
+			alert("Error while Getting Service Rule Management Details.");
+		}
+	});
+}
+
+function serviceRuleExport() {
+	    let request = {};
+    	let checkedArray = datatable.getRows();
+    	datatable.clearToastMessage();
+    	let serviceRuleID = null;
+    	let costShareMapIDArray = []
+    	let costShareAdminIDArray = []
+    	let plCostShareIDArray = []
+    	var serviceRuleMgmtRequestList = [];
+    	for (var i = 0; i < checkedArray.length; i++) {
+    		if (checkedArray[i][0].value === 'true') {
+    		    var serviceRuleMgmtRequest = {};
+    			costShareMapIDArray = Object.entries(checkedArray[i][2]).filter(([key, value]) => !isNaN(key) && typeof value === 'number')
+    				.map(([key, value]) => value);
+    			costShareAdminIDArray = Object.entries(checkedArray[i][3]).filter(([key, value]) => !isNaN(key) && typeof value === 'number')
+    				.map(([key, value]) => value);
+    			plCostShareIDArray = Object.entries(checkedArray[i][4]).filter(([key, value]) => !isNaN(key) && typeof value === 'number')
+    				.map(([key, value]) => value);
+    			serviceRuleID = checkedArray[i][5].content;
+    			serviceRuleMgmtRequest = {
+    				costShareMapIDs: costShareMapIDArray,
+    				costShareAdminIDs: costShareAdminIDArray,
+    				plCostShareIDs: plCostShareIDArray,
+    				serviceRuleID: serviceRuleID,
+    				serviceRule: null,
+    				serviceType: null,
+    				description: null,
+    				serviceCalcMethod: null,
+    				serviceAgeMin: null,
+    				serviceAgeMax: null,
+    				serviceGender: null
+    			}
+    			serviceRuleMgmtRequestList.push(serviceRuleMgmtRequest);
+    		}
+    	}
+    	var myHeaders = new Headers();
+    	myHeaders.append("Content-Type", "application/json");
+        request["serviceRuleMgmtRequestList"] = serviceRuleMgmtRequestList;
+    	showAndHide();
+    $.ajax({
+            type: "POST",
+            contentType: "application/json",
+            url: "serviceRuleManagement.xlsx",
+            cache: false,
+            data: JSON.stringify(request),
+            xhr: function () {
+                var xhr = new XMLHttpRequest();
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState == 2) {
+                        if (xhr.status == 200) {
+                            xhr.responseType = "blob";
+                        } else {
+                            xhr.responseType = "text";
+                        }
+                    }
+                };
+                return xhr;
+            },
+            success: function (data) {
+                var blob = new Blob([data], { type: "application/octetstream" });
+                let today = new Date();
+                let dd = today.getDate();
+                let mm = today.getMonth() + 1;
+                let yyyy = today.getFullYear();
+                if (dd < 10) {
+                    dd = '0' + dd;
+                }
+                if (mm < 10) {
+                    mm = '0' + mm;
+                }
+                today = mm + '.' + dd + '.' + yyyy;
+                var excelName = "serviceRuleManagement_" + today + ".xlsx"
+                if (window.navigator.msSaveBlob) {
+                    window.navigator.msSaveBlob(blob, excelName);
+                } else {
+                    var windUrl = window.URL || window.webkitURL;
+                    var url = windUrl.createObjectURL(blob);
+                    var link = document.createElement("a");
+                    link.href = url
+                    link.setAttribute("download", excelName);
+                    document.body.appendChild(link);
+                    link.click();
+                    link.remove();
+                }
+            },
+            error: function (xhr, textStatus, errorThrown) {
+                alert("Something went wrong while exporting service rule management, please try again..!");
+            }
+        });
+            getServiceRuleManagementData();
+            showAndHide();
+   }
+
+function validateNumber(e) {
+	const serviceAgeMin = document.querySelector('#serviceAgeMin');
+	if (serviceAgeMin != null || serviceAgeMin != undefined) {
+		fieldValidateWithoutDecimal(serviceAgeMin);
+	}
+
+	const serviceAgeMax = document.querySelector('#serviceAgeMax');
+	if (serviceAgeMax != null || serviceAgeMax != undefined) {
+		fieldValidateWithoutDecimal(serviceAgeMax);
+	}
+
+	const code = document.querySelector('#code');
+	if (code != null || code != undefined) {
+		fieldValidateWithoutDecimal(code);
+	}
+
+	const accumulatorCode = document.querySelector('#accumulatorCode');
+	if (accumulatorCode != null || accumulatorCode != undefined) {
+		fieldValidateWithoutDecimal(accumulatorCode);
+	}
+
+	const min = document.querySelector('#min');
+	if (min != null || min != undefined) {
+		fieldValidateWithDecimal(min);
+	}
+
+	const max = document.querySelector('#max');
+	if (max != null || max != undefined) {
+		fieldValidateWithDecimal(max);
+	}
+
+	const coinsurance = document.querySelector('#coinsurance');
+	if (coinsurance != null || coinsurance != undefined) {
+		fieldValidateWithDecimal(coinsurance);
+	}
+
+	const copayment = document.querySelector('#copayment');
+	if (copayment != null || copayment != undefined) {
+		fieldValidateWithDecimal(copayment);
+	}
+}
+
+function fieldValidateWithoutDecimal(restricted) {
+	restricted.addEventListener('keyup', event => {
+		const value = event.target.value;
+		if (!/^[0-9]{0,5}$/.test(value) && value !== '') {
+			event.target.value = event.target.getAttribute('data-value');
+		} else {
+			event.target.setAttribute('data-value', value);
+		}
+	});
+}
+
+function fieldValidateWithDecimal(restricted) {
+	restricted.addEventListener('keyup', event => {
+		const value = event.target.value;
+		if (!/^[0-9]+\.?[0-9]{0,2}?$/.test(value) && value !== '') {
+			event.target.value = event.target.getAttribute('data-value');
+		} else {
+			event.target.setAttribute('data-value', value);
+		}
+	});
+}
+
+function resetIfInvalid(el) {
+	if (el.value == "") {
+		return;
+	}
+	var options = el.list.options;
+	for (var i = 0; i < options.length; i++) {
+		if (el.value == options[i].value) {
+			return;
+		}
+	}
+	el.value = "";
+}
+
+function serviceRuleDeleteRequest() {
+	let serviceRuleMgmtArray = [];
+	let checkedArray = datatable.getRows();
+	datatable.clearToastMessage();
+	let costShareMapIDArray = []
+	let costShareAdminIDArray = []
+	let plCostShareIDArray = []
+	for (var i = 0; i < checkedArray.length; i++) {
+		if (checkedArray[i][0].value === 'true') {
+			costShareMapIDArray = Object.entries(checkedArray[i][2]).filter(([key, value]) => !isNaN(key) && typeof value === 'number')
+				.map(([key, value]) => value);
+			costShareAdminIDArray = Object.entries(checkedArray[i][3]).filter(([key, value]) => !isNaN(key) && typeof value === 'number')
+				.map(([key, value]) => value);
+			plCostShareIDArray = Object.entries(checkedArray[i][4]).filter(([key, value]) => !isNaN(key) && typeof value === 'number')
+				.map(([key, value]) => value);
+			let serviceRuleID = checkedArray[i][5].content;
+			let request = {
+				costShareMapIDs: costShareMapIDArray,
+				costShareAdminIDs: costShareAdminIDArray,
+				plCostShareIDs: plCostShareIDArray,
+				serviceRuleID: serviceRuleID,
+				serviceRule: null,
+				serviceType: null,
+				description: null,
+				serviceCalcMethod: null,
+				serviceAgeMin: null,
+				serviceAgeMax: null,
+				serviceGender: null
+			}
+			serviceRuleMgmtArray.push(request);
+		}
+	}
+	serviceRuleDeleteMulti(serviceRuleMgmtArray);
+}
+
+function serviceRuleDeleteEditRequest() {
+	var costShareMapIDsStr = $("#costShareMapIDs").val();
+	var costShareMapIDs = null;
+	if (costShareMapIDsStr != "") {
+		costShareMapIDs = JSON.parse(costShareMapIDsStr);
+	}
+
+	let costShareAdminIDsStr = $("#costShareAdminIDs").val();
+	let costShareAdminIDs = null;
+	if (costShareAdminIDsStr != "") {
+		costShareAdminIDs = JSON.parse(costShareAdminIDsStr);
+	}
+
+	let plCostShareIDsStr = $("#plCostShareIDs").val();
+	let plCostShareIDs = null;
+	if (plCostShareIDsStr != "") {
+		plCostShareIDs = JSON.parse(plCostShareIDsStr);
+	}
+
+	let serviceRuleIDStr = $("#serviceRuleID").val();
+	let serviceRuleID = null;
+	if (serviceRuleIDStr != "") {
+		serviceRuleID = serviceRuleIDStr;
+	}
+	let serviceRuleMgmtRequest = {
+		costShareMapIDs: costShareMapIDs,
+		costShareAdminIDs: costShareAdminIDs,
+		plCostShareIDs: plCostShareIDs,
+		serviceRuleID: serviceRuleID,
+		serviceRule: null,
+		serviceType: null,
+		description: null,
+		serviceCalcMethod: null,
+		serviceAgeMin: null,
+		serviceAgeMax: null,
+		serviceGender: null
+
+	}
+	serviceRuleDelete(serviceRuleMgmtRequest);
+}
+
+
+function serviceRuleDelete(serviceRuleMgmtRequest) {
+
+	var myHeaders = new Headers();
+	myHeaders.append("Content-Type", "application/json");
+	showAndHide();
+	$.ajax({
+		type: "POST",
+		contentType: "application/json",
+		url: "deleteServiceRuleMgmt",
+		data: JSON.stringify(serviceRuleMgmtRequest),
+		dataType: 'json',
+		success: function (response) {
+			if (response.serviceRuleMsg == "SUCCESS") {
+				$("#deleteModal").modal("hide");
+				document.getElementById("SaveSuccessMessage").innerHTML = 'Successfully deleted selected Service Rule';
+				$("#sucessBoxModal").modal("toggle");
+			}
+			getServiceRuleManagementData();
+			showAndHide();
+		},
+		error: function (xhr) {
+			alert("Error while deleting Service Rule");
+		}
+	});
+}
+function serviceRuleDeleteMulti(serviceRuleMgmtArray) {
+	var myHeaders = new Headers();
+	myHeaders.append("Content-Type", "application/json");
+	showAndHide();
+	$.ajax({
+		type: "POST",
+		contentType: "application/json",
+		url: "multiDeleteServiceRuleMgmt",
+		data: JSON.stringify(serviceRuleMgmtArray),
+		dataType: 'json',
+		success: function (response) {
+			if (response.serviceRuleMsg == "SUCCESS") {
+				$("#deleteModal").modal("hide");
+				document.getElementById("SaveSuccessMessage").innerHTML = 'Successfully deleted selected Service Rule';
+				$("#sucessBoxModal").modal("toggle");
+			}
+			getServiceRuleManagementData();
+			showAndHide();
+		},
+		error: function (xhr) {
+			alert("Error while deleting Service Rule");
+		}
+	});
+}
+function serviceRuleTierDelete(serviceRuleTierID, serviceRuleID) {
+	$("#deleteRowModal").modal("toggle");
+	$('#serviceRuleTierID').val(serviceRuleTierID);
+	$('#serviceRuleID').val(serviceRuleID);
+}
+
+function deleteServiceRuleTierRowData() {
+	var request = {};
+	request["serviceRuleTierID"] = document.getElementById("serviceRuleTierID").value;
+	request["serviceRuleID"] = document.getElementById("serviceRuleID").value;
+	if (request != null || request != '') {
+		showAndHide();
+		$.ajax({
+			type: "POST",
+			contentType: "application/json",
+			url: "deleteServiceRuleTierID",
+			data: JSON.stringify(request),
+			dataType: 'json',
+			success: function (response) {
+				if (response.serviceRuleMsg == "SUCCESS") {
+					$("#deleteRowModal").modal('hide');
+					document.getElementById("successMessage").innerHTML = 'Successfully deleted selected Service Rule ID';
+					$("#sucessBoxRowModal").modal("toggle");
+				}
+				showAndHide();
+			},
+			error: function (xhr) {
+				alert("Something went wrong while Deleting the service Rule ID, please try again..!");
+			}
+		});
+	}
+}
+
+function deleteAssociatedServiceID(serviceMapID, serviceRuleID) {
+	$("#deleteMapRowModal").modal("toggle");
+	$('#serviceMapID').val(serviceMapID);
+	$('#serviceRuleID').val(serviceRuleID);
+}
+
+function deleteServiceAssocistedRowData() {
+	var request = {};
+	request["serviceMapID"] = document.getElementById("serviceMapID").value;
+	request["serviceRuleID"] = document.getElementById("serviceRuleID").value;
+	if (request != null || request != '') {
+		showAndHide();
+		$.ajax({
+			type: "POST",
+			contentType: "application/json",
+			url: "deleteAssociatedServiceID",
+			data: JSON.stringify(request),
+			dataType: 'json',
+			success: function (response) {
+				if (response.serviceRuleMsg == "SUCCESS") {
+					$("#deleteMapRowModal").modal('hide');
+					document.getElementById("successMessage").innerHTML = 'Successfully deleted selected Service ID';
+					$("#sucessBoxRowModal").modal("toggle");
+				}
+				showAndHide();
+			},
+			error: function (xhr) {
+				alert("Something went wrong while Deleting the service Rule ID, please try again..!");
+			}
+		});
+	}
+}
+
+function serviceRuleTierDetails(serviceRuleTierID, serviceRuleID, code, accumulatorCode, type, tierExAmtPerCounter, min, max, coinsurance, copayment) {
+	$('#serviceRuleTierID').val(serviceRuleTierID);
+	$('#serviceRuleID').val(serviceRuleID);
+	$('#code').val(code);
+	$("#accumulatorCode").val(accumulatorCode);
+	$("#type").val(type);
+	document.getElementById("type").disabled = true;
+	if(tierExAmtPerCounter == "true"){
+        document.getElementById("tierExAmtPerCounter").checked = true;
+	}else{
+	    document.getElementById("tierExAmtPerCounter").checked = false;
+	}
+	$("#min").val(min);
+	$("#max").val(max);
+	$("#coinsurance").val(coinsurance);
+	$("#copayment").val(copayment);
+}
+
+
+
+function saveOrUpdateServiceRuleRecordData() {
+	if (saveOrUpdateServiceRuleRecordRequest() != null) {
+		var request = saveOrUpdateServiceRuleRecordRequest();
+		showAndHide();
+		$.ajax({
+			type: "POST",
+			contentType: "application/json",
+			url: "saveOrUpdateServiceRuleRecord",
+			data: JSON.stringify(request),
+			dataType: 'json',
+			success: function (response) {
+				if (response.serviceRuleMsg == "SUCCESS") {
+					var serviceRuleID = request["serviceRuleID"];
+					if (serviceRuleID != null) {
+						document.getElementById("SaveSuccessMessage").innerHTML = 'Successfully Save Service Rule Record';
+						$("#sucessBoxModal").modal("toggle");
+					} else {
+						document.getElementById("SaveSuccessMessage").innerHTML = 'Successfully Save Service Rule Record';
+						$("#sucessBoxModal").modal("toggle");
+					}
+				}
+				showAndHide();
+			},
+			error: function (xhr) {
+				alert("Something went wrong while saving the Service Rule Record, please try again..!");
+			}
+		});
+	}
+}
+
 function saveOrUpdateServiceRuleRecordRequest() {
 	var request = {};
 	var serviceRule = null;
@@ -158,4 +1664,517 @@ function saveOrUpdateServiceRuleRecordRequest() {
 
 		return request;
 	}
+}
+
+function callSecondAPI(serviceRuleID) {
+	if (saveOrUpdateSerlTypeRequest != null) {
+		var request = saveOrUpdateSerlTypeRequest();
+		showAndHide();
+		$.ajax({
+			type: "POST",
+			contentType: "application/json",
+			url: "saveOrUpdateSerlTypeRecord",
+			data: JSON.stringify(request),
+			dataType: 'json',
+			success: function (response) {
+				if (response.serviceRuleMsg == "MAXLIMIT") {
+					document.getElementById("WarningMesssage").innerHTML = 'Please select SERL Type';
+					$("#warningModal").modal("toggle");
+				}
+				showAndHide();
+			},
+			error: function (xhr) {
+				document.getElementById("WarningMesssage").innerHTML = 'Something went wrong while saving the SERL Type Record, please try again..!';
+				$("#warningModal").modal("toggle");
+			}
+		});
+	}
+}
+
+function saveOrUpdateSerlTypeRequest() {
+	var request = {};
+	var serviceRuleID = $("#serviceRuleID").val();
+	request["serviceRuleID"] = serviceRuleID;
+	var relatedServicesIdMap = document.getElementById('relatedServicesIdMap');
+	if (relatedServicesIdMap.value != '') {
+		var relatedServicesIdMapList = document.getElementById('relatedServicesIdMapList');
+		request["relatedServicesId"] = relatedServicesIdMapList.options.namedItem(relatedServicesIdMap.value).id;
+	} else {
+		request["relatedServicesId"] = "";
+	}
+    return request;
+}
+
+function saveOrUpdateServiceRuleTierData() {
+	if (saveOrUpdateServiceRuleTierRequestData() != null) {
+		var request = saveOrUpdateServiceRuleTierRequestData();
+		showAndHide();
+		$.ajax({
+			type: "POST",
+			contentType: "application/json",
+			url: "saveOrUpdateServiceRuleTierData",
+			data: JSON.stringify(request),
+			dataType: 'json',
+			success: function (response) {
+				if (response.serviceRuleMsg == "SUCCESS") {
+					$("#serviceRuleTierModal").modal('hide');
+					document.getElementById("successMessage").innerHTML = 'Successfully Save Service Rule Tier Data';
+					$("#sucessBoxRowModal").modal("toggle");
+				} else if (response.serviceRuleMsg == "DuplicateRecords") {
+					$("#serviceRuleTierModal").modal('hide');
+					document.getElementById("WarningMesssage").innerHTML = 'Please modify the field values to save Service Rule Tier Data. Record already exist for Service Rule ID.';
+					$("#warningModal").modal("toggle");
+				}
+				showAndHide();
+			},
+			error: function (xhr) {
+				alert("Something went wrong while updating the program, please try again..!");
+			}
+		});
+	}
+}
+
+function saveOrUpdateServiceRuleTierRequestData() {
+	var request = {};
+	var serviceRuleTierID = $("#serviceRuleTierID").val();
+	request["serviceRuleTierID"] = serviceRuleTierID;
+
+	var serviceRuleID = null;
+	var code = null
+	var accumulatorCode = null;
+	var type = null;
+	var tierExAmtPerCounter = null;
+	var min = null;
+	var max = null;
+	var coinsurance = null;
+	var copayment = null;
+
+	if (serviceRuleTierID != "") {
+		//Edit tier
+		serviceRuleID = $("#serviceRuleID").val();
+		code = $("#code").val();
+		accumulatorCode = $('#accumulatorCode').val();
+		type = $('#type').val();
+        if(document.getElementById("tierExAmtPerCounter").checked){
+          tierExAmtPerCounter = true;
+        }else{
+          tierExAmtPerCounter = false;
+        }
+		min = $('#min').val();
+		max = $('#max').val();
+		coinsurance = $('#coinsurance').val();
+		copayment = $('#copayment').val();
+	} else {
+		//New  tier
+		serviceRuleID = $("#serviceRuleID").val();
+		code = $("#code").val();
+		accumulatorCode = $('#accumulatorCode').val();
+		type = $('#type').val();
+        if(document.getElementById("tierExAmtPerCounter").checked){
+          tierExAmtPerCounter = true;
+        }else{
+          tierExAmtPerCounter = false;
+        }
+		min = $('#min').val();
+		max = $('#max').val();
+		coinsurance = $('#coinsurance').val();
+		copayment = $('#copayment').val();
+
+	}
+	if (code == "" && accumulatorCode == "" && type == "" && min == "" && max == "" && coinsurance == "" && copayment == "") {
+		$("#serviceRuleTierModal").modal('hide');
+		document.getElementById("WarningMesssage").innerHTML = 'Please fill atleast 1 field data for Service Rule Tier';
+		$("#warningModal").modal("toggle");
+	} else {
+		request["serviceRuleID"] = serviceRuleID;
+		request["code"] = code;
+		request["accumulatorCode"] = accumulatorCode;
+		request["type"] = type;
+        request["tierExAmtPerCounter"] = tierExAmtPerCounter;
+		request["min"] = min;
+		request["max"] = max;
+		request["coinsurance"] = coinsurance;
+		request["copayment"] = copayment;
+		return request;
+	}
+}
+
+function serviceMapAdd() {
+	if (serviceMapRequest() != null) {
+		var request = serviceMapRequest();
+		var myHeaders = new Headers();
+		myHeaders.append("Content-Type", "application/json");
+		showAndHide();
+		$.ajax({
+			type: "POST",
+			contentType: "application/json",
+			url: "saveAssociatesServiceIdData",
+			data: JSON.stringify(request),
+			dataType: 'json',
+			success: function (response) {
+				if (response.serviceRuleMsg == "SUCCESS") {
+					$("#serviceMapModal").modal('hide');
+					document.getElementById("successMessage").innerHTML = 'Successfully Save Associated Service Data';
+					$("#sucessBoxRowModal").modal("toggle");
+				} else if (response.serviceRuleMsg == "DuplicateRecords") {
+					$("#serviceMapModal").modal('hide');
+					document.getElementById("WarningMesssage").innerHTML = 'Record already exist for Associated Service ID';
+					$("#warningModal").modal("toggle");
+				} else if (response.serviceRuleMsg == "MAXLIMIT") {
+					$("#serviceMapModal").modal('hide');
+					document.getElementById("WarningMesssage").innerHTML = 'Selected Service IDs already Associated';
+					$("#warningModal").modal("toggle");
+				}
+				showAndHide();
+			},
+			error: function (xhr) {
+				alert("Error while Getting Service Rule Management Details.");
+			}
+		});
+	}
+}
+
+function serviceMapRequest() {
+	var request = {};
+	var serviceRuleID = $("#serviceRuleID").val();
+	request["serviceRuleID"] = serviceRuleID;
+
+	var serviceMap = document.getElementById('serviceMap');
+	if (serviceMap.value != '') {
+		var serviceMapList = document.getElementById('serviceMapList');
+		request["serviceID"] = serviceMapList.options.namedItem(serviceMap.value).id;
+		request["serviceDescription"] = serviceMapList.options.namedItem(serviceMap.value).value;
+	} else {
+		request["serviceID"] = "";
+		request["serviceDescription"] = "";
+	}
+
+	var serID = request["serviceID"];
+	if (serID == '' || serID == null) {
+		$("#serviceMapModal").modal('hide');
+		document.getElementById("WarningMesssage").innerHTML = 'Please select Service Map ID';
+		$("#warningModal").modal("toggle");
+	} else {
+		return request;
+	}
+}
+
+function clearServiceRuleTierFields() {
+	setTimeout(function () {
+		$('#code').val("");
+		$('#accumulatorCode').val("");
+		document.getElementById("type").disabled = true;
+		document.getElementById("tierExAmtPerCounter").checked = true;
+		$('#min').val("");
+		$('#max').val("");
+		$('#coinsurance').val("");
+		$('#copayment').val("");
+		$('#noResult').css('display', 'none');
+	}, 100);
+}
+
+function clearServiceMapFields() {
+	setTimeout(function () {
+		$('#serviceMap').val("");
+		$('#noResult').css('display', 'none');
+	}, 100);
+}
+
+function splitServiceRuleMgmt(plCostShareID, benefitCategory) {
+	document.getElementById("splitMessage").innerHTML = "Please confirm that you would like to Split below entry - <br/><span style='color: red;'>" + benefitCategory + "</span>";
+	$("#splitModal").modal("toggle");
+	$('#plCostShareID').val(plCostShareID);
+}
+
+function splitServiceRuleMgmtRecord() {
+	var request = {};
+	var selectedPlCostShareID = document.getElementById("plCostShareID").value;
+	selectedPlCostShareID = parseInt(selectedPlCostShareID);
+	request["plCostShareID"] = selectedPlCostShareID
+	if (request != null || request != '') {
+		showAndHide();
+		$.ajax({
+			type: "POST",
+			contentType: "application/json",
+			url: "splitPaymentLineRecord",
+			data: JSON.stringify(request),
+			dataType: 'json',
+			success: function (response) {
+				if (response) {
+					$.ajax({
+						type: "POST",
+						contentType: "application/json",
+						url: "setCostShareMapID",
+						data: JSON.stringify(response.serviceRuleMgmtRequest),
+						dataType: 'json',
+						success: function (response) {
+							if (response.serviceRuleMsg == "SUCCESS") {
+								var newTab = window.open("./getServiceRuleMgmtSplitDetails", '_blank')
+								newTab.focus();
+							}
+						},
+					});
+				}
+				var request1 = {};
+				var costShareMapIDs = document.getElementById("costShareMapIDs").value;
+				request1["costShareMapIDs"] = JSON.parse(costShareMapIDs)
+				var costShareAdminIDs = document.getElementById("costShareAdminIDs").value;
+				request1["costShareAdminIDs"] = JSON.parse(costShareAdminIDs)
+				var plCostShareIDs = document.getElementById("plCostShareIDs").value;
+				request1["plCostShareIDs"] = JSON.parse(plCostShareIDs);
+				request1["splitPlCostShareID"] = selectedPlCostShareID;
+				var serviceRuleID = document.getElementById("serviceRuleID").value;
+				if (serviceRuleID) {
+					request1["serviceRuleID"] = serviceRuleID;
+				} else {
+					request1["serviceRuleID"] = "";
+				}
+				$.ajax({
+					type: "POST",
+					contentType: "application/json",
+					url: "removePlCostShare",
+					data: JSON.stringify(request1),
+					dataType: 'json',
+					success: function (response) {
+						if (response) {
+							$.ajax({
+								type: "POST",
+								contentType: "application/json",
+								url: "setCostShareMapID",
+								data: JSON.stringify(response.serviceRuleMgmtRequest),
+								dataType: 'json',
+								success: function (response1) {
+									window.location.href = "./getServiceRuleMgmtDetails";
+								}
+							});
+						}
+					}
+				});
+				showAndHide();
+			},
+			error: function (xhr) {
+				alert("Something went wrong while split Payment Line Service Rule Management, please try again..!");
+			}
+		});
+	}
+}
+
+function deleteServiceRuleMgmt(plCostShareID, benefitCategory) {
+	document.getElementById("deleteMessage").innerHTML = "Please confirm that you would like to Delete below entry - <br><span style='color: red;'>" + benefitCategory + "</span>";
+	$("#deleteBenCatModal").modal("toggle");
+	$('#plCostShareID').val(plCostShareID);
+}
+
+function deleteServiceRuleMgmtRecord() {
+	var request = {};
+	request["plCostShareID"] = document.getElementById("plCostShareID").value;
+	if (request != null || request != '') {
+		showAndHide();
+		$.ajax({
+			type: "POST",
+			contentType: "application/json",
+			url: "deletePaymentLineRecord",
+			data: JSON.stringify(request),
+			dataType: 'json',
+			success: function (response) {
+				if (response.serviceRuleMsg == "SUCCESS") {
+					$("#deleteBenCatModal").modal('hide');
+					document.getElementById("successMessage").innerHTML = 'Successfully Deleted PL Benefit categaory Record';
+					$("#sucessBoxRowModal").modal("toggle");
+				} else if (response.serviceRuleMsg == "ERROR") {
+					$("#deleteBenCatModal").modal('hide');
+					document.getElementById("ErrorMesssage").innerHTML = 'Something went wrong while deleting PL Benefit categaory Record, please try again..!';
+					$("#errorModal").modal("toggle");
+				}
+				showAndHide();
+			},
+			error: function (xhr) {
+				alert("Something went wrong while deleting PL Benefit categaory Record, please try again..!");
+			}
+		});
+	}
+}
+
+function copyServiceRuleMgmt(plCostShareID, costShareMapID, serviceRuleID, benefitCategory) {
+	document.getElementById("copyMessage").innerHTML = "Please confirm that you would like to Copy below entry - <br><span style='color: red;'>" + benefitCategory + "</span>";
+	$("#copyModal").modal("toggle");
+	$('#plCostShareID').val(plCostShareID);
+	$('#costShareMapID').val(costShareMapID);
+	$('#serviceRuleID').val(serviceRuleID);
+}
+
+function copyServiceRuleMgmtRecord() {
+	var request = {};
+	request["plCostShareID"] = document.getElementById("plCostShareID").value;
+	request["costShareMapID"] = document.getElementById("costShareMapID").value;
+	request["serviceRuleID"] = document.getElementById("serviceRuleID").value;
+	if (request != null || request != '') {
+		showAndHide();
+		$.ajax({
+			type: "POST",
+			contentType: "application/json",
+			url: "copyPaymentLineRecord",
+			data: JSON.stringify(request),
+			dataType: 'json',
+			success: function (response) {
+				if (response.serviceRuleMsg == "SUCCESS") {
+					$("#copyModal").modal('hide');
+					document.getElementById("successCopyMessage").innerHTML = 'Successfully Copy PL Benefit categaory Record';
+					$("#sucessBoxCopyModal").modal("toggle");
+				} else if (response.serviceRuleMsg == "ERROR") {
+					$("#copyModal").modal('hide');
+					document.getElementById("ErrorMesssage").innerHTML = 'Something went wrong while copying PL Benefit categaory Record, please try again..!';
+					$("#errorModal").modal("toggle");
+				}
+				showAndHide();
+			},
+			error: function (xhr) {
+				alert("Something went wrong while copying PL Benefit categaory Record, please try again..!");
+			}
+		});
+	}
+}
+
+function dropServiceRuleMgmt(plCostShareID, costShareMapID, costShareAdminID, serviceRuleID, benefitCategory) {
+	document.getElementById("dropMessage").innerHTML = "Please confirm that you would like to Drop below entry :- <br/><span style='color: red;'>" + benefitCategory + "</span>";
+	$("#dropModal").modal("toggle");
+	$('#plCostShareID').val(plCostShareID);
+	$('#costShareMapID').val(costShareMapID);
+	$('#costShareAdminID').val(costShareAdminID);
+	$('#serviceRuleID').val(serviceRuleID);
+}
+
+function dropServiceRuleMgmtRecord() {
+	var request = {};
+	request["plCostShareID"] = document.getElementById("plCostShareID").value;
+	request["costShareMapID"] = document.getElementById("costShareMapID").value;
+	request["costShareAdminID"] = document.getElementById("costShareAdminID").value;
+	request["serviceRuleID"] = document.getElementById("serviceRuleID").value;
+	if (request != null || request != '') {
+		showAndHide();
+		$.ajax({
+			type: "POST",
+			contentType: "application/json",
+			url: "dropPaymentLineRecord",
+			data: JSON.stringify(request),
+			dataType: 'json',
+			success: function (response) {
+				if (response.serviceRuleMsg == "SUCCESS") {
+					$("#dropModal").modal('hide');
+					document.getElementById("successDropMessage").innerHTML = 'Successfully Drop Payment Line Benefit categaory';
+					$("#sucessBoxDropModal").modal("toggle");
+				} else if (response.serviceRuleMsg == "ERROR") {
+					$("#dropModal").modal('hide');
+					document.getElementById("ErrorMesssage").innerHTML = 'Something went wrong while dropping PL Benefit categaory, please try again..!';
+					$("#errorModal").modal("toggle");
+				}
+				showAndHide();
+			},
+			error: function (xhr) {
+				alert("Something went wrong while dropping PL Benefit categaory, please try again..!");
+			}
+		});
+	}
+}
+
+function targetCopyTab() {
+	window.open("./getServiceRuleMgmtCopyDetails", "_blank");
+}
+
+function targetDropTab() {
+	window.open("./getServiceRuleMgmtDropDetails", "_blank");
+}
+
+function handleRuleFieldInput() {
+    var response = $('#serviceRuleIdMap').val();
+    $.ajax({
+        url: "serviceRuleRecordsDetails",
+        type: 'GET',
+        data: {serviceRule: response},
+        contentType: "application/json",
+        dataType: 'json',
+        success: function(response) {
+
+            document.getElementById('description').value = response.serviceRuleRecordDTO.description;
+            document.getElementById('serviceAgeMin').value = response.serviceRuleRecordDTO.minimumAge;
+            document.getElementById('serviceAgeMax').value = response.serviceRuleRecordDTO.maximumAge;
+            var serviceType = response.serviceRuleRecordDTO.serviceRuleType;
+            var serviceTypeList = document.getElementById('serviceTypeList');
+            var options = serviceTypeList.options;
+            for (var i = 0; i < options.length; i++) {
+                  if (options[i].value === serviceType) {
+                         serviceTypeList.selectedIndex = i;
+                         break;
+                  }
+            }
+             var calculationType = response.serviceRuleRecordDTO.calculationType;
+             var serviceCalcMethodList = document.getElementById('serviceCalcMethodList');
+             var options = serviceCalcMethodList.options;
+             for (var i = 0; i < options.length; i++) {
+                    if (options[i].value === calculationType) {
+                        serviceCalcMethodList.selectedIndex = i;
+                        break;
+                    }
+             }
+
+            var gender = response.serviceRuleRecordDTO.gender;
+            var serviceGenderList = document.getElementById('serviceGenderList');
+            var options = serviceGenderList.options;
+            for (var i = 0; i < options.length; i++) {
+                    if (options[i].value === gender) {
+                        serviceGenderList.selectedIndex = i;
+                        break;
+                    }
+            }
+
+             var relatedServicesId = response.serviceRuleRecordDTO.serlRelId;
+               if (relatedServicesId === null) {
+                     document.getElementById("WarningMesssage").innerHTML = "SERL is not configured on SESE&SETR admin screen. Please select from the dropdown.";
+                      $("#warningModal").modal("show");
+                        document.getElementById("serviceMgmtWarningOk").addEventListener("click", function (event) {
+                            event.preventDefault();
+                            $("#warningModal").modal("hide");
+                        });
+                        document.getElementById("relatedServicesIdMap").value = "";
+               } else {
+                  var relatedServicesIdMap = document.getElementById('relatedServicesIdMap');
+                  var relatedServicesIdMapList = document.getElementById('relatedServicesIdMapList');
+                  var options = relatedServicesIdMapList.options;
+                      for (var i = 0; i < options.length; i++) {
+                             if (options[i].id === relatedServicesId) {
+                                 relatedServicesIdMap.value = options[i].value;
+                                 break;
+                             }
+                      }
+               }
+             document.getElementById('addServiceRuleTierButton').disabled = true;
+             populateServiceTierTable(response.serviceRuleRecordDTO.serviceRuleTierRecordDTO);
+        },
+        error: function(error) {
+            console.error('Error in fetching data', error);
+        }
+       });
+}
+
+function populateServiceTierTable(serviceRuleTierRecord) {
+    var tableBody = document.getElementById('serviceTier_table').getElementsByTagName('tbody')[0];
+    tableBody.innerHTML = '';
+    serviceRuleTierRecord.forEach(function(serviceRuleTier) {
+        var row = tableBody.insertRow();
+        if (serviceRuleTier.isTierExcessAmountPerCounter == "A") {
+                serviceRuleTier.isTierExcessAmountPerCounter = "true";
+        }else {
+                serviceRuleTier.isTierExcessAmountPerCounter = "false";
+        }
+        row.innerHTML = `
+            <td>${serviceRuleTier.serviceRuleTierID}</td>
+            <td>${serviceRuleTier.deductibleAccumulator}</td>
+            <td>${serviceRuleTier.tierNumber}</td>
+            <td>${serviceRuleTier.isTierExcessAmountPerCounter}</td>
+            <td>${serviceRuleTier.allowableCounter}</td>
+            <td>${serviceRuleTier.allowedAmount}</td>
+            <td>${serviceRuleTier.coinsurance}</td>
+            <td>${serviceRuleTier.copay}</td>
+        `;
+    });
 }
