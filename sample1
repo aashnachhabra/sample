@@ -1,12 +1,76 @@
-<div class="form-group">
-                            <label for="legalEntityList" >Legal Entity List</label>
-                            <select class="form-select" ng-model="requestBody.planDetails.legalEntityList" id="legalEntityList"
-                                    name="legalEntityList" ng-disabled="requestBody.parentPlanAssignmentID != null || ${pageContext.session.getAttribute('nonIfpRoleId') == 35}">
-                            <option value="">Select...</option>
-                            <option
-                                    ng-repeat="(key, value) in portfolioEditorDDMapResponse.legalEntityNonIfpMap"
-                                    value="{{value}}">{{value}}
-                            </option>
-                            </select>
-                        </div>
-how do i make this multiselect i added the multiple attribute but it disturbs the ui and make the dropdown menu come inside the textbox 
+name: Get Changed Files on PR Merge
+
+on:
+  pull_request:
+    types:
+      - closed
+
+jobs:
+  get-changed-files:
+    if: github.event.pull_request.merged == true
+    runs-on: uhg-runner
+
+    steps:
+      # Step 1: Authenticate with GitHub using PAT
+      - name: Authenticate with GitHub
+        run: echo "${{ secrets.GH_PAT }}" | gh auth login --with-token
+
+
+      # Step 2: Check out the repository
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      # Step 3: Get the files changed in the merged PR
+      - name: Fetch Changed Files
+        id: changed-files
+        run: |
+          # Get the PR number
+          PR_NUMBER="${{ github.event.pull_request.number }}"
+          echo "PR_NUMBER: $PR_NUMBER"
+
+          # Fetch the list of changed files using the GitHub REST API
+          FILES=$(curl -L \
+          -H "Accept: application/vnd.github+json" \
+          -H "Authorization: Bearer ${{ secrets.GH_PAT }}" \
+          -H "X-GitHub-Api-Version: 2022-11-28" \
+          "https://api.github.com/repos/${{ github.repository }}/pulls/$PR_NUMBER/files")
+
+          # Debug: Print FILES variable
+          echo "FILES: ${FILES}"
+
+          FILES_STATUS=$(echo "${FILES}" | jq -c '.[]' | while read -r file_info; do
+            # Extract details
+            FILE_PATH=$(echo "$file_info" | jq -r '.path')
+            ADDITIONS=$(echo "$file_info" | jq -r '.additions')
+            DELETIONS=$(echo "$file_info" | jq -r '.deletions')
+            STATUS=$(echo "$file_info" | jq -r '.status')
+
+            # Construct JSON output
+            echo "{\"path\": \"$FILE_PATH\", \"additions\": $ADDITIONS, \"deletions\": $DELETIONS, \"status\": \"$STATUS\"}"
+          done | jq -s '.')
+
+          # Save JSON output
+          echo "${FILES_STATUS}" > changed_files.json
+          echo "::set-output name=files::${FILES_STATUS}"
+      # Step 4: Print the changed files
+      - name: Display Changed Files
+        run: |
+          echo "Changed files:"
+          cat changed_files.json
+
+      # Step 5: Make an API call with the file paths, additions, deletions, and status
+#      - name: Send Changed Files to API
+#        run: |
+#          curl -X POST http://localhost:8900/api/documents/modifiedFilePathsFromGithub \
+#          -H "Content-Type: application/json" \
+#          -d @changed_files.json
+this is a worflow i create some time back to get changed files in a pr, but now it seems to be not working what previously it was working
+this is the error
+{
+    "message": "Not Found",
+    "documentation_url": "https://docs.github.com/rest/pulls/pulls#list-pull-requests-files",
+    "status": "404"
+}
+please fix or suggest alternate ways to do this functionality
+
+
