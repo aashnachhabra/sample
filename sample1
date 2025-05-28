@@ -72,5 +72,54 @@ this is the error
     "status": "404"
 }
 please fix or suggest alternate ways to do this functionality
+name: Get Changed Files on PR Merge
+
+on:
+  pull_request:
+    types:
+      - closed
+
+jobs:
+  get-changed-files:
+    if: github.event.pull_request.merged == true
+    runs-on: uhg-runner
+
+    steps:
+      # Step 1: Checkout the full repository
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Needed for git diff to work across commits
+
+      # Step 2: Get Changed Files using git diff
+      - name: Get Changed Files via Git
+        id: changed
+        run: |
+          BASE=${{ github.event.pull_request.base.sha }}
+          MERGE_COMMIT=${{ github.event.pull_request.merge_commit_sha }}
+
+          echo "Base SHA: $BASE"
+          echo "Merge Commit SHA: $MERGE_COMMIT"
+
+          git fetch origin $BASE $MERGE_COMMIT
+
+          # Get file changes: status (A/M/D) and path
+          CHANGED=$(git diff --name-status $BASE $MERGE_COMMIT | awk '{print "{\"path\":\""$2"\", \"status\":\""$1"\"},"}')
+          CHANGED_JSON="[$(echo $CHANGED | sed 's/,$//')]"
+
+          # Save to file and set as output
+          echo "$CHANGED_JSON" > changed_files.json
+          echo "files=$CHANGED_JSON" >> $GITHUB_OUTPUT
+
+      # Step 3: Display the Changed Files
+      - name: Display Changed Files
+        run: cat changed_files.json
+
+      # Step 4 (Optional): Send the changed files JSON to your API
+      # - name: Send Changed Files to API
+      #   run: |
+      #     curl -X POST http://localhost:8900/api/documents/modifiedFilePathsFromGithub \
+      #     -H "Content-Type: application/json" \
+      #     -d @changed_files.json
 
 
