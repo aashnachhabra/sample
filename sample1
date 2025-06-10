@@ -1,125 +1,323 @@
-name: Get Changed Files on PR Merge
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn"%>
+<!doctype html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<link rel="stylesheet" href="css/UHCcustom.css">
+	<link rel="stylesheet" href="css/bootstrap.css">
+	<link rel="stylesheet" href="css/css/fontawesome.min.css">
+	<link rel="stylesheet" href="css/css/brands.min.css">
+	<link rel="stylesheet" href="css/css/solid.min.css">
+	<link rel="stylesheet" href="css/loader.css">
+	<link href="https://unpkg.com/frappe-datatable@1.16.2/dist/frappe-datatable.min.css" rel="stylesheet">
+	<link rel="stylesheet" href="css/deductible-management.css">
+	<script src="js/jquery-3.3.1.min.js"></script>
+    <script src="js/popper.min.js"></script>
+	<script src="js/UHCcustom.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/loader.js"></script>
+     <!-- include the dependencies -->
+    <script src="https://unpkg.com/sortablejs@1.7.0/Sortable.min.js"></script>
+    <script src="https://unpkg.com/clusterize.js@0.18.0/clusterize.min.js"></script>
+    <!-- include the lib -->
+   	<script src="js/frappe-datatable.min.js"></script>
+    <script src="js/app/deductibleManagement.js"></script>
+	<title>Deductible Management</title>
+	<link rel="icon" href="assets/PlanBuilderFavIcon.png">
+	<script src="js/jquery-3.2.1.min.js"></script>
+	<script>
+		$(function () {
+			$('[data-toggle="tooltip"]').tooltip()
+		})
+		var abbRoleId = "${pageContext.session.getAttribute('abbRoleId')}";
+    </script>
+    <link href="https://unpkg.com/frappe-datatable@0.0.5/dist/frappe-datatable.min.css" rel="stylesheet">
+</head>
+<body onload="getDeductibleMgmtData()">
+	<%@include file="loader.jsp"%>
+	<%@include file="header.jsp"%>
+    <div class="text-primary" style="margin: 2em;">
+		<h1><i class="fa-solid fa-filter-circle-dollar"></i> Deductible Management</h1>
+	</div>
+    <div class="shadow-lg p-3 mb-5 bg-white rounded" style="margin:2em">
+        <form>
+        	<div class="row" style="margin-top: 1em;">
+                <div class="col">
+                    <div class="d-grid gap-2">
+                        <!-- button type="button" id="newButton" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#dedMgmtCreateModal"><i class="fa-solid fa-circle-plus"></i> Add</button-->
+                        <a class="btn btn-outline-success" role="button" id="newButton" href="./getDeductibleManagement">Add</a>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="d-grid gap-2">
+                        <button type="button" id="deleteButton" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal"><i class="fa-solid fa-trash"></i> Delete</button>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="d-grid gap-2">
+                        <button type="button" id="editButton" class="btn btn-outline-primary" onclick="deductibleEdit();"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="d-grid gap-2">
+                        <button type="button" id="exportButton" class="btn btn-outline-primary" onclick="deductibleExport();"><i class="fa-solid fa-pen-to-square"></i> Export</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+        <div id="datatable" style="margin-top: 1em;"></div>
+	</div>
 
-on:
-  pull_request:
-    types:
-      - closed
+    <!-- Delete Warning Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title text-danger" id="deleteModalLabel">Warning</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="row">
+                            <div class="col">
+                                <h5 class="text-danger">Please confirm that you'd like to delete this entry. Once deleted it cannot be restored.</h5>
+                            </div>
+                        </div>
+                        <div class="row" style="padding-top: 1em;">
+                            <div class="col">
+                                <div class="d-grid gap-2">
+                                    <button type="button" class="btn btn-danger" onclick="deductibleDeleteRequest();">Confirm & Delete</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <%@include file="footer.html"%>
 
-jobs:
-  get-changed-files:
-    if: github.event.pull_request.merged == true
-    runs-on: uhg-runner
+    <form action="./deductibleManagement" id="dedManagement" method="get" autocomplete="off">
+<div class="modal fade" id="sucessBoxModal" tabindex="-1" role="dialog" aria-labelledby="sucessBoxModalLabel"  aria-hidden="true" data-bs-backdrop="static">
+       <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5><span id="lblWarnTitle" class="modal-title text-success"> Success </span></h5>
+                <!-- button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button-->
+            </div>
+            <div class="modal-body" id="SaveSuccessMessage">
+            </div>
+            <div class="modal-footer">
+                <button type="submit" id="dedManagement" class="btn btn-outline-success" data-dismiss="modal">OK</a>
+            </div>
+        </div>
+	</div>
+</div>
+</form>
 
-    steps:
-      # Step 1: Authenticate with GitHub using PAT
-      - name: Authenticate with GitHub
-        run: echo "${{ secrets.GH_PAT }}" | gh auth login --with-token
 
+ <form action="./deductibleManagement" id="dedMgmt" method="get" autocomplete="off">
+<div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="errorModalLabel"  aria-hidden="true" data-bs-backdrop="static">
+       <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5><span id="ErrorClose" class="modal-title text-danger"> Error </span></h5>
+                <!-- button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button-->
+            </div>
+            <div class="modal-body" id="ErrorMesssage">
+            </div>
+            <div class="modal-footer">
+                <button type="submit" id="dedMgmt" class="btn btn-outline-success" data-dismiss="modal">OK</a>
+            </div>
+        </div>
+	</div>
+</div>
+</form>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var addButton = document.getElementById('newButton');
+    var editButton = document.getElementById('editButton');
+    addButton.addEventListener('click', function() {
+        // Store the state in the local storage
+        localStorage.setItem('buttonClicked','add');
+    });
+    editButton.addEventListener('click',function(){
+    });
+});
+</script>
+</body>
+</html>
+function getDeductibleMgmtData() {
+    showAndHide();
+    $.ajax({
+    	type: "GET",
+        contentType: "application/json",
+        url: "deductibleMgmtResponseTable",
+        dataType: 'json',
+        success: function(response) {
+	        if(response.length !== 0){
+	        	$('#datatable').css('display', 'block');
+	            $('#noResult').css('display', 'none');
+	            setDedMgmtCustomeDatatable(response);
+	        }else{
+	            $('#noResult').css('display', 'block');
+	            $('#datatable').css('display', 'none');
+	        }
+	        showAndHide();
+        },
+        error: function(xhr) {
+        	$('#datatable').css('display', 'none');
+            $('#noResult').css('display', 'block');
+        }
+    });
+    document.getElementById('editButton').disabled=true;
+    document.getElementById('exportButton').disabled=true;
+    document.getElementById('deleteButton').disabled=true;
+};
 
-      # Step 2: Check out the repository
-      - name: Checkout Repository
-        uses: actions/checkout@v3
+function setDedMgmtCustomeDatatable(inputData){
+    const datatable = new DataTable('#datatable', {
+    	columns: [
+    		{
+    			name: 'dedAdminID',
+                id: 'dedAdminID',
+                editable: false
+            },
+    		{
+    			name: 'dedAdminIDs',
+                id: 'dedAdminIDs',
+                editable: false,
+                dropdown: false
+            },
+            {
+    			name: 'Prefix',
+                id: 'dedPfx',
+                editable: false,
+            },
+            {
+                name: 'Member Amount',
+                id: 'dedMemeAmtStr',
+                editable: false,
+            },
+            {
+                name: 'Family Amount',
+                id: 'dedFamAmtStr',
+                editable: false,
+            },
+            {
+                name: 'Accumulator',
+                id: 'acacAccNoStr',
+                editable: false,
+            },
+            {
+                name: 'Description',
+                id: 'dedDesc',
+                editable: false,
+            },
+            {
+                name: 'Region',
+                id: 'region',
+                editable: false,
+            },
+            {
+                name: 'Deductible Assigned',
+                id: 'deductibleAssigned',
+                editable: false,
+            },
+        ],
+        events: {
+            onCheckRow: () => {
+                let arrayrow = datatable.getRows();
+                for (var i = 0; i < arrayrow.length; i++) {
+                    arrayrow[i][0].value = "false";
+                }
+                this.checkedRows = this.datatable.rowmanager.getCheckedRows();
+                if (this.checkedRows.length <= 0) {
+                	document.getElementById('editButton').disabled=true;
+                	document.getElementById('exportButton').disabled=true;
+                	document.getElementById('deleteButton').disabled=true;
+                }else{
+                    for(var i = 0; i< this.checkedRows.length; i++){
+                        arrayrow[this.checkedRows[i]][0].value = "true";
+                    }
+                    if(this.checkedRows.length >=2){
+                    	document.getElementById('editButton').disabled=true;
+                    	document.getElementById('exportButton').disabled=false;
+                    	if (abbRoleId != 19) { //is user role not as just view: ifp_abb_view user.
+                            document.getElementById('deleteButton').disabled = false;
+                        }
+                    }else{
+                        document.getElementById('editButton').disabled=false;
+                        document.getElementById('exportButton').disabled=false;
+                    	if (abbRoleId != 19) { //is user role not as just view: ifp_abb_view user.
+                            document.getElementById('deleteButton').disabled = false;
+                        }
+                    }
+                }
+            }
+          },
+        data: inputData,
+        checkboxColumn: true,
+        id: "dedAdminID",
+        inlineFilters: true,
+        layout: 'fluid',
+        serialNoColumn: true,
+        noDataMessage: 'Awe Snap! No results, please create new Deductible to display'
+    }); 
+    datatable.style.setStyle(`.dt-cell__content .dt-cell__content--header-0`, {padding: '0'});
+    datatable.style.setStyle(`.dt-cell--header .dt-cell__content`, {overflow: 'visible'});
+    datatable.style.setStyle(`.dt-cell__content--col-0`, {overflow: 'visible'});
+    datatable.style.setStyle(`.dt-toast`, {top: '40px'});
+    datatable.style.setStyle(`.dt-scrollable`, {'border-bottom': '1px solid #d1d8dd !important'});
+    window.datatable=datatable;
+    $(".dt-cell__content--header-1 > .sort-indicator").text("S. No.");
 
-      # Step 3: Get the files changed in the merged PR
-      - name: Fetch Changed Files
-        id: changed-files
-        run: |
-          # Get the PR number
-          PR_NUMBER="${{ github.event.pull_request.number }}"
-          echo "PR_NUMBER: $PR_NUMBER"
-
-          # Fetch the list of changed files using the GitHub REST API
-          FILES=$(curl -L \
-          -H "Accept: application/vnd.github+json" \
-          -H "Authorization: Bearer ${{ secrets.GH_PAT }}" \
-          -H "X-GitHub-Api-Version: 2022-11-28" \
-          "https://api.github.com/repos/${{ github.repository }}/pulls/$PR_NUMBER/files")
-
-          # Debug: Print FILES variable
-          echo "FILES: ${FILES}"
-
-          FILES_STATUS=$(echo "${FILES}" | jq -c '.[]' | while read -r file_info; do
-            # Extract details
-            FILE_PATH=$(echo "$file_info" | jq -r '.path')
-            ADDITIONS=$(echo "$file_info" | jq -r '.additions')
-            DELETIONS=$(echo "$file_info" | jq -r '.deletions')
-            STATUS=$(echo "$file_info" | jq -r '.status')
-
-            # Construct JSON output
-            echo "{\"path\": \"$FILE_PATH\", \"additions\": $ADDITIONS, \"deletions\": $DELETIONS, \"status\": \"$STATUS\"}"
-          done | jq -s '.')
-
-          # Save JSON output
-          echo "${FILES_STATUS}" > changed_files.json
-          echo "::set-output name=files::${FILES_STATUS}"
-      # Step 4: Print the changed files
-      - name: Display Changed Files
-        run: |
-          echo "Changed files:"
-          cat changed_files.json
-
-      # Step 5: Make an API call with the file paths, additions, deletions, and status
-#      - name: Send Changed Files to API
-#        run: |
-#          curl -X POST http://localhost:8900/api/documents/modifiedFilePathsFromGithub \
-#          -H "Content-Type: application/json" \
-#          -d @changed_files.json
-this is a worflow i create some time back to get changed files in a pr, but now it seems to be not working what previously it was working
-this is the error
-{
-    "message": "Not Found",
-    "documentation_url": "https://docs.github.com/rest/pulls/pulls#list-pull-requests-files",
-    "status": "404"
 }
-please fix or suggest alternate ways to do this functionality
-name: Get Changed Files on PR Merge
 
-on:
-  pull_request:
-    types:
-      - closed
+function setTitle(){
+    $('.dt-cell__content').each(function(i, obj) {
+        if($(this).children('input').attr('type') != 'checkbox' && ($(this).text()).trim()) {
+            $(this).attr("title", $(this).text());
+            $(this).attr("data-toggle", "tooltip");
+            $(this).tooltip({ placement: 'top'});
+            $(this).attr("data-title", $(this).attr("title"));
+            $(this).removeAttr("title");
+        }
+    });
+}
 
-jobs:
-  get-changed-files:
-    if: github.event.pull_request.merged == true
-    runs-on: uhg-runner
+setInterval(function () {
+    $('.bs-tooltip-end').css('display','none');
+}, 0);
 
-    steps:
-      # Step 1: Checkout the full repository
-      - name: Checkout Repository
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0  # Needed for git diff to work across commits
+setInterval(function () {
+    setTitle();
+}, 1000);
 
-      # Step 2: Get Changed Files using git diff
-      - name: Get Changed Files via Git
-        id: changed
-        run: |
-          BASE=${{ github.event.pull_request.base.sha }}
-          MERGE_COMMIT=${{ github.event.pull_request.merge_commit_sha }}
+function setMultiSelectDropDown(id, filedName){
+	$(id).multiselect({
+		filterPlaceholder: 'Search for '+ filedName +'...',
+        enableFiltering: true,
+        enableCaseInsensitiveFiltering:true,
+        includeSelectAllOption: true,
+        maxHeight: 400,
+        dropUp: true,
+        nonSelectedText: filedName
+    });
+}
 
-          echo "Base SHA: $BASE"
-          echo "Merge Commit SHA: $MERGE_COMMIT"
+$(document).ready(function () {
+    setMultiSelectDropDown('#allRegion','Region');
+	var dedID = $("#dedID").val();
+	var dedAdminID = $("#dedAdminID").val();
+		let dedAdminIDs = $("#dedAdminIDs").val();
+	if(dedAdminID=="" && dedID=="" && dedAdminIDs == "") {
+		document.getElementById('deleteEditButton').disabled=true;
+	}
+});
 
-          git fetch origin $BASE $MERGE_COMMIT
-
-          # Get file changes: status (A/M/D) and path
-          CHANGED=$(git diff --name-status $BASE $MERGE_COMMIT | awk '{print "{\"path\":\""$2"\", \"status\":\""$1"\"},"}')
-          CHANGED_JSON="[$(echo $CHANGED | sed 's/,$//')]"
-
-          # Save to file and set as output
-          echo "$CHANGED_JSON" > changed_files.json
-          echo "files=$CHANGED_JSON" >> $GITHUB_OUTPUT
-
-      # Step 3: Display the Changed Files
-      - name: Display Changed Files
-        run: cat changed_files.json
-
-      # Step 4 (Optional): Send the changed files JSON to your API
-      # - name: Send Changed Files to API
-      #   run: |
-      #     curl -X POST http://localhost:8900/api/documents/modifiedFilePathsFromGithub \
-      #     -H "Content-Type: application/json" \
-      #     -d @changed_files.json
-
-
+this is js and jsp so when the deductible management page loads for the first time with the table i want the table to be sorted by prefix currently the default sorting is unknown implement this please
