@@ -1,323 +1,463 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8"
-	pageEncoding="UTF-8"%>
-<%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn"%>
-<!doctype html>
-<html>
-<head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-	<link rel="stylesheet" href="css/UHCcustom.css">
-	<link rel="stylesheet" href="css/bootstrap.css">
-	<link rel="stylesheet" href="css/css/fontawesome.min.css">
-	<link rel="stylesheet" href="css/css/brands.min.css">
-	<link rel="stylesheet" href="css/css/solid.min.css">
-	<link rel="stylesheet" href="css/loader.css">
-	<link href="https://unpkg.com/frappe-datatable@1.16.2/dist/frappe-datatable.min.css" rel="stylesheet">
-	<link rel="stylesheet" href="css/deductible-management.css">
-	<script src="js/jquery-3.3.1.min.js"></script>
-    <script src="js/popper.min.js"></script>
-	<script src="js/UHCcustom.js"></script>
-    <script src="js/bootstrap.min.js"></script>
-    <script src="js/loader.js"></script>
-     <!-- include the dependencies -->
-    <script src="https://unpkg.com/sortablejs@1.7.0/Sortable.min.js"></script>
-    <script src="https://unpkg.com/clusterize.js@0.18.0/clusterize.min.js"></script>
-    <!-- include the lib -->
-   	<script src="js/frappe-datatable.min.js"></script>
-    <script src="js/app/deductibleManagement.js"></script>
-	<title>Deductible Management</title>
-	<link rel="icon" href="assets/PlanBuilderFavIcon.png">
-	<script src="js/jquery-3.2.1.min.js"></script>
-	<script>
-		$(function () {
-			$('[data-toggle="tooltip"]').tooltip()
-		})
-		var abbRoleId = "${pageContext.session.getAttribute('abbRoleId')}";
-    </script>
-    <link href="https://unpkg.com/frappe-datatable@0.0.5/dist/frappe-datatable.min.css" rel="stylesheet">
-</head>
-<body onload="getDeductibleMgmtData()">
-	<%@include file="loader.jsp"%>
-	<%@include file="header.jsp"%>
-    <div class="text-primary" style="margin: 2em;">
-		<h1><i class="fa-solid fa-filter-circle-dollar"></i> Deductible Management</h1>
-	</div>
-    <div class="shadow-lg p-3 mb-5 bg-white rounded" style="margin:2em">
-        <form>
-        	<div class="row" style="margin-top: 1em;">
-                <div class="col">
-                    <div class="d-grid gap-2">
-                        <!-- button type="button" id="newButton" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#dedMgmtCreateModal"><i class="fa-solid fa-circle-plus"></i> Add</button-->
-                        <a class="btn btn-outline-success" role="button" id="newButton" href="./getDeductibleManagement">Add</a>
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="d-grid gap-2">
-                        <button type="button" id="deleteButton" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal"><i class="fa-solid fa-trash"></i> Delete</button>
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="d-grid gap-2">
-                        <button type="button" id="editButton" class="btn btn-outline-primary" onclick="deductibleEdit();"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="d-grid gap-2">
-                        <button type="button" id="exportButton" class="btn btn-outline-primary" onclick="deductibleExport();"><i class="fa-solid fa-pen-to-square"></i> Export</button>
-                    </div>
-                </div>
-            </div>
-        </form>
-        <div id="datatable" style="margin-top: 1em;"></div>
-	</div>
+@GetMapping(value = { "/create-parent", "/edit-parent" })
+ public String showCreateParent(@RequestParam("ruleType") String ruleTypeText,
+ @RequestParam(required = false, name = "parentID") Long parentID,
+ @RequestParam(required = false, name = "clonedParentId") Long clonedParentId, ModelMap map,
+ HttpSession session) {
+ // parentID = 1L;
+ Long newParentId = parentID;
+ int ruleType = CoreUtils.convertStringToInteger(ruleTypeText);
+ if (ruleType == 4 && clonedParentId != null && newParentId == null) {
+ ParentRule newParentRule = parentRuleService.clone(ruleType, clonedParentId);
+ newParentId = newParentRule.getParentID();
+ map.put("oldRuleTitle", parentRuleService.getParentRuleTitle(clonedParentId));
+ map.put("ruleTitle", newParentRule.getRuleTitle());
+ } else if (clonedParentId != null && newParentId == null) {
+ ParentRule newParentRule = parentRuleService.clone(ruleType, clonedParentId);
+ newParentId = newParentRule.getParentID();
+ map.put("oldRuleTitle", parentRuleService.getParentRuleTitle(clonedParentId));
+ map.put("ruleTitle", newParentRule.getRuleTitle());
+ } else {
+ if (newParentId != null) {
+ map.put("ruleTitle", parentRuleService.getParentRuleTitle(parentID));
+ }
+ }
+ map.put("parentID", newParentId);
+ map.put("ruleType", ruleType);
 
-    <!-- Delete Warning Modal -->
-    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true" data-bs-backdrop="static">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title text-danger" id="deleteModalLabel">Warning</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form>
-                        <div class="row">
-                            <div class="col">
-                                <h5 class="text-danger">Please confirm that you'd like to delete this entry. Once deleted it cannot be restored.</h5>
-                            </div>
-                        </div>
-                        <div class="row" style="padding-top: 1em;">
-                            <div class="col">
-                                <div class="d-grid gap-2">
-                                    <button type="button" class="btn btn-danger" onclick="deductibleDeleteRequest();">Confirm & Delete</button>
-                                </div>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-    <%@include file="footer.html"%>
+ map.put("clonedParentId", clonedParentId);
+ String resultPage = "CreateParent";
+ if (newParentId != null) {
+ map.put("editFlag", Boolean.TRUE);
+ } else {
+ map.put("editFlag", Boolean.FALSE);
+ }
 
-    <form action="./deductibleManagement" id="dedManagement" method="get" autocomplete="off">
-<div class="modal fade" id="sucessBoxModal" tabindex="-1" role="dialog" aria-labelledby="sucessBoxModalLabel"  aria-hidden="true" data-bs-backdrop="static">
-       <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5><span id="lblWarnTitle" class="modal-title text-success"> Success </span></h5>
-                <!-- button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button-->
-            </div>
-            <div class="modal-body" id="SaveSuccessMessage">
-            </div>
-            <div class="modal-footer">
-                <button type="submit" id="dedManagement" class="btn btn-outline-success" data-dismiss="modal">OK</a>
-            </div>
-        </div>
-	</div>
-</div>
-</form>
+ Object value = session.getAttribute("query");
+ if (value != null) {
+ String query = String.valueOf(value);
+ if (StringUtils.isNotEmpty(query)) {
+ map.put("query", query);
+ }
+ }
+ return resultPage;
+ }
 
+ @PostMapping(value = { "/filterlibrary" })
+ public String filterlib(@RequestParam("ruleType") Set<String> ruleTypes, ModelMap map, Model model,
+ HttpServletRequest request, HttpSession session) {
+ List<String> benCat = StringUtils.isNotBlank(request.getParameter("benCatIn"))
+ ? Arrays.asList(request.getParameter("benCatIn").split(","))
+ : new ArrayList<>();
+ List<String> ruleCat = StringUtils.isNotBlank(request.getParameter("ruleCatIn"))
+ ? Arrays.asList(request.getParameter("ruleCatIn").split(","))
+ : new ArrayList<>();
+ List<String> planIn = StringUtils.isNotBlank(request.getParameter("planIn"))
+ ? Arrays.asList(request.getParameter("planIn").split(","))
+ : new ArrayList<>();
+ List<String> cocseriesIn = StringUtils.isNotBlank(request.getParameter("cocseriesIn"))
+ ? Arrays.asList(request.getParameter("cocseriesIn").split(","))
+ : new ArrayList<>();
+ List<String> orgIn = StringUtils.isNotBlank(request.getParameter("orgIn"))
+ ? Arrays.asList(request.getParameter("orgIn").split(","))
+ : new ArrayList<>();
+ List<String> stateIn = StringUtils.isNotBlank(request.getParameter("stateIn"))
+ ? Arrays.asList(request.getParameter("stateIn").split(","))
+ : new ArrayList<>();
+ List<String> segmentIn = StringUtils.isNotBlank(request.getParameter("segmentIn"))
+ ? Arrays.asList(request.getParameter("segmentIn").split(","))
+ : new ArrayList<>();
+ List<String> licenseIn = StringUtils.isNotBlank(request.getParameter("licenseIn"))
+ ? Arrays.asList(request.getParameter("licenseIn").split(","))
+ : new ArrayList<>();
+ String tabSelect = request.getParameter("tabSelect");
+ String libraryName = request.getParameter("libraryName");
+ String action = request.getParameter("action");
+ String currPage = request.getParameter("currentPage");
 
- <form action="./deductibleManagement" id="dedMgmt" method="get" autocomplete="off">
-<div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="errorModalLabel"  aria-hidden="true" data-bs-backdrop="static">
-       <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5><span id="ErrorClose" class="modal-title text-danger"> Error </span></h5>
-                <!-- button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button-->
-            </div>
-            <div class="modal-body" id="ErrorMesssage">
-            </div>
-            <div class="modal-footer">
-                <button type="submit" id="dedMgmt" class="btn btn-outline-success" data-dismiss="modal">OK</a>
-            </div>
-        </div>
-	</div>
-</div>
-</form>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    var addButton = document.getElementById('newButton');
-    var editButton = document.getElementById('editButton');
-    addButton.addEventListener('click', function() {
-        // Store the state in the local storage
-        localStorage.setItem('buttonClicked','add');
-    });
-    editButton.addEventListener('click',function(){
-    });
+ String incremSlideStr = request.getParameter("incremSlide");
+
+ if (StringUtils.isNoneBlank(libraryName) && StringUtils.equalsIgnoreCase("buildYourOwnView", libraryName)
+ && (ruleTypes == null || ruleTypes.isEmpty())) {
+
+ map.put("ruleTypes", com.optum.eni.core.constants.ParentType.values());
+ model.addAttribute("ruleTypes", com.optum.eni.core.constants.ParentType.values());
+
+ populateFilters(model, libraryName);
+ List<LibrarySearchResult> librarySearchResults = new ArrayList<>();
+ // Passing null object in the list, if librarySearchResults is empty
+ LibrarySearchResult librarySearchResult = new LibrarySearchResult();
+ librarySearchResults.add(librarySearchResult);
+ model.addAttribute("standardsLibrary", librarySearchResults);
+ session.setAttribute("standardLibExportData", librarySearchResults);
+ // session.setAttribute("ruleDescMapExportData", ruleIdDescMap);
+
+ model.addAttribute("query", "");
+ session.setAttribute("query", null);
+
+ logger.info("Pg AccessLog Service search started.........");
+ pgAccessLogService.saveLog(null, request);
+
+ String userName = parentRuleService.getCurrentUserName();
+ Long userId = parentRuleService.getUserIdByUserName(userName);
+ Users user = authenticationService.getUserByUserID(userId.intValue());
+
+ logger.info("Pg AccessLog Service search ended.........");
+
+ session.setAttribute(CoreSessionConstants.roleId, user.getRoleID());
+ model.addAttribute(CoreSessionConstants.roleId, user.getRoleID());
+ model.addAttribute("totalRecord", 0);
+ model.addAttribute("currentPage", 1);
+ model.addAttribute("rowsPerPage", 8);
+ model.addAttribute("incremSlide", 5);
+ model.addAttribute("libraryName", libraryName);
+ map.put("libraryName", libraryName);
+ } else {
+
+ int incremSlide = 5;
+
+ if (StringUtils.isNoneBlank(incremSlideStr)) {
+
+ incremSlide = Integer.valueOf(incremSlideStr);
+ }
+
+ int recordsPerPage = 8;
+
+ int currentPage = 1;
+
+ if (StringUtils.isNoneBlank(currPage)) {
+
+ currentPage = Integer.valueOf(currPage);
+
+ }
+ if (incremSlide <= 0 || incremSlide >= Integer.MAX_VALUE / 10) {
+ incremSlide = 5;
+ }
+
+ if ("prev".equalsIgnoreCase(action)) {
+
+ if (currentPage >= incremSlide) {
+ currentPage = incremSlide - 4;
+ }
+ }
+// if ("prev".equalsIgnoreCase(action)) {
+//
+// if (currentPage >= incremSlide) {
+// if (incremSlide < Integer.MAX_VALUE / 10) {
+// currentPage = incremSlide - 4;
+// }
+// }
+//
+// }
+
+ List<String> collectors = new ArrayList<>();
+
+ if (ruleTypes != null) {
+
+ for (String ruleType : ruleTypes) {
+
+ if (StringUtils.isNoneBlank(ruleType)) {
+
+ String[] roleIds = ruleType.split(",");
+
+ for (String roleId : roleIds) {
+ collectors.add(roleId);
+ }
+
+ }
+ }
+
+ }
+
+ if (StringUtils.isNoneBlank(tabSelect) && tabSelect.equalsIgnoreCase("condensed-view-option")) {
+
+ recordsPerPage = 24;
+ }
+
+ if ("Last".equals(action)) {
+
+ String standardsLibrarySize = request.getParameter("standardsLibrarySize");
+
+ if (StringUtils.isNoneEmpty(standardsLibrarySize)) {
+
+ int totalPage = Integer.parseInt(standardsLibrarySize);
+
+ double pageNo = totalPage / recordsPerPage;
+
+ if (pageNo == Math.floor(pageNo)) {
+
+ pageNo = Math.floor(pageNo);
+
+ } else {
+
+ pageNo = Math.floor(pageNo) + 1;
+
+ }
+
+ currentPage = (int) pageNo + 1;
+ incremSlide = currentPage;
+ }
+
+ }
+
+ List<LibrarySearchResult> librarySearchResults = new ArrayList<>();
+ ParentRuleSearchResponse parentRuleSearchResponse = null;
+ String searchQuery = request.getParameter("query");
+ model.addAttribute("query", searchQuery);
+
+ boolean predicate = CollectionUtils.isNotEmpty(ruleTypes) && ruleTypes.size() == 1 && ruleTypes.stream()
+ .anyMatch(rt -> StringUtils.isNotBlank(searchQuery) && StringUtils.equalsIgnoreCase("0", "0"));
+
+ if (predicate) {
+ librarySearchResults = parentRuleSearchService.search(searchQuery);
+ } else {
+ parentRuleSearchResponse = parentRuleSearchService.findBy(collectors, benCat, ruleCat, planIn,
+ cocseriesIn, orgIn, stateIn, segmentIn, licenseIn, currentPage, recordsPerPage, action);
+ librarySearchResults = parentRuleSearchResponse.getResult();
+ }
+ librarySearchResults.sort(Comparator.comparing(LibrarySearchResult::getRuleId).reversed());
+
+ Map<Long, String> ruleIdDescMap = librarySearchResults.stream()
+ .collect(HashMap<Long, String>::new,
+ (m, c) -> m.put(c.getRuleId(),
+ c.getRuleTypeId() != null && c.getRuleTypeId() == 4
+ ? c.getFieldRangesProdTypeRuleCat()
+ : Jsoup.parse(StringUtils.isNotEmpty(c.getRuleDescription())
+ ? c.getRuleDescription()
+ : c.getBody() != null ? c.getBody().size() > 3 ? c.getBody().get(0)
+ + c.getBody().get(1) + c.getBody().get(2) : "" : "")
+ .text().toString()),
+ (m, u) -> {
+ });
+
+ Map<String, String> statesMap = parentRuleSearchService.getAllStates().stream().collect(
+ HashMap<String, String>::new, (m, c) -> m.put(c.getStateAbbr(), c.getStateDesc()), (m, c) -> {
+ });
+
+ populateFilters(model, libraryName);
+ model.addAttribute("ruleDescMap", ruleIdDescMap);
+ model.addAttribute("statesMap", statesMap);
+ if (StringUtils.isEmpty(tabSelect)) {
+ tabSelect = "detailed-view-option";
+ }
+ model.addAttribute("tabSelect", tabSelect);
+
+ if (StringUtils.isNoneBlank(libraryName) && StringUtils.equalsIgnoreCase("buildYourOwnView", libraryName)) {
+ map.put("ruleTypes", com.optum.eni.core.constants.ParentType.values());
+ model.addAttribute("ruleTypes", com.optum.eni.core.constants.ParentType.values());
+ }
+
+ if (!StringUtils.equalsIgnoreCase("buildYourOwnView", libraryName) && ruleTypes != null) {
+
+ String value = StringUtils.join(ruleTypes, ',');
+ map.put("ruleType", value);
+ model.addAttribute("ruleType", value);
+ } else {
+ map.put("ruleType", ruleTypes);
+ model.addAttribute("ruleType", ruleTypes);
+ }
+
+ model.addAttribute("standardsLibrary", librarySearchResults);
+ session.setAttribute("standardLibExportData", librarySearchResults);
+ model.addAttribute("benCat", benCat);
+ model.addAttribute("ruleCat", ruleCat);
+ model.addAttribute("planIn", planIn);
+ model.addAttribute("cocseriesIn", cocseriesIn);
+ model.addAttribute("orgIn", orgIn);
+ model.addAttribute("stateIn", stateIn);
+ model.addAttribute("segmentIn", segmentIn);
+ model.addAttribute("licenseIn", licenseIn);
+
+ model.addAttribute("query", "");
+ session.setAttribute("query", null);
+ if (StringUtils.isNotBlank(searchQuery)) {
+ model.addAttribute("query", searchQuery);
+ }
+
+ model.addAttribute("libraryName", libraryName);
+ map.put("libraryName", libraryName);
+ // pgAccessLogService.saveLog(null, request);
+
+ model.addAttribute("currentPage", currentPage);
+ model.addAttribute("rowsPerPage", recordsPerPage);
+
+ double pageNo = parentRuleSearchResponse != null
+ ? parentRuleSearchResponse.getTotalRecords() / recordsPerPage
+ : 0;
+
+ if (pageNo == Math.floor(pageNo)) {
+
+ pageNo = Math.floor(pageNo);
+
+ } else {
+
+ pageNo = Math.floor(pageNo) + 1;
+
+ }
+
+ int totalPage = (int) pageNo;
+
+ if (incremSlide > totalPage) {
+
+ incremSlide = totalPage + 1;
+
+ }
+
+ model.addAttribute("incremSlide", incremSlide);
+ model.addAttribute("totalRecord",
+ parentRuleSearchResponse != null ? parentRuleSearchResponse.getTotalRecords() : 0);
+ model.addAttribute("action", action);
+ }
+ return "StandardsLibrary";
+ }
+
+ @GetMapping(value = { "/view-parent" })
+ public String showViewParent(@RequestParam("ruleType") Integer ruleType,
+ @RequestParam(required = false, name = "parentID") Long parentID,
+ @RequestParam(required = false, name = "ruleTitle") String ruleTitle,
+ @RequestParam(required = false, name = "clonedParentId") Long clonedParentId, ModelMap map,
+ HttpSession session) {
+ Long newParentId = parentID;
+ if (ruleType == 4 && clonedParentId != null && newParentId == null) {
+ ParentRule newParentRule = parentRuleService.clone(ruleType, clonedParentId);
+ newParentId = newParentRule.getParentID();
+ map.put("oldRuleTitle", ruleTitle);
+ map.put("ruleTitle", newParentRule.getRuleTitle());
+ } else {
+ map.put("ruleTitle", ruleTitle);
+ }
+ map.put("parentID", newParentId);
+ map.put("ruleType", ruleType);
+
+ map.put("clonedParentId", clonedParentId);
+ String resultPage = "ViewParent";
+ if (newParentId != null) {
+ map.put("editFlag", Boolean.TRUE);
+ } else {
+ map.put("editFlag", Boolean.FALSE);
+ }
+
+ Object value = session.getAttribute("query");
+ if (value != null) {
+ String query = String.valueOf(value);
+ if (StringUtils.isNotEmpty(query)) {
+ map.put("query", query);
+ }
+ }
+return resultPage;
+}
+serviceimpl codes
+
+@Override
+publicParentRuleclone(IntegerruleType,LongclonedParentId){
+ParentRulenewParentRule=null;
+Optional<ParentRule>optional=parentRuleRepository.findById(clonedParentId);
+if(optional.isPresent()){
+newParentRule=optional.get();
+newParentRule.setParentID(null);
+}else{
+newParentRule=newParentRule();
+}
+parentRuleRepository.save(newParentRule);
+
+LongnewParentId=newParentRule.getParentID();
+cloneParentCOCSeries(newParentId,clonedParentId);
+cloneParentOrg(newParentId,clonedParentId);
+cloneParentSegment(newParentId,clonedParentId);
+cloneParentLicense(newParentId,clonedParentId);
+cloneParentAppliesTo(newParentId,clonedParentId);
+cloneParentFiledRangesProduct(newParentId,clonedParentId);
+
+newThread(){
+@Override
+publicvoidrun(){
+migrateService.saveParentRule(newParentId);
+}
+}.start();
+
+returnnewParentRule;
+}
+
+privatevoidcloneParentCOCSeries(LongnewParentID,LongclonedParentId){
+List<ParentCocSeries>parentCocSeries=parentCocSeriesRepository.findAllByParentID(clonedParentId);
+parentCocSeries.forEach(cocSeries->{
+cocSeries.setParentCOCID(null);
+cocSeries.setParentID(newParentID);
 });
-</script>
-</body>
-</html>
-function getDeductibleMgmtData() {
-    showAndHide();
-    $.ajax({
-    	type: "GET",
-        contentType: "application/json",
-        url: "deductibleMgmtResponseTable",
-        dataType: 'json',
-        success: function(response) {
-	        if(response.length !== 0){
-	        	$('#datatable').css('display', 'block');
-	            $('#noResult').css('display', 'none');
-	            setDedMgmtCustomeDatatable(response);
-	        }else{
-	            $('#noResult').css('display', 'block');
-	            $('#datatable').css('display', 'none');
-	        }
-	        showAndHide();
-        },
-        error: function(xhr) {
-        	$('#datatable').css('display', 'none');
-            $('#noResult').css('display', 'block');
-        }
-    });
-    document.getElementById('editButton').disabled=true;
-    document.getElementById('exportButton').disabled=true;
-    document.getElementById('deleteButton').disabled=true;
-};
-
-function setDedMgmtCustomeDatatable(inputData){
-    const datatable = new DataTable('#datatable', {
-    	columns: [
-    		{
-    			name: 'dedAdminID',
-                id: 'dedAdminID',
-                editable: false
-            },
-    		{
-    			name: 'dedAdminIDs',
-                id: 'dedAdminIDs',
-                editable: false,
-                dropdown: false
-            },
-            {
-    			name: 'Prefix',
-                id: 'dedPfx',
-                editable: false,
-            },
-            {
-                name: 'Member Amount',
-                id: 'dedMemeAmtStr',
-                editable: false,
-            },
-            {
-                name: 'Family Amount',
-                id: 'dedFamAmtStr',
-                editable: false,
-            },
-            {
-                name: 'Accumulator',
-                id: 'acacAccNoStr',
-                editable: false,
-            },
-            {
-                name: 'Description',
-                id: 'dedDesc',
-                editable: false,
-            },
-            {
-                name: 'Region',
-                id: 'region',
-                editable: false,
-            },
-            {
-                name: 'Deductible Assigned',
-                id: 'deductibleAssigned',
-                editable: false,
-            },
-        ],
-        events: {
-            onCheckRow: () => {
-                let arrayrow = datatable.getRows();
-                for (var i = 0; i < arrayrow.length; i++) {
-                    arrayrow[i][0].value = "false";
-                }
-                this.checkedRows = this.datatable.rowmanager.getCheckedRows();
-                if (this.checkedRows.length <= 0) {
-                	document.getElementById('editButton').disabled=true;
-                	document.getElementById('exportButton').disabled=true;
-                	document.getElementById('deleteButton').disabled=true;
-                }else{
-                    for(var i = 0; i< this.checkedRows.length; i++){
-                        arrayrow[this.checkedRows[i]][0].value = "true";
-                    }
-                    if(this.checkedRows.length >=2){
-                    	document.getElementById('editButton').disabled=true;
-                    	document.getElementById('exportButton').disabled=false;
-                    	if (abbRoleId != 19) { //is user role not as just view: ifp_abb_view user.
-                            document.getElementById('deleteButton').disabled = false;
-                        }
-                    }else{
-                        document.getElementById('editButton').disabled=false;
-                        document.getElementById('exportButton').disabled=false;
-                    	if (abbRoleId != 19) { //is user role not as just view: ifp_abb_view user.
-                            document.getElementById('deleteButton').disabled = false;
-                        }
-                    }
-                }
-            }
-          },
-        data: inputData,
-        checkboxColumn: true,
-        id: "dedAdminID",
-        inlineFilters: true,
-        layout: 'fluid',
-        serialNoColumn: true,
-        noDataMessage: 'Awe Snap! No results, please create new Deductible to display'
-    }); 
-    datatable.style.setStyle(`.dt-cell__content .dt-cell__content--header-0`, {padding: '0'});
-    datatable.style.setStyle(`.dt-cell--header .dt-cell__content`, {overflow: 'visible'});
-    datatable.style.setStyle(`.dt-cell__content--col-0`, {overflow: 'visible'});
-    datatable.style.setStyle(`.dt-toast`, {top: '40px'});
-    datatable.style.setStyle(`.dt-scrollable`, {'border-bottom': '1px solid #d1d8dd !important'});
-    window.datatable=datatable;
-    $(".dt-cell__content--header-1 > .sort-indicator").text("S. No.");
-
+parentCocSeriesRepository.saveAll(parentCocSeries);
 }
 
-function setTitle(){
-    $('.dt-cell__content').each(function(i, obj) {
-        if($(this).children('input').attr('type') != 'checkbox' && ($(this).text()).trim()) {
-            $(this).attr("title", $(this).text());
-            $(this).attr("data-toggle", "tooltip");
-            $(this).tooltip({ placement: 'top'});
-            $(this).attr("data-title", $(this).attr("title"));
-            $(this).removeAttr("title");
-        }
-    });
-}
-
-setInterval(function () {
-    $('.bs-tooltip-end').css('display','none');
-}, 0);
-
-setInterval(function () {
-    setTitle();
-}, 1000);
-
-function setMultiSelectDropDown(id, filedName){
-	$(id).multiselect({
-		filterPlaceholder: 'Search for '+ filedName +'...',
-        enableFiltering: true,
-        enableCaseInsensitiveFiltering:true,
-        includeSelectAllOption: true,
-        maxHeight: 400,
-        dropUp: true,
-        nonSelectedText: filedName
-    });
-}
-
-$(document).ready(function () {
-    setMultiSelectDropDown('#allRegion','Region');
-	var dedID = $("#dedID").val();
-	var dedAdminID = $("#dedAdminID").val();
-		let dedAdminIDs = $("#dedAdminIDs").val();
-	if(dedAdminID=="" && dedID=="" && dedAdminIDs == "") {
-		document.getElementById('deleteEditButton').disabled=true;
-	}
+privatevoidcloneParentOrg(LongnewParentID,LongclonedParentId){
+List<ParentOrganization>parentOrganizations=parentOrganizationRepository.findAllByParentID(clonedParentId);
+parentOrganizations.forEach(parentOrg->{
+parentOrg.setParentOrgID(null);
+parentOrg.setParentID(newParentID);
 });
+parentOrganizationRepository.saveAll(parentOrganizations);
+}
 
-this is js and jsp so when the deductible management page loads for the first time with the table i want the table to be sorted by prefix currently the default sorting is unknown implement this please
+privatevoidcloneParentSegment(LongnewParentID,LongclonedParentId){
+List<ParentSegment>parentSegments=parentSegmentRepository.findAllByParentID(clonedParentId);
+parentSegments.forEach(parentSegment->{
+parentSegment.setParentSegmentID(null);
+parentSegment.setParentID(newParentID);
+});
+parentSegmentRepository.saveAll(parentSegments);
+}
+
+privatevoidcloneParentLicense(LongnewParentID,LongclonedParentId){
+List<ParentLicense>parentLicenses=parentLicenseRepository.findAllByParentID(clonedParentId);
+parentLicenses.forEach(parentLicense->{
+parentLicense.setParentLicenseID(null);
+parentLicense.setParentID(newParentID);
+});
+parentLicenseRepository.saveAll(parentLicenses);
+}
+
+privatevoidcloneParentAppliesTo(LongnewParentID,LongclonedParentId){
+List<ParentAppliesTo>parentAppliesTos=parentAppliesToRepository.findAllByParentID(clonedParentId);
+parentAppliesTos.forEach(parentAppliesTo->{
+parentAppliesTo.setParentAppliesToID(null);
+parentAppliesTo.setParentID(newParentID);
+});
+parentAppliesToRepository.saveAll(parentAppliesTos);
+}
+
+privatevoidcloneParentFiledRangesProduct(LongnewParentID,LongclonedParentId){
+List<FiledRangesProduct>filedRangesProducts=filedRangesProductRepository.findByParentID(clonedParentId);
+filedRangesProducts.forEach(filedRangesProduct->{
+FiledRangesProductnewFiledRangesProduct=filedRangesProduct;
+longfiledRangesProductID=filedRangesProduct.getFiledRangesProductID();
+newFiledRangesProduct.setFiledRangesProductID(null);
+newFiledRangesProduct.setParentID(newParentID);
+filedRangesProductRepository.save(newFiledRangesProduct);
+
+cloneCostShareRanges(newParentID,newFiledRangesProduct.getFiledRangesProductID(),filedRangesProductID);
+cloneLimitRanges(newParentID,newFiledRangesProduct.getFiledRangesProductID(),filedRangesProductID);
+});
+}
+
+privatevoidcloneCostShareRanges(LongnewParentId,LongnewFiledRangesProductId,LongclonedFiledRangesProductID){
+List<CostShareRanges>costShareRanges=costShareRangesRepository
+.findByFiledRangesProductID(clonedFiledRangesProductID);
+//costShareRanges.forEach(costShareRange->{
+for(inti=0;i<costShareRanges.size();i++){
+costShareRanges.get(i).setSequenceNo((long)i);
+costShareRanges.get(i).setCostShareRangeID(null);
+costShareRanges.get(i).setFiledRangesProductID(newFiledRangesProductId);
+costShareRanges.get(i).setParentID(newParentId);
+//});
+}
+costShareRangesRepository.saveAll(costShareRanges);
+}
+
+privatevoidcloneLimitRanges(LongnewParentId,LongnewFiledRangesProductId,LongclonedFiledRangesProductID){
+List<LimitRanges>limitRanges=limitRangesRepository.findByFiledRangesProductID(clonedFiledRangesProductID);
+//limitRanges.forEach(limitRange->{
+for(inti=0;i<limitRanges.size();i++){
+limitRanges.get(i).setLimitRangesID(null);
+limitRanges.get(i).setFiledRangesProductID(newFiledRangesProductId);
+limitRanges.get(i).setParentID(newParentId);
+limitRanges.get(i).setSequenceNo((long)i);
+}
+limitRangesRepository.saveAll(limitRanges);
+}
