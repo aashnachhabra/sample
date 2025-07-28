@@ -1,170 +1,199 @@
-package com.uhc.ei.planlibrary.controller;
+package com.optum.eni.core.database.mysql.domain;
 
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
+import java.io.Serializable;
+import java.sql.Timestamp;
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
-import com.uhc.ei.planlibrary.constants.SessionConstants;
-import com.uhc.ei.planlibrary.service.HomeService;
-import org.apache.commons.lang3.StringUtils;
-import org.joda.time.DateTime;
-import org.owasp.encoder.Encode;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.*;
+import org.hibernate.annotations.GenericGenerator;
 
-import com.uhc.ei.planlibrary.kafka.publisher.PublishMedicalLibraryCollection;
-import com.uhc.ei.planlibrary.mongodb.domain.TicPlanData;
-import com.uhc.ei.planlibrary.mongodb.repo.TicPlanDataRepository;
+import com.optum.eni.core.model.ParentRuleChangeLog;
+import com.optum.eni.core.mongodb.domain.ChildRule;
+import com.optum.eni.core.mongodb.domain.RuleCondition;
 
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import lombok.Data;
 
-@Controller
-public class HomeController {
+@SuppressWarnings("serial")
+@Entity
+@Table(name = "parentrules", schema = "core03")
+@Data
+public class ParentRule implements Serializable {
+	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO, generator = "native")
+	@GenericGenerator(name = "native", strategy = "native")
+	@Column(name = "parentID")
+	private Long parentID;
+	@Column(name = "ruleTitle")
+	private String ruleTitle;
+	@Column(name = "stateID", nullable = true)
+	private Long stateID;
+	@Column(name = "statusID")
+	private Long statusID;
+	@Column(name = "parentName")
+	private String parentName;
+	@Column(name = "benCatID")
+	private Long benCatID;
+	@Column(name = "parentTypeID")
+	private Long parentTypeID;
+	@Column(name = "planTypeID")
+	private Long planTypeID;
+	@Column(name = "createdBy")
+	private Long createdBy;
+	@Column(name = "createdDate")
+	private Timestamp createdDate;
+	@Column(name = "isCurrent", columnDefinition = "BIT")
+	private Integer isCurrent;
+	@Column(name = "parentDesc")
+	private String parentDesc;
+	@Column(name = "effectiveDate")
+	private Timestamp effectiveDate;
+	@Column(name = "ineffectiveDate")
+	private Timestamp ineffectiveDate;
 
-	@Autowired
-	private TicPlanDataRepository ticPlanDataRepository;
-	
-	@Autowired
-	private PublishMedicalLibraryCollection publishMedicalLibraryCollection;
+	@Transient
+	private Long parentDescId;
+	@Transient
+	private String stateShortName;
+	@Transient
+	private String statusName;
+	@Transient
+	private List<ParentDescription> parentDescriptionList;
+	@Transient
+	private List<ParentCocSeries> parentCocSeriesList;
+	@Transient
+	private List<ParentLicense> parentLicenseList;
+	@Transient
+	private List<ParentOrganization> parentOrganizationList;
+	@Transient
+	private List<ParentSegment> parentSegmentList;
+	@Transient
+	private List<ParentAppliesTo> appliesToList;
+	@Transient
+	private List<ParentState> parentStateList;
+	@Transient
+	private Long[] cocSeriesSelected;
+	@Transient
+	private Long[] licenseSelected;
+	@Transient
+	private Long[] organizationSelected;
+	@Transient
+	private Long[] segmentSelected;
+	@Transient
+	private Long[] appliesToSelected;
+	@Transient
+	private Long[] stateSelected;
+	@Transient
+	private List<ParentRuleChangeLog> parentChangeLogList;
+	@Transient
+	private List<Resource> resources;
+	@Transient
+	private List<ChangeLog> changeLogs;
+	@Transient
+	private List<FiledRangesProduct> filedRangesProduct;
+	@Transient
+	private List<RuleHeaderDetails> ruleHeaderDetails;
+	@Transient
+	private List<FunctionalAreaConfigDetails> functionalAreaConfigDetails;
+	@Transient
+	private List<ServiceCodes> serviceCodes;
+	@Transient
+	private String majorOrMinor;
+	@Transient
+	private List<ChildRule> childRules;
+	@Transient
+	private RuleCondition childRuleWhenCondition;
 
-	@Autowired
-	private HomeService homeService;
+}
+package com.optum.eni.core.mongodb.domain;
 
-	@RequestMapping("/")
-	public String home(ModelMap map, HttpSession session) {
-		TicData data = new TicData();
-		data.setSourceSystem("Test");
-		return "home";
+import com.optum.eni.core.constants.CoreCollectionConstants;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.optum.eni.core.json.serializer.RuleConditionDeserializer;
+import com.optum.eni.core.json.serializer.RuleConditionSerializer;
+
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+
+@Document(CoreCollectionConstants.CHILD_RULES_COLLECTION)
+@Getter
+@Setter
+@NoArgsConstructor
+@ToString
+public class ChildRule {
+
+	@Id
+	private String id;
+
+	@JsonProperty("prevChildRuleId")
+	private String prevChildRuleId;
+
+	@JsonProperty("originalChildRuleId")
+	private String originalChildRuleId;
+
+	@JsonProperty("parentRuleId")
+	private Long parentRuleId;
+
+	@JsonProperty("sourceSystem")
+	private String sourceSystem;
+
+	@JsonProperty("sourceConfiguration")
+	private String sourceConfiguration;
+
+	@JsonProperty("isSourceConfigurationChanged")
+	private boolean isSourceConfigurationChanged;
+
+	@Transient
+	private String sourceConfigurationName;
+
+	@JsonProperty("ruleTitle")
+	private String ruleTitle;
+
+	@JsonProperty("ruleType")
+	private String ruleType;
+
+	@JsonProperty("ruleDescription")
+	private String ruleDescription;
+
+	@JsonProperty("isCurrent")
+	private boolean isCurrent;
+
+	@JsonProperty("version")
+	private int version;
+
+	@JsonProperty("when")
+	@JsonDeserialize(using = RuleConditionDeserializer.class)
+	@JsonSerialize(using = RuleConditionSerializer.class)
+	private RuleCondition ruleLogicWhen;
+
+	@JsonProperty("then")
+	@JsonDeserialize(using = RuleConditionDeserializer.class)
+	@JsonSerialize(using = RuleConditionSerializer.class)
+	private RuleCondition ruleLogicThen;
+
+	public ChildRule(ChildRule childRule) {
+		parentRuleId = childRule.parentRuleId;
+		sourceSystem = childRule.sourceSystem;
+		sourceConfiguration = childRule.sourceConfiguration;
+		ruleTitle = childRule.ruleTitle;
+		ruleType = childRule.ruleType;
+		ruleDescription = childRule.ruleDescription;
+		ruleLogicWhen = childRule.ruleLogicWhen;
+		ruleLogicThen = childRule.ruleLogicThen;
 	}
 
-	@RequestMapping("/Tic")
-	@ResponseBody
-	public List<TicPlanData> getTicData(Model model, HttpSession session) {
-		List<TicPlanData> list = ticPlanDataRepository.findAll();
-		return list;
-	}
-
-	@PostMapping(value = { "/UpdateTic" })
-	@ResponseBody
-	public String update(Model model, HttpSession session, @RequestBody TicData ticData) {
-		TicPlanData data = ticPlanDataRepository.findBySourceSystem(ticData.getSourceSystem());
-		if (ticData.getNextRunDate() != null && ticData.getNextRunDate().length() > 0) {
-			if (isDateFuture(ticData.getNextRunDate(), "yyyy-MM-dd")) {
-				data.setNextScheduledLoadDate(ticData.getNextRunDate());
-				data.setEmail(ticData.getEmail());
-				data.setUserName(ticData.getUserName());
-				data.setUpdatedOn(new DateTime().toString());
-				ticPlanDataRepository.save(data);
-				return "Reload";
-			} else {
-				return "R";
-			}
-		}
-		return "Reload";
-	}
-
-	@PostMapping(value = { "/runTic" })
-	@ResponseBody
-	public String run(Model model, HttpSession session, @RequestBody TicData ticData) {
-		TicPlanData data = ticPlanDataRepository.findBySourceSystem(ticData.getSourceSystem());
-		data.setEmail(ticData.getEmail());
-		data.setUserName(ticData.getUserName());
-		if (data.getStatus().equals("Run")) {
-			return "R";
-		}
-		data.setStatus("Run");
-		ticPlanDataRepository.save(data);
-		data.setUpdatedOn(new DateTime().toString());
-		return "Reload";
-	}
-
-	@PostMapping(value = { "/removeTic" })
-	public String remove(Model model, HttpSession session, @RequestBody TicData ticData) {
-		TicPlanData data = ticPlanDataRepository.findBySourceSystem(ticData.getSourceSystem());
-		if (data.getNextScheduledLoadDate() != null && data.getNextScheduledLoadDate().length() > 0) {
-			LocalDate currentDate = LocalDate.now();
-			int dayOfMonth = currentDate.getDayOfMonth();
-			int month = currentDate.getMonthValue();
-			int y = currentDate.getYear();
-			String date = "";
-			if (dayOfMonth <= 24) {
-				date = y + "-" + month + "-" + "24";
-			} else {
-				month = month + 1;
-				date = y + "-" + month + "-" + "24";
-			}
-			data.setNextScheduledLoadDate(date);
-			data.setEmail(ticData.getEmail());
-			data.setUserName(ticData.getUserName());
-			data.setUpdatedOn(new DateTime().toString());
-			ticPlanDataRepository.save(data);
-		}
-		return "Reload";
-	}
-
-	public static boolean isDateFuture(final String date, final String dateFormat) {
-		LocalDate localDate = LocalDate.now(ZoneId.systemDefault());
-		DateTimeFormatter dtf = DateTimeFormatter.ofPattern(dateFormat);
-		LocalDate inputDate = LocalDate.parse(date, dtf);
-
-		return inputDate.isAfter(localDate);
-	}
-
-	@RequestMapping("/RuleManagement")
-	public String ruleManagement() {
-		return "RuleManagement";
-	}
-
-	@RequestMapping("/TemplateManagement")
-	public String templateManagement() {
-		return "TemplateManagement";
-	}
-	
-	
-	@CrossOrigin
-	@PostMapping(value = "/publish/medicalLibrary", name = "Publish MedicalLibrary API Collection records", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "Ok/Success.The requested resource was created successfully."),
-			@ApiResponse(code = 400, message = "Bad Request. Incorrect header or junk request data."),
-			@ApiResponse(code = 500, message = "Internal Server Error.") })
-	public ResponseEntity<List<ResponseCommand>> publisMedicalLibraryh(Model model, HttpSession session, @RequestBody List<RequestCommand> commands) {
-
-		return ResponseEntity.status(HttpStatus.OK).body(this.publishMedicalLibraryCollection.publisMedicalLibraryh(commands));
-		
-	}
-
-	private String validateRequest(String defaultBusiness) {
-		if (StringUtils.isNotEmpty(defaultBusiness)) {
-			return Encode.forJava(defaultBusiness);
-		} else {
-			return null;
-		}
-	}
-
-	@GetMapping("/updateDefaultBusiness")
-	@ResponseBody
-	public ResponseEntity<Object> updateDataPointerStatus(HttpServletRequest request, @RequestParam("defaultBusiness") String defaultBusiness) {
-		HttpSession session = request.getSession();
-		String username = (String) session.getAttribute(SessionConstants.USER_NAME);
-		homeService.updateDefaultBusiness(username, defaultBusiness);
-		if(defaultBusiness != null && validBusiness(defaultBusiness)) {
-			session.setAttribute(SessionConstants.DEFAULT_BUSINESS, validateRequest(defaultBusiness));
-		}
-		return ResponseEntity.status(HttpStatus.OK).body("Successfully updated Default Business");
-	}
-
-	private boolean validBusiness(String business){
-		return business.matches("[a-zA-Z0-9]+");
-	}
 }
