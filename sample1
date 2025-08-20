@@ -1,11 +1,8 @@
-[INFO] Finished at: 2025-08-20T15:14:18+05:30
 [INFO] ------------------------------------------------------------------------
-[ERROR] Failed to execute goal com.github.eirslett:frontend-maven-plugin:1.15.0:npm (npm install) on project web-react-converted: Failed to run task: 'npm install' failed. java.io.IOException: Cannot run program "/Users/achhab16/Desktop/pioneers_pioneers-ideate-portfolio-editor-lex-service/web-react-converted/node/node" (in directory "/Users/achhab16/Desktop/pioneers_pioneers-ideate-portfolio-editor-lex-service/web-react-converted"): error=2, No such file or directory -> [Help 1]
+[ERROR] Failed to execute goal com.github.eirslett:frontend-maven-plugin:1.15.0:npm (npm install) on project web-react-converted: Failed to run task: 'npm install' failed. java.io.IOException: Cannot run program "/Users/achhab16/Desktop/pioneers_pioneers-ideate-portfolio-editor-lex-service/web-react-converted/target/node/node" (in directory "/Users/achhab16/Desktop/pioneers_pioneers-ideate-portfolio-editor-lex-service/web-react-converted"): error=2, No such file or directory -> [Help 1]
 [ERROR] 
 [ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
 [ERROR] Re-run Maven using the -X switch to enable full debug logging.
 [ERROR] 
 [ERROR] For more information about the errors and possible solutions, please read the following articles:
 [ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
-
-Process finished with exit code 1
