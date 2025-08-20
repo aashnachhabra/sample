@@ -1,14 +1,32 @@
-[INFO] 
-[INFO] --- frontend:1.13.4:install-node-and-npm (install-node-and-npm) @ web-angular-react ---
-[INFO] Installing node version v22.0.0
-[INFO] Downloading https://nodejs.org/dist/v22.0.0/node-v22.0.0-darwin-arm64.tar.gz to /Users/achhab16/.m2/repository/com/github/eirslett/node/22.0.0/node-22.0.0-darwin-arm64.tar.gz
-[INFO] No proxies configured
-[INFO] No proxy was configured, downloading directly
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.5.3</version>
+        <relativePath/> <!-- lookup parent from repository -->
+    </parent>
 
+    <groupId>com.optum.ideate</groupId>
+    <artifactId>pioneers_pioneers-ideate-portfolio-editor-lex-service</artifactId>
+    <version>1.0.X-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>pioneers_pioneers-ideate-portfolio-editor-lex-service</name>
 
-[INFO] Installing node version v22.0.0
-[INFO] Downloading https://nodejs.org/dist/v22.0.0/node-v22.0.0-darwin-arm64.tar.gz to /Users/achhab16/.m2/repository/com/github/eirslett/node/22.0.0/node-22.0.0-darwin-arm64.tar.gz
-[INFO] No proxies configured
-[INFO] No proxy was configured, downloading directly
+    <description>Spring boot backend and frontend service modules for Level Funded Expansion Project</description>
 
-unable to find valid certification path to requested target
+    <modules>
+        <module>app</module>
+<!--        <module>web-angular</module>-->
+        <module>web-react-converted</module>
+    </modules>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <maven.usage.skip>true</maven.usage.skip>
+        <maven.deploy.skip>true</maven.deploy.skip>
+    </properties>
+</project>
