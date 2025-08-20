@@ -1,73 +1,38 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <groupId>com.optum.ideate</groupId>
-    <artifactId>pioneers_pioneers-ideate-portfolio-editor-lex-service</artifactId>
-    <version>1.0.X-SNAPSHOT</version>
-  </parent>
+import React from 'react'
+import { Routes, Route, Navigate } from 'react-router-dom'
+import App from './../../../../../home/sandbox/src/app/App.tsx'
+import Page from './../../../../../home/sandbox/src/app/shared/components/page/Page.tsx'
+import Table from './../../../../../home/sandbox/src/app/shared/components/table/Table.tsx'
+import Header from './../../../../../home/sandbox/src/app/shared/components/header/Header.tsx'
+import SessionTimeoutDialog from './../../../../../home/sandbox/src/app/sso/component/session-timeout-dialog/SessionTimeoutDialog.tsx'
+import NotFound from './../../../../../home/sandbox/src/app/sso/component/not-found/NotFound.tsx'
+import Logout from './../../../../../home/sandbox/src/app/sso/component/logout/Logout.tsx'
+import HealthCheck from './../../../../../home/sandbox/src/app/sso/component/health-check/HealthCheck.tsx'
+import PingPe from './../../../../../home/sandbox/src/app/sso/component/ping-pe/PingPe.tsx'
+import VerticalForm from './../../../../../home/sandbox/src/app/portfolio-mgmt/component/portfolio-editor/vertical-form/VerticalForm.tsx'
+import EditorTab from './../../../../../home/sandbox/src/app/portfolio-mgmt/component/portfolio-editor/editor-tab/EditorTab.tsx'
+import Accumulators from './../../../../../home/sandbox/src/app/portfolio-mgmt/component/portfolio-editor/accumulators/Accumulators.tsx'
+import MyPlans from './../../../../../home/sandbox/src/app/portfolio-mgmt/component/my-plans/MyPlans.tsx'
+import PortfolioManagement from './../../../../../home/sandbox/src/app/portfolio-mgmt/component/portfolio-management/PortfolioManagement.tsx'
 
-  <artifactId>web-angular</artifactId>
-  <packaging>jar</packaging>
-  <name>portfolio-editor-lex-web-angular</name>
-
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>
-
-  <dependencies>
-  </dependencies>
-
-  <build>
-    <plugins>
-      <plugin>
-        <artifactId>maven-clean-plugin</artifactId>
-        <version>2.5</version>
-        <configuration>
-          <filesets>
-            <fileset>
-              <directory>build</directory>
-              <includes>
-                <include>**</include>
-              </includes>
-              <directory>node_modules</directory>
-              <includes>
-                <include>**</include>
-              </includes>
-            </fileset>
-          </filesets>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>com.github.eirslett</groupId>
-        <artifactId>frontend-maven-plugin</artifactId>
-        <version>1.15.0</version>
-        <configuration>
-          <workingDirectory>${project.basedir}</workingDirectory>
-        </configuration>
-        <executions>
-          <execution>
-            <id>install node and npm</id>
-            <goals>
-              <goal>install-node-and-npm</goal>
-            </goals>
-            <configuration>
-              <nodeVersion>v18.17.0</nodeVersion>
-              <npmVersion>10.8.0</npmVersion>
-              <nodeDownloadRoot>https://repo1.uhc.com/artifactory/nodejs-org-cache/</nodeDownloadRoot>
-              <npmDownloadRoot>https://repo1.uhc.com/artifactory/npm-remote/npm/-/</npmDownloadRoot>
-            </configuration>
-          </execution>
-
-          <execution>
-            <id>npm run build</id>
-            <goals>
-              <goal>npm</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
-  </build>
-
-</project>
+export default function App() {
+  return (
+    <Routes>
+      <Route path='/app' element={<App />} />
+      <Route path='/page' element={<Page />} />
+      <Route path='/table' element={<Table />} />
+      <Route path='/header' element={<Header />} />
+      <Route path='/session-timeout-dialog' element={<SessionTimeoutDialog />} />
+      <Route path='/not-found' element={<NotFound />} />
+      <Route path='/logout' element={<Logout />} />
+      <Route path='/health-check' element={<HealthCheck />} />
+      <Route path='/ping-pe' element={<PingPe />} />
+      <Route path='/vertical-form' element={<VerticalForm />} />
+      <Route path='/editor-tab' element={<EditorTab />} />
+      <Route path='/accumulators' element={<Accumulators />} />
+      <Route path='/my-plans' element={<MyPlans />} />
+      <Route path='/portfolio-management' element={<PortfolioManagement />} />
+      <Route path="*" element={<Navigate to="/home" replace />} />
+    </Routes>
+  )
+}
