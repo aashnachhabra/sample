@@ -1,38 +1,11 @@
-import React from 'react'
-import { Routes, Route, Navigate } from 'react-router-dom'
-import App from './../../../../../home/sandbox/src/app/App.tsx'
-import Page from './../../../../../home/sandbox/src/app/shared/components/page/Page.tsx'
-import Table from './../../../../../home/sandbox/src/app/shared/components/table/Table.tsx'
-import Header from './../../../../../home/sandbox/src/app/shared/components/header/Header.tsx'
-import SessionTimeoutDialog from './../../../../../home/sandbox/src/app/sso/component/session-timeout-dialog/SessionTimeoutDialog.tsx'
-import NotFound from './../../../../../home/sandbox/src/app/sso/component/not-found/NotFound.tsx'
-import Logout from './../../../../../home/sandbox/src/app/sso/component/logout/Logout.tsx'
-import HealthCheck from './../../../../../home/sandbox/src/app/sso/component/health-check/HealthCheck.tsx'
-import PingPe from './../../../../../home/sandbox/src/app/sso/component/ping-pe/PingPe.tsx'
-import VerticalForm from './../../../../../home/sandbox/src/app/portfolio-mgmt/component/portfolio-editor/vertical-form/VerticalForm.tsx'
-import EditorTab from './../../../../../home/sandbox/src/app/portfolio-mgmt/component/portfolio-editor/editor-tab/EditorTab.tsx'
-import Accumulators from './../../../../../home/sandbox/src/app/portfolio-mgmt/component/portfolio-editor/accumulators/Accumulators.tsx'
-import MyPlans from './../../../../../home/sandbox/src/app/portfolio-mgmt/component/my-plans/MyPlans.tsx'
-import PortfolioManagement from './../../../../../home/sandbox/src/app/portfolio-mgmt/component/portfolio-management/PortfolioManagement.tsx'
+[INFO] Finished at: 2025-08-20T15:14:18+05:30
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal com.github.eirslett:frontend-maven-plugin:1.15.0:npm (npm install) on project web-react-converted: Failed to run task: 'npm install' failed. java.io.IOException: Cannot run program "/Users/achhab16/Desktop/pioneers_pioneers-ideate-portfolio-editor-lex-service/web-react-converted/node/node" (in directory "/Users/achhab16/Desktop/pioneers_pioneers-ideate-portfolio-editor-lex-service/web-react-converted"): error=2, No such file or directory -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
 
-export default function App() {
-  return (
-    <Routes>
-      <Route path='/app' element={<App />} />
-      <Route path='/page' element={<Page />} />
-      <Route path='/table' element={<Table />} />
-      <Route path='/header' element={<Header />} />
-      <Route path='/session-timeout-dialog' element={<SessionTimeoutDialog />} />
-      <Route path='/not-found' element={<NotFound />} />
-      <Route path='/logout' element={<Logout />} />
-      <Route path='/health-check' element={<HealthCheck />} />
-      <Route path='/ping-pe' element={<PingPe />} />
-      <Route path='/vertical-form' element={<VerticalForm />} />
-      <Route path='/editor-tab' element={<EditorTab />} />
-      <Route path='/accumulators' element={<Accumulators />} />
-      <Route path='/my-plans' element={<MyPlans />} />
-      <Route path='/portfolio-management' element={<PortfolioManagement />} />
-      <Route path="*" element={<Navigate to="/home" replace />} />
-    </Routes>
-  )
-}
+Process finished with exit code 1
