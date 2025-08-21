@@ -1,8 +1,127 @@
-[INFO] ------------------------------------------------------------------------
-[ERROR] Failed to execute goal com.github.eirslett:frontend-maven-plugin:1.15.0:npm (npm install) on project web-react-converted: Failed to run task: 'npm install' failed. java.io.IOException: Cannot run program "/Users/achhab16/Desktop/pioneers_pioneers-ideate-portfolio-editor-lex-service/web-react-converted/target/node/node" (in directory "/Users/achhab16/Desktop/pioneers_pioneers-ideate-portfolio-editor-lex-service/web-react-converted"): error=2, No such file or directory -> [Help 1]
-[ERROR] 
-[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
-[ERROR] Re-run Maven using the -X switch to enable full debug logging.
-[ERROR] 
-[ERROR] For more information about the errors and possible solutions, please read the following articles:
-[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
+now when i toggle on the dbs view button i want the view to shift to this component whose html ts css i have provided below, please implement that in the above code
+
+html
+
+<div class="container">
+  <h2 class="blue">Deductible & Out of Pocket</h2>
+
+  <h3 class="blue">Annual Deductible</h3>
+  <div class="row" (click)="handleClick('Individual In Network Deductible')">
+    Individual - In Network: {{ deductible.individual.inNetwork }}
+  </div>
+  <div class="row" (click)="handleClick('Individual Out of Network Deductible')">
+    Individual - Out of Network: {{ deductible.individual.outNetwork }}
+  </div>
+  <div class="row" (click)="handleClick('Family In Network Deductible')">
+    Family - In Network: {{ deductible.family.inNetwork }}
+  </div>
+  <div class="row" (click)="handleClick('Family Out of Network Deductible')">
+    Family - Out of Network: {{ deductible.family.outNetwork }}
+  </div>
+
+  <p class="clickable" (click)="handleClick('Deductible Explanation')">
+    All individual deductible amounts will count toward the family deductible, but an individual will not have to pay more than the individual deductible amount.
+    You're responsible for paying 100% of your medical expenses until you reach your deductible. For certain covered services, you may be required to pay a fixed dollar amount - your copay.
+  </p>
+
+  <h3 class="blue">Annual Out-of-Pocket Limit</h3>
+  <div class="row" (click)="handleClick('Individual In Network OOP')">
+    Individual - In Network: {{ outOfPocket.individual.inNetwork }}
+  </div>
+  <div class="row" (click)="handleClick('Individual Out of Network OOP')">
+    Individual - Out of Network: {{ outOfPocket.individual.outNetwork }}
+  </div>
+  <div class="row" (click)="handleClick('Family In Network OOP')">
+    Family - In Network: {{ outOfPocket.family.inNetwork }}
+  </div>
+  <div class="row" (click)="handleClick('Family Out of Network OOP')">
+    Family - Out of Network: {{ outOfPocket.family.outNetwork }}
+  </div>
+
+  <p class="clickable" (click)="handleClick('OOP Explanation')">
+    Once you've met your deductible limit you start sharing costs with your plan – coinsurance. You continue paying a portion of the expense until you reach your out-of-pocket limit. From there, your plan pays 100% of allowed amounts for the rest of the plan year.
+  </p>
+
+  <h2 class="blue">Preventive Care Services</h2>
+  <div class="row" (click)="handleClick('Preventive In Network')">
+    In Network: {{ preventiveCare.inNetwork }}
+  </div>
+  <div class="row" (click)="handleClick('Preventive Out of Network')">
+    Out Of Network: {{ preventiveCare.outNetwork }}
+  </div>
+
+  <p class="clickable" (click)="handleClick('Preventive Explanation')">
+    Benefits for Child Health Supervision Services are covered out-of-network and deductibles does not apply.
+    Certain preventive care services are provided as specified by the Patient Protection and Affordable Care Act (ACA), with no cost-sharing to you. These services are based on your age gender and other health factors.
+    UnitedHealthcare also covers other routine services that may require a copay or co-insurance or deductible.
+    Includes routine services such as Routine Wellness Checks immunizations Breast Pumps Mammography and Colorectal Cancer Screenings.
+    There is no cost (excluding cost if applicable) for all FDA approved methods or contraception under this Policy as required by federal and state law.
+  </p>
+</div>
+
+
+css
+
+.container {
+  font-family: Arial, sans-serif;
+  padding: 20px;
+  max-width: 800px;
+  margin: auto;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
+}
+
+.blue {
+  color: #0073cf;
+  font-weight: bold;
+  margin-top: 20px;
+}
+
+.row {
+  margin: 8px 0;
+  cursor: pointer;
+  padding-left: 10px;
+}
+
+.clickable {
+  cursor: pointer;
+  margin: 10px 0;
+  padding-left: 10px;
+}
+
+h2, h3 {
+  margin-top: 20px;
+}
+
+ts 
+
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-benefits',
+  templateUrl: './benefits.component.html',
+  styleUrls: ['./benefits.component.css']
+})
+export class BenefitsComponent {
+  deductible = {
+    individual: { inNetwork: '$1,500', outNetwork: '$3,000' },
+    family: { inNetwork: '$3,000', outNetwork: '$9,000' }
+  };
+
+  outOfPocket = {
+    individual: { inNetwork: '$1,500', outNetwork: '$9,000' },
+    family: { inNetwork: '$3,000', outNetwork: '$18,000' }
+  };
+
+  preventiveCare = {
+    inNetwork: 'No copay',
+    outNetwork: 'Not covered'
+  };
+
+  handleClick(item: string) {
+    alert(`Clicked on: ${item}`);
+  }
+}
+
+
