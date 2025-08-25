@@ -1,181 +1,108 @@
-<!-- dbs-view.component.html -->
-<div class="container my-4">
-  <!-- Deductible & Out of Pocket: Annual Deductible -->
-  <div class="table-responsive">
-    <h4>Deductible &amp; Out of Pocket</h4>
-    <div class="table-wrapper">
-      <table class="table table-sm table-hover" id="CAT1">
-        <thead class="thead-primary">
-        <tr>
-          <th scope="col" style="width:55%">Annual Deductible</th>
-          <th scope="col" style="width:22%">In Network</th>
-          <th scope="col" style="width:22%">Out of Network</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr (click)="openModal('Deductible & Out of Pocket', 'Individual', 1500, 3000)">
-          <th scope="row">Individual</th>
-          <td>$1,500</td>
-          <td>$3,000</td>
-        </tr>
-        <tr (click)="openModal('Deductible & Out of Pocket', 'Family', 3000, 9000)">
-          <th scope="row">Family</th>
-          <td>$3,000</td>
-          <td>$9,000</td>
-        </tr>
-        <tr class="table-borderless">
-          <td colspan="4"><em>All individual deductible amounts will count toward the family deductible, but an individual will not have to pay more than the individual deductible amount.</em></td>
-        </tr>
-        <tr class="table-borderless">
-          <td colspan="4"><em>You're responsible for paying 100% of your medical expenses until you reach your deductible. For certain covered services, you may be required to pay a fixed dollar amount — your copay.</em></td>
-        </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
+import { useMemo, useState } from 'react';
+import { Button } from 'primereact/button';
+import { Dropdown } from 'primereact/dropdown';
+import { InputText } from 'primereact/inputtext';
+import { TabView, TabPanel } from 'primereact/tabview';
+import { Table, TableSettings, ActionSettings } from '@/components/Table';
+import { useNavigate } from 'react-router-dom';
 
-  <!-- Annual Out-of-Pocket Limit -->
-  <div class="table-responsive mt-4">
-    <h4>Annual Out-of-Pocket Limit</h4>
-    <div class="table-wrapper">
-      <table class="table table-sm table-hover" id="CAT2">
-        <thead class="thead-primary">
-        <tr>
-          <th scope="col" style="width:55%">Annual Out-of-Pocket Limit</th>
-          <th scope="col" style="width:22%">In Network</th>
-          <th scope="col" style="width:22%">Out of Network</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr (click)="openModal('Annual Out-of-Pocket Limit', 'Individual', 1500, 9000)">
-          <th scope="row">Individual</th>
-          <td>$1,500</td>
-          <td>$9,000</td>
-        </tr>
-        <tr (click)="openModal('Annual Out-of-Pocket Limit', 'Family', 3000, 18000)">
-          <th scope="row">Family</th>
-          <td>$3,000</td>
-          <td>$18,000</td>
-        </tr>
-        <tr class="table-borderless">
-          <td colspan="4"><em>All individual out-of-pocket maximum amounts will count toward the family out-of-pocket maximum, but an individual will not have to pay more than the individual out-of-pocket maximum amount.</em></td>
-        </tr>
-        <tr class="table-borderless">
-          <td colspan="4"><em>Once you've met your deductible, you start sharing costs with your plan – coinsurance. You continue paying a portion of the expense until you reach your out-of-pocket limit. From there, your plan pays 100% of allowed amounts for the rest of the plan year.</em></td>
-        </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
+export function PortfolioManagement() {
+  const navigate = useNavigate();
+  const [search, setSearch] = useState({
+    planCode: '',
+    segment: '',
+    state: '',
+    cocSeries: '',
+    license: '',
+    product: '',
+    standard: '',
+    planType: ''
+  });
 
-  <!-- Preventive Care Services -->
-  <h4 class="mt-4">Preventive Care Services</h4>
-  <div class="table-responsive">
-    <div class="table-wrapper">
-      <table class="table table-sm table-hover" id="CAT3">
-        <thead class="thead-primary">
-        <tr>
-          <th scope="col" style="width:55%">Benefit Category</th>
-          <th scope="col" style="width:22%">In Network</th>
-          <th scope="col" style="width:22%">Out of Network</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr>
-          <th scope="row">Preventive Care Services</th>
-          <td>No copay</td>
-          <td>Not covered</td>
-        </tr>
-        <tr class="table-borderless">
-          <td colspan="4"><em>Benefits for Child Health Supervision Services are covered out-of-network and deductible does not apply.</em></td>
-        </tr>
-        <tr class="table-borderless">
-          <td colspan="4"><em>Certain preventive care services are provided as specified by the ACA, with no cost-sharing to you. These services are based on your age, gender and other health factors. UnitedHealthcare also covers other routine services that may require a copay, co-insurance or deductible.</em></td>
-        </tr>
-        <tr class="table-borderless">
-          <td colspan="4"><em>Includes services such as Routine Wellness Checkups, Immunizations, Breast Pumps, Mammography and Colorectal Cancer Screenings.</em></td>
-        </tr>
-        <tr class="table-borderless">
-          <td colspan="4"><em>There is no cost (including out-of-network) for all FDA approved methods of contraception under this Policy as required by law.</em></td>
-        </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-</div>
+  const tableData = useMemo(() => ([
+    { planCode: 'PC001', orgnaization: 'Org A', cocSeries: 'COC-A', state: 'CA', segment: 'KA', license: 'LIC001', product: 'Product-A', standard: 'Standard' },
+    { planCode: 'PC002', orgnaization: 'Org A', cocSeries: 'COC-B', state: 'TX', segment: 'KA', license: 'LIC002', product: 'Product-A', standard: 'Standard' },
+    { planCode: 'PC003', orgnaization: 'Org A', cocSeries: 'COC-C', state: 'NY', segment: 'KA', license: 'LIC003', product: 'Product-A', standard: 'Standard' }
+  ]), []);
 
-<!-- Modal (place near end of template to avoid stacking issues) -->
-<div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h4 class="modal-title">Edit {{ modalTitle }}</h4>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
+  const actions: ActionSettings[] = [
+    { title: 'Standard', showTitle: true, func: () => navigate('/portfolio-management/portfolio-editor'), params: [], size: 'small', outlined: true, severity: 'primary' },
+    { title: 'Custom', showTitle: true, func: () => navigate('/portfolio-management/portfolio-editor'), params: [], size: 'small', outlined: true, severity: 'primary' }
+  ];
 
-      <div class="modal-body">
-        <form>
-          <!-- Tier 1 -->
-          <div class="row mb-3">
-            <div class="col">
-              <label>Tier 1 Individual</label>
-              <input type="text" class="form-control" [value]="tier1Individual" disabled />
-            </div>
-            <div class="col">
-              <label>Tier 1 Family</label>
-              <input type="text" class="form-control" [value]="tier1Family" disabled />
+  const tableSettings: TableSettings = {
+    columns: [
+      { field: 'planCode', header: 'Plan Code', width: '120px', minWidth: '100px' },
+      { field: 'cocSeries', header: 'COC Series', width: '140px', minWidth: '120px' },
+      { field: 'state', header: 'State', width: '100px', minWidth: '80px' },
+      { field: 'segment', header: 'Segment', width: '100px', minWidth: '80px' },
+      { field: 'license', header: 'License', width: '120px', minWidth: '100px' },
+      { field: 'product', header: 'Published', width: '140px', minWidth: '120px' },
+      { field: 'standard', header: 'Standard', width: '120px', minWidth: '100px' }
+    ],
+    actions,
+    selectable: false
+  };
+
+  return (
+    <TabView>
+      <TabPanel header="Portfolio Management" leftIcon="pi pi-briefcase mr-2">
+        <h1>Portfolio Management</h1>
+        <div className="p-card p-3 m-5">
+          <div className="p-card-body">
+            <form onSubmit={(e) => { e.preventDefault(); console.log('Search form values:', search); }}>
+              <div className="grid">
+                <div className="flex justify-content-center col-3 p-2 mt-2">
+                  <div className="p-float-label w-full">
+                    <InputText id="planCode" value={search.planCode} onChange={(e) => setSearch({ ...search, planCode: e.target.value })} className="w-full" />
+                    <label htmlFor="planCode">Plan Code</label>
+                  </div>
+                </div>
+
+                {[
+                  { id: 'segment', options: ['KA','KB','KC'] },
+                  { id: 'state', options: ['CA','TX','NY','FL'] },
+                  { id: 'cocSeries', options: ['COC-A','COC-B','COC-C'] },
+                  { id: 'license', options: ['LIC001','LIC002','LIC003'] },
+                  { id: 'product', options: ['Product-A','Product-B','Product-C'] },
+                  { id: 'standard', options: ['Standard','Custom'] },
+                  { id: 'planType', options: ['Type-A','Type-B','Type-C'] }
+                ].map(({ id, options }) => (
+                  <div key={id} className="flex justify-content-center col-3 p-2 mt-2">
+                    <div className="p-float-label w-full">
+                      <Dropdown id={id} value={(search as any)[id]} onChange={(e) => setSearch({ ...search, [id]: e.value })} options={options.map(o => ({ label: o, value: o }))} className="w-full" placeholder=" " />
+                      <label htmlFor={id}>{id === 'cocSeries' ? 'COC Series' : id.charAt(0).toUpperCase() + id.slice(1)}</label>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="flex">
+                <Button type="button" label="Clear" size="small" outlined severity="warning" className="flex-1 flex align-items-center justify-content-center m-2" onClick={() => setSearch({ planCode:'', segment:'', state:'', cocSeries:'', license:'', product:'', standard:'', planType:'' })} />
+                <Button type="submit" label="Search" size="small" outlined className="flex-1 flex align-items-center justify-content-center m-2" />
+              </div>
+            </form>
+
+            <div className="p-3">
+              <Table settings={tableSettings} records={tableData} loading={false} totalRecords={tableData.length} paginate enableSort pageSize={25} rowsPerPage={[10,25,50]} onPageChange={(e) => console.log('Page changed:', e)} />
             </div>
           </div>
+        </div>
+      </TabPanel>
+      <TabPanel header="My Plans">
+        <h1>My Plans</h1>
+        <div className="p-card p-3 m-5">
+          <MyPlans />
+        </div>
+      </TabPanel>
+    </TabView>
+  );
+}
 
-          <!-- Tier 2 -->
-          <div class="row mb-3">
-            <div class="col">
-              <label>Tier 2 Individual</label>
-              <input type="number" class="form-control" [(ngModel)]="form.tier2Individual" name="tier2Individual" />
-            </div>
-            <div class="col">
-              <label>Tier 2 Family</label>
-              <input type="number" class="form-control" [(ngModel)]="form.tier2Family" name="tier2Family" />
-            </div>
-          </div>
+function MyPlans() {
+  return <div>My Plans component is available as a dedicated route too.</div>;
+}
 
-          <!-- Tier 3 -->
-          <div class="row mb-3">
-            <div class="col">
-              <label>Tier 3 Individual</label>
-              <input type="number" class="form-control" [(ngModel)]="form.tier3Individual" name="tier3Individual" />
-            </div>
-            <div class="col">
-              <label>Tier 3 Family</label>
-              <input type="number" class="form-control" [(ngModel)]="form.tier3Family" name="tier3Family" />
-            </div>
-          </div>
 
-          <!-- Dropdowns -->
-          <div class="row mb-3">
-            <div class="col">
-              <label>Deductible/OOPM Type</label>
-              <select class="form-select" [(ngModel)]="form.type" name="type">
-                <option value="Emp">Emp</option>
-                <option value="Fam">Fam</option>
-              </select>
-            </div>
-            <div class="col">
-              <label>Does Deductible Cross Apply?</label>
-              <select class="form-select" [(ngModel)]="form.crossApply" name="crossApply">
-                <option value="No">No</option>
-                <option value="Yes">Yes</option>
-              </select>
-            </div>
-          </div>
-        </form>
-      </div>
 
-      <div class="modal-footer">
-        <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-outline-danger" (click)="resetForm()">Reset</button>
-        <button type="button" class="btn btn-primary" (click)="saveForm()">Save</button>
-      </div>
-    </div>
-  </div>
-</div>
+
+can u style and rewrite this component using tailwind css. Do not modify any functionality just make the components more beautiful and organized while keeping a simple uhg theme intact
