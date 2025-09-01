@@ -170,3 +170,5 @@ if __name__ == '__main__':
 
 i have these 2 api calls upload sbc upload dbs they are taking about 1.5+min and 3+mins respectively. I want to optimise them and reduce the time without disturbing other functionality
 let me share another code file for better understanding. wait before giving solutions
+you may use asyncio aiohttp if needed just make the api calls faster and optimised
+
