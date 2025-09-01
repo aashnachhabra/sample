@@ -1,3 +1,61 @@
+import os
+import json
+import logging
+from datetime import datetime
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+from werkzeug.utils import secure_filename
+
+from config import (
+    UPLOAD_SBC_FOLDER, UPLOAD_DBS_FOLDER,
+    OUTPUT_JSON_SBC_FOLDER, MAPPED_OUTPUT_JSON_SBC_FOLDER,
+    OUTPUT_JSON_DBS_FOLDER, SIMILARITY_JSON_FOLDER,
+    GOOGLE_CREDENTIALS_PATH
+)
+
+from dbs_extractor import process_pdf_to_json
+from sbc_extractor import process_sbc_pdf_to_json
+from comparison import compare_json_chunks
+
+logging.basicConfig(
+    level=logging.INFO, 
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
+app = Flask(__name__)
+CORS(app)
+
+# Set config
+app.config.update({
+    'UPLOAD_SBC_FOLDER': UPLOAD_SBC_FOLDER,
+    'UPLOAD_DBS_FOLDER': UPLOAD_DBS_FOLDER,
+    'OUTPUT_JSON_SBC_FOLDER': OUTPUT_JSON_SBC_FOLDER,
+    'MAPPED_OUTPUT_JSON_SBC_FOLDER': MAPPED_OUTPUT_JSON_SBC_FOLDER,
+    'OUTPUT_JSON_DBS_FOLDER': OUTPUT_JSON_DBS_FOLDER,
+    'SIMILARITY_JSON_FOLDER': SIMILARITY_JSON_FOLDER
+})
+
+os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = GOOGLE_CREDENTIALS_PATH
+
+# Ensure folders exist
+def ensure_directories():
+    for folder in [
+        UPLOAD_SBC_FOLDER, UPLOAD_DBS_FOLDER,
+        OUTPUT_JSON_SBC_FOLDER, MAPPED_OUTPUT_JSON_SBC_FOLDER,
+        OUTPUT_JSON_DBS_FOLDER, SIMILARITY_JSON_FOLDER
+    ]:
+        os.makedirs(folder, exist_ok=True)
+
+ensure_directories()
+
+@app.route('/health', methods=['GET'])
+def health_check():
+    try:
+        return jsonify({"status": "healthy", "message": "Application is running"}), 200
+    except Exception as e:
+        return jsonify({"status": "unhealthy", "message": "Health check failed due to an internal error."}), 500
+
 @app.route('/uploadDoc/dbs', methods=['POST'])
 def uploadDoc_dbs():
     file = request.files.get('file')
@@ -25,3 +83,90 @@ def uploadDoc_dbs():
     except Exception as e:
         logger.error(f"Unexpected error occurred during DBS processing: {e}")
         return jsonify({"error": "Unexpected error occurred during DBS processing"}), 500
+
+@app.route('/uploadDoc/sbc', methods=['POST'])
+def uploadDoc_sbc():
+    file = request.files.get('file')
+    if not file or file.filename == '':
+        logger.warning("No valid file provided in SBC upload")
+        return jsonify({"error": "No valid file provided"}), 400
+
+    filename = secure_filename(file.filename)
+    file_path = os.path.join(app.config['UPLOAD_SBC_FOLDER'], filename)
+    file.save(file_path)
+    logger.info(f"SBC file uploaded to: {file_path}")
+
+    extracted_dbs_data = request.form.get('extracted_dbs_data')
+    if not extracted_dbs_data:
+        logger.warning("No extracted DBS json provided")
+        return jsonify({"error": "No extracted DBS json provided"}), 400
+
+    try:
+        extracted_dbs_data = json.loads(extracted_dbs_data)
+    except json.JSONDecodeError:
+        logger.error("Invalid JSON format in extracted DBS data")
+        return jsonify({"error": "Invalid JSON format"}), 400
+
+    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    base_filename = os.path.splitext(filename)[0]
+    output_json_path = os.path.join(app.config['OUTPUT_JSON_SBC_FOLDER'], f"{base_filename}_sbc_{timestamp}.json")
+    mapped_output_json_path = os.path.join(app.config['MAPPED_OUTPUT_JSON_SBC_FOLDER'], f"mapped_{base_filename}_sbc_{timestamp}.json")
+
+    try:
+        mapped_json, mapped_output_file = process_sbc_pdf_to_json(extracted_dbs_data, file_path, output_json_path, mapped_output_json_path)
+
+        if "error" in mapped_json:
+            logger.error(f"Error processing SBC file: {mapped_json['error']}")
+            return jsonify(mapped_json), 400
+
+        logger.info(f"SBC file processed successfully: {mapped_output_file}")
+        return jsonify({"extracted_json": mapped_json, "file_path": f"mapped_{base_filename}_sbc_{timestamp}.json"}), 200
+    except Exception as e:
+        logger.error(f"Unexpected error occurred during SBC processing: {e}")
+        return jsonify({"error": "Unexpected error occurred during SBC processing"}), 500
+
+@app.route('/compareDoc', methods=['POST'])
+def compareDoc():
+    data = request.get_json()
+    sbc_json = data.get('sbc_json')
+    dbs_json = data.get('dbs_json')
+    sbc_loc = os.path.join(app.config['MAPPED_OUTPUT_JSON_SBC_FOLDER'], data.get("sbc_path"))
+    dbs_loc = os.path.join(app.config['OUTPUT_JSON_DBS_FOLDER'], data.get("dbs_path"))
+
+    if not all([sbc_json, dbs_json, sbc_loc, dbs_loc]):
+        logger.warning("Missing required fields for comparison")
+        return jsonify({"error": "Missing required fields for comparison"}), 400
+    
+    if not sbc_loc.startswith(app.config['MAPPED_OUTPUT_JSON_SBC_FOLDER']):
+        raise Exception("sbc file not allowed")
+
+    if not dbs_loc.startswith(app.config['OUTPUT_JSON_DBS_FOLDER']):
+        raise Exception("dbs file not allowed")
+
+    try:
+        with open(sbc_loc, "r", encoding="utf-8") as f:
+            sbc_data = json.load(f)
+        with open(dbs_loc, "r", encoding="utf-8") as f:
+            dbs_data = json.load(f)
+        logger.info(f"Loaded SBC and DBS data for comparison from: {sbc_loc}, {dbs_loc}")
+    except Exception as e:
+        logger.error(f"Error loading SBC or DBS data: {e}")
+        return jsonify({"error": "Error loading data"}), 500
+
+    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    similarity_json_path = os.path.join(app.config['SIMILARITY_JSON_FOLDER'], f"similarity_{timestamp}.json")
+    
+    try:
+        comparison_output = compare_json_chunks(sbc_data, dbs_data, similarity_json_path)
+        logger.info(f"Comparison completed successfully and results are stored in: {similarity_json_path}")
+        return jsonify(comparison_output), 200
+    except Exception as e:
+        logger.error(f"Error occurred during comparison: {e}")
+        return jsonify({"error": "Error occurred during comparison"}), 500
+
+if __name__ == '__main__':
+    logger.info("Starting Flask application")
+    app.run(host='0.0.0.0', port=5000)
+
+i have these 2 api calls upload sbc upload dbs they are taking about 1.5+min and 3+mins respectively. I want to optimise them and reduce the time without disturbing other functionality
+let me share another code file for better understanding. wait before giving solutions
