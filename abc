@@ -1,303 +1,187 @@
-prompt = f"""
-    ### Role
-    You are a highly skilled information extractor. Your task is to extract structured and unstructured data from the provided insurance-related text and organize it into a valid JSON format while preserving the original document structure.
+import fitz
+import re
+import logging
+import concurrent.futures
+import orjson
+from google import genai
+from google.genai import types
+from config import (PROJECT_ID, LOCATION, GEMINI_MODEL )
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
+def fix_malformed_json(json_string):
+    try:
+        json_string = re.sub(r'\\(?!["\\/bfnrtu])', '', json_string)
+        json_string = json_string.replace('\\\\', '\\')
+        json_string = re.sub(r'\\n', ' ', json_string)
+        json_string = re.sub(r'\\t', ' ', json_string)
+        json_string = re.sub(r'}\s*{', r'},{', json_string)
+        json_string = json_string.strip()
+        if not json_string.startswith("{") and not json_string.startswith("["):
+            json_string = "{" + json_string
+        if not json_string.endswith("}") and not json_string.endswith("]"):
+            json_string = json_string + "}"
+        try:
+            orjson.loads(json_string)
+        except orjson.JSONDecodeError as e:
+            logger.warning(f"JSON still malformed after initial fixes: {e}. Attempting further corrections.")
+            return json_string  # Just return the string, not a tuple
+        return json_string
+    except Exception as e:
+        logger.error(f"Error fixing malformed JSON: {e}")
+        return "{}" 
+
+def split_pdf_by_pages_in_memory(pdf_path, pages_per_chunk=2):
+    try:
+        doc = fitz.open(pdf_path)
+        split_chunks = []
+        for i in range(0, len(doc), pages_per_chunk):
+            chunk_doc = fitz.open()
+            for page_num in range(i, min(i + pages_per_chunk, len(doc))):
+                chunk_doc.insert_pdf(doc, from_page=page_num, to_page=page_num)
+            # Save chunk to bytes in memory
+            chunk_bytes = chunk_doc.write()
+            if chunk_bytes:  # Only add non-empty chunks
+                split_chunks.append(chunk_bytes)
+        return split_chunks
+    except Exception as e:
+        logger.error(f"Error chunking DBS pdf: {e}")
+        return []
+
+def clean_escape_characters(data):
+    if isinstance(data, dict):
+        return {key.replace("\\n", " ").replace("\\t", " ").replace("\\", " "): clean_escape_characters(value) for key, value in data.items()}
+    elif isinstance(data, list):
+        return [clean_escape_characters(item) for item in data]
+    elif isinstance(data, str):
+        return data.replace("\\n", " ").replace("\\t", " ").replace("\\", " ")
+    return data
+
+def merge_chunks_in_order(aggregated_results):
+    try:
+        sorted_chunks = sorted(
+            [(key, value) for key, value in aggregated_results.items() if value],
+            key=lambda x: int(x[0].split()[1])
+        )
+        final_json = {key: value for key, value in sorted_chunks}
+        return final_json
+    except Exception as e:
+        logger.error(f"Error merging chunks in order: {e}")
+        return None
+
+def process_chunk(idx, chunk_bytes, prompt):
+    chunk_key = f"chunk {idx + 1}"
+    logger.info(f"Processing {chunk_key}")
+    if not chunk_bytes:
+        logger.error(f"No data extracted for {chunk_key}. Skipping.")
+        return chunk_key, None
+    json_output = process_pdf_with_gemini(chunk_bytes, prompt)
+    try:
+        parsed_json = orjson.loads(json_output)
+        return chunk_key, parsed_json
+    except orjson.JSONDecodeError as e:
+        logger.error(f"Failed to parse JSON for {chunk_key}: {e}")
+        logger.debug(f"Raw JSON output for {chunk_key}: {json_output}")
+        try:
+            fixed_json_output = fix_malformed_json(json_output)
+            parsed_json = orjson.loads(fixed_json_output)
+            return chunk_key, parsed_json
+        except Exception as fix_error:
+            logger.error(f"Failed to fix JSON for {chunk_key}: {fix_error}")
+            logger.debug(f"Raw JSON output for {chunk_key}: {json_output}")
+            return chunk_key, None
+
+def process_pdf_with_gemini(chunk_bytes, prompt):
+    try:
+        client = genai.Client(
+            vertexai=True,
+            project=PROJECT_ID,
+            location=LOCATION,
+        )
+
+        responses = client.models.generate_content(
+            model=GEMINI_MODEL,
+            contents=[
+                types.Part.from_bytes(
+                    data=chunk_bytes,
+                    mime_type='application/pdf',
+                ),
+                prompt
+            ]
+        )
+        cleaned_responses = []
+        for response in responses:
+            # Extract candidates from a tuple response
+            candidates = None
+            if isinstance(response, tuple) and response[0] == 'candidates':
+                candidates = response[1]
+            else:
+                candidates = [response]
+
+            # Loop through candidates and extract JSON from the text part
+            for candidate in candidates:
+                if hasattr(candidate, 'content') and hasattr(candidate.content, 'parts'):
+                    for part in candidate.content.parts:
+                        if hasattr(part, 'text') and part.text.strip().startswith("```json"):
+                            raw_text = part.text
+                            # Clean up code block markers and whitespace
+                            cleaned_response = raw_text.strip().strip("```json").strip("```").strip()
+                            cleaned_response = re.sub(r"^[^\{]+", "", cleaned_response)
+                            cleaned_responses.append(cleaned_response)
+                else:
+                    continue
+        
+        output = "".join(cleaned_responses)
+        sanitized_output = output.replace("\\", "\\\\")
+        try:
+            orjson.loads(sanitized_output)
+        except orjson.JSONDecodeError:
+            logger.warning("Sanitized JSON is invalid. Attempting to fix.")
+            sanitized_output = fix_malformed_json(sanitized_output)
+        return sanitized_output
+    except Exception as e:
+        logger.error(f"Error processing DBS pdf chunk with Gemini model: {e}")
+        return None
     
-    ### Structure Preservation Rules:
-    1. **Maintain Document Hierarchy**: Preserve the original nested structure (sections → subsections → items).
-    2. **Section Continuity**: If extracting from a document chunk, maintain section relationships and don't create orphaned data.
-    3. **Parent-Child Relationships**: Keep related items grouped under their appropriate parent sections.
-    4. **Sequential Order**: Preserve the order of items as they appear in the source document.
-    
-    ### Extraction Rules:
-    1. **Extract Specific Fields**:
-        - **State**: Identify and extract state names explicitly mentioned in the text (e.g., "California", "Iowa").
-        - **Medical Plan Code**: Detect and extract the first alphanumeric patterns (e.g., "DNU3", "CZZL").
-        - **RX Plan Code**: Locate and extract alphanumeric patterns adjacent to medical plan codes (e.g., "5U", "X01T").
-
-    2. **Input Structures**:
-        - Input PDF document has information described using below components:
-            - Majorly document is divided into 3 tabular structures and in unstructured list or text.
-                - Table for "Annual Medical Deductible" and "Annual Out-of-Pocket Limit" will have
-                    - Row labels like "Individual", "Family", "Single Coverage", "Family Coverage", "Ped Dental Annual Deductible - Family", "Ped Dental Annual Deductible - Individual".
-                    - Column headers like "In-network", "Out-of-Network", "Designated Network".
-                    - It can have 2 column, 3 column or single column table.
-                        - Do not add sub-keys for missing column headers.
-                        
-                - Table for "Medical Benefits" will have
-                    - Column headers like "Designated Network", "Network", "Out-of-Network".
-                    - Main header like "Copays ($) and Coinsurance (%) for Covered Health Care Services"
-                    - Section Headers represents medical services category like "Inpatient Care", "Outpatient Care", "Emergency Services", "Maternity and Newborn Care", "Mental Health Services", "Substance Use Disorder Services", "Prescription Drug", "Specialty Prescription Drug", "Rehabilitation Services - Outpatient Therapy and Manipulative Treatment", "Habilitative Services - Outpatient", "Lab, X-Ray and Diagnostic - Outpatient", "Other Services".
-                    - Row labels represent medical services like "Specialist", "Urgent Care Center Services", "Virtual Care Services", "Hospice Care", "Surgery - Outpatient", "Lab Testing", "X-Ray and other Diagnostic Testing", "Network partial hospitalization/intensive outpatient treatment/high intensity outpatient", "Intensive Behavior Therapy (ABA)".
-                    - Row text beneath row labels like "For services provided at an ambulatory surgical center or in a physician’s office", "For services provided at an outpatient hospital-based surgical center".
-                    - It can have 2 column, 3 column or single column table.
-                        - Do not add sub-keys for missing column headers.       
-                 Table for "Pharmacy Benefits" will have
-                    - Column headers like "Designated Network", "Network", "Out-of-Network".
-                    - Main header like "Copays ($) and Coinsurance (%) for Covered Prescription Drugs"
-                    - Section Headers like "Tier 1", "Tier 2", "Tier 3", "Specialty Drugs".
-                    - Row labels like "Generic", "Brand Name", "Specialty".
-                    - Sub Rows like "For services provided at an ambulatory surgical center or in a physician’s office", "For services provided at an outpatient hospital-based surgical center".                                                        
-                - Unstructured list or text for "Medical Exclusions" section.
-                - Columns in table represent different provider types. It can be 1, 2 or all 3 provider types in a table.
-                - Row text beneath row labels can provide additional context or limitations for specific services.
-    
-    3. **Output Format**:
-        Output should be a single valid JSON object with the following structure:
-        {{  
-            "section-header":{{
-                "Row-label":{{
-                    "Column-header": "value",
-                    "limitations": "text describing limitations, if present"
-                }}
-            }}
-                
-        }}
-
-        example:
-        "Rehabilitation Services - Outpatient Therapy and Manipulative Treatment": {{
-            "Designated Network": "$75 copay",
-            "Network": "$75 copay",
-            "Out-of-Network": "$75 copay",
-            "limitations": "Limited to 20 visits of cognitive rehabilitation therapy per year. Limited to 20 visits of manipulative treatments per year. Limited to 20 visits of pulmonary rehabilitation therapy per year. Limited to 30 visits of post-cochlear implant aural therapy per year. Limited to 104 visits of speech therapy and 52 visits each of physical therapy and occupational therapy for diagnosis and treatment of Down Syndrome for an Enrolled Dependent 18 years of age or younger. Rehabilitation care includes intensive intervention programs and early intensive behavioral intervention."
-        }},
-        "Scopic Procedures - Outpatient Diagnostic and Therapeutic": {{
-            "Designated Network": "$500 copay",
-            "Network": "$500 copay",
-            "Out-of-Network": "50%*",
-            "limitations": "Diagnostic/therapeutic scopic procedures include, but are not limited to colonoscopy, sigmoidoscopy and endoscopy. For network benefits you have no copay for a diagnostic colonoscopy for the first service in a year."
-        }},
-        "Surgery - Outpatient¹": {{
-            "Designated Network": "20%*",
-            "Network": "20%*",
-            "Out-of-Network": "50%*"
-        }}
-
-    3. **Data Extraction**:
-        
-        - Use section headers (e.g., "Inpatient Care", "Outpatient Care") as top-level keys.
-        - Use row labels (e.g., "Individual", "Family") as keys within each section.
-        - Treat column headers (e.g., "Designated Network", "Network", "Out-of-Network") as sub-keys.
-        - If a column header is missing, DO NOT create that sub-key.
-        - If a row has only a single value, assign it to all available columns as values(e.g., "Designated Network", "Network", "Out-of-Network").
-        - IF a row does not have a value for "Designated Network" but has values for "Network" and "Out-of-Network", copy the "Network" value to "Designated Network".
-        - DO NOT COPY VALUES to "Network" from "Out-of-Network".
-        - KEEP "Network" value INTACT.
-        - Do not copy values to other columns if they already have a value.
-        - If there is any sub-row that contains text describing "limitation" include it in an output JSON as a value for the key "limitations" under the respective row label.
-        - For "Prescription Drug" and "Specialty Prescription Drug" sections,
-            - It has 2 column headers
-                - Do not extract column headers "Up to a 31-day supply" and "Up to a 90-day supply" as separate keys.
-                - For "Prescription Drug"
-                    - Use "Prescription Drug Product Tier Level" as a section header.
-                    - Use column headers like "In-Network Retail Pharmacy", "Out-of-Network Retail Pharmacy", "Retail Non-preferred Specialty Network Pharmacy", "In-Network Mail Order Pharmacy**" as separate keys to a row label.
-                - For "Specialty Prescription Drug"
-                    - Use column header like "Preferred Specialty Retail Network","Retail Non-preferred Specialty Network Pharmacy","Preferred Out-of-Network Specialty Pharmacy","Specialty Mail Order**" as separate keys to a row label.
-                    - Use "Specialty Prescription Drug Product Tier Level" as a section header.
-        - Apply the rules in section 3.1 and 3.2 STRICTLY while extracting information.
-        - Strictly stop the extraction process after completing the section titled "Medical Exclusions".
-
-        3.1. **CRITICAL FIELDS RULES**: Apply these rules when row label matches below rule headings:
-            3.1.1 **Annual Medical Deductible**:
-                - Include all relevant row labels, such as "Individual", "Family", "Single Coverage", "Family Coverage", "Ped Dental Annual Deductible - Family", and "Ped Dental Annual Deductible - Individual".
-                - If only a single value (e.g., "No.") is present without network-specific details:
-                    * Map the value to both "In-network" and "Out-of-Network" fields for the respective row label.
-                    * Ensure that all mapped values preserve their original formatting (e.g., "No.", etc.).
-
-            3.1.2. **Annual Pharmacy Deductible**:
-                - Include all relevant row labels, such as "Individual" and "Family".
-                - Map "In-network" values to their respective fields.
-                - Map "Out-of-Network" values to their respective fields only else assign its value as null if column is present.
-                - If there is only one column header like "In Network and Out of Network"
-                    - Copy the value for a row to both "In-network" and "Out-of-Network" fields.
-                - Include any text describing limitations under the "limitations" key, if present.
-                - If only a single value (e.g., "No.") is present without network-specific details:
-                    * Map the value to both "In-network" and "Out-of-Network" fields for the respective row label.
-                    * Ensure that all mapped values preserve their original formatting (e.g., "No.", etc.).
-        
-            3.1.3 **Specialist**:
-                - Add parent key as "Office Services - Sickness & Injury".
-        
-            3.1.4 **Urgent Care Center Services**:
-                - Add parent key as "Office Services - Sickness & Injury".
-
-            3.1.5 **Virtual Care Services**:
-                - Add parent key as "Office Services - Sickness & Injury".
-
-            3.1.6 **Rehabilitation Services - Outpatient Therapy and Manipulative Treatment** OR **Rehabilitation Services - Outpatient Therapy**:
-                - For sub-row labels like "Manipulative Treatment" and "Other rehabilitation services":
-                    - create a nested JSON object under the main row label for each sub-row label.
-                    - Map the value to respective "Designated Network", "Network", and "Out-of-Network" keys.
-                    - Include any text describing limitations under the "limitations" key for a sub-row label, if present.
-
-            3.1.7 **Habilitative Services - Outpatient**:
-                - For sub-row labels like "Manipulative Treatment" and "Other rehabilitation services":
-                    - create a nested JSON object under the main row label for each sub-row label.
-                    - Map the value to respective "Designated Network", "Network", and "Out-of-Network" keys.
-                    - Include any text describing limitations under the "limitations" key for a sub-row label, if present.
-
-            3.1.8. **Major Diagnostic and Imaging - Outpatient**:
-                - If three sub-keys exist ("Designated Network", "Network", and "Out-of-Network"), map the values to their respective keys.
-                - If only two sub-keys exist ("Network" and "Out-of-Network"), assign the first value to both "Designated Network" and "Network", and the second value to "Out-of-Network".
-                - If only two sub-keys exist ("Designated Network" and "Network"), assign the first value to "Designated Network" and the second value to "Network". Keep the value of "Out-of-Network" as null.
-            
-            3.1.9. **Hospice Care**:
-                - Add parent key as "Other Services".
-
-            3.1.10. **Surgery - Outpatient**:
-                - If it has sub-row label like "For services provided at an ambulatory surgical center or in a physician’s office":
-                - Map the value to respective "Designated Network", "Network", and "Out-of-Network" keys. For example:
-                    Surgery - Outpatient: {{
-                        "For services provided at an ambulatory surgical center or in a physician’s office": {{
-                            "Designated Network": "Value for Designated Network",
-                            "Network": "Value for Network",
-                            "Out-of-Network": "Value for Out-of-Network",
-                            "limitations": "Text describing limitations, if present"
-                        }}
-                    }}
-                - If it has sub-row label like "For services provided at an outpatient hospital-based surgical center":
-                    - Map the value to respective "Designated Network", "Network", and "Out-of-Network" keys. For example:
-                    Surgery - Outpatient: {{
-                        "For services provided at an outpatient hospital-based surgical center": {{
-                            "Designated Network": "Value for Designated Network",
-                            "Network": "Value for Network",
-                            "Out-of-Network": "Value for Out-of-Network",
-                            "limitations": "Text describing limitations, if present"
-                        }}
-                    }}
-                - If only two sub-keys exist ("Network" and "Out-of-Network"), assign the first value to both "Designated Network" and "Network", and the second value to "Out-of-Network".
-                - If only two sub-keys exist ("Designated Network" and "Network"), assign the first value to "Designated Network" and the second value to "Network". Keep the value of "Out-of-Network" as null.
-
-        3.2 **IMPORTANT GENERIC RULES TO BE APPLIED**:
-            3.2.0. While Extracting information:
-                - Preserve the original wording, spacing, and formatting of all text.
-                - Do not guess or infer missing values. Skip fields that are not explicitly present in the input.
-                - Do not include multiple entries for the same section (like "Medical Exclusions", "State").
-                - Ensure the output is strictly valid JSON, adhering to proper syntax and structure.
-                - Stop the extraction process after completing the section titled "Medical Exclusions".
-            
-            3.2.1. Scenario 1:
-                - If there are values only in "Network" and "Out-of-Network" column but not in "Designated Network", even though "Designated Network" sub-key is present:
-                    - Map the "Network" value to both "Designated Network" and "Network".
-                    - Map the "Out-of-Network" value to "Out-of-Network".
-                - Do not copy the "Network" value to "Designated Network" if it already has a value.
-                - Do not skip extraction of "Out-of-Network" if it is present in the document.
-                - Include any applicable limitations as a separate key under "limitations".
-
-            3.2.2. Scenario 2:
-                - If there are values only in "Designated Network" and "Network" columns is present:
-                    - Map the "Designated Network" value to both "Designated Network".
-                    - Set the "Out-of-Network" value to null.
-                - Copy the value from "Network" column to "Designated Network" sub-key.
-                - Include any applicable limitations as a separate key under "limitations".
-        
-            3.2.3. Scenario 3:
-                - If a column has a data like ("The amount you pay is based on where the covered health care service is provided."):
-                    - Copy the value to all the sub-keys "Designated Network", "Network", and "Out-of-Network" present in the document. For example:
-                        {{
-                            Designated Network: "The amount you pay is based on where the covered health care service is provided.",
-                            Network: "The amount you pay is based on where the covered health care service is provided.",
-                            Out-of-Network: "The amount you pay is based on where the covered health care service is provided.",
-                            limitations: "Text describing limitations, if present"
-                        }}
-
-            3.2.4. Scenario 4:
-                - If a column has a data like ("You pay a $250 per occurrence deductible per visit prior to and in addition to paying any Annual Deductible and any coinsurance amount. 20%*") is present:
-                    - It should be split and extracted as a separate entry under the relevant section.
-                    - Use separate keys "Costshare DN", "Costshare IN" and "Costshare OON" and map to its respective section. For example:
-                        {{
-                            "Costshare DN": "You pay a $250 per occurrence deductible per visit prior to and in addition to paying any Annual Deductible and any coinsurance amount.",
-                            "Costshare IN": "You pay a $250 per occurrence deductible per visit prior to and in addition to paying any Annual Deductible and any coinsurance amount.",
-                            "Costshare OON": "You pay a $250 per occurrence deductible per visit prior to and in addition to paying any Annual Deductible and any coinsurance amount.",
-                            "Designated Network": "20%*",
-                            "Network": "20%*",
-                            "Out-of-Network": "20%*",
-                            "limitations": "Text describing limitations, if present"
-                        }}
-                    - Do not copy the "Network" value to "Designated Network" if it already has a value.
-                    - Do not skip extraction of "Out-of-Network" or "Costshare OON" if it is present in the document.
-
-    4. **Unstructured Lists (e.g., Exclusions)**:
-        - Use the section name (e.g., "Medical Exclusions") as the key.
-        - Extract each item in the list as a separate entry under the section.
-        - Retain the exact wording, punctuation, and capitalization of each item.
-        - Remove bullet points or numbering from the extracted data.
-        - Preserve the order of items as they appear in the input text.
-        - Strictly stop the extraction after completing the section titled "Medical Exclusions".
-   
-  
-    ### Example JSON Format:
-    {{
-    "State": "Value (like California)",
-    "Medical Plan Code": "Value (like DNU3)",
-    "RX Plan Code": "Value (like 5U)",
-    "Section Name (like Annual Medical Deductible)": {{
-        "Row Label (like Single Coverage or Individual)": {{
-            "Column Label (like In-network)": "Value (like $1000)",
-            "Column Label (like Out-of-Network)": "Value (like $2000)",
-            "limitations": "Text describing limitations, if present"
-        }},
-        "Row Label (like Family Coverage or Family)": {{
-            "Column Label (like In-network)": "Value (like $1000)",
-            "Column Label (like Out-of-Network)": "Value (like $2000)",
-            "limitations": "Text describing limitations, if present"
-        }},
-        "Row Label (like Ped Dental Annual Deductible - Family)": {{
-            "Column Label (like In-network)": "Value (like $1000)",
-            "Column Label (like Out-of-Network)": "Value (like $2000)",
-            "limitations": "Text describing limitations, if present"
-        }},
-        "Row Label (like Ped Dental Annual Deductible - Individual)": {{
-            "Column Label (like In-network)": "Value (like $1000)",
-            "Column Label (like Out-of-Network)": "Value (like $2000)",
-            "limitations": "Text describing limitations, if present"
-        }},
-        ...
-    }},
-    "Section Name (like Annual Out-of-Pocket Limit)": {{
-        "Row Label (like Individual)": {{
-            "Column Label (like In-network)": "Value (like $1000)",
-            "Column Label (like Out-of-Network)": "Value (like $2000)",
-            "limitations": "Text describing limitations, if present"
-        }},
-        "Row Label (like Family)": {{
-            "Column Label (like In-network)": "Value (like $1000)",
-            "Column Label (like Out-of-Network)": "Value (like $2000)",
-            "limitations": "Text describing limitations, if present"
-        }},
-        ...
-    }},
-    "Section Name (like Office Services - Sickness & Injury)": {{
-        "Subcategory (like Specialist)": {{
-            "Designated Network": "Value (like $1000)",
-            "Network": "Value (like $1000)",
-            "Out-of-Network": "Value (like $2000)",
-            "limitations": "Text describing limitations, if present"
-        }},
-        "Subcategory (like Urgent Care Center Services)": {{
-            "Designated Network": "Value (like $1000)",
-            "Network": "Value (like $1000)",
-            "Out-of-Network": "Value (like $2000)",
-            "limitations": "Text describing limitations, if present"
-        }},
-        ...
-    }},
-    "Section Name (like Outpatient Care)": {{
-        "Subcategory (like Habilitative Services - Outpatient)": {{
-            "Designated Network": "Value (like $1000)",
-            "Network": "Value (like $1000)",
-            "Out-of-Network": "Value (like $2000)",
-            "limitations": "Text describing limitations, if present"
-        }},
-        "Subcategory (like Home Health Care)": {{
-            "Designated Network": "Value (like $1000)",
-            "Network": "Value (like $1000)",
-            "Out-of-Network": "Value (like $2000)",
-            "limitations": "Text describing limitations, if present"
-        }},
-        ...
-    }},
-    "Medical Exclusions" : "Text describing exclusions, if present"
-    }}
-
-    Respond only with valid JSON.
+def remove_empty_keys(data):
     """
+    Recursively remove keys with value None from a dictionary.
+    """
+    if isinstance(data, dict):
+        return {k: remove_empty_keys(v) for k, v in data.items() if v is not None}
+    elif isinstance(data, list):
+        return [remove_empty_keys(item) for item in data]
+    else:
+        return data
+
+def process_pdf_to_json(file_path, output_file_path):
+
+    prompt = "prompt here with detailed instructions"
+
+    split_chunks = split_pdf_by_pages_in_memory(file_path, pages_per_chunk=2)
+    logger.info(f"Split PDF into {len(split_chunks)} in-memory chunks.")
+
+    aggregated_results = {}
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        future_to_chunk = {
+            executor.submit(process_chunk, idx, chunk_bytes, prompt): idx
+            for idx, chunk_bytes in enumerate(split_chunks)
+        }
+        for future in concurrent.futures.as_completed(future_to_chunk):
+            chunk_key, result = future.result()
+            if result is not None:
+                aggregated_results[chunk_key] = result
+
+    cleaned_results = clean_escape_characters(aggregated_results)
+    cleaned_json = remove_empty_keys(cleaned_results)
+    final_json = merge_chunks_in_order(cleaned_json)
+
+    with open(output_file_path, "wb") as json_file:
+        json_file.write(orjson.dumps(final_json, option=orjson.OPT_INDENT_2))
+    logger.info(f"Final JSON saved in ascending order to: {output_file_path}")
+
+    return final_json
