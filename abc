@@ -1,174 +1,193 @@
-import os
-import json
+import fitz
+import re
 import logging
-from datetime import datetime
-from flask import Flask, request, jsonify
-from flask_cors import CORS
-from werkzeug.utils import secure_filename
-
-from config import (
-    UPLOAD_SBC_FOLDER, UPLOAD_DBS_FOLDER,
-    OUTPUT_JSON_SBC_FOLDER, MAPPED_OUTPUT_JSON_SBC_FOLDER,
-    OUTPUT_JSON_DBS_FOLDER, SIMILARITY_JSON_FOLDER,
-    GOOGLE_CREDENTIALS_PATH
-)
-
-from dbs_extractor import process_pdf_to_json
-from sbc_extractor import process_sbc_pdf_to_json
-from comparison import compare_json_chunks
+import concurrent.futures
+import orjson
+from google import genai
+from google.genai import types
+from config import (PROJECT_ID, LOCATION, GEMINI_MODEL )
 
 logging.basicConfig(
-    level=logging.INFO, 
+    level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
 
-app = Flask(__name__)
-CORS(app)
-
-# Set config
-app.config.update({
-    'UPLOAD_SBC_FOLDER': UPLOAD_SBC_FOLDER,
-    'UPLOAD_DBS_FOLDER': UPLOAD_DBS_FOLDER,
-    'OUTPUT_JSON_SBC_FOLDER': OUTPUT_JSON_SBC_FOLDER,
-    'MAPPED_OUTPUT_JSON_SBC_FOLDER': MAPPED_OUTPUT_JSON_SBC_FOLDER,
-    'OUTPUT_JSON_DBS_FOLDER': OUTPUT_JSON_DBS_FOLDER,
-    'SIMILARITY_JSON_FOLDER': SIMILARITY_JSON_FOLDER
-})
-
-os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = GOOGLE_CREDENTIALS_PATH
-
-# Ensure folders exist
-def ensure_directories():
-    for folder in [
-        UPLOAD_SBC_FOLDER, UPLOAD_DBS_FOLDER,
-        OUTPUT_JSON_SBC_FOLDER, MAPPED_OUTPUT_JSON_SBC_FOLDER,
-        OUTPUT_JSON_DBS_FOLDER, SIMILARITY_JSON_FOLDER
-    ]:
-        os.makedirs(folder, exist_ok=True)
-
-ensure_directories()
-
-@app.route('/health', methods=['GET'])
-def health_check():
+def fix_malformed_json(json_string):
     try:
-        return jsonify({"status": "healthy", "message": "Application is running"}), 200
+        json_string = re.sub(r'\\(?!["\\/bfnrtu])', '', json_string)
+        json_string = json_string.replace('\\\\', '\\')
+        json_string = re.sub(r'\\n', ' ', json_string)
+        json_string = re.sub(r'\\t', ' ', json_string)
+        json_string = re.sub(r'}\s*{', r'},{', json_string)
+        json_string = json_string.strip()
+        if not json_string.startswith("{") and not json_string.startswith("["):
+            json_string = "{" + json_string
+        if not json_string.endswith("}") and not json_string.endswith("]"):
+            json_string = json_string + "}"
+        try:
+            orjson.loads(json_string)
+        except orjson.JSONDecodeError as e:
+            logger.warning(f"JSON still malformed after initial fixes: {e}. Attempting further corrections.")
+            return json_string  # Just return the string, not a tuple
+        return json_string
     except Exception as e:
-        return jsonify({"status": "unhealthy", "message": "Health check failed due to an internal error."}), 500
+        logger.error(f"Error fixing malformed JSON: {e}")
+        return "{}" 
 
-@app.route('/uploadDoc/dbs', methods=['POST'])
-def uploadDoc_dbs():
-    file = request.files.get('file')
-    if not file or file.filename == '':
-        logger.warning("No valid file provided in DBS upload")
-        return jsonify({"error": "No valid file provided"}), 400
-
-    filename = secure_filename(file.filename)
-    file_path = os.path.join(app.config['UPLOAD_DBS_FOLDER'], filename)
-    file.save(file_path)
-    logger.info(f"DBS file uploaded to: {file_path}")
-
-    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    base_filename = os.path.splitext(filename)[0]
-    dbs_json_path = os.path.join(app.config['OUTPUT_JSON_DBS_FOLDER'], f"{base_filename}_{timestamp}_dbs.json")
-
+def split_pdf_by_pages_in_memory(pdf_path, pages_per_chunk=2):
     try:
-        result = process_pdf_to_json(file_path, dbs_json_path)
-        if "error" in result:
-            logger.error(f"Error processing DBS file: {result['error']}")
-            return jsonify(result), 400
-
-        logger.info(f"DBS file processed successfully: {dbs_json_path}")
-        return jsonify({"extracted_json": result, "file_path": f"{base_filename}_{timestamp}_dbs.json"}), 200
+        doc = fitz.open(pdf_path)
+        split_chunks = []
+        for i in range(0, len(doc), pages_per_chunk):
+            chunk_doc = fitz.open()
+            for page_num in range(i, min(i + pages_per_chunk, len(doc))):
+                chunk_doc.insert_pdf(doc, from_page=page_num, to_page=page_num)
+            # Save chunk to bytes in memory
+            chunk_bytes = chunk_doc.write()
+            if chunk_bytes:  # Only add non-empty chunks
+                split_chunks.append(chunk_bytes)
+        return split_chunks
     except Exception as e:
-        logger.error(f"Unexpected error occurred during DBS processing: {e}")
-        return jsonify({"error": "Unexpected error occurred during DBS processing"}), 500
+        logger.error(f"Error chunking DBS pdf: {e}")
+        return []
 
-@app.route('/uploadDoc/sbc', methods=['POST'])
-def uploadDoc_sbc():
-    file = request.files.get('file')
-    if not file or file.filename == '':
-        logger.warning("No valid file provided in SBC upload")
-        return jsonify({"error": "No valid file provided"}), 400
+def clean_escape_characters(data):
+    if isinstance(data, dict):
+        return {key.replace("\\n", " ").replace("\\t", " ").replace("\\", " "): clean_escape_characters(value) for key, value in data.items()}
+    elif isinstance(data, list):
+        return [clean_escape_characters(item) for item in data]
+    elif isinstance(data, str):
+        return data.replace("\\n", " ").replace("\\t", " ").replace("\\", " ")
+    return data
 
-    filename = secure_filename(file.filename)
-    file_path = os.path.join(app.config['UPLOAD_SBC_FOLDER'], filename)
-    file.save(file_path)
-    logger.info(f"SBC file uploaded to: {file_path}")
-
-    extracted_dbs_data = request.form.get('extracted_dbs_data')
-    if not extracted_dbs_data:
-        logger.warning("No extracted DBS json provided")
-        return jsonify({"error": "No extracted DBS json provided"}), 400
-
+def merge_chunks_in_order(aggregated_results):
     try:
-        extracted_dbs_data = json.loads(extracted_dbs_data)
-    except json.JSONDecodeError:
-        logger.error("Invalid JSON format in extracted DBS data")
-        return jsonify({"error": "Invalid JSON format"}), 400
-
-    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    base_filename = os.path.splitext(filename)[0]
-    output_json_path = os.path.join(app.config['OUTPUT_JSON_SBC_FOLDER'], f"{base_filename}_sbc_{timestamp}.json")
-    mapped_output_json_path = os.path.join(app.config['MAPPED_OUTPUT_JSON_SBC_FOLDER'], f"mapped_{base_filename}_sbc_{timestamp}.json")
-
-    try:
-        mapped_json, mapped_output_file = process_sbc_pdf_to_json(extracted_dbs_data, file_path, output_json_path, mapped_output_json_path)
-
-        if "error" in mapped_json:
-            logger.error(f"Error processing SBC file: {mapped_json['error']}")
-            return jsonify(mapped_json), 400
-
-        logger.info(f"SBC file processed successfully: {mapped_output_file}")
-        return jsonify({"extracted_json": mapped_json, "file_path": f"mapped_{base_filename}_sbc_{timestamp}.json"}), 200
+        sorted_chunks = sorted(
+            [(key, value) for key, value in aggregated_results.items() if value],
+            key=lambda x: int(x[0].split()[1])
+        )
+        final_json = {key: value for key, value in sorted_chunks}
+        return final_json
     except Exception as e:
-        logger.error(f"Unexpected error occurred during SBC processing: {e}")
-        return jsonify({"error": "Unexpected error occurred during SBC processing"}), 500
+        logger.error(f"Error merging chunks in order: {e}")
+        return None
 
-@app.route('/compareDoc', methods=['POST'])
-def compareDoc():
-    data = request.get_json()
-    sbc_json = data.get('sbc_json')
-    dbs_json = data.get('dbs_json')
-    sbc_loc = os.path.join(app.config['MAPPED_OUTPUT_JSON_SBC_FOLDER'], data.get("sbc_path"))
-    dbs_loc = os.path.join(app.config['OUTPUT_JSON_DBS_FOLDER'], data.get("dbs_path"))
+def process_chunk(idx, chunk_bytes, prompt):
+    chunk_key = f"chunk {idx + 1}"
+    logger.info(f"Processing {chunk_key}")
+    if not chunk_bytes:
+        logger.error(f"No data extracted for {chunk_key}. Skipping.")
+        return chunk_key, None
+    json_output = process_pdf_with_gemini(chunk_bytes, prompt)
+    try:
+        parsed_json = orjson.loads(json_output)
+        return chunk_key, parsed_json
+    except orjson.JSONDecodeError as e:
+        logger.error(f"Failed to parse JSON for {chunk_key}: {e}")
+        logger.debug(f"Raw JSON output for {chunk_key}: {json_output}")
+        try:
+            fixed_json_output = fix_malformed_json(json_output)
+            parsed_json = orjson.loads(fixed_json_output)
+            return chunk_key, parsed_json
+        except Exception as fix_error:
+            logger.error(f"Failed to fix JSON for {chunk_key}: {fix_error}")
+            logger.debug(f"Raw JSON output for {chunk_key}: {json_output}")
+            return chunk_key, None
 
-    if not all([sbc_json, dbs_json, sbc_loc, dbs_loc]):
-        logger.warning("Missing required fields for comparison")
-        return jsonify({"error": "Missing required fields for comparison"}), 400
+def process_pdf_with_gemini(chunk_bytes, prompt):
+    try:
+        client = genai.Client(
+            vertexai=True,
+            project=PROJECT_ID,
+            location=LOCATION,
+        )
+
+        responses = client.models.generate_content(
+            model=GEMINI_MODEL,
+            contents=[
+                types.Part.from_bytes(
+                    data=chunk_bytes,
+                    mime_type='application/pdf',
+                ),
+                prompt
+            ]
+        )
+        cleaned_responses = []
+        for response in responses:
+            # Extract candidates from a tuple response
+            candidates = None
+            if isinstance(response, tuple) and response[0] == 'candidates':
+                candidates = response[1]
+            else:
+                candidates = [response]
+
+            # Loop through candidates and extract JSON from the text part
+            for candidate in candidates:
+                if hasattr(candidate, 'content') and hasattr(candidate.content, 'parts'):
+                    for part in candidate.content.parts:
+                        if hasattr(part, 'text') and part.text.strip().startswith("```json"):
+                            raw_text = part.text
+                            # Clean up code block markers and whitespace
+                            cleaned_response = raw_text.strip().strip("```json").strip("```").strip()
+                            cleaned_response = re.sub(r"^[^\{]+", "", cleaned_response)
+                            cleaned_responses.append(cleaned_response)
+                else:
+                    continue
+        
+        output = "".join(cleaned_responses)
+        sanitized_output = output.replace("\\", "\\\\")
+        try:
+            orjson.loads(sanitized_output)
+        except orjson.JSONDecodeError:
+            logger.warning("Sanitized JSON is invalid. Attempting to fix.")
+            sanitized_output = fix_malformed_json(sanitized_output)
+        return sanitized_output
+    except Exception as e:
+        logger.error(f"Error processing DBS pdf chunk with Gemini model: {e}")
+        return None
     
-    if not sbc_loc.startswith(app.config['MAPPED_OUTPUT_JSON_SBC_FOLDER']):
-        raise Exception("sbc file not allowed")
+def remove_empty_keys(data):
+    """
+    Recursively remove keys with value None from a dictionary.
+    """
+    if isinstance(data, dict):
+        return {k: remove_empty_keys(v) for k, v in data.items() if v is not None}
+    elif isinstance(data, list):
+        return [remove_empty_keys(item) for item in data]
+    else:
+        return data
 
-    if not dbs_loc.startswith(app.config['OUTPUT_JSON_DBS_FOLDER']):
-        raise Exception("dbs file not allowed")
+def process_pdf_to_json(file_path, output_file_path):
 
-    try:
-        with open(sbc_loc, "r", encoding="utf-8") as f:
-            sbc_data = json.load(f)
-        with open(dbs_loc, "r", encoding="utf-8") as f:
-            dbs_data = json.load(f)
-        logger.info(f"Loaded SBC and DBS data for comparison from: {sbc_loc}, {dbs_loc}")
-    except Exception as e:
-        logger.error(f"Error loading SBC or DBS data: {e}")
-        return jsonify({"error": "Error loading data"}), 500
+    prompt = "some text here"
+    split_chunks = split_pdf_by_pages_in_memory(file_path, pages_per_chunk=2)
+    logger.info(f"Split PDF into {len(split_chunks)} in-memory chunks.")
 
-    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    similarity_json_path = os.path.join(app.config['SIMILARITY_JSON_FOLDER'], f"similarity_{timestamp}.json")
-    
-    try:
-        comparison_output = compare_json_chunks(sbc_data, dbs_data, similarity_json_path)
-        logger.info(f"Comparison completed successfully and results are stored in: {similarity_json_path}")
-        return jsonify(comparison_output), 200
-    except Exception as e:
-        logger.error(f"Error occurred during comparison: {e}")
-        return jsonify({"error": "Error occurred during comparison"}), 500
+    aggregated_results = {}
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        future_to_chunk = {
+            executor.submit(process_chunk, idx, chunk_bytes, prompt): idx
+            for idx, chunk_bytes in enumerate(split_chunks)
+        }
+        for future in concurrent.futures.as_completed(future_to_chunk):
+            chunk_key, result = future.result()
+            if result is not None:
+                aggregated_results[chunk_key] = result
 
-if __name__ == '__main__':
-    logger.info("Starting Flask application")
-    app.run(host='0.0.0.0', port=5000)
+    cleaned_results = clean_escape_characters(aggregated_results)
+    cleaned_json = remove_empty_keys(cleaned_results)
+    final_json = merge_chunks_in_order(cleaned_json)
 
-i have these 2 api calls upload sbc upload dbs they are taking about 1.5+min and 3+mins respectively. I want to optimise them and reduce the time without disturbing other functionality
-let me share another code file for better understanding. wait before giving solutions
-you may use asyncio aiohttp if needed just make the api calls faster and optimised
+    with open(output_file_path, "wb") as json_file:
+        json_file.write(orjson.dumps(final_json, option=orjson.OPT_INDENT_2))
+    logger.info(f"Final JSON saved in ascending order to: {output_file_path}")
+
+    return final_json
+
+i wanna use openai azure keys that i set in config file instead of gemini and i do not want to change any other logic just wanna use openai instead of gemini as llm
+
+AZURE_OPENAI_API_KEY="ebc6ea027367426a9c881498b8db690f"
+AZURE_OPENAI_ENDPOINT="https://kgnwl0lm6yi5ugbopenai.openai.azure.com/"
+AZURE_OPENAI_MODEL_DEPLOYMENT="gpt-4-deployment"
 
