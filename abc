@@ -1,52 +1,76 @@
-2025-09-08 13:03:24,483 - INFO - Press CTRL+C to quit
-2025-09-08 13:03:54,578 - INFO - DBS file uploaded to: /Users/achhab16/Desktop/pioneers_pioneers-sbc-dbs-compare/backend/upload_dbs/UHC_AL_ChoicePlus_Standard_EPPE_L31S_1.pdf
-2025-09-08 13:03:54,658 - INFO - Split PDF into 7 in-memory chunks.
-2025-09-08 13:03:54,659 - INFO - Processing chunk 1
-2025-09-08 13:03:54,659 - INFO - Processing chunk 2
-2025-09-08 13:03:54,659 - INFO - Processing chunk 3
-2025-09-08 13:03:54,660 - INFO - Processing chunk 4
-2025-09-08 13:03:54,660 - INFO - Processing chunk 5
-2025-09-08 13:03:54,661 - INFO - Processing chunk 6
-2025-09-08 13:03:54,661 - INFO - Processing chunk 7
-2025-09-08 13:04:03,554 - INFO - HTTP Request: POST https://kgnwl0lm6yi5ugbopenai.openai.azure.com/openai/deployments/gpt-4-deployment/chat/completions?api-version=2024-02-15-preview "HTTP/1.1 200 OK"
-2025-09-08 13:04:03,564 - WARNING - Sanitized JSON is invalid. Attempting to fix.
-2025-09-08 13:04:03,564 - WARNING - JSON still malformed after initial fixes: unexpected character: line 1 column 2 (char 1). Attempting further corrections.
-2025-09-08 13:04:03,564 - ERROR - Failed to parse JSON for chunk 5: unexpected character: line 1 column 2 (char 1)
-2025-09-08 13:04:03,564 - WARNING - JSON still malformed after initial fixes: unexpected character: line 1 column 2 (char 1). Attempting further corrections.
-2025-09-08 13:04:03,564 - ERROR - Failed to fix JSON for chunk 5: unexpected character: line 1 column 2 (char 1)
-2025-09-08 13:04:05,746 - INFO - HTTP Request: POST https://kgnwl0lm6yi5ugbopenai.openai.azure.com/openai/deployments/gpt-4-deployment/chat/completions?api-version=2024-02-15-preview "HTTP/1.1 200 OK"
-2025-09-08 13:04:05,747 - WARNING - Sanitized JSON is invalid. Attempting to fix.
-2025-09-08 13:04:05,747 - WARNING - JSON still malformed after initial fixes: unexpected character: line 1 column 2 (char 1). Attempting further corrections.
-2025-09-08 13:04:05,747 - ERROR - Failed to parse JSON for chunk 1: unexpected character: line 1 column 2 (char 1)
-2025-09-08 13:04:05,747 - WARNING - JSON still malformed after initial fixes: unexpected character: line 1 column 2 (char 1). Attempting further corrections.
-2025-09-08 13:04:05,747 - ERROR - Failed to fix JSON for chunk 1: unexpected character: line 1 column 2 (char 1)
-2025-09-08 13:04:06,199 - INFO - HTTP Request: POST https://kgnwl0lm6yi5ugbopenai.openai.azure.com/openai/deployments/gpt-4-deployment/chat/completions?api-version=2024-02-15-preview "HTTP/1.1 200 OK"
-2025-09-08 13:04:06,201 - WARNING - Sanitized JSON is invalid. Attempting to fix.
-2025-09-08 13:04:06,201 - WARNING - JSON still malformed after initial fixes: unexpected character: line 1 column 2 (char 1). Attempting further corrections.
-2025-09-08 13:04:06,201 - ERROR - Failed to parse JSON for chunk 6: unexpected character: line 1 column 2 (char 1)
-2025-09-08 13:04:06,201 - WARNING - JSON still malformed after initial fixes: unexpected character: line 1 column 2 (char 1). Attempting further corrections.
-2025-09-08 13:04:06,201 - ERROR - Failed to fix JSON for chunk 6: unexpected character: line 1 column 2 (char 1)
-2025-09-08 13:04:12,215 - INFO - HTTP Request: POST https://kgnwl0lm6yi5ugbopenai.openai.azure.com/openai/deployments/gpt-4-deployment/chat/completions?api-version=2024-02-15-preview "HTTP/1.1 200 OK"
-2025-09-08 13:04:12,217 - WARNING - Sanitized JSON is invalid. Attempting to fix.
-2025-09-08 13:04:12,217 - WARNING - JSON still malformed after initial fixes: unexpected character: line 1 column 2 (char 1). Attempting further corrections.
-2025-09-08 13:04:12,217 - ERROR - Failed to parse JSON for chunk 4: unexpected character: line 1 column 2 (char 1)
-2025-09-08 13:04:12,217 - WARNING - JSON still malformed after initial fixes: unexpected character: line 1 column 2 (char 1). Attempting further corrections.
-2025-09-08 13:04:12,218 - ERROR - Failed to fix JSON for chunk 4: unexpected character: line 1 column 2 (char 1)
-2025-09-08 13:04:14,144 - INFO - HTTP Request: POST https://kgnwl0lm6yi5ugbopenai.openai.azure.com/openai/deployments/gpt-4-deployment/chat/completions?api-version=2024-02-15-preview "HTTP/1.1 200 OK"
-2025-09-08 13:04:14,145 - WARNING - Sanitized JSON is invalid. Attempting to fix.
-2025-09-08 13:04:14,145 - WARNING - JSON still malformed after initial fixes: unexpected character: line 1 column 2 (char 1). Attempting further corrections.
-2025-09-08 13:04:14,146 - ERROR - Failed to parse JSON for chunk 7: unexpected character: line 1 column 2 (char 1)
-2025-09-08 13:04:14,146 - WARNING - JSON still malformed after initial fixes: unexpected character: line 1 column 2 (char 1). Attempting further corrections.
-2025-09-08 13:04:14,146 - ERROR - Failed to fix JSON for chunk 7: unexpected character: line 1 column 2 (char 1)
-2025-09-08 13:04:15,065 - INFO - HTTP Request: POST https://kgnwl0lm6yi5ugbopenai.openai.azure.com/openai/deployments/gpt-4-deployment/chat/completions?api-version=2024-02-15-preview "HTTP/1.1 200 OK"
-2025-09-08 13:04:15,067 - WARNING - Sanitized JSON is invalid. Attempting to fix.
-2025-09-08 13:04:15,067 - WARNING - JSON still malformed after initial fixes: unexpected character: line 1 column 2 (char 1). Attempting further corrections.
-2025-09-08 13:04:15,068 - ERROR - Failed to parse JSON for chunk 2: unexpected character: line 1 column 2 (char 1)
-2025-09-08 13:04:15,068 - WARNING - JSON still malformed after initial fixes: unexpected character: line 1 column 2 (char 1). Attempting further corrections.
-2025-09-08 13:04:15,068 - ERROR - Failed to fix JSON for chunk 2: unexpected character: line 1 column 2 (char 1)
-2025-09-08 13:04:24,589 - INFO - HTTP Request: POST https://kgnwl0lm6yi5ugbopenai.openai.azure.com/openai/deployments/gpt-4-deployment/chat/completions?api-version=2024-02-15-preview "HTTP/1.1 200 OK"
-2025-09-08 13:04:24,590 - WARNING - Sanitized JSON is invalid. Attempting to fix.
-2025-09-08 13:04:24,590 - WARNING - JSON still malformed after initial fixes: unexpected character: line 1 column 2 (char 1). Attempting further corrections.
-2025-09-08 13:04:24,590 - ERROR - Failed to parse JSON for chunk 3: unexpected character: line 1 column 2 (char 1)
-2025-09-08 13:04:24,590 - WARNING - JSON still malformed after initial fixes: unexpected character: line 1 column 2 (char 1). Attempting further corrections.
-2025-09-08 13:04:24,590 - ERROR - Failed to fix JSON for chunk 3: unexpected character: line 1 column 2 (char 1)
+@app.route('/uploadDoc/dbs', methods=['POST'])
+def uploadDoc_dbs():
+    file = request.files.get('file')
+    if not file or file.filename == '':
+        logger.warning("No valid file provided in DBS upload")
+        return jsonify({"error": "No valid file provided"}), 400
+
+    filename = secure_filename(file.filename)
+    file_path = os.path.join(app.config['UPLOAD_DBS_FOLDER'], filename)
+    file.save(file_path)
+    logger.info(f"DBS file uploaded to: {file_path}")
+
+    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    base_filename = os.path.splitext(filename)[0]
+    dbs_json_path = os.path.join(app.config['OUTPUT_JSON_DBS_FOLDER'], f"{base_filename}_{timestamp}_dbs.json")
+
+    try:
+        result = process_pdf_to_json(file_path, dbs_json_path)
+        if "error" in result:
+            logger.error(f"Error processing DBS file: {result['error']}")
+            return jsonify(result), 400
+
+        logger.info(f"DBS file processed successfully: {dbs_json_path}")
+        return jsonify({"extracted_json": result, "file_path": f"{base_filename}_{timestamp}_dbs.json"}), 200
+    except Exception as e:
+        logger.error(f"Unexpected error occurred during DBS processing: {e}")
+        return jsonify({"error": "Unexpected error occurred during DBS processing"}), 500
+ this is api where uploaded doc is being uploaded
+
+still getting error
+2025-09-08 13:36:17,026 - INFO - HTTP Request: POST https://kgnwl0lm6yi5ugbopenai.openai.azure.com/openai/deployments/gpt-4-deployment/chat/completions?api-version=2024-02-15-preview "HTTP/1.1 200 OK"
+2025-09-08 13:36:17,030 - WARNING - Sanitized JSON is invalid. Attempting to fix.
+2025-09-08 13:36:17,030 - WARNING - JSON still malformed after initial fixes: unexpected character: line 1 column 2 (char 1). Attempting further corrections.
+2025-09-08 13:36:17,030 - ERROR - Failed to parse JSON for chunk 5: unexpected character: line 1 column 2 (char 1)
+2025-09-08 13:36:17,031 - WARNING - JSON still malformed after initial fixes: unexpected character: line 1 column 2 (char 1). Attempting further corrections.
+2025-09-08 13:36:17,031 - ERROR - Failed to fix JSON for chunk 5: unexpected character: line 1 column 2 (char 1)
+2025-09-08 13:36:19,804 - INFO - HTTP Request: POST https://kgnwl0lm6yi5ugbopenai.openai.azure.com/openai/deployments/gpt-4-deployment/chat/completions?api-version=2024-02-15-preview "HTTP/1.1 200 OK"
+2025-09-08 13:36:19,805 - WARNING - Sanitized JSON is invalid. Attempting to fix.
+2025-09-08 13:36:19,805 - WARNING - JSON still malformed after initial fixes: unexpected character: line 1 column 2 (char 1). Attempting further corrections.
+2025-09-08 13:36:19,805 - ERROR - Failed to parse JSON for chunk 4: unexpected character: line 1 column 2 (char 1)
+2025-09-08 13:36:19,806 - WARNING - JSON still malformed after initial fixes: unexpected character: line 1 column 2 (char 1). Attempting further corrections.
+2025-09-08 13:36:19,806 - ERROR - Failed to fix JSON for chunk 4: unexpected character: line 1 column 2 (char 1)
+2025-09-08 13:36:21,355 - INFO - HTTP Request: POST https://kgnwl0lm6yi5ugbopenai.openai.azure.com/openai/deployments/gpt-4-deployment/chat/completions?api-version=2024-02-15-preview "HTTP/1.1 200 OK"
+2025-09-08 13:36:21,356 - WARNING - Sanitized JSON is invalid. Attempting to fix.
+2025-09-08 13:36:21,356 - WARNING - JSON still malformed after initial fixes: unexpected character: line 1 column 2 (char 1). Attempting further corrections.
+2025-09-08 13:36:21,356 - ERROR - Failed to parse JSON for chunk 1: unexpected character: line 1 column 2 (char 1)
+2025-09-08 13:36:21,356 - WARNING - JSON still malformed after initial fixes: unexpected character: line 1 column 2 (char 1). Attempting further corrections.
+2025-09-08 13:36:21,356 - ERROR - Failed to fix JSON for chunk 1: unexpected character: line 1 column 2 (char 1)
+2025-09-08 13:36:23,582 - INFO - HTTP Request: POST https://kgnwl0lm6yi5ugbopenai.openai.azure.com/openai/deployments/gpt-4-deployment/chat/completions?api-version=2024-02-15-preview "HTTP/1.1 200 OK"
+2025-09-08 13:36:23,583 - WARNING - Sanitized JSON is invalid. Attempting to fix.
+2025-09-08 13:36:23,583 - WARNING - JSON still malformed after initial fixes: unexpected character: line 1 column 2 (char 1). Attempting further corrections.
+2025-09-08 13:36:23,583 - ERROR - Failed to parse JSON for chunk 6: unexpected character: line 1 column 2 (char 1)
+2025-09-08 13:36:23,583 - WARNING - JSON still malformed after initial fixes: unexpected character: line 1 column 2 (char 1). Attempting further corrections.
+2025-09-08 13:36:23,583 - ERROR - Failed to fix JSON for chunk 6: unexpected character: line 1 column 2 (char 1)
+2025-09-08 13:36:24,766 - INFO - HTTP Request: POST https://kgnwl0lm6yi5ugbopenai.openai.azure.com/openai/deployments/gpt-4-deployment/chat/completions?api-version=2024-02-15-preview "HTTP/1.1 200 OK"
+2025-09-08 13:36:24,768 - WARNING - Sanitized JSON is invalid. Attempting to fix.
+2025-09-08 13:36:24,768 - WARNING - JSON still malformed after initial fixes: unexpected character: line 1 column 2 (char 1). Attempting further corrections.
+2025-09-08 13:36:24,768 - ERROR - Failed to parse JSON for chunk 7: unexpected character: line 1 column 2 (char 1)
+2025-09-08 13:36:24,768 - WARNING - JSON still malformed after initial fixes: unexpected character: line 1 column 2 (char 1). Attempting further corrections.
+2025-09-08 13:36:24,768 - ERROR - Failed to fix JSON for chunk 7: unexpected character: line 1 column 2 (char 1)
+2025-09-08 13:36:25,685 - INFO - HTTP Request: POST https://kgnwl0lm6yi5ugbopenai.openai.azure.com/openai/deployments/gpt-4-deployment/chat/completions?api-version=2024-02-15-preview "HTTP/1.1 200 OK"
+2025-09-08 13:36:25,686 - WARNING - Sanitized JSON is invalid. Attempting to fix.
+2025-09-08 13:36:25,686 - WARNING - JSON still malformed after initial fixes: unexpected character: line 1 column 2 (char 1). Attempting further corrections.
+2025-09-08 13:36:25,686 - ERROR - Failed to parse JSON for chunk 2: unexpected character: line 1 column 2 (char 1)
+2025-09-08 13:36:25,686 - WARNING - JSON still malformed after initial fixes: unexpected character: line 1 column 2 (char 1). Attempting further corrections.
+2025-09-08 13:36:25,686 - ERROR - Failed to fix JSON for chunk 2: unexpected character: line 1 column 2 (char 1)
+2025-09-08 13:36:31,052 - INFO - HTTP Request: POST https://kgnwl0lm6yi5ugbopenai.openai.azure.com/openai/deployments/gpt-4-deployment/chat/completions?api-version=2024-02-15-preview "HTTP/1.1 200 OK"
+2025-09-08 13:36:31,563 - WARNING - Sanitized JSON is invalid. Attempting to fix.
+2025-09-08 13:36:31,563 - WARNING - JSON still malformed after initial fixes: unexpected character: line 1 column 2 (char 1). Attempting further corrections.
+2025-09-08 13:36:31,563 - ERROR - Failed to parse JSON for chunk 3: unexpected character: line 1 column 2 (char 1)
+2025-09-08 13:36:31,563 - WARNING - JSON still malformed after initial fixes: unexpected character: line 1 column 2 (char 1). Attempting further corrections.
+2025-09-08 13:36:31,563 - ERROR - Failed to fix JSON for chunk 3: unexpected character: line 1 column 2 (char 1)
+2025-09-08 13:36:31,565 - INFO - Final JSON saved in ascending order to: /Users/achhab16/Desktop/pioneers_pioneers-sbc-dbs-compare/backend/json_dbs/UHC_AL_ChoicePlus_Standard_EPPE_L31S_1_2025-09-08_13-36-07_dbs.json
+2025-09-08 13:36:31,565 - INFO - DBS file processed successfully: /Users/achhab16/Desktop/pioneers_pioneers-sbc-dbs-compare/backend/json_dbs/UHC_AL_ChoicePlus_Standard_EPPE_L31S_1_2025-09-08_13-36-07_dbs.json
+2025-09-08 13:36:31,567 - INFO - 127.0.0.1 - - [08/Sep/2025 13:36:31] "POST /uploadDoc/dbs HTTP/1.1" 200 -
+
