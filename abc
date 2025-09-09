@@ -185,3 +185,8 @@ def process_pdf_to_json(file_path, output_file_path):
     logger.info(f"Final JSON saved in ascending order to: {output_file_path}")
 
     return final_json
+
+
+my responses are not very consistent as the rules to form json are highly dependent on prompt, i was thinking to convert the pdf to markdown first using some most efficient libraries and then send it for json conversion
+also tell me how to modify my prompt after this change.
+Rewrite this code file
