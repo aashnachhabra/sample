@@ -1,0 +1,359 @@
+{
+  "State": "Alabama",
+  "Medical Plan Code": "L31S",
+  "Medical Plan": "Choice Plus",
+  "Annual Medical Deductible": {
+    "Individual": {
+      "In-network": "$2,000",
+      "Out-of-Network": "$10,000"
+    },
+    "Family": {
+      "In-network": "$4,000",
+      "Out-of-Network": "$20,000"
+    },
+    "Ped Dental Annual Deductible - Family": {
+      "In-network": "Included in your medical deductible",
+      "Out-of-Network": "Included in your medical deductible"
+    },
+    "Ped Dental Annual Deductible - Individual": {
+      "In-network": "Included in your medical deductible",
+      "Out-of-Network": "Included in your medical deductible"
+    },
+    "limitations": "All individual deductible amounts will count toward the family deductible, but an individual will not have to pay more than the individual deductible amount."
+  },
+  "Annual Out-of-Pocket Limit": {
+    "Individual": {
+      "In-network": "$3,500",
+      "Out-of-Network": "$15,000"
+    },
+    "Family": {
+      "In-network": "$7,000",
+      "Out-of-Network": "$30,000"
+    },
+    "limitations": "All individual out-of-pocket maximum amounts will count toward the family out-of-pocket maximum, but an individual will not have to pay more than the individual out-of-pocket maximum amount."
+  },
+  "Preventive Care Services": {
+    "Preventive Care Services": {
+      "Designated Network": "No copay",
+      "Network": "No copay",
+      "Out-of-Network": "Not covered",
+      "limitations": "Certain preventive care services are provided as specified by the Patient Protection and Affordable Care Act (ACA), with no cost-sharing to you. These services are based on your age, gender and other health factors. UnitedHealthcare also covers other routine services that may require a copay, coinsurance or deductible. Includes services such as Routine Wellness Checkups, Immunizations, Breast Pumps, Mammography and Colorectal Cancer Screenings."
+    }
+  },
+  "Office Services - Sickness & Injury": {
+    "Primary Care Physician": {
+      "Network": "$20 copay",
+      "Out-of-Network": "50%*",
+      "limitations": "Additional copays, deductible, or coinsurance may apply when you receive other services at your physician's office. For example, surgery. Telehealth is covered at the same cost share as in the office."
+    },
+    "Covered persons less than age 19": {
+      "Network": "No copay",
+      "Out-of-Network": "50%*",
+      "limitations": "Additional copays, deductible, or coinsurance may apply when you receive other services at your physician's office. For example, surgery. Telehealth is covered at the same cost share as in the office."
+    },
+    "Specialist": {
+      "Designated Network": "$35 copay",
+      "Network": "$35 copay",
+      "Out-of-Network": "50%*"
+    },
+    "Urgent Care Center Services": {
+      "Designated Network": "$75 copay*",
+      "Network": "$75 copay*",
+      "Out-of-Network": "50%*"
+    },
+    "Virtual Care Services": {
+      "Network": "No copay",
+      "Out-of-Network": "Not covered",
+      "limitations": "Benefits are available only when services are delivered through a Designated Virtual Network Provider for 24/7 Virtual Visit services only. You can find a 24/7 Virtual Visit Provider by contacting us at myuhc.com or the telephone number on your ID card. Access to 24/7 Virtual Visits and prescription services may not be available in all states or for all groups."
+    }
+  },
+  "Emergency Care": {
+    "Ambulance Services - Emergency Ambulance": {
+      "Air Ambulance": {
+        "Network": "No copay",
+        "Out-of-Network": "No copay"
+      },
+      "Ground Ambulance": {
+        "Network": "No copay",
+        "Out-of-Network": "No copay"
+      }
+    },
+    "Ambulance Services - Non-Emergency Ambulance¹": {
+      "Air Ambulance": {
+        "Network": "No copay",
+        "Out-of-Network": "No copay"
+      },
+      "Ground Ambulance": {
+        "Network": "No copay",
+        "Out-of-Network": "50%*"
+      }
+    },
+    "Dental Services - Accident Only": {
+      "Network": "No copay",
+      "Out-of-Network": "No copay"
+    },
+    "Emergency Health Care Services - Outpatient": {
+      "Network": "$500 copay",
+      "Out-of-Network": "$500 copay",
+      "limitations": "Notification is required if it results in confinement to an Out-of-Network Hospital."
+    }
+  },
+  "Inpatient Care": {
+    "Congenital Heart Disease (CHD) Surgeries¹": {
+      "Network": "No copay",
+      "Out-of-Network": "50%*"
+    },
+    "Habilitative Services - Inpatient": {
+      "Designated Network": "The amount you pay is based on where the covered health care service is provided.",
+      "Network": "The amount you pay is based on where the covered health care service is provided.",
+      "Out-of-Network": "The amount you pay is based on where the covered health care service is provided.",
+      "limitations": "Limited to 60 days per year."
+    },
+    "Hospital - Inpatient Stay": {
+      "Designated Network": "No copay",
+      "Network": "No copay",
+      "Out-of-Network": "50%*"
+    },
+    "Skilled Nursing Facility/Inpatient Rehabilitation Facility Services": {
+      "Designated Network": "No copay",
+      "Network": "No copay",
+      "Out-of-Network": "50%*",
+      "limitations": "Limited to 60 days per year."
+    }
+  },
+  "Outpatient Care": {
+    "Habilitative Services - Outpatient": {
+      "Designated Network": "$20 copay",
+      "Network": "$20 copay",
+      "Out-of-Network": "50%*",
+      "limitations": "Limited to 20 visits of cognitive rehabilitation therapy per year. Limited to 20 visits of manipulative treatments per year. Limited to 30 visits of post-cochlear implant aural therapy per year."
+    },
+    "Home Health Care¹": {
+      "Network": "No copay",
+      "Out-of-Network": "50%"
+    },
+    "Lab, X-Ray and Diagnostic - Outpatient - Lab Testing": {
+      "Designated Network": "No copay",
+      "Network": "50%*",
+      "Out-of-Network": "Not covered",
+      "limitations": "For Designated Network Benefits, laboratory services must be received from a Designated Diagnostic Provider. Network Benefits include laboratory services received from a Network provider that is not a Designated Diagnostic Provider."
+    },
+    "Lab, X-Ray and Diagnostic - Outpatient - X-Ray and other Diagnostic Testing¹": {
+      "Network": "No copay",
+      "Out-of-Network": "50%",
+      "limitations": "For network benefits you have no copay for a diagnostic mammogram or breast ultrasound for the first service in a year."
+    },
+    "Major Diagnostic and Imaging - Outpatient¹": {
+      "Designated Network": "No copay",
+      "Network": "You pay a $500 per occurrence deductible per service prior to and in addition to paying any Annual Deductible and any coinsurance amount. 30%*",
+      "Out-of-Network": "50%*",
+      "limitations": "For Designated Network Benefits, services must be received from a Designated Diagnostic Provider. Network Benefits include services received from a Network provider that is not a Designated Diagnostic Provider. For network benefits you have no copay for a breast MRI for the first service in a year."
+    },
+    "Physician Fees for Surgical and Medical Services": {
+      "Network": "No copay",
+      "Out-of-Network": "50%",
+      "limitations": "You may have to pay an extra copay, deductible or coinsurance for physician fees or pharmaceutical products."
+    },
+    "Rehabilitation Services - Outpatient Therapy and Manipulative Treatment": {
+      "Network": "$20 copay",
+      "Out-of-Network": "50%",
+      "limitations": "Limited to 20 visits of cognitive rehabilitation therapy per year. Limited to 20 visits of manipulative treatments per year. Limited to 20 visits of pulmonary rehabilitation therapy per year. Limited to 30 visits of post-cochlear implant aural therapy per year. Limited to 36 visits of cardiac rehabilitation therapy per year."
+    },
+    "Scopic Procedures - Outpatient Diagnostic and Therapeutic": {
+      "Designated Network": "No copay",
+      "Network": "50%*",
+      "Out-of-Network": "50%*",
+      "limitations": "Diagnostic/therapeutic scopic procedures include, but are not limited to colonoscopy, sigmoidoscopy and endoscopy. For network benefits you have no copay for a diagnostic colonoscopy for the first service in a year."
+    },
+    "Surgery - Outpatient": {
+      "Designated Network": "$500 copay",
+      "Network": "$500 copay",
+      "Out-of-Network": "50%*"
+    },
+    "Therapeutic Treatments - Outpatient¹": {
+      "Designated Network": "No copay",
+      "Network": "No copay",
+      "Out-of-Network": "50%*",
+      "limitations": "For dialysis services, Out-of-Network Benefits are not available. Therapeutic treatments include, but are not limited to dialysis, intravenous chemotherapy, intravenous infusion, medical education services and radiation oncology."
+    }
+  },
+  "Supplies and Services": {
+    "Diabetes Self-Management Items": {
+      "Network": "No copay",
+      "Out-of-Network": "Not covered"
+    },
+    "Diabetes Self-Management and Training/Diabetic Eye Exams/Foot Care¹": {
+      "Designated Network": "The amount you pay is based on where the covered health care service is provided under Durable Medical Equipment (DME), Orthotics and Supplies or in the Prescription Drug Benefits Section.",
+      "Network": "The amount you pay is based on where the covered health care service is provided under Durable Medical Equipment (DME), Orthotics and Supplies or in the Prescription Drug Benefits Section.",
+      "Out-of-Network": "The amount you pay is based on where the covered health care service is provided under Durable Medical Equipment (DME), Orthotics and Supplies or in the Prescription Drug Benefits Section."
+    },
+    "Durable Medical Equipment (DME), Orthotics and Supplies": {
+      "Network": "No copay",
+      "Out-of-Network": "50%*",
+      "limitations": "The amount you pay is based on where the covered health care service is provided."
+    },
+    "Enteral Nutrition": {
+      "Network": "No copay",
+      "Out-of-Network": "50%*"
+    },
+    "Hearing Aids": {
+      "Network": "No copay",
+      "Out-of-Network": "50%*",
+      "limitations": "Limited to $2,500 per year. Limited to a single purchase per hearing impaired ear every 3 years. Repair and/or replacement of a hearing aid would apply to this limit in the same manner as a purchase."
+    },
+    "Ostomy Supplies": {
+      "Network": "No copay",
+      "Out-of-Network": "Not covered"
+    },
+    "Pharmaceutical Products - Outpatient": {
+      "Network": "No copay",
+      "Out-of-Network": "50%*",
+      "limitations": "This includes medications given at a doctor's office, or in a covered person's home."
+    },
+    "Prosthetic Devices¹": {
+      "Network": "No copay",
+      "Out-of-Network": "50%"
+    },
+    "Urinary Catheters": {
+      "Network": "No copay",
+      "Out-of-Network": "Not covered"
+    }
+  },
+  "Pregnancy": {
+    "Pregnancy - Maternity Services": {
+      "Designated Network": "The amount you pay is based on where the covered health care service is provided except that an Annual Deductible will not apply for a newborn child whose length of stay in the Hospital is the same as the mother's length of stay.",
+      "Network": "The amount you pay is based on where the covered health care service is provided except that an Annual Deductible will not apply for a newborn child whose length of stay in the Hospital is the same as the mother's length of stay.",
+      "Out-of-Network": "The amount you pay is based on where the covered health care service is provided except that an Annual Deductible will not apply for a newborn child whose length of stay in the Hospital is the same as the mother's length of stay."
+    }
+  },
+  "Mental Health Care & Substance Related and Addictive Disorder Services": {
+    "Inpatient": {
+      "Network": "No copay",
+      "Out-of-Network": "50%*"
+    },
+    "Intensive Behavioral Therapy (e.g. ABA)": {
+      "Network": "No copay",
+      "Out-of-Network": "50%"
+    },
+    "Other Outpatient Services such as Electro-Convulsive Treatment, Psychological Testing, Transcranial Magnetic Stimulation and Medication Assisted Treatment": {
+      "Network": "No copay",
+      "Out-of-Network": "50%*"
+    },
+    "Other Outpatient Services, including Partial Hospitalization/Day Treatment/High Intensity Outpatient/Intensive Outpatient Programs": {
+      "Network": "No copay",
+      "Out-of-Network": "50%*"
+    },
+    "Outpatient Office Visit": {
+      "Network": "$30 copay",
+      "Out-of-Network": "50%*"
+    }
+  },
+  "Other Services": {
+    "Cellular Therapy, Gene Therapy, and other Genetic/Molecular Therapies": {
+      "Designated Network": "The amount you pay is based on where the covered health care service is provided.",
+      "Network": "The amount you pay is based on where the covered health care service is provided.",
+      "Out-of-Network": "The amount you pay is based on where the covered health care service is provided.",
+      "limitations": "For Network Benefits, Cellular Therapy, Gene Therapy, or other genetic/molecular therapy services must be received from a Designated Provider or a Designated Dispensing Entity."
+    },
+    "Clinical Trials": {
+      "Designated Network": "Not covered",
+      "Network": "Not covered",
+      "Out-of-Network": "Not covered"
+    },
+    "Fertility Preservation for latrogenic Infertility¹": {
+      "Designated Network": "The amount you pay is based on where the covered health care service is provided.",
+      "Network": "The amount you pay is based on where the covered health care service is provided.",
+      "Out-of-Network": "The amount you pay is based on where the covered health care service is provided.",
+      "limitations": "Limited to $20,000 per Covered Person per lifetime. Limited to 1 cycle of fertility preservation for latrogenic Infertility per lifetime. This Benefit limit will be the same as, and combined with, those stated under Preimplantation Genetic Testing (PGT) and Related Services."
+    },
+    "Gender Dysphoria": {
+      "Designated Network": "The amount you pay is based on where the covered health care service is provided.",
+      "Network": "The amount you pay is based on where the covered health care service is provided.",
+      "Out-of-Network": "The amount you pay is based on where the covered health care service is provided.",
+      "limitations": "Limits for voice modification therapy and/or voice lessons will be the same as, and combined with, outpatient speech therapy limits as described under Habilitative Services and Rehabilitation Services Outpatient Therapy and Manipulative Treatment."
+    },
+    "Hospice Care¹": {
+      "Designated Network": "No copay",
+      "Network": "No copay",
+      "Out-of-Network": "50%"
+    },
+    "Preimplantation Genetic Testing (PGT) and Related Services¹": {
+      "Designated Network": "No copay",
+      "Network": "No copay",
+      "Out-of-Network": "50%",
+      "limitations": "Benefit limits for related services will be the same as, and combined with, those stated under Fertility Preservation for latrogenic Infertility. This limit does not include Preimplantation Genetic Testing (PGT) for the specific genetic disorder."
+    },
+    "Reconstructive Procedures": {
+      "Designated Network": "The amount you pay is based on where the covered health care service is provided.",
+      "Network": "The amount you pay is based on where the covered health care service is provided.",
+      "Out-of-Network": "The amount you pay is based on where the covered health care service is provided."
+    },
+    "Temporomandibular Joint (TMJ) Services": {
+      "Network": "No copay",
+      "Out-of-Network": "Not covered"
+    },
+    "Transplantation Services": {
+      "Designated Network": "The amount you pay is based on where the covered health care service is provided.",
+      "Network": "The amount you pay is based on where the covered health care service is provided.",
+      "Out-of-Network": "The amount you pay is based on where the covered health care service is provided.",
+      "limitations": "For Network Benefits, transplantation services must be received from a Designated Provider."
+    }
+  },
+  "Pediatric Services - Dental": {
+    "Basic Dental Services": {
+      "Network": "20%*",
+      "Out-of-Network": "40%*"
+    },
+    "Diagnostic Services": {
+      "Network": "No copay",
+      "Out-of-Network": "20%",
+      "limitations": "Limited to 1 time every 36 months for Panoramic x-rays. Limited to 2 evaluations (checkup exams) every 12 months. Limited to 2 series of films every 12 months of Bitewing x-rays."
+    },
+    "Major Restorative Services": {
+      "Network": "40%*",
+      "Out-of-Network": "50%*"
+    },
+    "Medically Necessary Orthodontics¹": {
+      "Network": "40%*",
+      "Out-of-Network": "50%*",
+      "limitations": "All orthodontic treatment must be prior authorized."
+    },
+    "Preventive Services": {
+      "Network": "No copay",
+      "Out-of-Network": "20%",
+      "limitations": "Limited to 2 dental prophylaxis cleanings and fluoride treatments every 12 months."
+    },
+    "limitations": "All Pediatric Dental-Benefits covered up to age 19. Additional limits may apply. Refer to your plan documents for more information."
+  },
+  "Pediatric Services - Vision": {
+    "Contact Lenses/Necessary Contact Lenses": {
+      "Network": "$25 copay",
+      "Out-of-Network": "50%",
+      "limitations": "Limited to 1 fitting and evaluation every 12 months. Limited to a 12 month supply. We will pay benefits for only one vision care service. You may choose either eyeglasses (eyeglass lenses and/or eyeglass frames) or contact lenses."
+    },
+    "Eyeglass Frames": {
+      "Eyeglass frames with a retail cost below $130": {
+        "Network": "No copay",
+        "Out-of-Network": "50%*"
+      },
+      "Eyeglass frames with a retail cost between $130-$160": {
+        "Network": "$15 copay",
+        "Out-of-Network": "50%*"
+      },
+      "Eyeglass frames with a retail cost between $160-$200": {
+        "Network": "$30 copay",
+        "Out-of-Network": "50%*"
+      },
+      "Eyeglass frames with a retail cost between $200-$250": {
+        "Network": "$50 copay",
+        "Out-of-Network": "50%*"
+      },
+      "Eyeglass frames with a retail cost greater than $250": {
+        "Network": "40%",
+        "Out-of-Network": "50%*"
+      },
+      "limitations": "Limited to once every 12 months."
+    },
+    "Eyeglass Lenses": {
+      "Network": "$25 copay",
+      "Out-of-Network": "50%",
