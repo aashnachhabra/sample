@@ -160,7 +160,7 @@ def remove_empty_keys(data):
 
 def process_pdf_to_json(file_path, output_file_path):
 
-    prompt = "prompt here with detailed instructions"
+    prompt = "some rules for generating json here"
 
     split_chunks = split_pdf_by_pages_in_memory(file_path, pages_per_chunk=2)
     logger.info(f"Split PDF into {len(split_chunks)} in-memory chunks.")
