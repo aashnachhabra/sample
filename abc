@@ -1,10 +1,27 @@
-the payload for delete is like this
-{
-benCatID:
-benefitCategories:
- 
-}
+<select id="Plan"
+                            class="form-control filterTable multiSelectField"
+                            multiple="multiple">
+                            <c:forEach var="pln" items="${planMaster}" varStatus="status">
+                                <c:if test="${ruleType == 18 || status.index < 2}">
+                                    <option value="${pln.planTypeName}"
+                                        <c:if test="${fn:contains(planIn, pln.planTypeName)}">selected</c:if>>
+                                        ${pln.planTypeName}
+                                    </option>
+                                </c:if>
+                            </c:forEach>
+                        </select>
 
-where need to send bencatid which ur currently seeting in id key and 
-benefitCategories will be array of objects of ben categories to be deleted 
-all benefits are in the benefitCategorySearchResponse variable and i wanna append on the selected objects in benefitCategories key as array of objects
+these are a few changes i made to implement a afeature where i wanna populate all entries of plan type dropdown if rule type is 18 else only top 2 entries i need to show as options,
+it worked fine for most screens however for one screen 
+its not loading fully and getting this error
+GET https://localhost/core/standardslibrary?libraryName=combinedLibrary&ruleType=11,12 net::ERR_INCOMPLETE_CHUNKED_ENCODING 200 (OK)
+
+this was the original code
+<select id="Plan"
+							class="form-control filterTable multiSelectField"
+							multiple="multiple">
+							<c:forEach var="pln" items="${planMaster}">
+								<option value="${pln.planTypeName}"
+									<c:if test="${fn:contains(planIn,pln.planTypeName)}">selected</c:if>>${pln.planTypeName}</option>
+							</c:forEach>
+						</select>
