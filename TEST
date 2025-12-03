@@ -1,26 +1,5 @@
-GET https://localhost/ifp/maxManagement 500 (Internal Server Error)
-maxManagement:1 Failed to find a valid digest in the 'integrity' attribute for resource 'https://localhost/ifp/js/jquery-3.3.1.slim.min.js' with computed SHA-384 integrity '9P117iLMiVlrAKvSsKGVTopqNIa7UOAoCMHpTmHA5W59ZrWkknyQCCxkLyeDGkZ1'. The resource has been blocked.
-maxManagement:1 Failed to find a valid digest in the 'integrity' attribute for resource 'https://localhost/ifp/js/popper-1.14.3.min.js' with computed SHA-384 integrity 'SUclH/Zte4mLtGYUZLossYBZVofSwFrZ01h5dtPzraURsKBFZQF19iPO3ncyE2HP'. The resource has been blocked.
-UHCcustom.js:3 Uncaught ReferenceError: $ is not defined
-    at UHCcustom.js:3:1
-(anonymous) @ UHCcustom.js:3
-bootstrap.js:240 Uncaught TypeError: Bootstrap's JavaScript requires jQuery. jQuery must be included before Bootstrap's JavaScript.
-    at Object.jQueryDetection (bootstrap.js:240:15)
-    at bootstrap.js:255:8
-    at bootstrap.js:9:29
-    at bootstrap.js:10:2
-jQueryDetection @ bootstrap.js:240
-(anonymous) @ bootstrap.js:255
-(anonymous) @ bootstrap.js:9
-(anonymous) @ bootstrap.js:10
-maxManagement:36 Uncaught ReferenceError: $ is not defined
-    at maxManagement:36:2
-(anonymous) @ maxManagement:36
-maxManagement:46 Uncaught ReferenceError: $ is not defined
-    at maxManagement:46:9
-(anonymous) @ maxManagement:46
-sessionUtil.js:54 Uncaught ReferenceError: $ is not defined
-    at sessionUtil.js:54:1
-(anonymous) @ sessionUtil.js:54
+<%@ page import="com.optum.ideate.mongodb.domain.BenefitCategory" %> <%@ page import="java.util.List" %> <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %> <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %> <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %> <!doctype html> <html> <head> <meta charset="utf-8"> <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"> <script src="https://code.jquery.com/jquery-3.5.1.js" integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc=" crossorigin="anonymous"></script> <link rel="stylesheet" href="css/UHCcustom.css"> <link rel="stylesheet" href="css/home.css"> <link rel="stylesheet" href="css/bootstrap.css"> <link rel="stylesheet" href="css/all.css"> <link rel="stylesheet" href="css/loader.css"> <script src="js/popper-1.14.3.min.js"></script> <script src="js/datatables-1.11.5.min.js"></script> <script src="js/datatables-1.11.4.bootstrap4.min.js"></script> <script src="js/jquery-1.19.0.min.js"></script> <script src="js/lodash-4.17.10.min.js"></script> <script src="js/jquery-3.3.1.min.js"></script> <script src="js/UHCcustom.js"></script> <script src="js/bootstrap.js"></script> <script src="js/bootstrap.min.js"></script> <script src="js/bootstrap-popup.min.js"></script> <script src="js/loader.js"></script> <script src="js/jquery-3.5.1.js"></script> <link rel="stylesheet" href="css/multislect-dropdown.css"> <script type="text/javascript" src="js/bootstrap-multiselect.js"></script> <link rel="stylesheet" href="css/bootstrap-multiselect.css"> <script src="js/app/maximum-management.js"></script> <title>Plan Library</title> <link rel="icon" href="assets/PlanBuilderFavIcon.png"> <style> .table-striped tbody tr.highlight td { background-color: #ff0000; } .table-striped tbody tr.highlight { background-color: #ff0000; } .accordion-body .d-flex button { flex: 1; } .accordion-header .form-check-input { transform: scale(0.4); margin-right: 5px; } .accordion-button:not(.collapsed) .selectable-accordion strong, .accordion-button:not(.collapsed) .selectable-accordion small { color: var(--bs-primary) !important; } </style> <link href="js/frappe-datatable.min.css" rel="stylesheet"> <link rel="stylesheet" href="css/fontawesome.min.css"> <link rel="stylesheet" href="css/brands.min.css"> <link rel="stylesheet" href="css/solid.min.css"> </head> <body> <div id="main"> <%@include file="loader.jsp" %> <%@include file="header.jsp" %> <div class="text-primary" style="margin: 2em;"> <h1><i class="fa-solid fa-filter-circle-dollar"></i> Maximum Management</h1> </div> <div class="shadow-lg p-3 mb-5 bg-white rounded" style="margin:2em"> <form action="./maxManagementSearch" id="bcfilters" method="post" autocomplete="off"> <input type="hidden" id="ifpRoleId" value="${pageContext.session.getAttribute('ifpRoleId')}" /> <input type="hidden" name="validateCoc" id="validateCoc" value="" /> <div class="row"> <c:if test="${enabledCascade == 'true'}"> <span class="modal-title text-danger"> <b>Warning: </b> There are benefit limit changes that have not been cascaded to applicable plans. If you do not cascade these updates, the applicable plans will not receive the changes. If you leave this page the updates will be saved but not cascaded. </span> </c:if> </div> </br> <div class="row"> <div class="col"> <div class="form-floating"> <select id="cocSeries" name="coc" class="form-control" multiple="multiple" onchange="return validateSearch(true),onCocChange();"> <c:forEach var="coc" items="${maximumDD.cocSeriesMap}"> <option id="${coc.key}" value="${coc.key}" <c:if test="${fn:contains(maxManagementSearchRequest.coc, coc.key)}"> selected</c:if>> ${coc.value} </option> </c:forEach> </select> </div> </div> <div class="col"> <div class="form-floating"> <select id="state" name="stateName" class="form-control" multiple="multiple" onchange="return validateSearch(true);"> <c:forEach var="state" items="${maximumDD.stateMap}"> <option id="${state.key}" value="${state.key}" <c:if test="${fn:contains(maxManagementSearchRequest.stateName, state.key)}"> selected</c:if>> ${state.value} </option> </c:forEach> </select>
 
-did not fix still getting this
+for some reason first the list display on the input box then only after a 1 second gap it comes as multislect dropdown whats the issue
+snippet of ready function in js
+
