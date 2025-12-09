@@ -1,10 +1,9 @@
-we are refactoring the clone year/state/product functionality in above jsp snippet now the modal will look like below it will have 3 fields for each coc , state and product family and only one to from is mandatory not all.
+we are re doing  the entire clone year/state/product functionality in above jsp snippet now the modal will look like below it will have 3 fields for each coc , state and product family and only one to from is mandatory not all.
 cases
 1) if only one of the to from is populated all the fields corresponding to it should be cloned to the from firlef. for eg if coc series "from" field is 2025 and "to" field is 2026 then irrespective of product family and state all 2025 data should be cloned to 2026 data and same logic for all fields
 2) if 2 are selected 
 3) if all are given then specific cloning
 
-no backend changes required since the payload remains same only how we pick the elements from ui changes
 rest all logic stays unchanged
 also attaching js file to understand clone better
 
@@ -21,5 +20,7 @@ how i want the clone modal to look now similar code snippet for ui reference onl
 <div class="modal-body"> <div class="row"> <div class="col-6"> <div class="form-group"> <div class="form-floating"> <input type="text" class="form-control" data-key="" list="fromCOCs" name="fromCocSeries" id="fromCocSeries" placeholder="From COC Series"> <label for="fromCocSeries" class="form-label">From COC Series</label> <datalist id="fromCOCs"> <c:forEach var="coc" items="${cocSeries}"> <option id="${coc.cocSeries}">${coc.cocSeries}</option> </c:forEach> </datalist> </div> </div> </div> <div class="col-6"> <div class="form-group"> <div class="form-floating"> <input type="text" class="form-control" data-key="" list="toCOCs" name="toCocSeries" id="toCocSeries" placeholder="To COC Series"> <label for="toCocSeries" class="form-label">To COC Series</label> <datalist id="toCOCs"> <c:forEach var="coc" items="${cocSeries}"> <option id="${coc.cocSeries}">${coc.cocSeries}</option> </c:forEach> </datalist> </div> </div> </div> </div> </div>
 
 rest clone functionality should remain unchanged
-first the api needs to get all the bencats under "from" fields then clone then to the "to" fields combi now this is how the flow should be 
-tell me what minimal code changes i need for this and where exactly i  need to make changes, go through all requirements and code above thoroughly
+first the api needs to get all the bencats under "from" (user can given min 1 combi and max all 3) fields then clone then to the "to" fields  now this is how the flow should be 
+tell me what  code changes i need for this and where exactly i  need to make changes, go through all requirements and code above thoroughly
+let me know if any backend changes are also needed
+
