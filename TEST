@@ -80,3 +80,24 @@
     private String safeString(String s) {
         return s == null ? "" : s.trim().toLowerCase();
     }
+
+ [
+    {
+        "id": "64234b77c548b539d5aa8732",
+        "maxId": 305,
+        "benCatName": "Acupuncture",
+        "cocSeries": 2024,
+        "state": "AL",
+        "standard": "Advantage+",
+        "appliesTo": "CR",
+        "crossApplies": "Yes",
+        "maxType": "Dollar Limit",
+        "maxValue": "1",
+        "freqType": "Day(s)",
+        "freqValue": 1,
+        "status": "Active",
+        "visible": null,
+        "subCategory": null,
+        "isBulkCascadeRequired": false
+    }
+]
