@@ -137,3 +137,201 @@
         "isBulkCascadeRequired": true
     }
 ]
+                                        <div>
+                                            <div class="accordion w-100" id="maxAccordion" style="display: none;">
+                                                <c:set var="prevKey" value="" />
+                                                <c:forEach var="maximumData" items="${maxManagementSearchResponse}"
+                                                    varStatus="loop">
+                                                    <c:set var="currentKey"
+                                                        value="${maximumData.benCatName}_${maximumData.cocSeries}_${maximumData.state}_${maximumData.standard}" />
+                                                    <c:if test="${currentKey ne prevKey}">
+                                                        <c:set var="subCount" value="0" />
+                                                        <c:forEach var="tmp" items="${maxManagementSearchResponse}">
+                                                            <c:if
+                                                                test="${tmp.benCatName == maximumData.benCatName && tmp.cocSeries == maximumData.cocSeries && tmp.state == maximumData.state && tmp.standard == maximumData.standard}">
+                                                                <c:set var="subCount" value="${subCount + 1}" />
+                                                            </c:if>
+                                                        </c:forEach>
+                                                        <c:if test="${prevKey != ''}">
+                                                            </tbody>
+                                                            </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                        </div>
+                        </c:if>
+                        <div class="accordion-item w-100 bt-1">
+                            <h2 class="accordion-header" id="heading${loop.index}">
+                                <div class="d-flex align-items-center w-100">
+                                    <input type="checkbox" class="form-check-input me-2" id="selectRowChk_${loop.index}"
+                                        name="selectedRows" value="${maximumData.maxId}"
+                                        onclick="toggleSelectRow(${loop.index});">
+                                    <div class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#collapse${loop.index}" aria-expanded="false"
+                                        aria-controls="collapse${loop.index}">
+                                        <div class="d-flex w-100 justify-content-between align-items-center selectable-accordion m-2"
+                                            id="accordionRow_${loop.index}">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <strong>${maximumData.benCatName} (${subCount})</strong>
+                                                <small class="text-muted"> - ${maximumData.cocSeries} -
+                                                    ${maximumData.state} - ${maximumData.standard}</small>
+                                            </div>
+                                            <div></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </h2>
+                            <div id="collapse${loop.index}" class="accordion-collapse collapse"
+                                aria-labelledby="heading${loop.index}">
+                                <div class="accordion-body">
+                                    <div class="d-flex gap-2 mb-2">
+                                        <button class="btn btn-outline-danger btn-sm" title="Delete Parent"
+                                            ${pageContext.session.getAttribute('ifpRoleId')==10 ? "disabled" : "" } onclick="deleteParentMaximum('${maximumData.benCatName}', '${maximumData.cocSeries}', '${maximumData.state}', '${maximumData.standard}')">
+                                            <i class="fas fa-trash"></i> Delete Parent
+                                        </button>
+                                        <button class="btn btn-outline-primary btn-sm" title="Copy Parent & Children">
+                                            <i class="fas fa-copy"></i> Copy Parent &amp; Children
+                                        </button>
+                                        <button class="btn btn-outline-success btn-sm" title="Add Child Maximum"
+                                            id="addChildMaximum_${loop.index}" data-bs-toggle="modal"
+                                            data-bs-target="#editVisitLimitModal"
+                                            ${pageContext.session.getAttribute('ifpRoleId')==10 ? "disabled" :
+                                            (pageContext.session.getAttribute('ifpRoleId')==8 ||
+                                            pageContext.session.getAttribute('ifpRoleId')==9 ||
+                                            pageContext.session.getAttribute('roleId')==4 ?"":"disabled")}
+                                            onclick="openChildMaximumModal('${maximumData.maxId}', '${maximumData.benCatName}', '${maximumData.cocSeries}', '${maximumData.state}', '${maximumData.standard}');">
+                                            <i class="far fa-plus" style="font-size: 20px;"></i> Add Child Maximum
+                                        </button>
+                                    </div>
+                                    <input type="hidden" name="benefitCategoryName"
+                                        id="benefitCategoryName_${loop.index}" value="${maximumData.benCatName}">
+                                    <input type="hidden" name="row_${loop.index}" id="row_${loop.index}" value="0">
+                                    <input type="hidden" name="rescoc" id="rescoc_${loop.index}"
+                                        value="${maximumData.cocSeries}">
+                                    <input type="hidden" name="resstateName" id="resstateName_${loop.index}"
+                                        value="${maximumData.state}">
+                                    <input type="hidden" name="resstandard" id="resstandard_${loop.index}"
+                                        value="${maximumData.standard}">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover table-striped mb-0" id="newmaxtbl">
+                                            <thead>
+                                                <tr>
+                                                    <th scope="col">Sub Category</th>
+                                                    <th scope="col">Visible</th>
+                                                    <th scope="col">Applies To</th>
+                                                    <th scope="col">Cross Applies</th>
+                                                    <th scope="col">Max Type</th>
+                                                    <th scope="col">Max Value</th>
+                                                    <th scope="col">Freq. Type</th>
+                                                    <th scope="col">Freq. Value</th>
+                                                    <th scope="col">Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                </c:if>
+                                                <tr>
+                                                    <td>
+                                                        ${maximumData.subCategory}
+                                                        <input type="hidden" name="subCategoryName_${loop.index}"
+                                                            id="subCategoryName_${loop.index}"
+                                                            value="${maximumData.subCategory}" />
+                                                    </td>
+                                                    <td>
+                                                        <c:choose>
+                                                            <c:when test="${maximumData.visible == 'Yes'}">
+                                                                <i class="fas fa-check-circle text-success" title="Visible"></i>
+                                                            </c:when>
+                                                            <c:when test="${not empty maximumData.visible && maximumData.visible == 'No'}">
+                                                                <i class="fas fa-times-circle text-danger" title="Not visible"></i>
+                                                            </c:when>
+                                                            <c:otherwise>
+                                                            </c:otherwise>
+                                                        </c:choose>
+                                                        <input type="hidden" id="visible_${loop.index}" value="${maximumData.visible}">
+                                                    </td>
+                                                    <td>
+                                                        ${maximumData.appliesTo}
+                                                        <input type="hidden" name="appliesTo"
+                                                            id="appliesTo_${loop.index}"
+                                                            value="${maximumData.appliesTo}">
+                                                    </td>
+                                                    <td>
+                                                        ${maximumData.crossApplies}
+                                                        <input type="hidden" name="crossApplies"
+                                                            id="crossApplies_${loop.index}"
+                                                            value="${maximumData.crossApplies}">
+                                                    </td>
+                                                    <td>
+                                                        ${maximumData.maxType}
+                                                        <input type="hidden" name="maxType" id="maxType_${loop.index}"
+                                                            value="${maximumData.maxType}">
+                                                    </td>
+                                                    <td>
+                                                        ${maximumData.maxValue}
+                                                        <input type="hidden" name="maxValue" id="maxValue_${loop.index}"
+                                                            value="${maximumData.maxValue}">
+                                                    </td>
+                                                    <td>
+                                                        ${maximumData.freqType}
+                                                        <input type="hidden" name="freqType" id="freqType_${loop.index}"
+                                                            value="${maximumData.freqType}">
+                                                    </td>
+                                                    <td>
+                                                        ${maximumData.freqValue}
+                                                        <input type="hidden" name="freqValue"
+                                                            id="freqValue_${loop.index}"
+                                                            value="${maximumData.freqValue}">
+                                                    </td>
+                                                    <td>
+                                                        <div class="btn-group btn-group-sm" role="group">
+                                                            <div class="btn-group">
+                                                                <button class="btn btn-outline-primary"
+                                                                    data-toggle="tooltip" data-placement="bottom"
+                                                                    ${pageContext.session.getAttribute('ifpRoleId')==10
+                                                                    || pageContext.session.getAttribute('ifpRoleId')==8
+                                                                    || pageContext.session.getAttribute('ifpRoleId')==9
+                                                                    || pageContext.session.getAttribute('roleId')==4
+                                                                    ?"":"disabled"} title="Edit" data-bs-toggle="modal"
+                                                                    data-bs-target="#editVisitLimitModal"
+                                                                    data-value="${maximumData.benCatName}^${maximumData.appliesTo}^${maximumData.crossApplies}^${maximumData.maxType}^${maximumData.maxValue}^${maximumData.freqType}^${maximumData.freqValue}^${maximumData.maxId}^${empty maximumData.subCategory ? '' : maximumData.subCategory}^${maximumData.visible}"
+                                                                    id="editMaximum"
+                                                                    onclick="getMaxID(${maximumData.maxId})">
+                                                                    <i class="fas fa-edit"></i>
+                                                                </button>
+                                                                <input type="hidden"
+                                                                    id="editMaximum_${maximumData.maxId}"
+                                                                    data-value="${maximumData.benCatName}^${maximumData.appliesTo}^${maximumData.crossApplies}^${maximumData.maxType}^${maximumData.maxValue}^${maximumData.freqType}^${maximumData.freqValue}^${maximumData.maxId}^${empty maximumData.subCategory ? '' : maximumData.subCategory}^${maximumData.visible}">
+                                                                <button class="btn btn-outline-danger"
+                                                                    data-toggle="tooltip" data-placement="bottom"
+                                                                    ${pageContext.session.getAttribute('ifpRoleId')==10
+                                                                    ? "disabled" :
+                                                                    (pageContext.session.getAttribute('ifpRoleId')==8 ||
+                                                                    pageContext.session.getAttribute('ifpRoleId')==9 ||
+                                                                    pageContext.session.getAttribute('roleId')==4
+                                                                    ?"":"disabled")} title="Deactivate"
+                                                                    data-bs-toggle="modal" id="deleteMaximum"
+                                                                    onclick="deleteMaximum(${maximumData.maxId})">
+                                                                    <i class="fas fa-trash"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <c:set var="prevKey" value="${currentKey}" />
+                                                </c:forEach>
+                                                <c:if test="${prevKey != ''}">
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        </c:if>
+                        <c:if test="${ empty maxManagementSearchResponse || maxManagementSearchResponse.size() == 0}">
+                            <div class="p-3">
+                                <p>No maximums configured. Please add a new maximum to begin or perform another search.
+                                </p>
+                            </div>
+                        </c:if>
+                        </div>
+                        </div>
