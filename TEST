@@ -81,23 +81,59 @@
         return s == null ? "" : s.trim().toLowerCase();
     }
 
- [
+[
     {
-        "id": "64234b77c548b539d5aa8732",
-        "maxId": 305,
-        "benCatName": "Acupuncture",
+        "id": "663b365ba8a71641890ace7d",
+        "maxId": 978,
+        "benCatName": "Abortion",
         "cocSeries": 2024,
-        "state": "AL",
+        "state": "FL",
         "standard": "Advantage+",
-        "appliesTo": "CR",
+        "appliesTo": "Basic-Major",
         "crossApplies": "Yes",
         "maxType": "Dollar Limit",
-        "maxValue": "1",
+        "maxValue": "11",
         "freqType": "Day(s)",
-        "freqValue": 1,
+        "freqValue": 21,
+        "status": "Active",
+        "visible": "Yes",
+        "subCategory": "",
+        "isBulkCascadeRequired": true
+    },
+    {
+        "id": "693a96eef172b513dd2d2747",
+        "maxId": 6965,
+        "benCatName": "Abortion",
+        "cocSeries": 2024,
+        "state": "FL",
+        "standard": "Advantage+",
+        "appliesTo": null,
+        "crossApplies": null,
+        "maxType": null,
+        "maxValue": null,
+        "freqType": null,
+        "freqValue": null,
         "status": "Active",
         "visible": null,
         "subCategory": null,
-        "isBulkCascadeRequired": false
+        "isBulkCascadeRequired": true
+    },
+    {
+        "id": "693bdf56d1dc923af8750019",
+        "maxId": 6993,
+        "benCatName": "Abortion",
+        "cocSeries": 2024,
+        "state": "FL",
+        "standard": "Advantage+",
+        "appliesTo": "Basic-Major",
+        "crossApplies": "Yes",
+        "maxType": "Dollar Limit",
+        "maxValue": "11",
+        "freqType": "Day(s)",
+        "freqValue": 30,
+        "status": "Active",
+        "visible": "Yes",
+        "subCategory": "",
+        "isBulkCascadeRequired": true
     }
 ]
