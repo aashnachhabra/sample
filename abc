@@ -331,16 +331,7 @@
                                                                                 ${firstItem.state} -
                                                                                 ${firstItem.standard}</small>
                                                                         </div>
-                                                                        <div class="ms-auto">
-  <button type="button"
-          class="btn btn-outline-primary btn-sm d-flex align-items-center gap-1"
-          title="Notes"
-          onclick="openNotesModal('${firstItem.maxId}', '${firstItem.benCatName}', '${firstItem.subCategory}'); event.stopPropagation();">
-     <i class="fas fa-pencil-alt"></i>
-     <span>Notes</span>
-  </button>
-</div>
-
+                                                                        <div></div>
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -1372,4 +1363,5 @@
                     </body>
 
                     </html>
-i have added notes button but issue is when i click it collapses or opens accordion i dont want accordion open close to be affected by it suggest fix
+in this for every accordion i want a notes button (with same blue white theme as other buttons and a suitable pencil type icon), it should open a modal and not trigger accordion to open or close, accordion open close should work as it is
+tell me code change what to do and exactly where
