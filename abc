@@ -1,117 +1,80 @@
-import os
-import allure
-from playwright.sync_api import Page, expect
-from tests.vikings.apps.becca.config.Constants import Constants
-from tests.vikings.fw.common.FW import FW
-from tests.vikings.fw.common.Results import Results
-from tests.vikings.fw.ui.BasePage import BasePage
-
-
-class LoginPage(BasePage):
-    USERNAME_FIELD_ID = "username"
-    PASSWORD_FIELD_ID = "password"
-    SUBMIT_BUTTON_NAME = "Submit"
-
-    def __init__(self, page: Page):
-        super().__init__(page)
-
-    def login(self):
-        with allure.step("Login to BECCA"):
-            username = FW.get_env("BECCA_APP_CIRRUS_UI_USERNAME")
-            password = FW.get_env("BECCA_APP_CIRRUS_UI_PASSWORD")
-            if not username or not password:
-                Results.report_event("Missing 'BECCA_APP_CIRRUS_UI_USERNAME' or 'BECCA_APP_CIRRUS_UI_PASSWORD' environment variables")
-                raise RuntimeError("Credentials not provided via environment variables")
-
-            self.page.goto(Constants.ALPHA_URL)
-            self.get_element_by_id(self.USERNAME_FIELD_ID).fill(username)
-            self.get_element_by_id(self.PASSWORD_FIELD_ID).fill(password)
-            self.click_button_by_name(self.SUBMIT_BUTTON_NAME)
-
-            expect(self.page.get_by_role("link").first).to_be_visible()
-            Results.report_event("User logged in successfully")
-            self.attach_screenshot("Login Screenshot")
-
-
-GETTING THIS ERROR ON TERMINAL
-
 /Users/achhab16/Library/Caches/pypoetry/virtualenvs/app-bPuqwu3B-py3.13/bin/python3.13 "/Users/achhab16/Library/Application Support/JetBrains/IdeaIC2025.2/plugins/python-ce/helpers/pycharm/_jb_pytest_runner.py" --path /Users/achhab16/Library/Caches/pypoetry/virtualenvs/app-bPuqwu3B-py3.13/lib/python3.13/site-packages/pytest -- tests/vikings/apps/becca -m smoke --tracing off -s --alluredir allure-results --reruns 0 -n 1 --html=reports/report.html --self-contained-html
-Testing started at 7:08 pm ...
+Testing started at 7:19 pm ...
 Launching pytest with arguments tests/vikings/apps/becca -m smoke --tracing off -s --alluredir allure-results --reruns 0 -n 1 --html=reports/report.html --self-contained-html /Users/achhab16/Library/Caches/pypoetry/virtualenvs/app-bPuqwu3B-py3.13/lib/python3.13/site-packages/pytest --no-header --no-summary -q in /Users/achhab16/Desktop/cirrus-apps_vikings-eval
 
 /Users/achhab16/Library/Caches/pypoetry/virtualenvs/app-bPuqwu3B-py3.13/lib/python3.13/site-packages/deepeval/__init__.py:52: UserWarning: You are using deepeval version 2.2.0, however version 3.8.3 is available. You should consider upgrading via the "pip install --upgrade deepeval" command.
   warnings.warn(
-INFO 2026-02-04 19:08:51 conftest.py Loaded environment variables from .env.local
-INFO 2026-02-04 19:08:51 conftest.py pytest_configure started
-INFO 2026-02-04 19:08:51 conftest.py conftest is loading vars
-INFO 2026-02-04 19:08:51 conftest.py Resolved app env path: /Users/achhab16/Desktop/cirrus-apps_vikings-eval/tests/vikings/apps/becca/config/.env.alpha
-INFO 2026-02-04 19:08:51 conftest.py Loaded environment variables from tests/vikings/apps/becca/config/.env.alpha
-INFO 2026-02-04 19:08:51 conftest.py ENV: alpha
-INFO 2026-02-04 19:08:51 conftest.py APP: becca
-INFO 2026-02-04 19:08:51 conftest.py RUN_ID: 123
-INFO 2026-02-04 19:08:51 conftest.py SSLV: true
-INFO 2026-02-04 19:08:51 conftest.py THRESHOLD: 0.5
-INFO 2026-02-04 19:08:51 conftest.py pytest_configure ended
-INFO 2026-02-04 19:08:51 conftest.py Session started: <Session  exitstatus=<ExitCode.OK: 0> testsfailed=0 testscollected=0>
-INFO 2026-02-04 19:08:51 conftest.py Current temp dir: /private/var/folders/pd/wzd_v7bx32n4byp72dqdzjkw0000gq/T/pytest-of-achhab16/pytest-20
-INFO 2026-02-04 19:08:51 conftest.py Base temp dir saved to /Users/achhab16/Desktop/cirrus-apps_vikings-eval/reports/base_temp.txt
-Base temp dir init: /private/var/folders/pd/wzd_v7bx32n4byp72dqdzjkw0000gq/T/pytest-of-achhab16/pytest-20
+INFO 2026-02-04 19:19:47 conftest.py Loaded environment variables from .env.local
+INFO 2026-02-04 19:19:47 conftest.py pytest_configure started
+INFO 2026-02-04 19:19:47 conftest.py conftest is loading vars
+INFO 2026-02-04 19:19:47 conftest.py Resolved app env path: /Users/achhab16/Desktop/cirrus-apps_vikings-eval/tests/vikings/apps/becca/config/.env.alpha
+INFO 2026-02-04 19:19:47 conftest.py Loaded environment variables from tests/vikings/apps/becca/config/.env.alpha
+INFO 2026-02-04 19:19:47 conftest.py ENV: alpha
+INFO 2026-02-04 19:19:47 conftest.py APP: becca
+INFO 2026-02-04 19:19:47 conftest.py RUN_ID: 123
+INFO 2026-02-04 19:19:47 conftest.py SSLV: true
+INFO 2026-02-04 19:19:47 conftest.py THRESHOLD: 0.5
+INFO 2026-02-04 19:19:47 conftest.py pytest_configure ended
+INFO 2026-02-04 19:19:47 conftest.py Session started: <Session  exitstatus=<ExitCode.OK: 0> testsfailed=0 testscollected=0>
+INFO 2026-02-04 19:19:47 conftest.py Current temp dir: /private/var/folders/pd/wzd_v7bx32n4byp72dqdzjkw0000gq/T/pytest-of-achhab16/pytest-24
+Base temp dir init: /private/var/folders/pd/wzd_v7bx32n4byp72dqdzjkw0000gq/T/pytest-of-achhab16/pytest-24
+INFO 2026-02-04 19:19:47 conftest.py Base temp dir saved to /Users/achhab16/Desktop/cirrus-apps_vikings-eval/reports/base_temp.txt
 ============================= test session starts ==============================
 created: 1/1 worker
 /Users/achhab16/Library/Caches/pypoetry/virtualenvs/app-bPuqwu3B-py3.13/lib/python3.13/site-packages/deepeval/__init__.py:52: UserWarning: You are using deepeval version 2.2.0, however version 3.8.3 is available. You should consider upgrading via the "pip install --upgrade deepeval" command.
   warnings.warn(
-INFO 2026-02-04 19:08:53 conftest.py Loaded environment variables from .env.local
-INFO 2026-02-04 19:08:54 conftest.py pytest_configure started
-INFO 2026-02-04 19:08:54 conftest.py conftest is loading vars
-INFO 2026-02-04 19:08:54 conftest.py Resolved app env path: /Users/achhab16/Desktop/cirrus-apps_vikings-eval/tests/vikings/apps/becca/config/.env.alpha
-INFO 2026-02-04 19:08:54 conftest.py Loaded environment variables from tests/vikings/apps/becca/config/.env.alpha
-INFO 2026-02-04 19:08:54 conftest.py ENV: alpha
-INFO 2026-02-04 19:08:54 conftest.py APP: becca
-INFO 2026-02-04 19:08:54 conftest.py RUN_ID: 123
-INFO 2026-02-04 19:08:54 conftest.py SSLV: true
-INFO 2026-02-04 19:08:54 conftest.py THRESHOLD: 0.5
-INFO 2026-02-04 19:08:54 conftest.py pytest_configure ended
-INFO 2026-02-04 19:08:54 conftest.py Session started: <Session  exitstatus=<ExitCode.OK: 0> testsfailed=0 testscollected=0>
-INFO 2026-02-04 19:08:54 conftest.py Current temp dir: /private/var/folders/pd/wzd_v7bx32n4byp72dqdzjkw0000gq/T/pytest-of-achhab16/pytest-20/popen-gw0
+INFO 2026-02-04 19:19:50 conftest.py Loaded environment variables from .env.local
+INFO 2026-02-04 19:19:50 conftest.py pytest_configure started
+INFO 2026-02-04 19:19:50 conftest.py conftest is loading vars
+INFO 2026-02-04 19:19:50 conftest.py Resolved app env path: /Users/achhab16/Desktop/cirrus-apps_vikings-eval/tests/vikings/apps/becca/config/.env.alpha
+INFO 2026-02-04 19:19:50 conftest.py Loaded environment variables from tests/vikings/apps/becca/config/.env.alpha
+INFO 2026-02-04 19:19:50 conftest.py ENV: alpha
+INFO 2026-02-04 19:19:50 conftest.py APP: becca
+INFO 2026-02-04 19:19:50 conftest.py RUN_ID: 123
+INFO 2026-02-04 19:19:50 conftest.py SSLV: true
+INFO 2026-02-04 19:19:50 conftest.py THRESHOLD: 0.5
+INFO 2026-02-04 19:19:50 conftest.py pytest_configure ended
+INFO 2026-02-04 19:19:50 conftest.py Session started: <Session  exitstatus=<ExitCode.OK: 0> testsfailed=0 testscollected=0>
+INFO 2026-02-04 19:19:50 conftest.py Current temp dir: /private/var/folders/pd/wzd_v7bx32n4byp72dqdzjkw0000gq/T/pytest-of-achhab16/pytest-24/popen-gw0
 1 worker [1 item]
 
 scheduling tests via LoadScheduling
 
 tests/vikings/apps/becca/ui_tests/test_becca_eval_pipeline.py::test_login_becca_logout_smoke[chromium-testcase0] Running teardown with pytest sessionfinish...
-INFO 2026-02-04 19:09:30 conftest.py pytest_sessionfinish started
-INFO 2026-02-04 19:09:30 conftest.py pytest_sessionfinish ended
-INFO 2026-02-04 19:09:30 ReportsMerger.py Starting merge of worker files.
-INFO 2026-02-04 19:09:30 FW.py worker files found for merge.
-INFO 2026-02-04 19:09:30 FW.py Merged 1 files into /Users/achhab16/Desktop/cirrus-apps_vikings-eval/reports/test_results.xlsx
-INFO 2026-02-04 19:09:30 ReportsMerger.py Completed merge of worker files.
+INFO 2026-02-04 19:20:19 conftest.py pytest_sessionfinish started
+INFO 2026-02-04 19:20:19 conftest.py pytest_sessionfinish ended
+INFO 2026-02-04 19:20:19 ReportsMerger.py Starting merge of worker files.
+INFO 2026-02-04 19:20:19 FW.py worker files found for merge.
+INFO 2026-02-04 19:20:19 FW.py Merged 1 files into /Users/achhab16/Desktop/cirrus-apps_vikings-eval/reports/test_results.xlsx
+INFO 2026-02-04 19:20:19 ReportsMerger.py Completed merge of worker files.
 
 
-======================== 1 failed, 4 warnings in 39.11s ========================
-INFO 2026-02-04 19:08:54 conftest.py Setup fixture before session: Eval
-INFO 2026-02-04 19:08:54 conftest.py db_session started
-INFO 2026-02-04 19:08:54 conftest.py Setting up database connection for session: e69b7922-412e-4ecb-afae-8be5fb983f3b
-INFO 2026-02-04 19:08:54 db_utils.py Opened database connection:{'db_name': 'test_db', 'user': 'test_user', 'session_id': 'e69b7922-412e-4ecb-afae-8be5fb983f3b'}
-INFO 2026-02-04 19:08:54 conftest.py properties_info started
-INFO 2026-02-04 19:08:54 conftest.py from env info
-INFO 2026-02-04 19:08:54 conftest.py ENV: alpha
-INFO 2026-02-04 19:08:54 conftest.py ROLE: DEVELOPER
-INFO 2026-02-04 19:08:54 conftest.py properties_info ended
-INFO 2026-02-04 19:08:55 conftest.py Setup before test: test_login_becca_logout_smoke[chromium-testcase0]
-INFO 2026-02-04 19:09:29 conftest.py base temp:/private/var/folders/pd/wzd_v7bx32n4byp72dqdzjkw0000gq/T/pytest-of-achhab16/pytest-20/popen-gw0
-INFO 2026-02-04 19:09:29 conftest.py file path:/private/var/folders/pd/wzd_v7bx32n4byp72dqdzjkw0000gq/T/pytest-of-achhab16/pytest-20/popen-gw0/result_68131.csv
-INFO 2026-02-04 19:09:29 conftest.py Teardown after test: test_login_becca_logout_smoke[chromium-testcase0]
-INFO 2026-02-04 19:09:29 db_utils.py Closed database connection:{'db_name': 'test_db', 'user': 'test_user', 'session_id': 'e69b7922-412e-4ecb-afae-8be5fb983f3b'}
-INFO 2026-02-04 19:09:29 conftest.py db_session ended
-INFO 2026-02-04 19:09:29 conftest.py Teardown fixture after session: Eval
+======================== 1 failed, 4 warnings in 31.66s ========================
+INFO 2026-02-04 19:19:51 conftest.py Setup fixture before session: Eval
+INFO 2026-02-04 19:19:51 conftest.py db_session started
+INFO 2026-02-04 19:19:51 conftest.py Setting up database connection for session: f35a0c2e-4462-4d68-9d88-850b065d9ef4
+INFO 2026-02-04 19:19:51 db_utils.py Opened database connection:{'db_name': 'test_db', 'user': 'test_user', 'session_id': 'f35a0c2e-4462-4d68-9d88-850b065d9ef4'}
+INFO 2026-02-04 19:19:51 conftest.py properties_info started
+INFO 2026-02-04 19:19:51 conftest.py from env info
+INFO 2026-02-04 19:19:51 conftest.py ENV: alpha
+INFO 2026-02-04 19:19:51 conftest.py ROLE: DEVELOPER
+INFO 2026-02-04 19:19:51 conftest.py properties_info ended
+INFO 2026-02-04 19:19:54 conftest.py Setup before test: test_login_becca_logout_smoke[chromium-testcase0]
+INFO 2026-02-04 19:20:18 conftest.py base temp:/private/var/folders/pd/wzd_v7bx32n4byp72dqdzjkw0000gq/T/pytest-of-achhab16/pytest-24/popen-gw0
+INFO 2026-02-04 19:20:18 conftest.py file path:/private/var/folders/pd/wzd_v7bx32n4byp72dqdzjkw0000gq/T/pytest-of-achhab16/pytest-24/popen-gw0/result_72398.csv
+INFO 2026-02-04 19:20:18 conftest.py Teardown after test: test_login_becca_logout_smoke[chromium-testcase0]
+INFO 2026-02-04 19:20:19 db_utils.py Closed database connection:{'db_name': 'test_db', 'user': 'test_user', 'session_id': 'f35a0c2e-4462-4d68-9d88-850b065d9ef4'}
+INFO 2026-02-04 19:20:19 conftest.py db_session ended
+INFO 2026-02-04 19:20:19 conftest.py Teardown fixture after session: Eval
 
-[gw0] FAILED tests/vikings/apps/becca/ui_tests/test_becca_eval_pipeline.py::test_login_becca_logout_smoke[chromium-testcase0] INFO 2026-02-04 19:09:29 conftest.py pytest_sessionfinish started
-INFO 2026-02-04 19:09:29 conftest.py pytest_sessionfinish ended
-
+INFO 2026-02-04 19:20:19 conftest.py pytest_sessionfinish started
+INFO 2026-02-04 19:20:19 conftest.py pytest_sessionfinish ended
+[gw0] FAILED tests/vikings/apps/becca/ui_tests/test_becca_eval_pipeline.py::test_login_becca_logout_smoke[chromium-testcase0] 
 tests/vikings/apps/becca/ui_tests/test_becca_eval_pipeline.py:61 (test_login_becca_logout_smoke[chromium-testcase0])
 request = <FixtureRequest for <Function test_login_becca_logout_smoke[chromium-testcase0]>>
-page = <Page url='https://login.microsoftonline.com/db05faca-c82a-4b9d-b9c5-0f64b6755421/oauth2/v2.0/authorize?client_id=404b...rfToken,yLZZNQ5islhzqtmyMd0n%7CresumePath,%2Fas%2FBK7EK_JGC6SvWz2m%2Fresume%2Fas%2Fauthorization.ping&sso_reload=true'>
+page = <Page url='https://login.microsoftonline.com/common/DeviceAuthTls/reprocess'>
 testcase = {'prompt': 'what is the coinsurance for pharmaceutical products for DTKS, 2024, AR, KA, INN.'}
-rows_accumulator = {'634290734': {'actual_prompt': 'what is the coinsurance for pharmaceutical products for DTKS, 2024, AR, KA, INN.', 'p...b-897d-491b-94c7-ff0eca53ae98&response_type=code&redirect_uri=https%3A%2F%2Fauthgateway1-…"\n', 'ui_status': 'failed'}}
+rows_accumulator = {'454229687': {'actual_prompt': 'what is the coinsurance for pharmaceutical products for DTKS, 2024, AR, KA, INN.', 'p...ucts for DTKS, 2024, AR, KA, INN.', 'ui_error': 'value must be a string or regular expression', 'ui_status': 'failed'}}
 
     @pytest.mark.parametrize("testcase", FW.get_test_data(BECCA_XL)[:1])
     @pytest.mark.smoke
@@ -124,47 +87,42 @@ tests/vikings/apps/becca/ui_tests/test_becca_eval_pipeline.py:67:
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 tests/vikings/apps/becca/ui_tests/test_becca_eval_pipeline.py:36: in test_login_becca_helper
     login.login()
-tests/vikings/apps/becca/ui_pages/LoginPage.py:27: in login
-    self.get_element_by_id(self.USERNAME_FIELD_ID).fill(username)
-../../Library/Caches/pypoetry/virtualenvs/app-bPuqwu3B-py3.13/lib/python3.13/site-packages/playwright/sync_api/_generated.py:15919: in fill
-    self._sync(
-../../Library/Caches/pypoetry/virtualenvs/app-bPuqwu3B-py3.13/lib/python3.13/site-packages/playwright/_impl/_locator.py:212: in fill
-    return await self._frame.fill(self._selector, strict=True, **params)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-../../Library/Caches/pypoetry/virtualenvs/app-bPuqwu3B-py3.13/lib/python3.13/site-packages/playwright/_impl/_frame.py:590: in fill
-    await self._fill(**locals_to_params(locals()))
-../../Library/Caches/pypoetry/virtualenvs/app-bPuqwu3B-py3.13/lib/python3.13/site-packages/playwright/_impl/_frame.py:602: in _fill
-    await self._channel.send("fill", self._timeout, locals_to_params(locals()))
-../../Library/Caches/pypoetry/virtualenvs/app-bPuqwu3B-py3.13/lib/python3.13/site-packages/playwright/_impl/_connection.py:69: in send
-    return await self._connection.wrap_api_call(
+tests/vikings/apps/becca/ui_pages/LoginPage.py:37: in login
+    expect(self.page).not_to_have_url(lambda url: "login.microsoftonline.com" in url)
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
-self = <playwright._impl._connection.Connection object at 0x115851400>
-cb = <function Channel.send.<locals>.<lambda> at 0x115d0f560>
-is_internal = False, title = None
+items = [<function LoginPage.login.<locals>.<lambda> at 0x111c6e3e0>]
+match_substring = False, normalize_white_space = False, ignoreCase = None
 
-    async def wrap_api_call(
-        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
-    ) -> Any:
-        if self._api_zone.get():
-            return await cb()
-        task = asyncio.current_task(self._loop)
-        st: List[inspect.FrameInfo] = getattr(
-            task, "__pw_stack__", None
-        ) or inspect.stack(0)
-    
-        parsed_st = _extract_stack_trace_information_from_stack(st, is_internal, title)
-        self._api_zone.set(parsed_st)
-        try:
-            return await cb()
-        except Exception as error:
->           raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
-E           playwright._impl._errors.TimeoutError: Locator.fill: Timeout 30000ms exceeded.
-E           Call log:
-E             - waiting for locator("#username")
-E               2 × waiting for" https://login.microsoftonline.com/db05faca-c82a-4b9d-b9c5-0f64b6755421/oauth2/v2.0/authorize?client_id=404b223b-897d-491b-94c7-ff0eca53ae98&response_type=code&redirect_uri=https%3A%2F%2Fauthgateway1-…" navigation to finish...
-E                 - navigated to "https://login.microsoftonline.com/db05faca-c82a-4b9d-b9c5-0f64b6755421/oauth2/v2.0/authorize?client_id=404b223b-897d-491b-94c7-ff0eca53ae98&response_type=code&redirect_uri=https%3A%2F%2Fauthgateway1-…"
+    def to_expected_text_values(
+        items: Union[
+            Sequence[Pattern[str]], Sequence[str], Sequence[Union[str, Pattern[str]]]
+        ],
+        match_substring: bool = False,
+        normalize_white_space: bool = False,
+        ignoreCase: Optional[bool] = None,
+    ) -> Sequence[ExpectedTextValue]:
+        out: List[ExpectedTextValue] = []
+        assert isinstance(items, (list, tuple))
+        for item in items:
+            if isinstance(item, str):
+                o = ExpectedTextValue(
+                    string=item,
+                    matchSubstring=match_substring,
+                    normalizeWhiteSpace=normalize_white_space,
+                    ignoreCase=ignoreCase,
+                )
+                if o["ignoreCase"] is None:
+                    del o["ignoreCase"]
+                out.append(o)
+            elif isinstance(item, Pattern):
+                out.append(
+                    expected_regex(item, match_substring, normalize_white_space, ignoreCase)
+                )
+            else:
+>               raise Error("value must be a string or regular expression")
+E               playwright._impl._errors.Error: value must be a string or regular expression
 
-../../Library/Caches/pypoetry/virtualenvs/app-bPuqwu3B-py3.13/lib/python3.13/site-packages/playwright/_impl/_connection.py:559: TimeoutError
+../../Library/Caches/pypoetry/virtualenvs/app-bPuqwu3B-py3.13/lib/python3.13/site-packages/playwright/_impl/_assertions.py:1030: Error
 
 Process finished with exit code 1
