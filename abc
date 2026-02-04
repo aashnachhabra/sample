@@ -1,128 +1,86 @@
-/Users/achhab16/Library/Caches/pypoetry/virtualenvs/app-bPuqwu3B-py3.13/bin/python3.13 "/Users/achhab16/Library/Application Support/JetBrains/IdeaIC2025.2/plugins/python-ce/helpers/pycharm/_jb_pytest_runner.py" --path /Users/achhab16/Library/Caches/pypoetry/virtualenvs/app-bPuqwu3B-py3.13/lib/python3.13/site-packages/pytest -- tests/vikings/apps/becca -m smoke --tracing off -s --alluredir allure-results --reruns 0 -n 1 --html=reports/report.html --self-contained-html
-Testing started at 7:19 pm ...
-Launching pytest with arguments tests/vikings/apps/becca -m smoke --tracing off -s --alluredir allure-results --reruns 0 -n 1 --html=reports/report.html --self-contained-html /Users/achhab16/Library/Caches/pypoetry/virtualenvs/app-bPuqwu3B-py3.13/lib/python3.13/site-packages/pytest --no-header --no-summary -q in /Users/achhab16/Desktop/cirrus-apps_vikings-eval
+    @Override
+    public ResponseEntity<String> saveNote(MaximumManagementNoteRequest noteRequest, String currentUser) {
+        if (noteRequest.getBenCatName() == null || noteRequest.getCocSeries() == null ||
+                noteRequest.getState() == null || noteRequest.getStandard() == null ||
+                noteRequest.getNoteDescription() == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Missing required fields.");
+        }
+        try {
+            MaximumManagementNotesCollection note = new MaximumManagementNotesCollection();
+            note.setBenCatName(noteRequest.getBenCatName());
+            note.setCocSeries(noteRequest.getCocSeries());
+            note.setState(noteRequest.getState());
+            note.setStandard(noteRequest.getStandard());
+            note.setNoteDescription(noteRequest.getNoteDescription());
+            note.setIsCurrent(1);
+            note.setCreatedBy(currentUser);
+            note.setModifiedBy(currentUser);
+            note.setCreatedOn(LocalDateTime.now());
+            note.setModifiedOn(LocalDateTime.now());
 
-/Users/achhab16/Library/Caches/pypoetry/virtualenvs/app-bPuqwu3B-py3.13/lib/python3.13/site-packages/deepeval/__init__.py:52: UserWarning: You are using deepeval version 2.2.0, however version 3.8.3 is available. You should consider upgrading via the "pip install --upgrade deepeval" command.
-  warnings.warn(
-INFO 2026-02-04 19:19:47 conftest.py Loaded environment variables from .env.local
-INFO 2026-02-04 19:19:47 conftest.py pytest_configure started
-INFO 2026-02-04 19:19:47 conftest.py conftest is loading vars
-INFO 2026-02-04 19:19:47 conftest.py Resolved app env path: /Users/achhab16/Desktop/cirrus-apps_vikings-eval/tests/vikings/apps/becca/config/.env.alpha
-INFO 2026-02-04 19:19:47 conftest.py Loaded environment variables from tests/vikings/apps/becca/config/.env.alpha
-INFO 2026-02-04 19:19:47 conftest.py ENV: alpha
-INFO 2026-02-04 19:19:47 conftest.py APP: becca
-INFO 2026-02-04 19:19:47 conftest.py RUN_ID: 123
-INFO 2026-02-04 19:19:47 conftest.py SSLV: true
-INFO 2026-02-04 19:19:47 conftest.py THRESHOLD: 0.5
-INFO 2026-02-04 19:19:47 conftest.py pytest_configure ended
-INFO 2026-02-04 19:19:47 conftest.py Session started: <Session  exitstatus=<ExitCode.OK: 0> testsfailed=0 testscollected=0>
-INFO 2026-02-04 19:19:47 conftest.py Current temp dir: /private/var/folders/pd/wzd_v7bx32n4byp72dqdzjkw0000gq/T/pytest-of-achhab16/pytest-24
-Base temp dir init: /private/var/folders/pd/wzd_v7bx32n4byp72dqdzjkw0000gq/T/pytest-of-achhab16/pytest-24
-INFO 2026-02-04 19:19:47 conftest.py Base temp dir saved to /Users/achhab16/Desktop/cirrus-apps_vikings-eval/reports/base_temp.txt
-============================= test session starts ==============================
-created: 1/1 worker
-/Users/achhab16/Library/Caches/pypoetry/virtualenvs/app-bPuqwu3B-py3.13/lib/python3.13/site-packages/deepeval/__init__.py:52: UserWarning: You are using deepeval version 2.2.0, however version 3.8.3 is available. You should consider upgrading via the "pip install --upgrade deepeval" command.
-  warnings.warn(
-INFO 2026-02-04 19:19:50 conftest.py Loaded environment variables from .env.local
-INFO 2026-02-04 19:19:50 conftest.py pytest_configure started
-INFO 2026-02-04 19:19:50 conftest.py conftest is loading vars
-INFO 2026-02-04 19:19:50 conftest.py Resolved app env path: /Users/achhab16/Desktop/cirrus-apps_vikings-eval/tests/vikings/apps/becca/config/.env.alpha
-INFO 2026-02-04 19:19:50 conftest.py Loaded environment variables from tests/vikings/apps/becca/config/.env.alpha
-INFO 2026-02-04 19:19:50 conftest.py ENV: alpha
-INFO 2026-02-04 19:19:50 conftest.py APP: becca
-INFO 2026-02-04 19:19:50 conftest.py RUN_ID: 123
-INFO 2026-02-04 19:19:50 conftest.py SSLV: true
-INFO 2026-02-04 19:19:50 conftest.py THRESHOLD: 0.5
-INFO 2026-02-04 19:19:50 conftest.py pytest_configure ended
-INFO 2026-02-04 19:19:50 conftest.py Session started: <Session  exitstatus=<ExitCode.OK: 0> testsfailed=0 testscollected=0>
-INFO 2026-02-04 19:19:50 conftest.py Current temp dir: /private/var/folders/pd/wzd_v7bx32n4byp72dqdzjkw0000gq/T/pytest-of-achhab16/pytest-24/popen-gw0
-1 worker [1 item]
+            MaximumManagementNotesCollection lastNote = notesRepository.findTopByOrderByNoteIdDesc();
+            Long nextNoteId = (lastNote != null && lastNote.getNoteId() != null)
+                    ? lastNote.getNoteId() + 1
+                    : 1L;
+            note.setNoteId(nextNoteId);
 
-scheduling tests via LoadScheduling
-
-tests/vikings/apps/becca/ui_tests/test_becca_eval_pipeline.py::test_login_becca_logout_smoke[chromium-testcase0] Running teardown with pytest sessionfinish...
-INFO 2026-02-04 19:20:19 conftest.py pytest_sessionfinish started
-INFO 2026-02-04 19:20:19 conftest.py pytest_sessionfinish ended
-INFO 2026-02-04 19:20:19 ReportsMerger.py Starting merge of worker files.
-INFO 2026-02-04 19:20:19 FW.py worker files found for merge.
-INFO 2026-02-04 19:20:19 FW.py Merged 1 files into /Users/achhab16/Desktop/cirrus-apps_vikings-eval/reports/test_results.xlsx
-INFO 2026-02-04 19:20:19 ReportsMerger.py Completed merge of worker files.
+            MaximumManagementNotesCollection savedNote = notesRepository.save(note);
+            return ResponseEntity.ok("Note saved successfully with ID: " + savedNote.getNoteId());
+        } catch (Exception e) {
+            logger.error("Error saving note: ", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to save note: " + e.getMessage());
+        }
+    }
 
 
-======================== 1 failed, 4 warnings in 31.66s ========================
-INFO 2026-02-04 19:19:51 conftest.py Setup fixture before session: Eval
-INFO 2026-02-04 19:19:51 conftest.py db_session started
-INFO 2026-02-04 19:19:51 conftest.py Setting up database connection for session: f35a0c2e-4462-4d68-9d88-850b065d9ef4
-INFO 2026-02-04 19:19:51 db_utils.py Opened database connection:{'db_name': 'test_db', 'user': 'test_user', 'session_id': 'f35a0c2e-4462-4d68-9d88-850b065d9ef4'}
-INFO 2026-02-04 19:19:51 conftest.py properties_info started
-INFO 2026-02-04 19:19:51 conftest.py from env info
-INFO 2026-02-04 19:19:51 conftest.py ENV: alpha
-INFO 2026-02-04 19:19:51 conftest.py ROLE: DEVELOPER
-INFO 2026-02-04 19:19:51 conftest.py properties_info ended
-INFO 2026-02-04 19:19:54 conftest.py Setup before test: test_login_becca_logout_smoke[chromium-testcase0]
-INFO 2026-02-04 19:20:18 conftest.py base temp:/private/var/folders/pd/wzd_v7bx32n4byp72dqdzjkw0000gq/T/pytest-of-achhab16/pytest-24/popen-gw0
-INFO 2026-02-04 19:20:18 conftest.py file path:/private/var/folders/pd/wzd_v7bx32n4byp72dqdzjkw0000gq/T/pytest-of-achhab16/pytest-24/popen-gw0/result_72398.csv
-INFO 2026-02-04 19:20:18 conftest.py Teardown after test: test_login_becca_logout_smoke[chromium-testcase0]
-INFO 2026-02-04 19:20:19 db_utils.py Closed database connection:{'db_name': 'test_db', 'user': 'test_user', 'session_id': 'f35a0c2e-4462-4d68-9d88-850b065d9ef4'}
-INFO 2026-02-04 19:20:19 conftest.py db_session ended
-INFO 2026-02-04 19:20:19 conftest.py Teardown fixture after session: Eval
 
-INFO 2026-02-04 19:20:19 conftest.py pytest_sessionfinish started
-INFO 2026-02-04 19:20:19 conftest.py pytest_sessionfinish ended
-[gw0] FAILED tests/vikings/apps/becca/ui_tests/test_becca_eval_pipeline.py::test_login_becca_logout_smoke[chromium-testcase0] 
-tests/vikings/apps/becca/ui_tests/test_becca_eval_pipeline.py:61 (test_login_becca_logout_smoke[chromium-testcase0])
-request = <FixtureRequest for <Function test_login_becca_logout_smoke[chromium-testcase0]>>
-page = <Page url='https://login.microsoftonline.com/common/DeviceAuthTls/reprocess'>
-testcase = {'prompt': 'what is the coinsurance for pharmaceutical products for DTKS, 2024, AR, KA, INN.'}
-rows_accumulator = {'454229687': {'actual_prompt': 'what is the coinsurance for pharmaceutical products for DTKS, 2024, AR, KA, INN.', 'p...ucts for DTKS, 2024, AR, KA, INN.', 'ui_error': 'value must be a string or regular expression', 'ui_status': 'failed'}}
+    @PostMapping("/maxManagement/save-notes")
+    @ResponseBody
+    public ResponseEntity<String> saveNote(
+            @RequestBody MaximumManagementNoteRequest noteRequest, HttpServletRequest request) {
+        HttpSession session = request.getSession();
+        String currentUser = (String) session.getAttribute(SessionConstants.USER_NAME);
+        return maximumManagementService.saveNote(noteRequest, currentUser);
+    }
 
-    @pytest.mark.parametrize("testcase", FW.get_test_data(BECCA_XL)[:1])
-    @pytest.mark.smoke
-    @allure.feature("becca")               # ✅ rename feature
-    @allure.story("ui_eval_e2e")
-    def test_login_becca_logout_smoke(request, page, testcase, rows_accumulator):
->       test_login_becca_helper(request, page, testcase, rows_accumulator)
 
-tests/vikings/apps/becca/ui_tests/test_becca_eval_pipeline.py:67: 
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
-tests/vikings/apps/becca/ui_tests/test_becca_eval_pipeline.py:36: in test_login_becca_helper
-    login.login()
-tests/vikings/apps/becca/ui_pages/LoginPage.py:37: in login
-    expect(self.page).not_to_have_url(lambda url: "login.microsoftonline.com" in url)
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+function saveNotes() {
+    var noteText = ($("#notesText").val() || "");
+    var trimmed = noteText.trim();
+    if (trimmed.length === 0) {
+        $("#saveNotesBtn").prop("disabled", true);
+        return;
+    }
+    if (noteText.length > NOTES_MAX_LEN) {
+        $("#notesError").show().text("Text exceeds maximum length");
+        $("#notesText").addClass("is-invalid");
+        $("#saveNotesBtn").prop("disabled", true);
+        return;
+    }
+    var payload = {
+        benCatName: $("#notesBenCatName").val(),
+        cocSeries: $("#notesCocSeries").val(),
+        state: $("#notesState").val(),
+        standard: $("#notesStandard").val(),
+        noteDescription: trimmed
+    };
 
-items = [<function LoginPage.login.<locals>.<lambda> at 0x111c6e3e0>]
-match_substring = False, normalize_white_space = False, ignoreCase = None
+    console.log("Saving Notes payload:", payload);
+    $.ajax({
+        type: "POST",
+        contentType: "application/json",
+        url: "maxManagement/save-notes",
+        data: JSON.stringify(payload),
+        dataType: "json",
+        success: function (res) {
+            $("#notesModal").modal("hide");
+        },
+        error: function (xhr) {
+            console.log("error", xhr);
+        }
+    });
+}
 
-    def to_expected_text_values(
-        items: Union[
-            Sequence[Pattern[str]], Sequence[str], Sequence[Union[str, Pattern[str]]]
-        ],
-        match_substring: bool = False,
-        normalize_white_space: bool = False,
-        ignoreCase: Optional[bool] = None,
-    ) -> Sequence[ExpectedTextValue]:
-        out: List[ExpectedTextValue] = []
-        assert isinstance(items, (list, tuple))
-        for item in items:
-            if isinstance(item, str):
-                o = ExpectedTextValue(
-                    string=item,
-                    matchSubstring=match_substring,
-                    normalizeWhiteSpace=normalize_white_space,
-                    ignoreCase=ignoreCase,
-                )
-                if o["ignoreCase"] is None:
-                    del o["ignoreCase"]
-                out.append(o)
-            elif isinstance(item, Pattern):
-                out.append(
-                    expected_regex(item, match_substring, normalize_white_space, ignoreCase)
-                )
-            else:
->               raise Error("value must be a string or regular expression")
-E               playwright._impl._errors.Error: value must be a string or regular expression
-
-../../Library/Caches/pypoetry/virtualenvs/app-bPuqwu3B-py3.13/lib/python3.13/site-packages/playwright/_impl/_assertions.py:1030: Error
-
-Process finished with exit code 1
+suggest fixes so that i can handle all state error and success effectively from frontend and backend but not a lot of change 
