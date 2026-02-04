@@ -1,86 +1,3008 @@
-    @Override
-    public ResponseEntity<String> saveNote(MaximumManagementNoteRequest noteRequest, String currentUser) {
-        if (noteRequest.getBenCatName() == null || noteRequest.getCocSeries() == null ||
-                noteRequest.getState() == null || noteRequest.getStandard() == null ||
-                noteRequest.getNoteDescription() == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("Missing required fields.");
-        }
-        try {
-            MaximumManagementNotesCollection note = new MaximumManagementNotesCollection();
-            note.setBenCatName(noteRequest.getBenCatName());
-            note.setCocSeries(noteRequest.getCocSeries());
-            note.setState(noteRequest.getState());
-            note.setStandard(noteRequest.getStandard());
-            note.setNoteDescription(noteRequest.getNoteDescription());
-            note.setIsCurrent(1);
-            note.setCreatedBy(currentUser);
-            note.setModifiedBy(currentUser);
-            note.setCreatedOn(LocalDateTime.now());
-            note.setModifiedOn(LocalDateTime.now());
+function maximumDelete(maxId){
+		showAndHide();
+        $.ajax({
+            type: "Delete",
+            contentType: "application/json",
+            url: "deleteMaximum"+'/'+maxId,
+            dataType: 'json',
+            success: function(response) {
+            	document.getElementById("successHeader").innerHTML = 'Deactivated';
+       		 	document.getElementById("successMessage").innerHTML = 'Maximum Deactivated Successfully.';
+       		 	$("#success").toast("show");
+            },
+            error: function(xhr) {
+	            console.log("error",xhr);
+	            alert("Something went wrong while deleting program, please try again..!");
+            }
+        });
+        reloadSearch();
+}
 
-            MaximumManagementNotesCollection lastNote = notesRepository.findTopByOrderByNoteIdDesc();
-            Long nextNoteId = (lastNote != null && lastNote.getNoteId() != null)
-                    ? lastNote.getNoteId() + 1
-                    : 1L;
-            note.setNoteId(nextNoteId);
+function reloadSearch() {
+    showAndHide();
+    var coc = $("#cocSeries").val();
+    var state = $("#state").val();
+    var standard = $("#standard").val();
 
-            MaximumManagementNotesCollection savedNote = notesRepository.save(note);
-            return ResponseEntity.ok("Note saved successfully with ID: " + savedNote.getNoteId());
-        } catch (Exception e) {
-            logger.error("Error saving note: ", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Failed to save note: " + e.getMessage());
-        }
+    if (coc && coc.length > 0 && state && state.length > 0 && standard && standard.length > 0) {
+        document.forms["bcfilters"].submit();
+    } else {
+        $("#cocSeries").val("");
+        $("#state").val("");
+        $("#standard").val("");
+        window.location.href = "./maxManagement";
+    }
+}
+
+function validateSearch(flag) {
+	console.log("search");
+    var coc = $('#cocSeries').val();
+    var state = $('#state').val();
+    var stand = $('#standard').val();
+
+    let cocSeries= coc.length > 0 ? coc.toString() : "";
+    let states= state.length > 0 ? state.toString() : "";
+    let standards= stand.length > 0 ? stand.toString() : "";
+
+    let hasAnyData = cocSeries !== "" || states !== "" || standards !== "";
+    document.getElementById('clearMaxManagement').disabled = !hasAnyData;
+
+    let hasAllData = cocSeries !== "" && states !== "" && standards !== "";
+    document.getElementById('bensearch').disabled = !hasAllData;
+
+    if(flag) {
+        return hasAllData;
+    }
+    if(!hasAllData) {
+        document.getElementById('bensearch').disabled = true;
+        document.getElementById('newMaximum').disabled = true;
+        document.getElementById("ErrorMesssage").innerHTML = 'Please select all filters to search';
+        $("#ErrorModal").modal("toggle");
+        return false;
+    }
+    return true;
+}
+
+function onlyNumberKey(evt){
+    var ASCIICode = (evt.which) ? evt.which : evt.keyCode
+    if (ASCIICode > 31 && (ASCIICode < 48 || ASCIICode > 57)){
+        document.getElementById("ErrorMesssage").innerHTML = 'COC Series should be Numeric';
+        $("#ErrorModal").modal("toggle");
+        return false;
+    }
+    enterKeyPressed(evt);
+    return true;
+}
+
+function clearSearch(){
+	showAndHide();
+	$("#cocSeries").val("");
+	$("#stateName").val("");
+	$("#standard").val("");
+	document.getElementById('clearMaxManagement').disabled = true;
+    document.getElementById('bensearch').disabled = true;
+    window.location.href="./maxManagement";
+}
+
+function submitSearchForm() {
+    document.getElementById('bcfilters').submit();
+}
+
+function setMultiSelectDropDown(id, fieldName) {
+    $(id).multiselect({
+        filterPlaceholder: 'Search for ' + fieldName + '...',
+        enableFiltering: true,
+        enableCaseInsensitiveFiltering: true,
+        includeSelectAllOption: true,
+        maxHeight: 400,
+        dropUp: true,
+        nonSelectedText: fieldName
+    });
+}
+
+var bcOldValue;
+var flagModel;
+let initialFormState = {};
+
+$(document).ready(function() {
+    validateSearch(true);
+    showAndHide();
+    $("#maxCloneModal").on("shown.bs.modal", function () {
+    clearCloneModal();
+    });
+    $('#maxAccordion').show();
+    var coc = $('#cocSeries').val();
+    var state = $('#state').val();
+    var stand = $('#standard').val();
+
+    let cocSeries= coc.length > 0 ? coc.toString() : "";
+    let stateSeries= state.length > 0 ? state.toString() : "";
+    let standSeries= stand.length > 0 ? stand.toString() : "";
+
+    if(cocSeries === ""||stateSeries === ""||standSeries === "") {
+        document.getElementById('bensearch').disabled = true;
+        document.getElementById('newMaximum').disabled = false;
     }
 
+    $('#editVisitLimitModal').on('hidden.bs.modal', function (e) {
+        var validateCoc  = document.getElementById("validateCoc").value;
+        if(validateCoc != 1){
+        $('#editVisitLimitModalSaveBut').removeAttr("disabled");
+        $('#editVisitLimitModalSaveBut').html("Save");
+        $("#visitlimit_addlimitbuttonid").attr("enabled", "true");
+        $("#visitlimit_addlimitbuttonid").html("Add Limit");
+        $("#visitlimit_bencat_Type").val("");
+        $("#visitlimit_subcategory").val("");
+        $("#visitlimit_1_limitType").val("");
+        $("#visitlimit_1_limitValue").val("");
+        $("#visitlimit_1_limitFreq").val("");
+        $("#visitlimit_1_limitFreqType").val("");
+        $("#visitlimit_limitCrossApplies").val("");
+        $("#visitlimit_limitApplies").val("");
+        $("#visitlimit_visible").val("");
+        $("#maxId").val("");
 
+        $("#isChildMaximum").val("false");
 
-    @PostMapping("/maxManagement/save-notes")
-    @ResponseBody
-    public ResponseEntity<String> saveNote(
-            @RequestBody MaximumManagementNoteRequest noteRequest, HttpServletRequest request) {
-        HttpSession session = request.getSession();
-        String currentUser = (String) session.getAttribute(SessionConstants.USER_NAME);
-        return maximumManagementService.saveNote(noteRequest, currentUser);
+        $("#parent_coc").prop('readonly', false).removeAttr('readonly').off('focus');
+        $("#parent_state").prop('readonly', false).removeAttr('readonly').off('focus');
+        $("#parent_productFamily").prop('readonly', false).removeAttr('readonly').off('focus');
+        $("#visitlimit_bencat_Type").prop('disabled', false).removeAttr('disabled');
+        $("#visitlimit_subcategory").prop('readonly', false).removeAttr('readonly').off('focus');
+
+        $("#parent_coc").val("");
+        $("#parent_state").val("");
+        $("#parent_productFamily").val("");
+
+        $('#editVisitLimitModalLabel').html('');
+        }
+    });
+    $('#editVisitLimitModal').on('shown.bs.modal', function (e) {
+
+        $('#editVisitLimitModalSaveBut').attr("disabled","true");
+        $("#visitlimit_addlimitbuttonid").attr("disabled","true");
+        $("#visitlimit_addlimitbuttonid").html("Add Limit");
+        if (e.relatedTarget.id == 'newMaximum') {
+
+            $('#editVisitLimitModalLabel').html('Add Parent Maximum');
+            $("#isChildMaximum").val("false");
+            $("#parent_coc").val("");
+            $("#parent_state").val("");
+            $("#parent_productFamily").val("");
+            $("#visitlimit_bencat_Type").val("");
+            $("#visitlimit_subcategory").val("");
+            $("#visitlimit_1_limitType").val("");
+            $("#visitlimit_1_limitValue").val("");
+            $("#visitlimit_1_limitFreq").val("");
+            $("#visitlimit_1_limitFreqType").val("");
+            $("#visitlimit_visible").val("");
+            $("#visitlimit_limitCrossApplies").val("");
+            $("#visitlimit_limitApplies").val("");
+            $("#maxId").val("");
+
+            $("#parent_coc").prop('readonly', false).removeAttr('readonly').off('focus');
+            $("#parent_state").prop('readonly', false).removeAttr('readonly').off('focus');
+            $("#parent_productFamily").prop('readonly', false).removeAttr('readonly').off('focus');
+            $("#visitlimit_bencat_Type").prop('disabled', false).removeAttr('disabled');
+            $("#visitlimit_subcategory").prop('readonly', true).on('focus', function() { $(this).blur(); });
+            $("#parentStandards").empty();
+
+            $('#editVisitLimitModalClearBut').prop('disabled', true);
+
+            loadAppliesTo("");
+            loadProductFamily("");
+
+            flagModel = true;
+            $(".delete-maximum").hide();
+        } else if (e.relatedTarget.id && e.relatedTarget.id.startsWith('addChildMaximum')) {
+            // New Child Maximum - All fields already populated by openChildMaximumModal()
+            $('#editVisitLimitModalLabel').html('Add Child Maximum');
+            flagModel = true;
+            $(".delete-maximum").hide();
+            var cocValue = $("#parent_coc").val();
+            if (cocValue && cocValue.trim() !== "") {
+                loadAppliesTo(cocValue.trim());
+            }
+        } else if (e.relatedTarget.id == 'editMaximum') {
+             $(".delete-maximum").show();
+             $('#editVisitLimitModalLabel').html('Edit Maximum');
+             $("#isChildMaximum").val("false");
+
+             var accordionItem = $(e.relatedTarget).closest('.accordion-item');
+             var cocSeries = accordionItem.find('input[name="rescoc"]').val();
+             var state = accordionItem.find('input[name="resstateName"]').val();
+             var standard = accordionItem.find('input[name="resstandard"]').val();
+
+             $("#parent_coc").val(cocSeries);
+             $("#parent_state").val(state);
+             $("#parent_productFamily").val(standard);
+
+             $("#parent_coc").prop('readonly', true).on('focus', function() { $(this).blur(); });
+             $("#parent_state").prop('readonly', true).on('focus', function() { $(this).blur(); });
+             $("#parent_productFamily").prop('readonly', true).on('focus', function() { $(this).blur(); });
+             $("#visitlimit_bencat_Type").prop('disabled', true);
+             $("#visitlimit_subcategory").prop('readonly', true).on('focus', function() { $(this).blur(); });
+
+             var maximumData = $(e.relatedTarget).data('value');
+             const arrMaxData = maximumData.split("^");
+
+             $("#visitlimit_bencat_Type").val(arrMaxData[0]);
+             $("#visitlimit_limitCrossApplies").val(arrMaxData[2]);
+             $("#visitlimit_1_limitType").val(arrMaxData[3]);
+             $("#visitlimit_1_limitValue").val(arrMaxData[4]);
+             $("#visitlimit_1_limitFreqType").val(arrMaxData[5]);
+             $("#visitlimit_1_limitFreq").val(arrMaxData[6]);
+             $("#maxId").val(arrMaxData[7]);
+             $("#visitlimit_subcategory").val(arrMaxData[8] || "");
+             if (cocSeries && cocSeries.trim() !== "") {
+                 loadAppliesTo(cocSeries.trim(), arrMaxData[1]);
+             } else {
+                 $("#visitlimit_limitApplies").val(arrMaxData[1]);
+             }
+             $("#visitlimit_visible").val(arrMaxData[9]);
+
+             $('#editVisitLimitModalClearBut').prop('disabled', false);
+
+             flagModel = false;
+             bcOldValue = document.getElementById("visitlimit_bencat_Type").value;
+             initialFormState = {};
+             $('#editVisitLimitModal .adddvisitlimitbutaction, #editVisitLimitModal input, #editVisitLimitModal select').each(function () {
+                 initialFormState[this.id] = $(this).val();
+             });
+
+        }
+    });
+    $('#editVisitLimitModalClearBut').on('click', function (e) {
+        const isEditMaximum = $("#maxId").val() !== "";
+        $('#editVisitLimitModalSaveBut').attr("disabled", "true");
+        var isChildMaximum = document.getElementById("isChildMaximum").value === "true";
+        if (!isChildMaximum && !isEditMaximum) {
+            $("#parent_coc").val("");
+            $("#parent_state").val("");
+            $("#parent_productFamily").val("");
+            $("#visitlimit_bencat_Type").val("");
+            $("#maxId").val("");
+        }
+        $("#visitlimit_subcategory").val("");
+        $("#visitlimit_1_limitType").val("");
+        $("#visitlimit_1_limitValue").val("");
+        $("#visitlimit_1_limitFreq").val("");
+        $("#visitlimit_1_limitFreqType").val("");
+        $("#visitlimit_limitCrossApplies").val("");
+        $("#visitlimit_limitApplies").val("");
+        $("#visitlimit_visible").val("");
+        $('#editVisitLimitModalClearBut').prop('disabled', true);
+    });
+    $(document).on('input change', '#editVisitLimitModal .adddvisitlimitbutaction, #editVisitLimitModal input, #editVisitLimitModal select', function () {
+       let ifpRoleId = Number(document.getElementById('ifpRoleId').value); // Make sure this hidden field exists and is set
+       if (ifpRoleId === 10) {
+           $('#editVisitLimitModalSaveBut').prop('disabled', true);
+           return;
+       }
+        var isChildMaximum = document.getElementById("isChildMaximum").value === "true";
+        const isEditMaximum = $("#maxId").val() !== "";
+
+        let cocFilled = $("#parent_coc").val() && $("#parent_coc").val().trim() !== "";
+        let stateFilled = $("#parent_state").val() && $("#parent_state").val().trim() !== "";
+        let productFamilyFilled = $("#parent_productFamily").val() && $("#parent_productFamily").val().trim() !== "";
+        let benCatFilled = $("#visitlimit_bencat_Type").val() && $("#visitlimit_bencat_Type").val().trim() !== "";
+        let appliesToFilled = $("#visitlimit_limitApplies").val() && $("#visitlimit_limitApplies").val().trim() !== "";
+        let visibleFilled = $("#visitlimit_visible").val() && $("#visitlimit_visible").val().trim() !== "";
+
+        let mandatoryFieldsFilled = isChildMaximum
+            ? (benCatFilled && appliesToFilled && visibleFilled)
+            : (cocFilled && stateFilled && productFamilyFilled && benCatFilled && appliesToFilled && visibleFilled);
+
+        if (!mandatoryFieldsFilled) {
+            $('#editVisitLimitModalSaveBut').prop('disabled', true);
+            let hasAnyValue = $("#parent_coc").val() || $("#parent_state").val() ||
+                             $("#parent_productFamily").val() || $("#visitlimit_bencat_Type").val() ||
+                             $("#visitlimit_subcategory").val() || $("#visitlimit_1_limitType").val() ||
+                             $("#visitlimit_1_limitValue").val() || $("#visitlimit_1_limitFreq").val() ||
+                             $("#visitlimit_1_limitFreqType").val() || $("#visitlimit_visible").val() ||
+                             $("#visitlimit_limitCrossApplies").val() || $("#visitlimit_limitApplies").val();
+            $('#editVisitLimitModalClearBut').prop('disabled', !hasAnyValue);
+            return;
+        }
+
+        let hasAnyValue = false;
+        if (isChildMaximum || isEditMaximum) {
+            hasAnyValue = $("#visitlimit_subcategory").val() ||
+                $("#visitlimit_1_limitType").val() ||
+                $("#visitlimit_1_limitValue").val() ||
+                $("#visitlimit_1_limitFreq").val() ||
+                $("#visitlimit_1_limitFreqType").val() ||
+                $("#visitlimit_visible").val() ||
+                $("#visitlimit_limitCrossApplies").val() ||
+                $("#visitlimit_limitApplies").val();
+        } else {
+            hasAnyValue = $("#parent_coc").val() ||
+                $("#parent_state").val() ||
+                $("#parent_productFamily").val() ||
+                $("#visitlimit_bencat_Type").val() ||
+                $("#visitlimit_subcategory").val() ||
+                $("#visitlimit_1_limitType").val() ||
+                $("#visitlimit_1_limitValue").val() ||
+                $("#visitlimit_1_limitFreq").val() ||
+                $("#visitlimit_1_limitFreqType").val() ||
+                $("#visitlimit_visible").val() ||
+                $("#visitlimit_limitCrossApplies").val() ||
+                $("#visitlimit_limitApplies").val();
+        }
+
+        $('#editVisitLimitModalClearBut').prop('disabled', !hasAnyValue);
+
+        if (isChildMaximum) {
+            $('#editVisitLimitModalSaveBut').prop('disabled', false);
+        } else {
+            let hasChanged = false;
+            $('#editVisitLimitModal .adddvisitlimitbutaction, #editVisitLimitModal input, #editVisitLimitModal select').each(function () {
+                if (initialFormState[this.id] !== $(this).val()) {
+                    hasChanged = true;
+                    return false;
+                }
+            });
+            $('#editVisitLimitModalSaveBut').prop('disabled', !hasChanged);
+        }
+    });
+    $("#visitlimit_bencat_Type").change(function () {
+        if (($("#visitlimit_bencat_Type").val()) == "") {
+            $('#editVisitLimitModalSaveBut').attr("disabled","true");
+        } else {
+            $('#editVisitLimitModalSaveBut').removeAttr("disabled");
+        }
+    });
+    document.getElementById("cocSeries").addEventListener("input", function () {
+        if ($('#cocSeries').val() === null || $('#cocSeries').val().length === 0) {
+            onCocChange();
+        }
+    });
+
+    $("#parent_coc").on('input change', function() {
+        var cocValue = $(this).val();
+        $("#parent_productFamily").val("");
+        $("#parentStandards").empty();
+        $("#visitlimit_subcategory").val("");
+
+        if (cocValue && cocValue.trim() !== "") {
+            onCocChange(true);
+            loadAppliesTo(cocValue.trim());
+        } else {
+            loadAppliesTo("");
+            loadProductFamily("");
+        }
+    });
+
+    function loadAppliesTo(cocValue, selectedValue) {
+        $.ajax({
+            url: "maxManagement/applies-to",
+            type: 'GET',
+            data: { cocSeries: cocValue },
+            success: function(appliesTo) {
+                $("#visitlimit_limitApplies").empty();
+                $("#visitlimit_limitApplies").append('<option selected value=" ">Select...</option>');
+
+                if (appliesTo && appliesTo.length > 0) {
+                    for (var i = 0; i < appliesTo.length; i++) {
+                        $("#visitlimit_limitApplies").append(
+                            '<option value="' + appliesTo[i] + '">' + appliesTo[i] + '</option>'
+                        );
+                    }
+                }
+                if (selectedValue) {
+                    $("#visitlimit_limitApplies").val(selectedValue);
+                }
+            },
+            error: function(xhr) {
+                console.error("Error loading appliesTo:", xhr);
+                console.error("Status:", xhr.status, "Response:", xhr.responseText);
+            }
+        });
     }
 
+    function loadProductFamily(cocValue) {
+        $.ajax({
+            url: "maxManagement/product-family",
+            type: 'GET',
+            data: { cocSeries: cocValue },
+            success: function(productFamilies) {
+                $("#parentStandards").empty();
 
-function saveNotes() {
-    var noteText = ($("#notesText").val() || "");
-    var trimmed = noteText.trim();
-    if (trimmed.length === 0) {
-        $("#saveNotesBtn").prop("disabled", true);
+                if (productFamilies && productFamilies.length > 0) {
+                    for (var i = 0; i < productFamilies.length; i++) {
+                        $("#parentStandards").append(
+                            '<option value="' + productFamilies[i] + '">' + productFamilies[i] + '</option>'
+                        );
+                    }
+                }
+            },
+            error: function(xhr) {
+                console.error("Error loading product families:", xhr);
+                console.error("Status:", xhr.status, "Response:", xhr.responseText);
+            }
+        });
+    }
+
+    $("#visitlimit_limitApplies").on('change', function() {
+        var appliesToValue = $(this).val();
+        var cocValue = $("#parent_coc").val();
+
+        $("#visitlimit_subcategory").val("");
+
+        if (appliesToValue && appliesToValue.trim() !== "" && appliesToValue.trim() !== " ") {
+            if (cocValue && cocValue.trim() !== "") {
+                $.ajax({
+                    url: "maxManagement/subcategory-by-appliesTo",
+                    type: 'GET',
+                    data: {
+                        cocSeries: cocValue.trim(),
+                        appliesTo: appliesToValue.trim()
+                    },
+                    success: function(subCategory) {
+                        if (subCategory && subCategory.trim() !== "") {
+                            $("#visitlimit_subcategory").val(subCategory);
+                        }
+                    },
+                    error: function(xhr) {
+                        console.error("Error fetching subcategory:", xhr);
+                    }
+                });
+            }
+        }
+    });
+});
+
+function saveNewMaximumWithBenCatCheck() {
+	showAndHide();
+
+	if(flagModel) {
+		console.log("New Maximum Mgmt flagModel : ",flagModel);
+		isNewMaximumMgmtBenCatExist();
+	} else {
+		console.log("Edit Maximum Mgmt flagModel : ",flagModel);
+		isNewMaximumMgmtBenCatExist();
+	}
+}
+
+function isNewMaximumMgmtBenCatExist() {
+	console.log("isNewMaximumMgmtBenCatExist");
+	checkNewMaximumMgmtBenCatExist().then(response => {
+		if(response != null) {
+			if(response.identicalCount == 0) {
+				saveNewMaximum();
+			 } else {
+				 showAndHide();
+				 document.getElementById("ErrorMesssage").innerHTML = 'The combination that you entered already exists.';
+				 $('#ErrorModal').modal('show');
+			 }
+		} else {
+			 showAndHide();
+			 document.getElementById("ErrorMesssage").innerHTML = 'Something went wrong, please try again..!';
+			 $('#ErrorModal').modal('show');
+		}
+	});
+}
+
+function checkNewMaximumMgmtBenCatExist() {
+	 console.log("checkNewMaximumMgmtBenCatExist");
+	 var request = {};
+	 request['cocSeries'] = $("#parent_coc").val();
+     request['state'] = $("#parent_state").val();
+     request['standard'] = $("#parent_productFamily").val();
+     request['benCatName'] = document.getElementById("visitlimit_bencat_Type").value;
+     request['subCategory'] = document.getElementById("visitlimit_subcategory").value || "";
+     request['appliesTo'] = document.getElementById("visitlimit_limitApplies").value;
+     request['maxType'] = document.getElementById("visitlimit_1_limitType").value;
+     request['maxValue'] = document.getElementById("visitlimit_1_limitValue").value;
+     request['freqValue'] = document.getElementById("visitlimit_1_limitFreq").value;
+     request['freqType'] = document.getElementById("visitlimit_1_limitFreqType").value;
+     request['visible'] = document.getElementById("visitlimit_visible").value;
+     request['crossApplies'] = document.getElementById("visitlimit_limitCrossApplies").value;
+     var maxId = document.getElementById("maxId").value;
+     if (maxId != null && maxId != '') {
+         request['maxId'] = parseInt(maxId);
+     }
+	 if (request.benCatName != ''){
+		 return $.ajax({
+			 type: "POST",
+		     contentType: "application/json",
+		     url: "isBenCatExistForNewMaximumMgmt",
+		     data: JSON.stringify(request),
+		     dataType: 'json'
+		 });
+	 } else {
+		 showAndHide();
+		 $("#editVisitLimitModal").modal('hide');
+		 document.getElementById("errorMesssage").innerHTML = 'Please select Benefit Category Name';
+		 $("#errorModal").modal("toggle");
+	 }
+	 return null;
+}
+
+function saveNewMaximum(){
+ console.log("saveNewMaximum");
+ var request = {};
+ request['cocSeries'] = $("#parent_coc").val();
+ request['state'] = $("#parent_state").val();
+ request['standard'] = $("#parent_productFamily").val();
+
+var maxId = document.getElementById("maxId").value;
+if (maxId != '') {
+ console.log("There is no maxId id: Its a new plan");
+ console.log("Editing existing maximum with maxId: ", maxId);
+ request['maxId'] = maxId;
+}
+
+ request['benCatName'] = document.getElementById("visitlimit_bencat_Type").value;
+ request['subCategory'] = document.getElementById("visitlimit_subcategory").value || "";
+ request['maxType'] = document.getElementById("visitlimit_1_limitType").value;
+ request['maxValue'] = document.getElementById("visitlimit_1_limitValue").value;
+ let freqValueStr = document.getElementById("visitlimit_1_limitFreq").value;
+ request['freqValue'] = freqValueStr === "" ? null : parseInt(freqValueStr);
+ request['freqType'] = document.getElementById("visitlimit_1_limitFreqType").value;
+ request['crossApplies'] = document.getElementById("visitlimit_limitCrossApplies").value;
+ request['appliesTo'] = document.getElementById("visitlimit_limitApplies").value;
+ request['visible'] = document.getElementById("visitlimit_visible").value;
+ request['status'] = 'Active';
+
+ saveNewMaximumData(request);
+}
+
+function saveNewMaximumData(request) {
+	console.log("saveNewMaximumData");
+        if (request.benCatName != ''){
+            $.ajax({
+                type: "POST",
+                contentType: "application/json",
+                url: "saveNewMaximum",
+                data: JSON.stringify(request),
+                dataType: 'json',
+                success: function (res) {
+                    console.log(res);
+                    // Hide loader before showing modal
+                    showAndHide();
+                    if (res.newMaximums == 0) {
+                        document.getElementById("ErrorMesssage").innerHTML = 'The combination that you entered already exists.';
+                        $('#ErrorModal').modal('show');
+                    } else {
+                        $("#editVisitLimitModal").modal('hide');
+                        document.getElementById("successResult").innerHTML = 'Maximum Successfully Saved';
+                        $("#sucessBoxNewMaximumModal").modal("show");
+                    }
+                },
+                error: function (xhr) {
+                    console.log("error",xhr);
+                    // Hide loader before showing error
+                    showAndHide();
+                    alert("Something went wrong while saving plans, please try again..!");
+                    $('#ErrorModal').modal('show');
+                }
+            });
+	    }
+}
+
+function deleteMaximum(maxIdVal){
+  $("#deleteConfirmBoxModal").modal("toggle");
+  $('#maxIdVal').val(maxIdVal);
+}
+
+function deleteParentMaximum(benCatName, cocSeries, state, standard) {
+    console.log(benCatName, cocSeries, state, standard);
+    $("#deleteParentConfirmBoxModal").modal("toggle");
+    $('#benCatNameDelete').val(benCatName);
+    $('#cocSeriesDelete').val(cocSeries);
+    $('#stateDelete').val(state);
+    $('#standardDelete').val(standard);
+}
+
+function exportMaximumManagement() {
+    console.log("Payload being sent:", JSON.stringify(maxManagementSearchResponseVar));
+    if (maxManagementSearchResponseVar != null) {
+    		showAndHide();
+    $.ajax({
+        type: "POST",
+        contentType: "application/json",
+        url: "exportMaximumManagement",
+        data: JSON.stringify(maxManagementSearchResponseVar),
+        cache: false,
+        xhr: function () {
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 2) {
+                    if (xhr.status == 200) {
+                        xhr.responseType = "blob";
+                    } else {
+                        xhr.responseType = "text";
+                    }
+                }
+            };
+            return xhr;
+        },
+        success: function (data) {
+            var blob = new Blob([data], { type: "application/octetstream"});
+            if (window.navigator.msSaveBlob) {
+                window.navigator.msSaveBlob(blob, "maximumManagement.xlsx");
+            } else {
+                var windUrl = window.URL || window.webkitURL;
+                var url = windUrl.createObjectURL(blob);
+                var link = document.createElement("a");
+                link.href = url;
+                link.setAttribute("download", "maximumManagement.xlsx");
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+            }
+            showAndHide();
+        },
+        error: function (xhr,textStatus, errorThrown) {
+            showAndHide();
+        }
+        });
+    }
+}
+function deleteParentMaximumConfirm() {
+    var benCatNameVal=document.getElementById("benCatNameDelete").value;
+    var cocSeriesVal=document.getElementById("cocSeriesDelete").value;
+    var stateVal=document.getElementById("stateDelete").value;
+    var standardVal=document.getElementById("standardDelete").value;
+    console.log(benCatNameVal, cocSeriesVal, stateVal, standardVal);
+        $.ajax({
+            url: "deleteParentMaximum",
+            type: "POST",
+            contentType: "application/json",
+            data: JSON.stringify({
+                benCatName: benCatNameVal,
+                cocSeries: cocSeriesVal,
+                state: stateVal,
+                standard: standardVal
+            }),
+            success: function(response) {
+                $("#deleteParentConfirmBoxModal").modal('hide');
+                document.getElementById("successResult").innerHTML = 'Maximum Successfully Deleted';
+                $("#sucessBoxNewMaximumModal").modal("toggle");
+            },
+            error: function(xhr) {
+                console.error('error', xhr);
+                alert('Something went wrong while Deleting plans, please try again..!');
+            }
+        });
+}
+
+function deleteMaximumData() {
+ var request = document.getElementById("maxIdVal").value;
+        if (request != ''){
+            $.ajax({
+                type: "POST",
+                contentType: "application/json",
+                url: "deletePlanConfirm",
+                data: JSON.stringify(request),
+                dataType: 'json',
+                success: function (res) {
+                    $("#deleteConfirmBoxModal").modal('hide');
+                    console.log(res);
+                    document.getElementById("successResult").innerHTML = 'Maximum Successfully Deleted';
+                    $("#sucessBoxNewMaximumModal").modal("toggle");
+                },
+                error: function (xhr) {
+                    console.log("error",xhr);
+                    alert("Something went wrong while Deleting plans, please try again..!");
+                }
+            });
+	    }
+}
+
+function deleteMaximumFromEdit() {
+    var maxId = document.getElementById("maxId").value;
+    $("#editVisitLimitModal").modal('hide');
+    deleteMaximum(maxId);
+}
+
+function validateClone() {
+  const anyRow = document.querySelector('input[id^="editMaximum_"]');
+  if (anyRow) {
+    const parts = (anyRow.getAttribute('data-value') || '').split('^');
+    const benCat = parts[0] || '';
+    const cocInput = document.querySelector('input[id^="rescoc_"]');
+    const stateInput = document.querySelector('input[id^="resstateName_"]');
+    const standardInput = document.querySelector('input[id^="resstandard_"]');
+
+    if (cocInput) document.getElementById("cloneCoc").value = cocInput.value || "";
+    if (stateInput) document.getElementById("cloneState").value = stateInput.value || "";
+    if (standardInput) document.getElementById("cloneStandard").value = standardInput.value || "";
+    document.getElementById("cloneBenefitCategoryName").value = benCat;
+    document.getElementById("cloneAppliesTo").value = parts[1] || '';
+    document.getElementById("cloneCrossAppliesTo").value = parts[2] || '';
+    document.getElementById("cloneMaxType").value = parts[3] || '';
+    document.getElementById("cloneMaxValue").value = parts[4] || '';
+    document.getElementById("cloneFreqType").value = parts[5] || '';
+    document.getElementById("cloneFreqValue").value = parts[6] || '';
+  }
+    document.getElementById('clonebtn').disabled = false;
+
+  $("#maxCloneModal").modal("toggle");
+}
+
+function enableClone(lists) {
+    document.getElementById('clonebtn').disabled = false;
+    document.getElementById('clonebtn').focus();
+    return false;
+}
+
+function onCocChange(isModal) {
+    isModal = isModal || false;
+    showAndHide();
+
+    var cocName, cocSeries;
+
+    if (isModal) {
+        cocName = $('#parent_coc').val();
+        cocSeries = (cocName && cocName.trim() !== "") ? cocName.trim() : "";
+    } else {
+        cocName = $('#cocSeries').val();
+        cocSeries = (cocName && cocName.length > 0) ? cocName.toString() : "";
+    }
+
+    $.ajax({
+        url: "maxManagement/product-family?cocSeries=" + cocSeries,
+        type: 'GET',
+        success: function(res) {
+            if (isModal) {
+                $("#parentStandards").empty();
+                if (res && res.length > 0) {
+                    for (var i = 0; i < res.length; i++) {
+                        var option = document.createElement("option");
+                        option.value = res[i];
+                        option.text = res[i];
+                        $("#parentStandards").append(option);
+                    }
+                    console.log("Product families loaded for modal COC:", cocSeries);
+                }
+            } else {
+                var selectedProductFamilies = $('#standard').val();
+                updateProductFamilyDropDown(res, selectedProductFamilies);
+                validateSearch(true);
+            }
+            showAndHide();
+        },
+        error: function(xhr) {
+            console.error("Error loading product families:", xhr);
+            showAndHide();
+        }
+    });
+}
+
+function getDropdownValues(dropdownId) {
+        let values = [];
+        $(`#${dropdownId} option`).each(function() {
+            values.push($(this).val());
+        });
+        return values;
+}
+
+function updateProductFamilyDropDown(res,selectedProductFamilies){
+    var standards = document.getElementById("standard");
+    $("#standard option").remove();
+    $('#standard').multiselect('rebuild');
+    for (var i = 0; i < res.length; i++) {
+        var option = document.createElement("option");
+        option.value = res[i];
+        option.innerText = res[i];
+        standards.appendChild(option);
+    }
+    $('#standard').val(selectedProductFamilies);
+    $('#standard').multiselect('rebuild');
+}
+
+function removeOptions(selectElement) {
+	 var i, L = selectElement.options.length - 1;
+	 for(i = L; i >= 0; i--) {
+	    selectElement.children[i].remove()
+	 }
+}
+
+function getIEXOrgProductFamily(standards){
+	$.ajax({
+	    url: "portfolioManagement/iex-product-family",
+	    type: 'GET',
+	    success: function(res) {
+			removeOptions(standards);
+			for (var i = 0; i < res.length; i++) {
+		        var option = document.createElement("option");
+		        option.value = res[i];
+		        option.innertText = res[i];
+		        standards.appendChild(option);
+		    }
+	    }
+	});
+}
+
+function getAllProductFamily(standards){
+	$.ajax({
+	    url: "maxManagement/all-product-family",
+	    type: 'GET',
+	    success: function(res) {
+			removeOptions(standards);
+
+			for (var i = 0; i < res.length; i++) {
+		        var option = document.createElement("option");
+		        option.value = res[i];
+		        option.innertText = res[i];
+		        standards.appendChild(option);
+		    }
+	    }
+	});
+}
+
+function enterKeyPressed(event) {
+   if (event.keyCode == 13 && event.key === "Enter") {
+		    event.preventDefault();
+		    document.getElementById("bensearch").click();
+   }
+}
+
+function ShowLeaveModel(){
+	var prevResponseArray = prevMaximumArray();
+	var currResponseArray = currMaximumArray();
+	if(_.isEqual(currResponseArray, prevResponseArray)){
+		$("#editVisitLimitModal").modal('hide');
+	}else{
+		$("#exampleModal").modal('show');
+	}
+}
+
+function closeUpdateModel(){
+	$("#exampleModal").modal('hide');
+	$("#editVisitLimitModal").modal('hide');
+}
+
+var globalMaxID;
+function getMaxID(maxID){
+	globalMaxID = maxID;
+}
+
+function prevMaximumArray() {
+    var prevResponseObj = {};
+    var editMaxId = document.getElementById("editMaximum_" + globalMaxID);
+    if (editMaxId) {
+        var prevArray = document.getElementById("editMaximum_" + globalMaxID).getAttribute('data-value');
+        const myArray = prevArray.split("^");
+        prevResponseObj['benCatName'] = myArray[0];
+        prevResponseObj['appliesTo'] = myArray[1];
+        prevResponseObj['crossApplies'] = myArray[2];
+        prevResponseObj['maxType'] = myArray[3];
+        prevResponseObj['maxValue'] = myArray[4];
+        prevResponseObj['freqType'] = myArray[5];
+        prevResponseObj['freqValue'] = myArray[6];
+        prevResponseObj['subCategory'] = myArray[8] || "";
+        prevResponseObj['visible'] = myArray[9];
+        prevResponseArray = JSON.stringify(prevResponseObj);
+        return prevResponseArray;
+    }
+}
+
+function currMaximumArray(){
+	 var currResponseObj = {};
+	 currResponseObj['benCatName'] = document.getElementById("visitlimit_bencat_Type").value;
+     currResponseObj['subCategory'] = document.getElementById("visitlimit_subcategory").value || "";
+     currResponseObj['appliesTo'] = document.getElementById("visitlimit_limitApplies").value;
+     currResponseObj['crossApplies'] = document.getElementById("visitlimit_limitCrossApplies").value;
+     currResponseObj['maxType'] = document.getElementById("visitlimit_1_limitType").value;
+     currResponseObj['maxValue'] = document.getElementById("visitlimit_1_limitValue").value;
+     currResponseObj['freqType'] = document.getElementById("visitlimit_1_limitFreqType").value;
+     currResponseObj['freqValue'] = document.getElementById("visitlimit_1_limitFreq").value;
+     currResponseObj['visible'] = document.getElementById("visitlimit_visible").value;
+	 currResponseArray = JSON.stringify(currResponseObj);
+	 return currResponseArray;
+}
+
+function validateLimitValue(field) {
+    if(validateNumeric(field)) {
+        field.value='';
+        return false;
+    }
+    if(parseInt(field.value) < 1 || parseInt(field.value) > 999999) {
+        field.value='';
+        return false;
+    }
+    if(parseInt(field.value) >= 1 || parseInt(field.value) <= 999999){
+    	field.value = parseInt(field.value).toLocaleString('en-US');
+    }
+
+}
+
+
+
+function validateNumeric(number) {
+	if (number.value != "") {
+		if (number.value.includes('$')) {
+			number.value = number.value.replace('$', '');
+		}
+		if (number.value.includes(',')) {
+			
+			number.value = number.value.replace(',', '');
+		}
+		//var numbers = /^[+]?[0-9]+$/;
+		
+		var numbers = /^[0-9]\d*(\.\d+)?$/;
+		if (!number.value.match(numbers)) {
+			number.value = '';
+			return true;
+		}
+	}
+}
+
+function resetIfInvalid(el){
+	   if (el.value == "") {
+	       return;
+	   }
+       if (!el.list || !el.list.options) {
+           el.value = "";
+           return;
+       }
+	   var options = el.list.options;
+	   for (var i = 0; i< options.length; i++) {
+	       if (el.value == options[i].value) {
+	           return;
+	       }    
+	   }
+	   el.value = "";
+	}
+
+function getCloneIfpDropdowns(){
+	var standards = document.getElementById("clonestandards");
+	var cocSeries = $('#cloneCoc').val();
+	if(cocSeries !== "") {
+	    showAndHide();
+        $("#cloneStandard").val("");
+	    	   $.ajax({
+	    		   type: "POST",
+	               contentType: "application/json",
+	               url: "getIfpDropdowns",
+	               data: cocSeries,
+	               dataType: 'json',
+	    		    
+	    		    success: function(res) {		
+	    				removeOptions(standards);	
+	    				
+	    				for (var i = 0; i < res.length; i++) {
+	    			        var option = document.createElement("option");
+	    			        option.value = res[i];
+	    			        option.innertText = res[i];
+	    			        standards.appendChild(option);
+	    			    }
+	    			    showAndHide();
+	    		    }
+	    		});   
+    }
+}
+
+function maximumBulkCascade(){
+    showAndHide();
+    var request = {};
+     request['cocSeries'] = $("#cocSeries").val();
+     request['state'] = $("#state").val();
+     request['standard'] = $("#standard").val();
+     $.ajax({
+            type: "POST",
+            contentType: "application/json",
+            url: "maximumBulkCascade",
+            data: JSON.stringify(request),
+            dataType: 'json',
+            success: function (res) {
+                if(res.batchID != null){
+                    document.getElementById("successResult").innerHTML = 'Maximum Cascade Batch created with Batch ID : '+res.batchID;
+                    $("#sucessBoxNewMaximumModal").modal("toggle");
+                }else{
+                    document.getElementById("errorMesssage").innerHTML = 'Batch creation Failed';
+                    $("#errorModal").modal("toggle");
+                }
+                showAndHide();
+            },
+            error: function (xhr) {
+                console.log("error",xhr);
+                alert("Something went wrong while saving plans, please try again..!");
+            }
+     });
+}
+
+function openChildMaximumModal(parentMaxId, benefitCategory, cocSeries, state, standard) {
+    console.log("openChildMaximumModal - Parent:", parentMaxId, "BenCat:", benefitCategory, "COC:", cocSeries, "State:", state, "Standard:", standard);
+
+    $("#isChildMaximum").val("true");
+
+    $("#parent_coc").val(cocSeries);
+    $("#parent_state").val(state);
+    $("#parent_productFamily").val(standard);
+    $("#visitlimit_bencat_Type").val(benefitCategory);
+    $("#parent_coc").prop('readonly', true).on('focus', function() { $(this).blur(); });
+    $("#parent_state").prop('readonly', true).on('focus', function() { $(this).blur(); });
+    $("#parent_productFamily").prop('readonly', true).on('focus', function() { $(this).blur(); });
+    $("#visitlimit_bencat_Type").prop('disabled', true);
+    $("#visitlimit_subcategory").prop('readonly', true).on('focus', function() { $(this).blur(); });
+
+    $("#maxId").val("");
+    $("#visitlimit_subcategory").val("");
+    $("#visitlimit_1_limitType").val("");
+    $("#visitlimit_1_limitValue").val("");
+    $("#visitlimit_1_limitFreq").val("");
+    $("#visitlimit_1_limitFreqType").val("");
+    $("#visitlimit_visible").val("");
+    $("#visitlimit_limitCrossApplies").val("");
+    $("#visitlimit_limitApplies").val("");
+}
+
+  function startClone() {
+    const from = {
+      cocSeries: (document.getElementById("fromCocSeries")?.value || '').trim() || null,
+      state: (document.getElementById("fromState")?.value || '').trim() || null,
+      standard: (document.getElementById("fromStandard")?.value || '').trim() || null,
+    };
+    const to = {
+      cocSeries: (document.getElementById("toCocSeries")?.value || '').trim() || null,
+      state: (document.getElementById("toState")?.value || '').trim() || null,
+      standard: (document.getElementById("toStandard")?.value || '').trim() || null,
+    };
+
+    const hasFrom = !!(from.cocSeries || from.state || from.standard);
+    const hasTo   = !!(to.cocSeries   || to.state   || to.standard);
+
+    if (!hasFrom) {
+      setError('Please provide at least one "From" filter (COC, State or Product Family).', "#ErrorModal", "ErrorMesssage");
+      return;
+    }
+    if (!hasTo) {
+      setError('Please provide at least one "To" value (COC, State or Product Family).', "#ErrorModal", "ErrorMesssage");
+      return;
+    }
+
+    fetchFromRowsByFilters({ from, to });
+  }
+
+  function fetchFromRowsByFilters(payload) {
+    showAndHide();
+    $.ajax({
+      type: "POST",
+      contentType: "application/json",
+      url: "findByFilters",
+      data: JSON.stringify({
+        coc: payload.from.cocSeries,
+        stateName: payload.from.state,
+        standard: payload.from.standard
+      }),
+      dataType: 'json',
+      success: function (rows) {
+        if (!rows || rows.length === 0) {
+          showAndHide();
+          setError('No records found for the selected "From" filter.', "#ErrorModal", "ErrorMesssage");
+          return;
+        }
+
+        const cloneList = [];
+        let rowCounter = 1;
+
+        rows.forEach(function (r) {
+          const rowCoc = r?.cocSeries ?? r?.coc ?? null;
+          const rowState = r?.state ?? r?.stateName ?? null;
+          const rowStandard = r?.standard ?? r?.productFamily ?? null;
+
+          const p = {
+            cloneCoc: (payload.to.cocSeries ?? rowCoc) ?? null,
+            cloneState: (payload.to.state ?? rowState) ?? null,
+            cloneStandard: (payload.to.standard ?? rowStandard) ?? null,
+
+            cloneBenefitCategoryName: r?.benCatName || '',
+            cloneAppliesTo: r?.appliesTo || '',
+            cloneCrossApplies: r?.crossApplies || '',
+            cloneMaxType: r?.maxType || '',
+            cloneMaxValue: r?.maxValue || '',
+            cloneFreqType: r?.freqType || '',
+            cloneFreqValue: r?.freqValue || '',
+            cloneSubCategory: r?.subCategory || '',
+            cloneVisible: r?.visible ?? '',
+            row: rowCounter++,
+          };
+
+          if (p.cloneBenefitCategoryName) {
+            cloneList.push(p);
+          }
+        });
+
+        if (cloneList.length === 0) {
+          showAndHide()
+          setError('No benefit categories available under the selected "From" filter.', "#ErrorModal", "ErrorMesssage");
+          return;
+        }
+        $.ajax({
+          type: "POST",
+          contentType: "application/json",
+          url: "isBenCatExistForClone",
+          data: JSON.stringify({ cloneMaximumManagementRequestList: cloneList }),
+          dataType: 'json',
+          success: function (resCheck) {
+            if (resCheck != null) {
+              if (Number(resCheck.duplicateCount) === 0) {
+                $.ajax({
+                  type: "POST",
+                  contentType: "application/json",
+                  url: "cloneMaxManagement",
+                  data: JSON.stringify({ cloneMaximumManagementRequestList: cloneList }),
+                  dataType: 'json',
+                  success: function (resClone) {
+                    showAndHide();
+                    document.getElementById("successMessage").innerHTML =
+                      resClone?.saveSuccess || 'Clone completed successfully.';
+                    $("#success").toast("show");
+                    $("#maxCloneModal").modal("toggle");
+                  },
+                  error: function () {
+                    showAndHide();
+                    setError('Something went wrong while cloning, please try again..!', "#ErrorModal", "ErrorMesssage");
+                  }
+                });
+              } else {
+                showAndHide();
+                $("#maxCloneModal").modal('hide');
+                clearCloneModal();
+                setError('The combination that you entered already exists.', "#ErrorModal", "ErrorMesssage");
+              }
+            } else {
+              showAndHide();
+              $("#maxCloneModal").modal('hide');
+              setError('Something went wrong, please try again..!', "#ErrorModal", "ErrorMesssage");
+            }
+          },
+          error: function () {
+            showAndHide();
+            $("#maxCloneModal").modal('hide');
+            setError('Something went wrong while checking duplicates..!', "#ErrorModal", "ErrorMesssage");
+          }
+        });
+      },
+      error: function () {
+        showAndHide();
+        setError('Something went wrong while fetching data for the "From" filters.', "#ErrorModal", "ErrorMesssage");
+      }
+    });
+  }
+
+  function setError(message, modalSelector, idAttr) {
+    $("#maxCloneModal").modal('hide');
+    const el = document.getElementById(idAttr) ||
+               document.getElementById("ErrorMesssage") ||
+               document.getElementById("errorMesssage");
+    if (el) el.innerHTML = message;
+    if (modalSelector) $(modalSelector).modal("toggle");
+  }
+ function clearCloneModal() {
+    const idsToClear = [
+        "fromCocSeries", "fromState", "fromStandard",
+        "toCocSeries", "toState", "toStandard"
+    ];
+    idsToClear.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = "";
+    });
+    }
+
+    function openCopyParentChildModal(benCat, coc, state, productFamily) {
+      $('#fromBenefitCategory').val(benCat);
+      $('#fromCoc').val(coc);
+      $('#fromStateCopy').val(state);
+      $('#fromProductFamily').val(productFamily);
+      $('#toBenefitCategory').val(benCat);
+      $('#toCoc').val('');
+      $('#toStateCopy').val('');
+      $('#toProductFamily').val('');
+
+      $('#copyParentChildModal').modal('show');
+
+    $('#copyParentChildSubmit').off('click').on('click', function() {
+        var copyRequest = {
+            fromBenefitCategory: $('#fromBenefitCategory').val(),
+            fromCoc: $('#fromCoc').val(),
+            fromState: $('#fromStateCopy').val(),
+            fromProductFamily: $('#fromProductFamily').val(),
+            toBenefitCategory: $('#toBenefitCategory').val(),
+            toCoc: $('#toCoc').val(),
+            toState: $('#toStateCopy').val(),
+            toProductFamily: $('#toProductFamily').val()
+        };
+            console.log("Copy Request being sent:", copyRequest);
+
+        $.ajax({
+            url: 'copyParentAndChildren',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify([copyRequest]),
+            success: function(response) {
+                $('#copyParentChildModal').modal('hide');
+                document.getElementById("successMessage").innerHTML = 'Copy successful!';
+                $("#success").toast('show');
+                window.location.reload();
+            },
+            error: function(xhr) {
+                document.getElementById("errorMesssage").innerHTML = 'Copy failed: ' + (xhr.responseText || 'Unknown error');
+                $('#ErrorModal').modal('show');
+            }
+        });
+    });
+}
+
+$(document).ready(function() {
+    $('#editVisitLimitModal form').on('submit', function(e) {
+        e.preventDefault();
+        return false;
+    });
+
+    $('#ErrorModalCloseBtn, #ErrorClose').on('click', function(e) {
+        if (e) e.preventDefault();
+        $('#ErrorModal').modal('hide');
+        return false;
+    });
+
+    $('#ErrorModal, #cocCfrmBoxModal').on('show.bs.modal', function() {
+            if ($('#editVisitLimitModal').hasClass('show')) {
+                var $this = $(this);
+                $('#editVisitLimitModal').css('z-index', '1040');
+                $this.css('z-index', '1060');
+                setTimeout(function() {
+                    $('.modal-backdrop').last().css('z-index', '1055');
+                }, 0);
+            }
+        }).on('hidden.bs.modal', function() {
+            if ($('#editVisitLimitModal').hasClass('show')) {
+                $('#editVisitLimitModal').css('z-index', '');
+            }
+        });
+});
+function toggleSelectRow(index) {
+    const checkbox = document.getElementById(`selectRowChk_${index}`);
+    if (!checkbox) return;
+    const accordionItem = checkbox.closest('.accordion-item');
+    let benCatName = '', cocSeries = '', state = '', standard = '';
+
+    if (accordionItem) {
+        const strong = accordionItem.querySelector('strong');
+        if (strong) {
+            benCatName = strong.childNodes[0]?.textContent.replace(/\s*\(\d+\)$/, '').trim() || '';
+        }
+        const small = accordionItem.querySelector('small.text-muted');
+        if (small) {
+            // Expected format: " - cocSeries - state - standard"
+            const parts = small.textContent.split('-').map(s => s.trim());
+            cocSeries = parts[1] || '';
+            state = parts[2] || '';
+            standard = parts[3] || '';
+        }
+    }
+    const maxId = checkbox.value;
+    // Collect all checked checkboxes' cocSeries
+    const checkedBoxes = Array.from(document.querySelectorAll('input[name="selectedRows"]:checked'));
+    const cocSeriesSet = new Set();
+    checkedBoxes.forEach(cb => {
+        const accItem = cb.closest('.accordion-item');
+        if (accItem) {
+            const small = accItem.querySelector('small.text-muted');
+            if (small) {
+                const parts = small.textContent.split('-').map(s => s.trim());
+                if (parts[1]) cocSeriesSet.add(parts[1]);
+            }
+        }
+    });
+
+    if (cocSeriesSet.size > 1) {
+        document.getElementById("ErrorMesssage").innerHTML = "Selected records have different COC Series. Please select records with the same COC Series.";
+        $("#ErrorModal").modal("toggle");
+        checkbox.checked = false;
         return;
     }
-    if (noteText.length > NOTES_MAX_LEN) {
+    if (benCatName === '' || state === '' || standard === '' || cocSeries === '') {
+        document.getElementById("ErrorMesssage").innerHTML = "Required fields are missing. Please check Benefit category, state, standard and COC Series.";
+        $("#ErrorModal").modal("toggle");
+        checkbox.checked = false;
+        return;
+    }
+    // Enable bulk update button if role is correct and checkbox is checked or unchecked
+    const roleId = Number(document.getElementById('ifpRoleId').value);
+    document.getElementById('bulkUpdate').disabled = !(checkedBoxes.length > 0 && roleId === 8);
+
+    // Update Bulk Update count before request, based on checked checkboxes
+    const checkedCount = document.querySelectorAll('input[name="selectedRows"]:checked').length;
+    const countSpan = document.getElementById('bulkUpdateCount');
+    const selectedCountSpan = document.getElementById('selectedCount');
+    if (checkedCount > 0) {
+        countSpan.textContent = checkedCount;
+        countSpan.style.display = '';
+    } else {
+        countSpan.textContent = 0;
+        countSpan.style.display = 'none';
+    }
+    if (selectedCountSpan) {
+        if (checkedCount === 1) {
+            selectedCountSpan.textContent = '1 selected item';
+        } else if (checkedCount > 1) {
+            selectedCountSpan.textContent = checkedCount + ' selected items';
+        } else {
+            selectedCountSpan.textContent = '';
+        }
+    }
+
+    // Call API to get related maxIds
+    request = ({
+        maxId: maxId,
+        benCatName: benCatName,
+        state: state,
+        cocSeries: cocSeries,
+        standard: standard
+    })
+    if (checkbox.checked) {
+        $.ajax({
+            type: "POST",
+            contentType: "application/json",
+            url: "findRelatedMaxIds",
+            data: JSON.stringify(request),
+            dataType: 'json',
+            success: function (maxCollection) {
+                // Add the response to window.selectedBulkMax, accumulating if already present
+                if (!window.selectedBulkMax || !Array.isArray(window.selectedBulkMax)) {
+                    window.selectedBulkMax = [];
+                }
+                // Add new items, avoiding duplicates by maxId
+                maxCollection.forEach(function (item) {
+                    if (!window.selectedBulkMax.some(existing => existing.maxId === item.maxId)) {
+                        window.selectedBulkMax.push(item);
+                    }
+                });
+            },
+            error: function (xhr) {
+                console.log("error", xhr);
+                alert("Something went wrong while saving plans, please try again..!");
+            }
+        });
+    } else {
+        // If unchecked, remove related maxIds from window.selectedBulkMax and update bulkUpdate button
+        const maxId = checkbox.value;
+        if (window.selectedBulkMax && Array.isArray(window.selectedBulkMax)) {
+            // Remove all related maxIds returned by the API from selectedBulkMax
+            $.ajax({
+                type: "POST",
+                contentType: "application/json",
+                url: "findRelatedMaxIds",
+                data: JSON.stringify(request),
+                dataType: 'json',
+                success: function (maxCollection) {
+                    const idsToRemove = maxCollection.map(item => item.maxId);
+                    window.selectedBulkMax = window.selectedBulkMax.filter(item => !idsToRemove.includes(item.maxId));
+                },
+                error: function (xhr) {
+                    console.log("error", xhr);
+                    alert("Something went wrong while saving plans, please try again..!");
+                }
+            });
+        }
+    }
+}
+function clearBulkUpdate() {
+    for (let i = 1; i <= 4; i++) {
+        // Reset the select to default
+        const select = document.getElementById(`bulkField_${i}`);
+        if (select) select.value = "";
+
+        // Reset the value input
+        const container = document.getElementById(`bulkValueInput_${i}`);
+        if (container) {
+            container.innerHTML = `<input class="form-control" type="text" disabled>`;
+        }
+    }
+    document.getElementById('applyBulkUpdate').disabled = true;
+}
+
+function createDropdownFromArray(options) {
+    return `
+           <select class="form-control" onclick="validateApplyButton()">
+           <option value="">Select...</option>
+           ${options.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
+           </select>
+          `;
+}
+
+function handleBulkFieldChange(select, inputContainerId) {
+    const field = select.value;
+    const container = document.getElementById(inputContainerId);
+    let inputHtml = '';
+    switch (field) {
+        case 'Visible':
+            inputHtml = createDropdownFromArray(BULK_OPTIONS.visible);
+            break;
+        case 'Cross Applies':
+            inputHtml = createDropdownFromArray(BULK_OPTIONS.crossApplies);
+            break;
+        case 'Max Type':
+            inputHtml = createDropdownFromArray(BULK_OPTIONS.maxTypes);
+            break;
+        case 'Freq Type':
+            inputHtml = createDropdownFromArray(BULK_OPTIONS.freqTypes);
+            break;
+        case 'Max Value':
+            inputHtml = `<input class="form-control" type="number" min="1" max="999999" oninput="validity.valid||(value='');validateApplyButton();">`;
+            break;
+        case 'Freq Value':
+            inputHtml = `<input class="form-control" type="number" min="1" max="9999" oninput="validity.valid||(value='');validateApplyButton();">`;
+            break;
+        default:
+            inputHtml = `<input class="form-control" type="text" disabled>`;
+    }
+    container.innerHTML = inputHtml;
+    validateApplyButton();
+}
+
+function validateApplyButton() {
+    let isValid = false;
+    for (let i = 1; i <= 4; i++) {
+        const field = document.getElementById(`bulkField_${i}`)?.value;
+        const valueInput = document
+            .getElementById(`bulkValueInput_${i}`)
+            ?.querySelector('input, select');
+        if (field && valueInput && valueInput.value) {
+            isValid = true;
+            break;
+        }
+    }
+    document.getElementById("applyBulkUpdate").disabled = !isValid;
+}
+
+function applyBulkUpdate() {
+    // Use the related maxIds list if available, else fallback to checked checkboxes
+    const selectedMax = window.selectedBulkMax ||
+        Array.from(document.querySelectorAll('input[name="selectedRows"]:checked')).map(cb => cb.value);
+    const updates = [];
+    for (let i = 1; i <= 4; i++) {
+        const field = document.getElementById(`bulkField_${i}`)?.value;
+        const valueInput = document
+            .getElementById(`bulkValueInput_${i}`)
+            ?.querySelector('input, select');
+        if (field && valueInput && valueInput.value) {
+            updates.push({
+                field: field,
+                value: valueInput.value
+            });
+        }
+    }
+    if (updates.length === 0) return;
+    const request = {
+        maxCollection: selectedMax,
+        updates: updates
+    };
+    if (request.maxCollection && request.maxCollection.length > 0) {
+        $.ajax({
+            type: "POST",
+            contentType: "application/json",
+            url: "bulkUpdateMaximum",
+            data: JSON.stringify(request),
+            dataType: 'json',
+            success: function (res) {
+                if (res.message != null) {
+                    document.getElementById("successResult").innerHTML = res.message;
+                    $("#sucessBoxNewMaximumModal").modal("show");
+                }
+            },
+            error: function (xhr) {
+                console.log("error", xhr);
+                alert("Something went wrong while saving plans, please try again..!");
+            }
+        });
+    }
+}
+var NOTES_MAX_LEN = 2000;
+
+function openNotesModal(benCatName, cocSeries, state, standard) {
+    $("#notesBenCatName").val(benCatName || "");
+    $("#notesCocSeries").val(cocSeries || "");
+    $("#notesState").val(state || "");
+    $("#notesStandard").val(standard || "");
+
+    $("#notesText").val("");
+    $("#notesCount").text("0");
+    $("#notesError").hide();
+    $("#notesText").removeClass("is-invalid");
+    $("#saveNotesBtn").prop("disabled", true);
+
+    $("#notesModal").modal("show");
+}
+
+function notesInputChange() {
+    var text = $("#notesText").val() || "";
+    var len = text.length;
+    $("#notesCount").text(len);
+    if (len > NOTES_MAX_LEN) {
         $("#notesError").show().text("Text exceeds maximum length");
         $("#notesText").addClass("is-invalid");
         $("#saveNotesBtn").prop("disabled", true);
         return;
     }
-    var payload = {
-        benCatName: $("#notesBenCatName").val(),
-        cocSeries: $("#notesCocSeries").val(),
-        state: $("#notesState").val(),
-        standard: $("#notesStandard").val(),
-        noteDescription: trimmed
-    };
 
-    console.log("Saving Notes payload:", payload);
-    $.ajax({
-        type: "POST",
-        contentType: "application/json",
-        url: "maxManagement/save-notes",
-        data: JSON.stringify(payload),
-        dataType: "json",
-        success: function (res) {
-            $("#notesModal").modal("hide");
-        },
-        error: function (xhr) {
-            console.log("error", xhr);
-        }
-    });
+    $("#notesError").hide();
+    $("#notesText").removeClass("is-invalid");
+    $("#saveNotesBtn").prop("disabled", text.trim().length === 0);
 }
 
-suggest fixes so that i can handle all state error and success effectively from frontend and backend but not a lot of change 
+function saveNotes() {
+   var noteText = ($("#notesText").val() || "").trim();
+   if (!noteText) {
+       $("#saveNotesBtn").prop("disabled", true);
+       return;
+   }
+   if (noteText.length > NOTES_MAX_LEN) {
+       $("#notesError").show().text("Text exceeds maximum length");
+       $("#notesText").addClass("is-invalid");
+       $("#saveNotesBtn").prop("disabled", true);
+       return;
+   }
+   var payload = {
+       benCatName: $("#notesBenCatName").val(),
+       cocSeries: $("#notesCocSeries").val(),
+       state: $("#notesState").val(),
+       standard: $("#notesStandard").val(),
+       noteDescription: noteText
+   };
+   $.ajax({
+       type: "POST",
+       contentType: "application/json",
+       url: "maxManagement/save-notes",
+       data: JSON.stringify(payload),
+       dataType: "json",
+       success: function (res) {
+           if (res.success) {
+               $("#notesModal").modal("hide");
+               document.getElementById("successResult").innerHTML = 'Note added successfully.';
+               $("#sucessBoxNewMaximumModal").modal("toggle");
+           } else {
+               $("#notesModal").modal("hide");
+               document.getElementById("ErrorMesssage").innerHTML = 'Failed to save note';
+               $("#ErrorModal").modal("toggle");
+           }
+       },
+       error: function (xhr) {
+           $("#notesModal").modal("hide");
+           let msg = "Something went wrong";
+           if (xhr.status === 400) {
+               msg = xhr.responseJSON?.message || "Invalid input";
+           } else if (xhr.status === 401) {
+               msg = "Session expired. Please login again.";
+           } else if (xhr.status === 500) {
+               msg = "Server error. Try again later.";
+           }
+           document.getElementById("ErrorMesssage").innerHTML = msg;
+           $("#ErrorModal").modal("toggle");
+       }
+   });
+}
+
+<%@ page import="com.optum.ideate.mongodb.domain.BenefitCategory" %>
+    <%@ page import="java.util.List" %>
+        <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+            <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+                <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+                    <!doctype html>
+                    <html>
+
+                    <head>
+                        <meta charset="utf-8">
+                        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+                        <script src="https://code.jquery.com/jquery-3.5.1.js"
+                            integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc="
+                            crossorigin="anonymous"></script>
+                        <link rel="stylesheet" href="css/UHCcustom.css">
+                        <link rel="stylesheet" href="css/home.css">
+                        <link rel="stylesheet" href="css/bootstrap.css">
+                        <link rel="stylesheet" href="css/all.css">
+                        <link rel="stylesheet" href="css/loader.css">
+
+                        <script src="js/popper-1.14.3.min.js"></script>
+                        <script src="js/datatables-1.11.5.min.js"></script>
+                        <script src="js/datatables-1.11.4.bootstrap4.min.js"></script>
+                        <script src="js/lodash-4.17.10.min.js"></script>
+                        <script src="js/UHCcustom.js"></script>
+                        <script src="js/bootstrap.min.js"></script>
+                        <script src="js/bootstrap-popup.min.js"></script>
+                        <script src="js/loader.js"></script>
+                        <script src="js/jquery-3.5.1.js"></script>
+                        <link rel="stylesheet" href="css/multislect-dropdown.css">
+                        <script type="text/javascript" src="js/bootstrap-multiselect.js"></script>
+                        <link rel="stylesheet" href="css/bootstrap-multiselect.css">
+                        <script src="js/app/maximum-management.js"></script>
+
+                        <title>Plan Library</title>
+                        <link rel="icon" href="assets/PlanBuilderFavIcon.png">
+                                                <style>
+                            .table-striped tbody tr.highlight td {
+                                background-color: #ff0000;
+                            }
+
+                            .table-striped tbody tr.highlight {
+                                background-color: #ff0000;
+                            }
+
+                            .accordion-body .d-flex button {
+                                flex: 1;
+                            }
+
+                            .accordion-header .form-check-input {
+                                width: 16px;
+                                height: 16px;
+                                margin-left: 10px;
+                                margin-right: 8px;
+                                background-color: initial;
+                                appearance: auto;
+                                box-sizing: border-box;
+                                padding: initial;
+                                border: 2px solid #6c757d;
+                                box-shadow: none;
+                            }
+
+                            .accordion-button:not(.collapsed) .selectable-accordion strong,
+                            .accordion-button:not(.collapsed) .selectable-accordion small {
+                                color: var(--bs-primary) !important;
+                            }
+
+                            .uhc-pager {
+                                display: flex;
+                                justify-content: center;
+                                align-items: center;
+                                user-select: none;
+                            }
+
+                            .uhc-pager-list {
+                                display: inline-flex;
+                                gap: 0;
+                                padding: 0;
+                                margin: 0;
+                                list-style: none;
+                                border: 1px solid #dcdcdc;
+                                border-radius: 6px;
+                                overflow: hidden;
+                                background-color: #fff;
+                            }
+
+                            .uhc-pager-list>li {
+                                display: inline-flex;
+                            }
+
+                            .uhc-pager-btn {
+                                appearance: none;
+                                border: none;
+                                border-right: 1px solid #e6e6e6;
+                                background: #fff;
+                                color: #0d4a8b;
+                                padding: 10px 16px;
+                                font-size: 15px;
+                                line-height: 1;
+                                cursor: pointer;
+                                min-width: 44px;
+                                font-weight: 500;
+                            }
+
+                            .uhc-pager-list>li:last-child .uhc-pager-btn {
+                                border-right: none;
+                            }
+
+                            .uhc-pager-btn:not(.is-active):not(:disabled):hover {
+                                background-color: #f7f9fc;
+                                color: #0a2e66;
+                            }
+
+                            .uhc-pager-btn.is-active {
+                                background-color: #0a2e66;
+                                color: #ffffff;
+                                font-weight: 700;
+                            }
+
+                            .uhc-pager-btn:disabled {
+                                color: #9aa0a6;
+                                cursor: not-allowed;
+                                background-color: #fff;
+                            }
+
+                            #pagerNumbers {
+                                display: contents;
+                            }
+
+                            #pagerNumbers>li .uhc-pager-btn {
+                                border-right: 1px solid #e6e6e6;
+                            }
+
+                            @media (max-width: 768px) {
+                                .uhc-pager-list {
+                                    flex-wrap: wrap;
+                                }
+                            }
+                        </style>
+
+                        <link href="js/frappe-datatable.min.css" rel="stylesheet">
+                        <link rel="stylesheet" href="css/fontawesome.min.css">
+                        <link rel="stylesheet" href="css/brands.min.css">
+                        <link rel="stylesheet" href="css/solid.min.css">
+                    </head>
+
+                    <body>
+                        <div id="main">
+                            <%@include file="loader.jsp" %>
+                                <%@include file="header.jsp" %>
+                                    <div class="text-primary" style="margin: 2em;">
+                                        <h1><i class="fa-solid fa-filter-circle-dollar"></i> Maximum Management</h1>
+                                    </div>
+                                    <div class="shadow-lg p-3 mb-5 bg-white rounded" style="margin:2em">
+                                        <form action="./maxManagementSearch" id="bcfilters" method="post"
+                                            autocomplete="off">
+                                            <input type="hidden" id="ifpRoleId"
+                                                value="${pageContext.session.getAttribute('ifpRoleId')}" />
+                                            <input type="hidden" name="validateCoc" id="validateCoc" value="" />
+                                            <div class="row">
+                                                <c:if test="${enabledCascade == 'true'}">
+                                                    <span class="modal-title text-danger">
+                                                        <b>Warning: </b> There are benefit limit changes that have not
+                                                        been cascaded to applicable plans. If you do not cascade these
+                                                        updates, the applicable plans will not receive the changes. If
+                                                        you leave this page the updates will be saved but not cascaded.
+                                                    </span>
+                                                </c:if>
+                                            </div>
+                                            </br>
+                                            <div class="row">
+                                                <div class="col">
+                                                    <div class="form-floating">
+                                                        <select id="cocSeries" name="coc" class="form-control"
+                                                            multiple="multiple"
+                                                            onchange="return validateSearch(true),onCocChange();">
+                                                            <c:forEach var="coc" items="${maximumDD.cocSeriesMap}">
+                                                                <c:set var="isSelected" value="false" />
+                                                                <c:forEach var="selectedCoc"
+                                                                    items="${fn:split(fn:escapeXml(maxManagementSearchRequest.coc != null ? maxManagementSearchRequest.coc : ''), ',')}">
+                                                                    <c:if test="${fn:trim(selectedCoc) eq coc.key}">
+                                                                        <c:set var="isSelected" value="true" />
+                                                                    </c:if>
+                                                                </c:forEach>
+                                                                <option id="${coc.key}" value="${coc.key}" <c:if
+                                                                    test="${isSelected}">selected</c:if>>${coc.value}
+                                                                </option>
+                                                            </c:forEach>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col">
+                                                    <div class="form-floating">
+                                                        <select id="state" name="stateName" class="form-control"
+                                                            multiple="multiple" onchange="return validateSearch(true);">
+                                                            <c:forEach var="state" items="${maximumDD.stateMap}">
+                                                                <c:set var="isSelected" value="false" />
+                                                                <c:forEach var="selectedState"
+                                                                    items="${fn:split(fn:escapeXml(maxManagementSearchRequest.stateName != null ? maxManagementSearchRequest.stateName : ''), ',')}">
+                                                                    <c:if test="${fn:trim(selectedState) eq state.key}">
+                                                                        <c:set var="isSelected" value="true" />
+                                                                    </c:if>
+                                                                </c:forEach>
+                                                                <option id="${state.key}" value="${state.key}" <c:if
+                                                                    test="${isSelected}">selected</c:if>>${state.value}
+                                                                </option>
+                                                            </c:forEach>
+                                                        </select>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col">
+                                                    <div class="form-floating">
+                                                        <select id="standard" name="standard" class="form-control"
+                                                            multiple="multiple" onchange="return validateSearch(true);">
+                                                            <c:forEach var="stand" items="${maximumDD.standardMap}">
+                                                                <c:set var="isSelected" value="false" />
+                                                                <c:forEach var="selectedStand"
+                                                                    items="${fn:split(fn:escapeXml(maxManagementSearchRequest.standard != null ? maxManagementSearchRequest.standard : ''), ',')}">
+                                                                    <c:if test="${fn:trim(selectedStand) eq stand.key}">
+                                                                        <c:set var="isSelected" value="true" />
+                                                                    </c:if>
+                                                                </c:forEach>
+                                                                <option id="${stand.key}" value="${stand.key}" <c:if
+                                                                    test="${isSelected}">selected</c:if>>${stand.value}
+                                                                </option>
+                                                            </c:forEach>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+
+                                            <div class="d-flex gap-2 w-100 mb-3 mt-3">
+
+                                                <button type="button" class="btn btn-outline-warning btn-sm flex-fill"
+                                                    title="Change Tracking" ${
+                                                    (pageContext.session.getAttribute('ifpRoleId')==8 ||
+                                                    pageContext.session.getAttribute('ifpRoleId')==9) ? "" : "disabled"
+                                                    } onclick="window.open('./maxMgmtChangeSearch', '_blank');">
+                                                    <i class="fas fa-exchange-alt"></i> Change Tracking
+                                                </button>
+                                                <button type="button" class="btn btn-outline-success btn-sm flex-fill" title="Export" onclick="exportMaximumManagement();">
+                                                    <i class="fas fa-file-export"></i> Export
+                                                </button>
+                                                <button type="button" class="btn btn-outline-primary btn-sm flex-fill"
+                                                        data-bs-toggle="modal" id="clone"
+                                                        ${pageContext.session.getAttribute('ifpRoleId')==8 ? "" : "disabled"}
+                                                        data-bs-target="#maxCloneModal">
+                                                    <i class="fas fa-clone"></i>
+                                                    Clone Year/State/Product
+                                                </button>
+                                                <button type="button" class="btn btn-outline-primary btn-sm flex-fill"
+                                                    ${pageContext.session.getAttribute('ifpRoleId')==10 ? "disabled" :
+                                                    (pageContext.session.getAttribute('ifpRoleId')==8 ||
+                                                    pageContext.session.getAttribute('ifpRoleId')==9 ||
+                                                    pageContext.session.getAttribute('roleId')==4 ?"":"disabled")}
+                                                    id="newMaximum" data-bs-toggle="modal"
+                                                    data-bs-target="#editVisitLimitModal">
+                                                    <i class="fas fa-plus" style="font-size: 20px;"></i>
+                                                    New Parent Maximum
+                                                </button>
+                                                <button type="button" class="btn btn-outline-primary btn-sm flex-fill"
+                                                    id="bulkUpdate" data-bs-toggle="modal"
+                                                    data-bs-target="#bulkUpdateModal" onclick="clearBulkUpdate()" disabled>
+                                                    <i class="fas fa-clone"></i>
+                                                    Bulk Update
+                                                    <span id="bulkUpdateCount" class="ms-1 rounded border px-1 text-xs" style="display:none; background-color:#002677; color:#fff;">0</span>
+                                                </button>
+                                                <button type="button" class="btn btn-outline-warning btn-sm flex-fill"
+                                                    id="clearMaxManagement"
+                                                    ${pageContext.session.getAttribute('ifpRoleId')==10 ? "disabled" :
+                                                    ((pageContext.session.getAttribute('roleId')!=7 &&
+                                                    maxManagementSearchResponse.size()> 0)
+                                                    ?"":"disabled")}
+                                                    onclick="clearSearch();">
+                                                    <i class="fas fa-eraser"></i>
+                                                    Clear
+                                                </button>
+
+                                                <button type="submit" class="btn btn-outline-primary btn-sm flex-fill"
+                                                    id="bensearch" ${ pageContext.session.getAttribute('roleId')!=7 &&
+                                                    maxManagementSearchResponse.size()==0 ? "disabled" :""}
+                                                    onclick="submitSearchForm();">
+                                                    <i class="fas fa-search"></i> Search
+                                                </button>
+                                            </div>
+
+                                        </form>
+                                        <script type="text/javascript">
+                                            showAndHide();
+                                            (function () {
+                                                setMultiSelectDropDown('#cocSeries', 'COC Series*');
+                                                setMultiSelectDropDown('#state', 'State*');
+                                                setMultiSelectDropDown('#standard', 'Product Family*');
+                                            })();
+                                        </script>
+
+                                        <script type="text/javascript">
+                                        var maxManagementSearchResponseVar = ${allMaxData};
+                                        </script>
+                                        <div>
+                                            <div class="accordion w-100" id="maxAccordion" style="display: none;">
+                                                <c:forEach var="groupEntry" items="${maxManagementSearchResponse}"
+                                                    varStatus="groupLoop">
+                                                    <c:set var="groupKey" value="${groupEntry.key}" />
+                                                    <c:set var="groupItems" value="${groupEntry.value}" />
+                                                    <c:set var="firstItem" value="${groupItems[0]}" />
+                                                    <c:set var="subCount" value="${groupItems.size()}" />
+                                                    <div class="accordion-item w-100 bt-1 acc-item"
+                                                        data-acc-idx="${groupLoop.index}">
+                                                        <h2 class="accordion-header" id="heading${groupLoop.index}">
+                                                            <div class="d-flex align-items-center w-100">
+                                                                <input type="checkbox" class="form-check-input me-2"
+                                                                    id="selectRowChk_${groupLoop.index}"
+                                                                    name="selectedRows" value="${firstItem.maxId}"
+                                                                    onclick="toggleSelectRow(${groupLoop.index});">
+                                                                <div class="accordion-button collapsed" type="button"
+                                                                    data-bs-toggle="collapse"
+                                                                    data-bs-target="#collapse${groupLoop.index}"
+                                                                    aria-expanded="false"
+                                                                    aria-controls="collapse${groupLoop.index}">
+                                                                    <div class="d-flex w-100 justify-content-between align-items-center selectable-accordion m-2"
+                                                                        id="accordionRow_${groupLoop.index}">
+                                                                        <div class="d-flex align-items-center gap-2">
+                                                                            <strong>${firstItem.benCatName}
+                                                                                (${subCount})</strong>
+                                                                            <small class="text-muted"> -
+                                                                                ${firstItem.cocSeries} -
+
+                                                                                ${firstItem.state} -
+                                                                                ${firstItem.standard}</small>
+                                                                        </div>
+                                                                        <div></div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="ms-auto m-2">
+                                                                    <button type="button"
+                                                                            class="btn btn-outline-primary btn-sm d-flex align-items-center gap-1"
+                                                                            title="Notes"
+                                                                            onclick="openNotesModal('${firstItem.benCatName}', '${firstItem.cocSeries}', '${firstItem.state}', '${firstItem.standard}'); event.stopPropagation();">
+                                                                        <i class="fas fa-pencil-alt"></i>
+                                                                        <span>Notes</span>
+                                                                    </button>
+                                                                    </div>
+                                                            </div>
+                                                        </h2>
+                                                        <div id="collapse${groupLoop.index}"
+                                                            class="accordion-collapse collapse"
+                                                            aria-labelledby="heading${groupLoop.index}">
+                                                            <div class="accordion-body">
+                                                                <div class="d-flex gap-2 mb-2">
+                                                                    <button class="btn btn-outline-danger btn-sm"
+                                                                        title="Delete Parent"
+                                                                        ${pageContext.session.getAttribute('ifpRoleId')==10
+                                                                        ? "disabled" : "" }
+                                                                        onclick="deleteParentMaximum('${firstItem.benCatName}', '${firstItem.cocSeries}', '${firstItem.state}', '${firstItem.standard}')">
+                                                                        <i class="fas fa-trash"></i> Delete Parent
+
+                                                                    <button class="btn btn-outline-primary btn-sm" title="Copy Parent & Children"
+                                                                        onclick="openCopyParentChildModal('${firstItem.benCatName}', '${firstItem.cocSeries}', '${firstItem.state}', '${firstItem.standard}')">
+                                                                        <i class="fas fa-copy"></i> Copy Parent &amp; Children
+                                                                    </button>
+
+                                                                   <button class="btn btn-outline-success btn-sm"
+                                                                        title="Add Child Maximum"
+                                                                        id="addChildMaximum_${groupLoop.index}"
+                                                                        data-bs-toggle="modal"
+                                                                        data-bs-target="#editVisitLimitModal"
+                                                                        ${pageContext.session.getAttribute('ifpRoleId')==10
+                                                                        ? "disabled" :
+                                                                        (pageContext.session.getAttribute('ifpRoleId')==8
+                                                                        ||
+                                                                        pageContext.session.getAttribute('ifpRoleId')==9
+                                                                        || pageContext.session.getAttribute('roleId')==4
+                                                                        ?"":"disabled")}
+                                                                        onclick="openChildMaximumModal('${firstItem.maxId}', '${firstItem.benCatName}', '${firstItem.cocSeries}', '${firstItem.state}', '${firstItem.standard}');">
+                                                                        <i class="far fa-plus"
+                                                                            style="font-size: 20px;"></i> Add Child
+                                                                        Maximum
+                                                                    </button>
+                                                                </div>
+                                                                <input type="hidden" name="benefitCategoryName"
+                                                                    id="benefitCategoryName_${groupLoop.index}"
+                                                                    value="${firstItem.benCatName}">
+                                                                <input type="hidden" name="row_${groupLoop.index}"
+                                                                    id="row_${groupLoop.index}" value="0">
+                                                                <input type="hidden" name="rescoc"
+                                                                    id="rescoc_${groupLoop.index}"
+                                                                    value="${firstItem.cocSeries}">
+                                                                <input type="hidden" name="resstateName"
+                                                                    id="resstateName_${groupLoop.index}"
+                                                                    value="${firstItem.state}">
+                                                                <input type="hidden" name="resstandard"
+                                                                    id="resstandard_${groupLoop.index}"
+                                                                    value="${firstItem.standard}">
+                                                                <div class="table-responsive">
+                                                                    <table class="table table-hover table-striped mb-0"
+                                                                        id="newmaxtbl">
+                                                                        <thead>
+                                                                            <tr>
+                                                                                <th scope="col">Sub Category</th>
+                                                                                <th scope="col">Visible</th>
+                                                                                <th scope="col">Applies To</th>
+                                                                                <th scope="col">Cross Applies</th>
+                                                                                <th scope="col">Max Type</th>
+                                                                                <th scope="col">Max Value</th>
+                                                                                <th scope="col">Freq. Type</th>
+                                                                                <th scope="col">Freq. Value</th>
+                                                                                <th scope="col">Action</th>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            <c:forEach var="maximumData"
+                                                                                items="${groupItems}"
+                                                                                varStatus="itemLoop">
+                                                                                <c:set var="loop"
+                                                                                    value="${groupLoop.index}_${itemLoop.index}" />
+                                                                                <tr>
+                                                                                    <td>
+
+                                                                                        ${maximumData.subCategory}
+                                                                                        <input type="hidden"
+                                                                                            name="subCategoryName_${loop}"
+                                                                                            id="subCategoryName_${loop}"
+                                                                                            value="${maximumData.subCategory}" />
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        <c:choose>
+                                                                                            <c:when
+                                                                                                test="${maximumData.visible == 'Yes'}">
+                                                                                                <i class="fas fa-check-circle text-success"
+                                                                                                    title="Visible"></i>
+                                                                                            </c:when>
+                                                                                            <c:when
+                                                                                                test="${not empty maximumData.visible && maximumData.visible == 'No'}">
+                                                                                                <i class="fas fa-times-circle text-danger"
+                                                                                                    title="Not visible"></i>
+                                                                                            </c:when>
+                                                                                            <c:otherwise>
+                                                                                            </c:otherwise>
+                                                                                        </c:choose>
+                                                                                        <input type="hidden"
+                                                                                            id="visible_${loop}"
+                                                                                            value="${maximumData.visible}">
+                                                                                    </td>
+                                                                                    <td>
+
+                                                                                        ${maximumData.appliesTo}
+                                                                                        <input type="hidden"
+                                                                                            name="appliesTo"
+                                                                                            id="appliesTo_${loop}"
+                                                                                            value="${maximumData.appliesTo}">
+                                                                                    </td>
+                                                                                    <td>
+
+                                                                                        ${maximumData.crossApplies}
+                                                                                        <input type="hidden"
+                                                                                            name="crossApplies"
+                                                                                            id="crossApplies_${loop}"
+                                                                                            value="${maximumData.crossApplies}">
+                                                                                    </td>
+                                                                                    <td>
+
+                                                                                        ${maximumData.maxType}
+                                                                                        <input type="hidden"
+                                                                                            name="maxType"
+                                                                                            id="maxType_${loop}"
+                                                                                            value="${maximumData.maxType}">
+                                                                                    </td>
+                                                                                    <td>
+
+                                                                                        ${maximumData.maxValue}
+                                                                                        <input type="hidden"
+                                                                                            name="maxValue"
+                                                                                            id="maxValue_${loop}"
+                                                                                            value="${maximumData.maxValue}">
+                                                                                    </td>
+                                                                                    <td>
+
+                                                                                        ${maximumData.freqType}
+                                                                                        <input type="hidden"
+                                                                                            name="freqType"
+                                                                                            id="freqType_${loop}"
+                                                                                            value="${maximumData.freqType}">
+                                                                                    </td>
+                                                                                    <td>
+
+                                                                                        ${maximumData.freqValue}
+                                                                                        <input type="hidden"
+                                                                                            name="freqValue"
+                                                                                            id="freqValue_${loop}"
+                                                                                            value="${maximumData.freqValue}">
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        <div class="btn-group btn-group-sm"
+                                                                                            role="group">
+                                                                                            <div class="btn-group">
+                                                                                                <button
+                                                                                                    class="btn btn-outline-primary"
+                                                                                                    data-toggle="tooltip"
+                                                                                                    data-placement="bottom"
+                                                                                                    ${pageContext.session.getAttribute('ifpRoleId')==10
+                                                                                                    ||
+                                                                                                    pageContext.session.getAttribute('ifpRoleId')==8
+                                                                                                    ||
+                                                                                                    pageContext.session.getAttribute('ifpRoleId')==9
+                                                                                                    ||
+                                                                                                    pageContext.session.getAttribute('roleId')==4
+                                                                                                    ?"":"disabled"}
+                                                                                                    title="Edit"
+                                                                                                    data-bs-toggle="modal"
+                                                                                                    data-bs-target="#editVisitLimitModal"
+                                                                                                    data-value="${maximumData.benCatName}^${maximumData.appliesTo}^${maximumData.crossApplies}^${maximumData.maxType}^${maximumData.maxValue}^${maximumData.freqType}^${maximumData.freqValue}^${maximumData.maxId}^${maximumData.subCategory}^${maximumData.visible}"
+                                                                                                    id="editMaximum"
+                                                                                                    onclick="getMaxID(${maximumData.maxId})">
+                                                                                                    <i
+                                                                                                        class="fas fa-edit"></i>
+                                                                                                </button>
+                                                                                                <input type="hidden"
+                                                                                                    id="editMaximum_${maximumData.maxId}"
+                                                                                                    data-value="${maximumData.benCatName}^${maximumData.appliesTo}^${maximumData.crossApplies}^${maximumData.maxType}^${maximumData.maxValue}^${maximumData.freqType}^${maximumData.freqValue}^${maximumData.maxId}^${maximumData.subCategory}^${maximumData.visible}">
+                                                                                                <button
+                                                                                                    class="btn btn-outline-danger"
+                                                                                                    data-toggle="tooltip"
+                                                                                                    data-placement="bottom"
+                                                                                                    ${pageContext.session.getAttribute('ifpRoleId')==10
+                                                                                                    ? "disabled" :
+                                                                                                    (pageContext.session.getAttribute('ifpRoleId')==8
+                                                                                                    ||
+                                                                                                    pageContext.session.getAttribute('ifpRoleId')==9
+                                                                                                    ||
+                                                                                                    pageContext.session.getAttribute('roleId')==4
+                                                                                                    ?"":"disabled")}
+                                                                                                    title="Deactivate"
+                                                                                                    data-bs-toggle="modal"
+                                                                                                    id="deleteMaximum"
+                                                                                                    onclick="deleteMaximum(${maximumData.maxId})">
+                                                                                                    <i
+                                                                                                        class="fas fa-trash"></i>
+                                                                                                </button>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </td>
+                                                                                </tr>
+                                                                            </c:forEach>
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </c:forEach>
+                                                <div id="maxPager" class="uhc-pager"
+                                                    style="display: none; margin: 1rem 2em;">
+                                                    <nav aria-label="Accordion pagination">
+                                                        <ul class="uhc-pager-list">
+                                                            <li><button type="button" class="uhc-pager-btn"
+                                                                    id="pagerFirst">First</button></li>
+                                                            <li><button type="button" class="uhc-pager-btn"
+                                                                    id="pagerPrev">Prev</button></li>
+                                                            <span id="pagerNumbers"></span>
+
+                                                            <li><button type="button" class="uhc-pager-btn"
+                                                                    id="pagerNext">Next</button></li>
+                                                            <li><button type="button" class="uhc-pager-btn"
+                                                                    id="pagerLast">Last</button></li>
+                                                        </ul>
+                                                    </nav>
+                                                </div>
+
+                                                <c:if
+                                                    test="${empty maxManagementSearchResponse || maxManagementSearchResponse.size() == 0}">
+                                                    <div class="p-3">
+                                                        <p>No maximums configured. Please add a new maximum to begin or
+                                                            perform another search.</p>
+                                                    </div>
+                                                </c:if>
+                                            </div>
+                                        </div>
+                                        <div class="modal fade" id="ErrorModal" tabindex="-1"
+                                            aria-labelledby="ErrorModalLabel" aria-hidden="true">
+                                            <div class="modal-dialog modal-dialog-centered">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5>
+                                                            <span id="Close"
+                                                                class="modal-title text-danger">Error</span>
+                                                        </h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                            aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body"
+                                                        style="overflow: auto; overflow-wrap: break-word; width: 30em; max-height: 20em;">
+                                                        <p>
+                                                            <span id="ErrorMesssage"></span>
+                                                        </p>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <input type="submit" name="ErrorClose" value="Cancel"
+                                                            id="ErrorClose" class="btn btn-outline-danger"
+                                                            data-bs-dismiss="modal" autocomplete="off">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+                                        <div class="modal fade" id="editVisitLimitModal">
+                                            <div
+                                                class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="editVisitLimitModalLabel"></h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                            onclick="ShowLeaveModel()"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <form class="row g-3">
+                                                            <input type="hidden" name="maxId" id="maxId" value="" />
+                                                            <input type="hidden" name="isChildMaximum"
+                                                                id="isChildMaximum" value="false" />
+
+                                                            <!-- COC, State, Product Family fields - editable for parent, readonly for child -->
+                                                            <div class="col-4">
+                                                                <label for="parent_coc">COC Series<span
+                                                                        style="color: red;">*</span></label>
+                                                                <input type="text" class="form-control"
+                                                                    list="parentCOCs" id="parent_coc" name="parent_coc"
+                                                                    placeholder="COC Series"
+                                                                    onchange="resetIfInvalid(this)"
+                                                                    ${pageContext.session.getAttribute('ifpRoleId')==10
+                                                                    ? "disabled" : "" }>
+                                                                <datalist id="parentCOCs">
+                                                                    <c:forEach var="coc"
+                                                                        items="${maximumDD.cocSeriesMap}">
+                                                                        <option value="${coc.value}">${coc.value}
+                                                                        </option>
+                                                                    </c:forEach>
+                                                                </datalist>
+                                                            </div>
+                                                            <div class="col-4">
+                                                                <label for="parent_state">State<span
+                                                                        style="color: red;">*</span></label>
+                                                                <input type="text" class="form-control"
+                                                                    list="parentStates" id="parent_state"
+                                                                    name="parent_state" placeholder="State"
+                                                                    onchange="resetIfInvalid(this)"
+                                                                    ${pageContext.session.getAttribute('ifpRoleId')==10
+                                                                    ? "disabled" : "" }>
+                                                                <datalist id="parentStates">
+                                                                    <c:forEach var="state"
+                                                                        items="${maximumDD.stateMap}">
+                                                                        <option value="${state.value}">${state.value}
+                                                                        </option>
+                                                                    </c:forEach>
+                                                                </datalist>
+                                                            </div>
+                                                            <div class="col-4">
+                                                                <label for="parent_productFamily">Product Family<span
+                                                                        style="color: red;">*</span></label>
+                                                                <input type="text" class="form-control"
+                                                                    list="parentStandards" id="parent_productFamily"
+                                                                    name="parent_productFamily"
+                                                                    placeholder="Product Family"
+                                                                    onchange="resetIfInvalid(this)"
+                                                                    ${pageContext.session.getAttribute('ifpRoleId')==10
+                                                                    ? "disabled" : "" }>
+                                                                <datalist id="parentStandards">
+                                                                    <c:forEach var="stand"
+                                                                        items="${maximumDD.standardMap}">
+                                                                        <option value="${stand.value}">${stand.value}
+                                                                        </option>
+                                                                    </c:forEach>
+                                                                </datalist>
+                                                            </div>
+
+                                                            <div class="visitlimit_benCat">
+                                                                <label for="visitlimit_benCatType">Benefit Category<span
+                                                                        style="color: red;">*</span></label>
+                                                                <select id="visitlimit_bencat_Type"
+                                                                    class="form-control adddvisitlimitbutaction"
+                                                                    data-toggle="tooltip" data-placement="top"
+                                                                    ${pageContext.session.getAttribute('ifpRoleId')==10
+                                                                    ? "disabled" : "" }
+                                                                    title="Required - Select a Benefit Category type.">
+                                                                    <option selected value="">Select...</option>
+                                                                    <c:forEach var="benCat"
+                                                                        items="${benefitCategoryNames}">
+                                                                        <option id="${benCat}" name="${benCat}">
+                                                                            ${benCat}</option>
+                                                                    </c:forEach>
+                                                                </select>
+                                                            </div>
+                                                            <div class="col-3">
+                                                                <label for="visitlimit_1_limitType">Max Type</label>
+                                                                <select id="visitlimit_1_limitType"
+                                                                    class="form-control adddvisitlimitbutaction"
+                                                                    data-toggle="tooltip" data-placement="top"
+                                                                    ${pageContext.session.getAttribute('ifpRoleId')==10
+                                                                    ? "disabled" : "" }
+                                                                    title="Required - Select a max type.">
+                                                                    <option selected value="">Select...</option>
+                                                                    <c:forEach var="limitType" items="${limitTypes}">
+                                                                        <option id="${limitType}" name="${limitType}">
+                                                                            ${limitType}
+                                                                        </option>
+                                                                    </c:forEach>
+                                                                </select>
+                                                            </div>
+                                                            <div class="col-3">
+                                                                <label for="visitlimit_1_limitValue">Max Value</label>
+                                                                <input id="visitlimit_1_limitValue" type="text" min=1
+                                                                    max=999999 oninput="validity.valid||(value='');"
+                                                                    class="form-control adddvisitlimitbutaction"
+                                                                    placeholder="" data-toggle="tooltip"
+                                                                    ${pageContext.session.getAttribute('ifpRoleId')==10
+                                                                    ? "disabled" : "" }
+                                                                    onchange="validateLimitValue(this)"
+                                                                    data-placement="top"
+                                                                    title="Required - Enter a number greater than 1."></input>
+                                                            </div>
+                                                            <div class="col-3">
+                                                                <label for="visitlimit_1_limitFreq">Frequency
+                                                                    Value</label>
+                                                                <input id="visitlimit_1_limitFreq" type="number" min=1
+                                                                    max=9999 oninput="validity.valid||(value='');"
+                                                                    class="form-control adddvisitlimitbutaction"
+                                                                    ${pageContext.session.getAttribute('ifpRoleId')==10
+                                                                    ? "disabled" : "" } placeholder=""
+                                                                    data-toggle="tooltip" data-placement="top"></input>
+                                                            </div>
+                                                            <div class="col-3">
+                                                                <label for="visitlimit_1_limitFreqType">Frequency
+                                                                    Type</label>
+                                                                <select id="visitlimit_1_limitFreqType"
+                                                                    class="form-control adddvisitlimitbutaction"
+                                                                    data-toggle="tooltip" data-placement="top"
+                                                                    ${pageContext.session.getAttribute('ifpRoleId')==10
+                                                                    ? "disabled" : "" }
+                                                                    title="Required - Select Months, Years, or Lifetime.">
+                                                                    <option selected value="">Select...</option>
+                                                                    <c:forEach var="frequencyType"
+                                                                        items="${frequencyTypes}">
+                                                                        <option id="${frequencyType}"
+                                                                            name="${frequencyType}">
+                                                                            ${frequencyType}</option>
+                                                                    </c:forEach>
+                                                                </select>
+                                                            </div>
+                                                            <div class="dropdown-divider"></div>
+                                                            <div class="form-group col-4">
+                                                                <label for="visitlimit_limitCross_Applies"> Cross
+                                                                    Applies</label>
+                                                                <select id="visitlimit_limitCrossApplies"
+                                                                    class="form-control adddvisitlimitbutaction"
+                                                                    data-toggle="tooltip"
+                                                                    ${pageContext.session.getAttribute('ifpRoleId')==10
+                                                                    ? "disabled" : "" } data-placement="top">
+                                                                    <option selected value="">Select...</option>
+                                                                    <c:forEach var="crossApply" items="${crossApplies}">
+                                                                        <option id="${crossApply}" name="${crossApply}">
+                                                                            ${crossApply}
+                                                                        </option>
+                                                                    </c:forEach>
+                                                                </select>
+                                                            </div>
+                                                            <div class="form-group col-4">
+                                                                <label for="visitlimit_limit_Applies">Applies To<span
+                                                                        style="color: red;">*</span></label>
+                                                                <select id="visitlimit_limitApplies"
+                                                                    class="form-control " data-toggle="tooltip"
+                                                                    data-placement="top"
+                                                                    ${pageContext.session.getAttribute('ifpRoleId')==10
+                                                                    ? "disabled" : "" }
+                                                                    title="Required - Select applies to this limit.">
+                                                                    <option selected value=" ">Select...</option>
+                                                                    <c:forEach var="applies" items="${appliesTo}">
+                                                                        <option id="${applies}" name="${applies}">
+                                                                            ${applies}</option>
+                                                                    </c:forEach>
+                                                                </select>
+                                                            </div>
+                                                            <div class="form-group col-4">
+                                                                <label for="visitlimit_visible">Visible<span
+                                                                        style="color: red;">*</span></label>
+                                                                <select id="visitlimit_visible"
+                                                                    class="form-control adddvisitlimitbutaction"
+                                                                    data-toggle="tooltip" data-placement="top"
+                                                                    ${pageContext.session.getAttribute('ifpRoleId')==10
+                                                                    ? "disabled" : "" }
+                                                                    title="Required - Select Yes or No.">
+                                                                    <option selected value="">Select...</option>
+                                                                    <c:forEach var="visibleOption" items="${visible}">
+                                                                        <option id="${visibleOption}"
+                                                                            name="${visibleOption}">
+                                                                            ${visibleOption}</option>
+                                                                    </c:forEach>
+                                                                </select>
+                                                            </div>
+                                                            <div class="visitlimit_subcategory">
+                                                                <label for="visitlimit_subcategory">Sub Category</label>
+                                                                <input type="text" id="visitlimit_subcategory"
+                                                                    class="form-control"
+                                                                    readonly
+                                                                    data-toggle="tooltip" data-placement="top"
+                                                                    ${pageContext.session.getAttribute('ifpRoleId')==10
+                                                                    ? "disabled" : "" }
+                                                                    title="Auto-populated based on Applies To selection"
+                                                                    placeholder="Auto-populated based on Applies To">
+                                                            </div>
+                                                            <div class="dropdown-divider"></div>
+                                                            <div class="col-2">
+                                                                <div class="d-grid gap-2">
+                                                                    <button type="button"
+                                                                        class="btn btn-block btn-outline-danger"
+                                                                        data-bs-dismiss="modal"
+                                                                        onclick="ShowLeaveModel()">
+                                                                        Cancel
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-2">
+                                                                <div class="d-grid gap-2">
+                                                                    <button type="button"
+                                                                        class="btn btn-block btn-outline-warning"
+                                                                        ${pageContext.session.getAttribute("ifpRoleId")==10
+                                                                        ? "disabled" : "" }
+                                                                        id="editVisitLimitModalClearBut">Clear
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                            <div class="delete-maximum col-2">
+                                                                <div class="d-grid gap-2">
+                                                                    <button type="button"
+                                                                        class="btn btn-block btn-outline-danger"
+                                                                        data-toggle="modal"
+                                                                        data-target="#deltevisitlimitConf"
+                                                                        id="editVisitLimitModalDeleteBut"
+                                                                        ${pageContext.session.getAttribute("ifpRoleId")==10
+                                                                        ? "disabled" : "" }
+                                                                        onclick="deleteMaximumFromEdit();">Delete
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-2">
+                                                                <div class="d-grid gap-2">
+                                                                    <button type="button"
+                                                                        class="btn btn-block btn-outline-primary"
+                                                                        id="editVisitLimitModalSaveBut"
+                                                                        ${pageContext.session.getAttribute("ifpRoleId")==10
+                                                                        ? "disabled" : "" }
+                                                                        onclick="validateCoc('maxSave')" disabled>Save
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="modal fade" id="sucessBoxNewMaximumModal" tabindex="-1"
+                                            role="dialog" aria-labelledby="sucessBoxNewMaximumModalLabel"
+                                            aria-hidden="true" data-bs-backdrop='static'>
+                                            <div class="modal-dialog modal-dialog-centered" role="document">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5><span id="lblWarnTitle" class="modal-title text-success">
+                                                                Success </span>
+                                                        </h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                            aria-label="Close" onclick="reloadSearch();"></button>
+                                                    </div>
+                                                    <div class="modal-body" id="successResult">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="modal fade" id="errorModal" tabindex="-1"
+                                            aria-labelledby="errorModalLabel" aria-hidden="true">
+                                            <div class="modal-dialog modal-dialog-centered" role="document">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5><span id="ErrorClose"
+                                                                class="modal-title text-danger">Error</span></h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                            aria-label="Close" onclick="reloadSearch();"></button>
+                                                    </div>
+                                                    <div class="modal-body" id="errorMesssage"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="modal fade" id="deleteParentConfirmBoxModal" tabindex="-1"
+                                            role="dialog" aria-labelledby="deleteParentConfirmBoxModal"
+                                            aria-hidden="true">
+                                            <div class="modal-dialog modal-dialog-centered" role="document">
+                                                <div class="modal-content">
+
+                                                    <div class="modal-header">
+                                                        <h5><span id="lblParentWarnTitle"
+                                                                class="modal-title text-danger"> Warning
+                                                            </span></h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                            aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <input type="hidden" name="benCatName" id="benCatNameDelete"
+                                                            value="" />
+                                                        <input type="hidden" name="cocSeries" id="cocSeriesDelete" value="" />
+                                                        <input type="hidden" name="state" id="stateDelete" value="" />
+                                                        <input type="hidden" name="standard" id="standardDelete" value="" />
+                                                        Please confirm that you'd like to delete this selected parent
+                                                        plan?
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <input type="submit" value="Cancel" id="deleteParentClose"
+                                                            class="btn btn-outline-danger" data-bs-dismiss="modal"
+                                                            autocomplete="off">
+                                                        <a onclick="deleteParentMaximumConfirm()"
+                                                            id="deleteParentConfirmVal" class="btn btn-outline-success"
+                                                            data-dismiss="modal">Confirm</a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="modal fade" id="deleteConfirmBoxModal" tabindex="-1" role="dialog"
+                                            aria-labelledby="deleteConfirmBoxModal" aria-hidden="true">
+                                            <div class="modal-dialog modal-dialog-centered" role="document">
+                                                <div class="modal-content">
+
+                                                    <div class="modal-header">
+                                                        <h5><span id="lblWarnTitle" class="modal-title text-danger">
+                                                                Warning </span>
+                                                        </h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                            aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <input type="hidden" name="maxIdVal" id="maxIdVal" value="" />
+                                                        Please confirm that you'd like to delete this selected plan?
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <input type="submit" value="Cancel" id="deleteClose"
+                                                            class="btn btn-outline-danger" data-bs-dismiss="modal"
+                                                            autocomplete="off">
+                                                        <a onclick="deleteMaximumData()" id="deleteConfirmVal"
+                                                            class="btn btn-outline-success"
+                                                            data-dismiss="modal">Confirm</a>
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- Clone Modal -->
+                                        <div class="modal fade" id="maxCloneModal" tabindex="-1"
+                                            aria-labelledby="maxCloneModalLabel" aria-hidden="true">
+                                            <div class="modal-dialog modal-dialog-centered">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="maxCloneModalLabel">Clone New
+                                                            Maximum Configuration
+                                                        </h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                            aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <input type="hidden" name="cloneBenefitCategoryName"
+                                                            id="cloneBenefitCategoryName">
+                                                        <div class="row g-2 mb-2 align-items-center">
+                                                            <div class="col-6">
+                                                                <div class="form-floating">
+                                                                    <select class="form-control" id="fromCocSeries"
+                                                                        name="fromCocSeries"
+                                                                        onchange="enableClone(this);">
+                                                                        <option value="">Select From COC Series</option>
+                                                                        <c:forEach var="coc"
+                                                                            items="${maximumDD.cocSeriesMap}">
+                                                                            <option value="${coc.key}">${coc.value}
+                                                                            </option>
+                                                                        </c:forEach>
+                                                                    </select>
+                                                                    <label for="fromCocSeries">From COC Series</label>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-6">
+                                                                <div class="form-floating">
+                                                                    <select class="form-control" id="toCocSeries"
+                                                                        name="toCocSeries"
+                                                                        onchange="enableClone(this);">
+                                                                        <option value="">Select To COC Series</option>
+                                                                        <c:forEach var="coc"
+                                                                            items="${maximumDD.cocSeriesMap}">
+                                                                            <option value="${coc.key}">${coc.value}
+                                                                            </option>
+                                                                        </c:forEach>
+                                                                    </select>
+                                                                    <label for="toCocSeries">To COC Series</label>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row g-2 mb-2 align-items-center">
+                                                            <div class="col-6">
+                                                                <div class="form-floating">
+                                                                    <select class="form-control" id="fromState"
+                                                                        name="fromState" onchange="enableClone(this);">
+                                                                        <option value="">Select From State</option>
+                                                                        <c:forEach var="state"
+                                                                            items="${maximumDD.stateMap}">
+                                                                            <option value="${state.key}">${state.value}
+                                                                            </option>
+                                                                        </c:forEach>
+                                                                    </select>
+                                                                    <label for="fromState">From State</label>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-6">
+                                                                <div class="form-floating">
+                                                                    <select class="form-control" id="toState"
+                                                                        name="toState" onchange="enableClone(this);">
+                                                                        <option value="">Select To State</option>
+                                                                        <c:forEach var="state"
+                                                                            items="${maximumDD.stateMap}">
+                                                                            <option value="${state.key}">${state.value}
+                                                                            </option>
+                                                                        </c:forEach>
+                                                                    </select>
+                                                                    <label for="toState">To State</label>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row g-2 mb-2 align-items-center">
+                                                            <div class="col-6">
+                                                                <div class="form-floating">
+                                                                    <select class="form-control" id="fromStandard"
+                                                                        name="fromStandard"
+                                                                        onchange="enableClone(this);">
+                                                                        <option value="">Select From Product Family
+                                                                        </option>
+                                                                        <c:forEach var="stand"
+                                                                            items="${maximumDD.standardMap}">
+                                                                            <option value="${stand.key}">${stand.value}
+                                                                            </option>
+                                                                        </c:forEach>
+                                                                    </select>
+                                                                    <label for="fromStandard">From Product
+                                                                        Family</label>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-6">
+                                                                <div class="form-floating">
+                                                                    <select class="form-control" id="toStandard"
+                                                                        name="toStandard" onchange="enableClone(this);">
+                                                                        <option value="">Select To Product Family
+                                                                        </option>
+                                                                        <c:forEach var="stand"
+                                                                            items="${maximumDD.standardMap}">
+                                                                            <option value="${stand.key}">${stand.value}
+                                                                            </option>
+                                                                        </c:forEach>
+                                                                    </select>
+                                                                    <label for="toStandard">To Product Family</label>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-warning"
+                                                            data-bs-dismiss="modal">Cancel</button>
+                                                        <button type="button" class="btn btn-success" disabled=""
+                                                            id="clonebtn" onclick="startClone();">Clone</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- Modal -->
+                                        <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog"
+                                            aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                            <div class="modal-dialog" role="document">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="exampleModalLabel">Leave site?</h5>
+                                                        <button type="button" class="close" data-bs-dismiss="modal"
+                                                            aria-label="Close"><span
+                                                                aria-hidden="true">&times;</span></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        Changes you made may not be saved.
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary"
+                                                            data-bs-dismiss="modal"
+                                                            onclick="closeUpdateModel()">Leave</button>
+                                                        <button type="button" class="btn btn-primary"
+                                                            data-bs-dismiss="modal">Cancel</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div style="position: fixed; top: 1%; right: 40%; z-index: 1;" class="toast"
+                                            data-autohide="false" id="success">
+                                            <div class="toast-header">
+                                                <strong class="mr-auto text-primary"> <i class="fas fa-square"
+                                                        style="color: #00a550"></i>Success
+                                                </strong>
+                                                <button type="button" style="margin-left: 13rem;" class="btn-close"
+                                                    data-bs-dismiss="toast"></button>
+                                            </div>
+                                            <div class="toast-body" style="background-color: #E8E8E8"
+                                                id="successMessage"></div>
+                                        </div>
+                                        <div class="modal fade" id="cascadeLeaveModal" tabindex="-1" role="dialog"
+                                            aria-labelledby="cascadeLeaveModalLabel" aria-hidden="true">
+                                            <div class="modal-dialog" role="document">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="cascadeLeaveLabel">Leave site?</h5>
+                                                        <button type="button" class="close" data-bs-dismiss="modal"
+                                                            aria-label="Close"><span
+                                                                aria-hidden="true">&times;</span></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        Warning: there are benefit limit changes that have not been
+                                                        cascaded to
+                                                        applicable plans. If you do not cascade these updates, the
+                                                        applicable plans will
+                                                        not receive the changes. If you leave this page the updates will
+                                                        be saved but
+                                                        not cascaded.
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <a type="button" class="btn btn-secondary"
+                                                            data-bs-dismiss="modal"
+                                                            href="${pageContext.session.getAttribute('planlibraryUrl')}">Leave</a>
+                                                        <button type="button" class="btn btn-primary"
+                                                            data-bs-dismiss="modal"
+                                                            onclick="restricBrowserClose()">Cancel</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="modal fade" id="bulkUpdateModal">
+                                            <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+                                                <div class="modal-content">
+                                                    <div class="modal-header mb-2 flex justify-between items-center">
+                                                        <h5 class="modal-title" id="bulkUpdateModalLabel">Bulk Update</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <p class="mb-4 text-sm text-muted">For the<span id="selectedCount" class="ms-1 text-muted"></span>, apply the following values (up to 4):</p>
+                                                        <div class="space-y-3">
+                                                            <c:forEach var="i" begin="1" end="4">
+                                                                <div class="row mb-2">
+                                                                    <div class="col-md-6">
+                                                                        <label class="form-label text-xs text-muted">Field</label>
+                                                                        <select id="bulkField_${i}" class="form-control"
+                                                                            onchange="handleBulkFieldChange(this, 'bulkValueInput_${i}')">
+                                                                            <option value="">Choose Field...</option>
+                                                                            <option value="Visible">Visible</option>
+                                                                            <option value="Cross Applies">Cross Applies</option>
+                                                                            <option value="Max Type">Max Type</option>
+                                                                            <option value="Max Value">Max Value</option>
+                                                                            <option value="Freq Type">Freq Type</option>
+                                                                            <option value="Freq Value">Freq Value</option>
+                                                                        </select>
+                                                                    </div>
+                                                                    <div class="col-md-6">
+                                                                        <label class="form-label text-xs text-muted">Value</label>
+                                                                        <span id="bulkValueInput_${i}">
+                                                                            <input class="form-control" type="text" disabled>
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                            </c:forEach>
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-block btn-outline-danger" data-bs-dismiss="modal">Cancel</button>
+                                                        <button type="button" id="applyBulkUpdate" class="btn btn-block btn-outline-primary"
+                                                            data-bs-dismiss="modal" onclick="applyBulkUpdate()" disabled>Apply</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <%@include file="footer.html" %>
+                        </div>
+                        <script>
+                            (function () {
+                                const PAGE_SIZE = 50;
+                                const WINDOW_SIZE = 20;
+
+                                const accordion = document.getElementById('maxAccordion');
+                                if (!accordion) return;
+                                const items = Array.from(accordion.querySelectorAll('.acc-item'));
+                                const pager = document.getElementById('maxPager');
+                                const btnFirst = document.getElementById('pagerFirst');
+                                const btnPrev = document.getElementById('pagerPrev');
+                                const btnNext = document.getElementById('pagerNext');
+                                const btnLast = document.getElementById('pagerLast');
+                                const numbersMount = document.getElementById('pagerNumbers');
+
+                                if (items.length === 0) {
+                                    if (pager) pager.style.display = 'none';
+                                    return;
+                                }
+
+                                const totalItems = items.length;
+                                const totalPages = Math.ceil(totalItems / PAGE_SIZE);
+                                let currentPage = 1;
+
+                                function showPage(page) {
+                                    currentPage = Math.max(1, Math.min(totalPages, page));
+                                    items.forEach(el => { el.style.display = 'none'; });
+                                    const startIdx = (currentPage - 1) * PAGE_SIZE;
+                                    const endIdx = Math.min(startIdx + PAGE_SIZE, totalItems);
+                                    for (let i = startIdx; i < endIdx; i++) {
+                                        items[i].style.display = '';
+                                    }
+                                    renderWindowNumbers();
+                                    updateEdgeButtons();
+                                    pager.style.display = (totalPages > 1) ? 'flex' : 'none';
+                                }
+
+                                function updateEdgeButtons() {
+                                    const atFirst = currentPage === 1;
+                                    const atLast = currentPage === totalPages;
+                                    btnFirst.disabled = atFirst;
+                                    btnPrev.disabled = atFirst;
+                                    btnNext.disabled = atLast;
+                                    btnLast.disabled = atLast;
+                                }
+                                function renderWindowNumbers() {
+                                    numbersMount.innerHTML = '';
+
+                                    if (totalPages <= WINDOW_SIZE) {
+                                        for (let p = 1; p <= totalPages; p++) appendPageBtn(p);
+                                        return;
+                                    }
+
+                                    const half = Math.floor(WINDOW_SIZE / 2);
+                                    let start = currentPage - half;
+                                    let end = currentPage + half;
+                                    if (WINDOW_SIZE % 2 === 0) end = currentPage + half - 1;
+                                    if (start < 1) {
+                                        end += (1 - start);
+                                        start = 1;
+                                    }
+                                    if (end > totalPages) {
+                                        const overshoot = end - totalPages;
+                                        start = Math.max(1, start - overshoot);
+                                        end = totalPages;
+                                    }
+                                    const visibleCount = end - start + 1;
+                                    if (visibleCount < WINDOW_SIZE) {
+                                        const deficit = WINDOW_SIZE - visibleCount;
+                                        end = Math.min(totalPages, end + deficit);
+                                        start = Math.max(1, end - WINDOW_SIZE + 1);
+                                    }
+
+                                    for (let p = start; p <= end; p++) appendPageBtn(p);
+                                }
+
+                                function appendPageBtn(p) {
+                                    const li = document.createElement('li');
+                                    const btn = document.createElement('button');
+                                    btn.type = 'button';
+                                    btn.className = 'uhc-pager-btn' + (p === currentPage ? ' is-active' : '');
+                                    btn.textContent = String(p);
+                                    btn.setAttribute('aria-label', `Go to page ${p}`);
+                                    btn.disabled = (p === currentPage);
+                                    btn.addEventListener('click', function () {
+                                        if (!btn.disabled) showPage(p);
+                                    });
+                                    li.appendChild(btn);
+                                    numbersMount.appendChild(li);
+                                }
+                                btnFirst.addEventListener('click', () => showPage(1));
+                                btnPrev.addEventListener('click', () => showPage(currentPage - 1));
+                                btnNext.addEventListener('click', () => showPage(currentPage + 1));
+                                btnLast.addEventListener('click', () => showPage(totalPages));
+                                showPage(1);
+                                window.__maxAccordionPaginate = function () {
+                                    const freshItems = Array.from(accordion.querySelectorAll('.acc-item'));
+                                    items.length = 0;
+                                    Array.prototype.push.apply(items, freshItems);
+                                    currentPage = 1;
+                                    showPage(1);
+                                };
+                            })();
+
+                            const BULK_OPTIONS = {
+                                visible: [
+                                    <c:forEach var="v" items="${visible}" varStatus="s">
+                                       "${v}"<c:if test="${!s.last}">,</c:if>
+                                    </c:forEach>
+                                         ],
+                                crossApplies: [
+                                    <c:forEach var="c" items="${crossApplies}" varStatus="s">
+                                        "${c}"<c:if test="${!s.last}">,</c:if>
+                                    </c:forEach>
+                                              ],
+                                maxTypes: [
+                                    <c:forEach var="m" items="${limitTypes}" varStatus="s">
+                                        "${m}"<c:if test="${!s.last}">,</c:if>
+                                    </c:forEach>
+                                          ],
+                                freqTypes: [
+                                    <c:forEach var="f" items="${frequencyTypes}" varStatus="s">
+                                        "${f}"<c:if test="${!s.last}">,</c:if>
+                                    </c:forEach>
+                                           ]};
+                        </script>
+                    </body>
+
+                   <!-- Copy Parent & Child Modal-->
+                        <div class="modal fade" id="copyParentChildModal" tabindex="-1" aria-labelledby="copyParentChildModalLabel" aria-hidden="true">
+                          <div class="modal-dialog modal-lg modal-dialog-centered">
+                            <div class="modal-content">
+                              <div class="modal-header">
+                                <h5 class="modal-title" id="copyParentChildModalLabel">Copy Parent & Child</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                              </div>
+                              <div class="modal-body">
+                                <form id="copyParentChildForm">
+                                  <div class="row">
+                                    <!-- From Section -->
+                                    <div class="col-md-6">
+                                      <label class="form-label">From</label>
+                                      <input type="text" class="form-control mb-1" id="fromBenefitCategory" readonly>
+                                      <input type="text" class="form-control mb-1" id="fromCoc" readonly>
+                                      <input type="text" class="form-control mb-1" id="fromStateCopy" readonly>
+                                     <input type="text" class="form-control mb-1" id="fromProductFamily" readonly>
+                                    </div>
+                                    <!-- To Section -->
+                                    <div class="col-md-6">
+                                      <label class="form-label">To</label>
+                                      <input type="text" class="form-control mb-1" id="toBenefitCategory" readonly>
+                                      <!-- COC Series Dropdown -->
+                                      <select class="form-control mb-1" id="toCoc" name="toCoc">
+                                        <option value="">Select COC Series</option>
+                                        <c:forEach var="coc" items="${maximumDD.cocSeriesMap}">
+                                          <option value="${coc.value}">${coc.value}</option>
+                                        </c:forEach>
+                                      </select>
+                                      <!-- State Dropdown -->
+                                      <select class="form-control mb-1" id="toStateCopy" name="toState">
+                                        <option value="">Select State</option>
+                                        <c:forEach var="state" items="${maximumDD.stateMap}">
+                                          <option value="${state.value}">${state.value}</option>
+                                        </c:forEach>
+                                      </select>
+                                      <!-- Product Family Dropdown -->
+                                      <select class="form-control mb-1" id="toProductFamily" name="toProductFamily">
+                                        <option value="">Select Product Family</option>
+                                        <c:forEach var="stand" items="${maximumDD.standardMap}">
+                                          <option value="${stand.value}">${stand.value}</option>
+                                        </c:forEach>
+                                      </select>
+                                    </div>
+                                  </div>
+                                </form>
+                              </div>
+                              <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <button type="button" class="btn btn-primary" id="copyParentChildSubmit">Copy</button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+         
+                <div class="modal fade" id="notesModal" tabindex="-1" aria-labelledby="notesModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg modal-dialog-centered">
+                        <div class="modal-content">
+
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="notesModalLabel">Add Note</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+
+                            <div class="modal-body">
+                                <label for="notesText" class="form-label fw-semibold">
+                                    Note <span class="text-danger">*</span>
+                                </label>
+
+                                <textarea class="form-control" id="notesText" rows="6"
+                                    placeholder="Write your notes here..." oninput="notesInputChange()"></textarea>
+
+                                <div class="d-flex justify-content-between align-items-center mt-2">
+                                    <div class="invalid-feedback" id="notesError" style="display:none;">
+                                        Text exceeds maximum length
+                                    </div>
+
+                                    <small class="text-muted ms-auto">
+                                        <span id="notesCount">0</span>/2000
+                                    </small>
+                                </div>
+                                <input type="hidden" id="notesBenCatName">
+                                <input type="hidden" id="notesCocSeries">
+                                <input type="hidden" id="notesState">
+                                    <input type="hidden" id="notesStandard">
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-outline-warning" data-bs-dismiss="modal">Cancel</button>
+                                    <button type="button" class="btn btn-primary" id="saveNotesBtn" onclick="saveNotes()">Save</button>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+</body>
+
+</html>
+
+i have these 2 files js and jsp when i click on notes an api should be called with payload of selected row  
+payload should have these fields of the row
+benCatName, cocSeries, state, standard
+api endpoint is 
+/maxManagement/get-notes
+
+if the api call return array of objects then show a modal with the list of notes (each note with ... if it is too long ) with edit and delete buttons, this page should be compliant with other ui elements in the page like blue white theme and same icons
+and should have an add note button at top right corner which opens the openNotesModal
+however if the get-notes call return [] then directly openNotesModal should open to add a note.
+can u implement this and tell code changes exactly where without disturbing any other functionality
+
+
+
