@@ -1,67 +1,1103 @@
+attaching input and response excel for a pipeline i am making for evaluation for a project becca
+i am seeing dupplicatte rows and a lot of failed cases check if they are even valid fails or i need to fix code or something
+in a lot of entries actual and expected answer is also not populating what is the issue
+prompt	expected_answer	PlanCode	validation_text
+what is the coinsurance for pharmaceutical products for $PlanCode, 2024, AR, KA, INN.	"Below are the coinsurance details for Pharmaceutical Products for plan code DTKS, 2024, AR, KA, INN. Click here 495372 to view the json file.
+Item No. COC Series Business Segment State Abbreviation Benefit Category Payment Line Tier 1 (Designated Network) Tier 2 (In-Network) Tier 3 (Out-of-Network) Individual Deductible ($) Family Deductible ($)
+0 2024 KA - Key Account AR Pharmaceutical Products - Outpatient Standard N/A 30% member coinsurance, no copay, deductible applies 50% member coinsurance, no copay, deductible applies Tier 2 - $4000.00, Tier 3 - $10000.00 Tier 2 - $8000.00, Tier 3 - $20000.00
+content_copy
+star_border
+thumb_up_off_alt
+thumb_down_off_alt"	DTKS	PlanCode,2024,AR,KA, In-Network
+What are the different maximums for Plan code $PlanCode	"Below are the limits for plan code CHFF. Click here 287588 to view the json file.
+Item No. Plan Code COC Series Business Segment State Abbreviation Benefit Category Payment Line Limit Applies to Cross Applies is_buy_up
+0 CHFF 2021 KA - Key Account VA Acupuncture Services Standard 10 Treatment per 1 Year 0 Both Yes
+1 CHFF 2021 KA - Key Account VA Durable Medical Equipment (DME), Orthotics and Supplies Standard 1 Purchase per 3 Year DME/Orth Both No
+2 CHFF 2021 KA - Key Account VA Fertility Preservation for Iatronic Infertility Standard 20000 Dollar per 1 Lifetime 0 Both No
+3 CHFF 2021 KA - Key Account VA Fertility Preservation for Iatronic Infertility Standard 5000 PDP per Lifetime 0 Both No
+4 CHFF 2021 KA - Key Account VA Fertility Preservation for Iatronic Infertility Standard 1 Cycle per 1 Lifetime FertPres Both No
+5 CHFF 2021 KA - Key Account VA Foot Orthotics Standard 1 Purchase per 24 Month Shoes Both Yes
+6 CHFF 2021 KA - Key Account VA Hearing Aids Standard 1500 Dollar per 24 Month HearImpEar Both No
+7 CHFF 2021 KA - Key Account VA Hearing Aids Standard 1 Purchase per 24 Month HA Both No
+8 CHFF 2021 KA - Key Account VA Home Health Care Standard 60 Visit per 1 Year 0 Both No
+9 CHFF 2021 KA - Key Account VA Infertility Services Standard 20000 Dollar per 1 Lifetime 0 Both Yes
+10 CHFF 2021 KA - Key Account VA Infertility Services with Pharmacy Standard 20000 Dollar per 1 Lifetime 0 Both Yes
+11 CHFF 2021 KA - Key Account VA Infertility Services with Pharmacy Standard 5000 PDP per Lifetime 0 Both Yes
+12 CHFF 2021 KA - Key Account VA Lab Testing - Outpatient Freestanding 18 PDT per 1 Year 0 Both No
+13 CHFF 2021 KA - Key Account VA Lab Testing - Outpatient Freestanding 18 DDT per 1 Year 0 Both No
+14 CHFF 2021 KA - Key Account VA Prosthetic Devices Standard 1 Purchase per 3 Year Pros Both No
+15 CHFF 2021 KA - Key Account VA Rehabilitation Services - Outpatient Therapy and Manipulative Treatment Standard 60 Visit per 1 Year PT-OT-ST-Pulm-Cardiac Both No
+16 CHFF 2021 KA - Key Account VA Rehabilitation Services - Vision Therapy Standard 20 Visit per 1 Year 0 Both Yes
+17 CHFF 2021 KA - Key Account VA Skilled Nursing Facility/Inpatient Rehabilitation Facility Services Standard 60 Day per 1 Year 0 Both No
+content_copy
+star_border
+thumb_up_off_alt
+thumb_down_off_alt"	CHFF	PlanCode,287588
+Is there copay applies to Plan Code $PlanCode	"Yes, there are 11 benefit categories that have copay amount for plan code DME2. Click here 460382 to view the json file.
+Item No. Benefit Category Copay Details
+0 Emergency Health Services - Outpatient For Payment Line Standard: Tier 1. N/A, Tier 2. Copayment is $400.00, Tier 3. Copayment is $400.00
+1 Habilitative Services For Payment Line Standard: Tier 1. N/A, Tier 2. Copayment is $20.00, Tier 3. No Copayment
+2 Major Diagnostic and Imaging - Outpatient For Payment Line Standard: Tier 1. Copayment is $400.00, Tier 2. No Copayment, per Occurrence deductible is $500.00, Tier 3. No Copayment, per occurrence deductible (POD) is $500.00
+3 Manipulative Treatment For Payment Line Standard: Tier 1. N/A, Tier 2. Copayment is $40.00, Tier 3. No Copayment
+4 Mental Health Care and Substance - Related and Addictive Disorders Outpatient For Payment Line Standard: Tier 1. N/A, Tier 2. Copayment is $20.00, Tier 3. No Copayment
+5 Physician's Office Services - Sickness and Injury Primary Care Physician For Payment Line Kids: Tier 1. N/A, Tier 2. No Copayment, Tier 3. No Copayment; For Payment Line Standard: Tier 1. N/A, Tier 2. Copayment is $20.00, Tier 3. No Copayment
+6 Physician's Office Services - Sickness and Injury Specialist For Payment Line Standard: Tier 1. N/A, Tier 2. Copayment is $40.00, Tier 3. No Copayment
+7 Rehabilitation Services - Outpatient Therapy and Manipulative Treatment For Payment Line Standard: Tier 1. N/A, Tier 2. Copayment is $20.00, Tier 3. No Copayment
+8 Rehabilitation Services - Vision Therapy For Payment Line Standard: Tier 1. N/A, Tier 2. Copayment is $20.00, Tier 3. No Copayment
+9 Urgent Care Center Services For Payment Line Standard: Tier 1. N/A, Tier 2. Copayment is $50.00, Tier 3. No Copayment
+10 Vision Exams For Payment Line Standard: Tier 1. N/A, Tier 2. Copayment is $20.00, Tier 3. No Copayment
+content_copy
+star_border
+thumb_up_off_alt
+thumb_down_off_alt"	DME2	PlanCode,11,460382,Physician's Office Services
+What is the specialist copay for plan code $PlanCode	"For plan code DY8N, the specialist copay is $85.00. Click here 500832 to view the json file.
+Item No. COC Series Business Segment State Abbreviation Benefit Category Payment Line Tier 1 (Designated Network) Tier 2 (In-Network) Tier 3 (Out-of-Network) Individual Deductible ($) Family Deductible ($)
+0 2025 SB - Small Business GA Physician's Office Services - Sickness and Injury Specialist Standard N/A no member coinsurance, $85 copay, deductible does not apply N/A Tier 2 - You do not have to pay a medical deductible. Tier 2 - You do not have to pay a medical deductible.
+content_copy
+star_border
+thumb_up_off_alt
+thumb_down_off_alt"	DY8N	PlanCode,$85,500832
+What is the cardiac limits on plan code $PlanCode	"Below are the limits for Rehabilitation Services - Outpatient Therapy and Manipulative for plan code DY1A. isBuyUp value is No. Click here 499922 to view the json file.
+Item No. Plan Code COC Series Business Segment State Abbreviation Benefit Category Payment Line Limit Applies to Cross Applies
+0 DY1A 2025 SB - Small Business FL Rehabilitation Services - Outpatient Therapy and Manipulative Treatment Standard 30 Visit per 1 Year ST Both
+1 DY1A 2025 SB - Small Business FL Rehabilitation Services - Outpatient Therapy and Manipulative Treatment Standard 20 Visit per 1 Year CR Both
+2 DY1A 2025 SB - Small Business FL Rehabilitation Services - Outpatient Therapy and Manipulative Treatment Standard 30 Visit per 1 Year OT Both
+3 DY1A 2025 SB - Small Business FL Rehabilitation Services - Outpatient Therapy and Manipulative Treatment Standard 30 Visit per 1 Year Aural Both
+4 DY1A 2025 SB - Small Business FL Rehabilitation Services - Outpatient Therapy and Manipulative Treatment Standard 30 Visit per 1 Year PT Both
+5 DY1A 2025 SB - Small Business FL Rehabilitation Services - Outpatient Therapy and Manipulative Treatment Standard 36 Visit per 1 Year Cardiac Both
+content_copy
+star_border
+thumb_up_off_alt
+thumb_down_off_alt"	DY1A	PlanCode,isBuyUp value is No,499922
+Give me some custom plan FI	"Apologies, I can only answer questions regarding plan library. Is there anything else I can help you with?
+content_copy
+star_border
+thumb_up_off_alt
+thumb_down_off_alt"		 I can only answer questions regarding plan library
+show me level funded plans with a $25 PCP copay	"There are 9,845 plans with a $25 PCP copay. Here's a sample of the first 10 rows. Are you looking for something specific from the plan library (e.g., business segment, limits, marketing name)? Click here 442593 , 442594 , 442595 , 442596 , 442597 , 554569 , 554769 , 554369 , 554370 , 347866 to view the json files.
+Item No. Plan Code COC Series Business Segment State Abbreviation Organization Benefit Category Medical Deductible (Individual) Medical Deductible (Family) Payment Line Tier 1 (Designated Network) Tier 2 (In-Network) Tier 3 (Non-Network)
+0 AdvE100024B 2022 SB - Small Business NA All Savers Physician's Office Services - Sickness and Injury Primary Care Physician $1000.00 $2000.00 Standard N/A no coinsurance, copayment is $25.00, deductible does not apply N/A
+1 AdvE200024B 2022 SB - Small Business NA All Savers Physician's Office Services - Sickness and Injury Primary Care Physician $2000.00 $4000.00 Standard N/A no coinsurance, copayment is $25.00, deductible does not apply N/A
+2 AdvE2000X24B 2022 SB - Small Business NA All Savers Physician's Office Services - Sickness and Injury Primary Care Physician $2000.00 $4000.00 Standard N/A no coinsurance, copayment is $25.00, deductible does not apply N/A
+3 AdvE2000Y24B 2022 SB - Small Business NA All Savers Physician's Office Services - Sickness and Injury Primary Care Physician $2000.00 $4000.00 Standard N/A no coinsurance, copayment is $25.00, deductible does not apply N/A
+4 AdvE300024B 2022 SB - Small Business NA All Savers Physician's Office Services - Sickness and Injury Primary Care Physician $3000.00 $6000.00 Standard N/A no coinsurance, copayment is $25.00, deductible does not apply N/A
+5 AdvP100026B 2022 SB - Small Business NA All Savers Physician's Office Services - Sickness and Injury Primary Care Physician $1000.00 $2000.00 Standard N/A no coinsurance, copayment is $25.00, deductible does not apply 50.0% coinsurance, no copayment, deductible applies
+6 AdvP200026B 2022 SB - Small Business NA All Savers Physician's Office Services - Sickness and Injury Primary Care Physician $2000.00 $4000.00 Standard N/A no coinsurance, copayment is $25.00, deductible does not apply 50.0% coinsurance, no copayment, deductible applies
+7 AdvP2000Y26B 2022 SB - Small Business NA All Savers Physician's Office Services - Sickness and Injury Primary Care Physician $2000.00 $4000.00 Standard N/A no coinsurance, copayment is $25.00, deductible does not apply 50.0% coinsurance, no copayment, deductible applies
+8 AdvP300026B 2022 SB - Small Business NA All Savers Physician's Office Services - Sickness and Injury Primary Care Physician $3000.00 $6000.00 Standard N/A no coinsurance, copayment is $25.00, deductible does not apply 50.0% coinsurance, no copayment, deductible applies
+9 CharE1000i100 2022 SB - Small Business NA All Savers Physician's Office Services - Sickness and Injury Primary Care Physician $1000.00 $2000.00 Standard - All other covered persons for services provided by your Primary Care Physician, Network obstetrician or gynecologist N/A no coinsurance, copayment is $25.00, deductible does not apply N/A
+content_copy
+star_border
+thumb_up_off_alt
+thumb_down_off_alt"		9845,$25 PCP copay,first 10 rows
+show me level funded plans with a $25 PCP copay	"I found 9,845 results. Do you need more detailed information about any of these? Click here 442593 , 442594 , 442595 , 442596 , 442597 , 554569 , 554769 , 554369 , 554370 , 347866 to view the json files.
+Item No. Plan Code COC Series Business Segment State Abbreviation Organization Benefit Category Payment Line Tier 1 (Designated Network) Tier 2 (In-Network) Tier 3 (Out-of-Network) Individual Deductible ($) Family Deductible ($)
+0 AdvE100024B 2022 SB - Small Business NA All Savers Physician's Office Services - Sickness and Injury Primary Care Physician Standard N/A no member coinsurance, $25 copay, deductible does not apply N/A Tier 2 - $1000.00 Tier 2 - $2000.00
+1 AdvE200024B 2022 SB - Small Business NA All Savers Physician's Office Services - Sickness and Injury Primary Care Physician Standard N/A no member coinsurance, $25 copay, deductible does not apply N/A Tier 2 - $2000.00 Tier 2 - $4000.00
+2 AdvE2000X24B 2022 SB - Small Business NA All Savers Physician's Office Services - Sickness and Injury Primary Care Physician Standard N/A no member coinsurance, $25 copay, deductible does not apply N/A Tier 2 - $2000.00 Tier 2 - $4000.00
+3 AdvE2000Y24B 2022 SB - Small Business NA All Savers Physician's Office Services - Sickness and Injury Primary Care Physician Standard N/A no member coinsurance, $25 copay, deductible does not apply N/A Tier 2 - $2000.00 Tier 2 - $4000.00
+4 AdvE300024B 2022 SB - Small Business NA All Savers Physician's Office Services - Sickness and Injury Primary Care Physician Standard N/A no member coinsurance, $25 copay, deductible does not apply N/A Tier 2 - $3000.00 Tier 2 - $6000.00
+5 AdvP100026B 2022 SB - Small Business NA All Savers Physician's Office Services - Sickness and Injury Primary Care Physician Standard N/A no member coinsurance, $25 copay, deductible does not apply 50% member coinsurance, no copay, deductible applies Tier 2 - $1000.00, Tier 3 - $2000.00 Tier 2 - $2000.00, Tier 3 - $4000.00
+6 AdvP200026B 2022 SB - Small Business NA All Savers Physician's Office Services - Sickness and Injury Primary Care Physician Standard N/A no member coinsurance, $25 copay, deductible does not apply 50% member coinsurance, no copay, deductible applies Tier 2 - $2000.00, Tier 3 - $4000.00 Tier 2 - $4000.00, Tier 3 - $8000.00
+7 AdvP2000Y26B 2022 SB - Small Business NA All Savers Physician's Office Services - Sickness and Injury Primary Care Physician Standard N/A no member coinsurance, $25 copay, deductible does not apply 50% member coinsurance, no copay, deductible applies Tier 2 - $2000.00, Tier 3 - $4000.00 Tier 2 - $4000.00, Tier 3 - $8000.00
+8 AdvP300026B 2022 SB - Small Business NA All Savers Physician's Office Services - Sickness and Injury Primary Care Physician Standard N/A no member coinsurance, $25 copay, deductible does not apply 50% member coinsurance, no copay, deductible applies Tier 2 - $3000.00, Tier 3 - $6000.00 Tier 2 - $6000.00, Tier 3 - $12000.00
+9 CharE1000i100 2022 SB - Small Business NA All Savers Physician's Office Services - Sickness and Injury Primary Care Physician Standard - All other covered persons for services provided by your Primary Care Physician, Network obstetrician or gynecologist N/A no member coinsurance, $25 copay, deductible does not apply N/A Tier 2 - $1000.00 Tier 2 - $2000.00
+content_copy
+star_border
+thumb_up_off_alt
+thumb_down_off_alt"		9845,$25 PCP copay,first 10 rows
+show me fully insured small group plans in AL under a 2025 coc with a $25 copay	"There are 100 plans with a $25 copay in AL under a 2025 COC. Here's a sample of the first 10 rows. Are you looking for something specific from the plan library (e.g., business segment, limits, marketing name)?Click here 701909 , 701981 , 701977 , 701849 , 701969 , 701965 , 701961 , 701831 , 701957 , 701953 to view the json files.
+Item No. Plan Code COC Series Business Segment State Abbreviation Benefit Category Payment Line Tier 1 (Designated Network) Tier 2 (In-Network) Tier 3 (Out-of-Network) Individual Deductible ($) Family Deductible ($)
+0 AL0025 2025 SB - Small Business AL Adult Vision - Contact Lenses (Formulary) Standard Not covered no member coinsurance, $25 copay, deductible does not apply Not covered Tier 2 - $750.00 Tier 2 - $1500.00
+1 AL0025 2025 SB - Small Business AL Adult Vision - Eyeglass Lenses Standard Not covered no member coinsurance, $25 copay, deductible does not apply Not covered Tier 2 - $750.00 Tier 2 - $1500.00
+2 AL0025B 2025 SB - Small Business AL Adult Vision - Contact Lenses (Formulary) Standard Not covered no member coinsurance, $25 copay, deductible does not apply Not covered Tier 2 - $750.00 Tier 2 - $1500.00
+3 AL0025B 2025 SB - Small Business AL Adult Vision - Eyeglass Lenses Standard Not covered no member coinsurance, $25 copay, deductible does not apply Not covered Tier 2 - $750.00 Tier 2 - $1500.00
+4 AL0025X 2025 SB - Small Business AL Adult Vision - Contact Lenses (Formulary) Standard Not covered no member coinsurance, $25 copay, deductible does not apply Not covered Tier 2 - $750.00 Tier 2 - $1500.00
+5 AL0025X 2025 SB - Small Business AL Adult Vision - Eyeglass Lenses Standard Not covered no member coinsurance, $25 copay, deductible does not apply Not covered Tier 2 - $750.00 Tier 2 - $1500.00
+6 AL0026 2025 SB - Small Business AL Adult Vision - Contact Lenses (Formulary) Standard Not covered no member coinsurance, $25 copay, deductible does not apply Not covered Tier 2 - $8300.00 Tier 2 - $16600.00
+7 AL0026 2025 SB - Small Business AL Adult Vision - Eyeglass Lenses Standard Not covered no member coinsurance, $25 copay, deductible does not apply Not covered Tier 2 - $8300.00 Tier 2 - $16600.00
+8 AL0026B 2025 SB - Small Business AL Adult Vision - Contact Lenses (Formulary) Standard Not covered no member coinsurance, $25 copay, deductible does not apply Not covered Tier 2 - $8300.00 Tier 2 - $16600.00
+9 AL0026B 2025 SB - Small Business AL Adult Vision - Eyeglass Lenses Standard Not covered no member coinsurance, $25 copay, deductible does not apply Not covered Tier 2 - $8300.00 Tier 2 - $16600.00
+content_copy
+star_border
+thumb_up_off_alt
+thumb_down_off_alt"		100,$25 copay,AL,2025
+show me fully insured small group plans in AL under the 2025 COC	"I found 88 plans. Do you need more detailed information about any of these? Click here 701757 , 701961 , 701963 , 701959 , 701919 , 701953 , 701955 , 702029 , 702027 , 701957 to view the json files.
+Item No. Plan Code COC Series Business Segment State Abbreviation Plan Description Marketing Name Plan Category Organization Legal Entity Product Type Product Standard
+0 AL0001 2025 SB - Small Business AL N/A UHC Bronze Value ($0 Virtual Urgent Care, $5 Tier 2 Rx, No Referrals) N/A Individual Exchange N/A EPO Individual Exchange Value
+1 AL0001A 2025 SB - Small Business AL N/A UHC Bronze-A Value ($0 Virtual Urgent Care, $0 Tier 2 Rx, No Referrals) N/A Individual Exchange N/A EPO Individual Exchange Value
+2 AL0001B 2025 SB - Small Business AL N/A UHC Bronze-B Value ($0 Virtual Urgent Care, $5 Tier 2 Rx, No Referrals) N/A Individual Exchange N/A EPO Individual Exchange Value
+3 AL0001X 2025 SB - Small Business AL N/A UHC Bronze-X Value ($0 Virtual Urgent Care, $5 Tier 2 Rx, No Referrals) N/A Individual Exchange N/A EPO Individual Exchange Value
+4 AL0004 2025 SB - Small Business AL N/A UHC Silver Value ($0 Virtual Urgent Care, $2 Tier 2 Rx, No Referrals) N/A Individual Exchange N/A EPO Individual Exchange Value
+5 AL0004A 2025 SB - Small Business AL N/A UHC Silver-A Value ($0 Virtual Urgent Care, $0 Tier 2 Rx, No Referrals) N/A Individual Exchange N/A EPO Individual Exchange Value
+6 AL0004B 2025 SB - Small Business AL N/A UHC Silver-B Value ($0 Virtual Urgent Care, $2 Tier 2 Rx, No Referrals) N/A Individual Exchange N/A EPO Individual Exchange Value
+7 AL0004C 2025 SB - Small Business AL N/A UHC Silver-C Value $0 Indiv Ded ($0 Virtual Urgent Care, $1 Tier 2 Rx, No Referrals) N/A Individual Exchange N/A EPO Individual Exchange Value
+8 AL0004D 2025 SB - Small Business AL N/A UHC Silver-D Value ($0 Virtual Urgent Care, $2 Tier 2 Rx, No Referrals) N/A Individual Exchange N/A EPO Individual Exchange Value
+9 AL0004E 2025 SB - Small Business AL N/A UHC Silver-E Value ($0 Virtual Urgent Care, $2 Tier 2 Rx, No Referrals) N/A Individual Exchange N/A EPO Individual Exchange Value
+content_copy
+star_border
+thumb_up_off_alt
+thumb_down_off_alt"		88
+What is the copay for UC for plan code $PlanCode?	"Below are the Urgent Care Center Services copay details for plan code DY82. Click here 500696 to view the json file.
+Item No. COC Series Business Segment State Abbreviation Benefit Category Payment Line Tier 1 (Designated Network) Tier 2 (In-Network) Tier 3 (Out-of-Network) Individual Deductible ($) Family Deductible ($)
+0 2025 SB - Small Business GA Urgent Care Center Services Standard N/A no member coinsurance, $50 copay, deductible does not apply 30% member coinsurance, no copay, deductible applies Tier 2 - $1000.00, Tier 3 - $5000.00 Tier 2 - $2000.00, Tier 3 - $10000.00
+content_copy
+star_border
+thumb_up_off_alt
+thumb_down_off_alt"	DY82	PlanCode,Urgent Care Center Services,500696
+What is the copay for UC for plan code $PlanCode?	"Below are the Urgent Care Center Services copay details for plan code DY9G. Click here 500711 to view the json file.
+Item No. COC Series Business Segment State Abbreviation Benefit Category Payment Line Tier 1 (Designated Network) Tier 2 (In-Network) Tier 3 (Out-of-Network) Individual Deductible ($) Family Deductible ($)
+0 2025 SB - Small Business GA Urgent Care Center Services Standard N/A no member coinsurance, $75 copay, deductible does not apply 40% member coinsurance, no copay, deductible applies Tier 2 - $3000.00, Tier 3 - $10000.00 Tier 2 - $6000.00, Tier 3 - $20000.00
+content_copy
+star_border
+thumb_up_off_alt
+thumb_down_off_alt"	DY9G	PlanCode,500711,Urgent Care Center Services
+Is there an IP waived copay for Plan Code $PlanCode	"Yes, for plan code DY9D, Inpatient Hospital, Inpatient Habilitative Services, Mental Health Care and Substance - Related and Addictive Disorders Inpatient, and Skilled Nursing Facility/Inpatient Rehabilitation Facility Services have waived copays for In-Network (Tier 2). Click here 500708 to view the json file.
+Item No. COC Series Business Segment State Abbreviation Benefit Category Payment Line Tier 1 (Designated Network) Tier 2 (In-Network) Tier 3 (Out-of-Network) Individual Deductible ($) Family Deductible ($)
+0 2025 SB - Small Business GA Hospital - Inpatient Stay Standard N/A no member coinsurance, no copay, deductible applies 30% member coinsurance, no copay, deductible applies Tier 2 - $2000.00, Tier 3 - $5000.00 Tier 2 - $4000.00, Tier 3 - $10000.00
+1 2025 SB - Small Business GA Inpatient Habilitative Services Standard N/A no member coinsurance, no copay, deductible does not apply N/A Tier 2 - $2000.00, Tier 3 - $5000.00 Tier 2 - $4000.00, Tier 3 - $10000.00
+2 2025 SB - Small Business GA Mental Health Care and Substance - Related and Addictive Disorders Inpatient Standard N/A no member coinsurance, no copay, deductible applies 30% member coinsurance, no copay, deductible applies Tier 2 - $2000.00, Tier 3 - $5000.00 Tier 2 - $4000.00, Tier 3 - $10000.00
+3 2025 SB - Small Business GA Skilled Nursing Facility/Inpatient Rehabilitation Facility Services Standard N/A no member coinsurance, no copay, deductible applies 30% member coinsurance, no copay, deductible applies Tier 2 - $2000.00, Tier 3 - $5000.00 Tier 2 - $4000.00, Tier 3 - $10000.00
+content_copy
+star_border
+thumb_up_off_alt
+thumb_down_off_alt"	DY9D	PlanCode,Yes,500708
+is there an radiology copay for Plan Code $PlanCode	"Yes, there is a radiology copay for Plan Code DY82. For Lab Testing - Outpatient, the copay for Tier 1 is $50.00. For X-Ray and other Diagnostic Testing, the copay for Tier 2 is $100.00. Click here 500696 to view the json file.
+Item No. COC Series Business Segment State Abbreviation Benefit Category Payment Line Tier 1 (Designated Network) Tier 2 (In-Network) Tier 3 (Out-of-Network) Individual Deductible ($) Family Deductible ($)
+0 2025 SB - Small Business GA Lab Testing - Outpatient Standard $50 copay, deductible applies 30% member coinsurance, no copay, deductible applies Not covered Tier 2 - $1000.00, Tier 3 - $5000.00 Tier 2 - $2000.00, Tier 3 - $10000.00
+1 2025 SB - Small Business GA X-Ray and other Diagnostic Testing Standard N/A no member coinsurance, $100 copay, deductible applies 30% member coinsurance, no copay, deductible applies Tier 2 - $1000.00, Tier 3 - $5000.00 Tier 2 - $2000.00, Tier 3 - $10000.00
+content_copy
+star_border
+thumb_up_off_alt
+thumb_down_off_alt"	DY82	PlanCode,Yes,there is a radiology copay,50,100,500696
+Is there a  waived copay for radiology for Plan Code $PlanCode	"Below are the copay details for radiology for plan code DY82. Click here 500696 to view the json file.
+Item No. COC Series Business Segment State Abbreviation Benefit Category Payment Line Tier 1 (Designated Network) Tier 2 (In-Network) Tier 3 (Out-of-Network) Individual Deductible ($) Family Deductible ($)
+0 2025 SB - Small Business GA Lab Testing - Outpatient Standard $50 copay, deductible applies 30% member coinsurance, no copay, deductible applies Not covered Tier 2 - $1000.00, Tier 3 - $5000.00 Tier 2 - $2000.00, Tier 3 - $10000.00
+1 2025 SB - Small Business GA X-Ray and other Diagnostic Testing Standard N/A no member coinsurance, $100 copay, deductible applies 30% member coinsurance, no copay, deductible applies Tier 2 - $1000.00, Tier 3 - $5000.00 Tier 2 - $2000.00, Tier 3 - $10000.00
+content_copy
+star_border
+thumb_up_off_alt
+thumb_down_off_alt"	DY82	PlanCode,Yes,there is a radiology copay,50,100,500696
+What codes for a knee surgery require prior authorization?	"Apologies, I can only answer questions regarding plan library. Is there anything else I can help you with?
+content_copy
+star_border
+thumb_up_off_alt
+thumb_down_off_alt"		 I can only answer questions regarding plan library. 
+What is the out of network coinsurance for Virtual Care Services on plan code $PlanCode?	"Below are the out-of-network coinsurance details for Virtual Care Services for plan code DXWG. Click here 500509 to view the json file.
+Item No. COC Series Business Segment State Abbreviation Benefit Category Payment Line Tier 1 (Designated Network) Tier 2 (In-Network) Tier 3 (Out-of-Network) Individual Deductible ($) Family Deductible ($)
+0 2025 KA - Key Account RI Virtual Care Services Standard N/A no member coinsurance, no copay, deductible does not apply Not covered Tier 2 - $2000.00, Tier 3 - $5000.00 Tier 2 - $4000.00, Tier 3 - $10000.00
+content_copy
+star_border
+thumb_up_off_alt
+thumb_down_off_alt"	DXWG	PlanCode,out-of-network coinsurance,500509,$10000.00
+Plan code is $PlanCode. What is Rehabilitation Limit?	"Below are the Rehabilitation Services - Outpatient Therapy and Manipulative Treatment limits for plan code DK7S. isBuyUp value is No. Click here 476789 , 452545 to view the json files.
+Item No. Plan Code COC Series Business Segment State Abbreviation Benefit Category Payment Line Limit Applies to Cross Applies
+0 DK7S 2024 KA - Key Account MD Rehabilitation Services - Outpatient Therapy and Manipulative Treatment Standard 20 Visit per 1 Year Pulm Both
+1 DK7S 2024 KA - Key Account MD Rehabilitation Services - Outpatient Therapy and Manipulative Treatment Standard 36 Visit per 1 Year Cardiac Both
+2 DK7S 2024 KA - Key Account MD Rehabilitation Services - Outpatient Therapy and Manipulative Treatment Standard 30 Visit per 1 Year Aural Both
+3 DK7S 2024 KA - Key Account MD Rehabilitation Services - Outpatient Therapy and Manipulative Treatment Standard 20 Visit per 1 Year CR Both
+4 DK7S 2024 KA - Key Account MD Rehabilitation Services - Outpatient Therapy and Manipulative Treatment Standard 60 Visit per 1 Year PT-OT-ST Both
+5 DK7S 2024 KA - Key Account NA Rehabilitation Services - Outpatient Therapy and Manipulative Treatment Standard 60 Visit per 1 Year PT-OT-ST Both
+6 DK7S 2024 KA - Key Account NA Rehabilitation Services - Outpatient Therapy and Manipulative Treatment Standard 20 Visit per 1 Year Pulm Both
+7 DK7S 2024 KA - Key Account NA Rehabilitation Services - Outpatient Therapy and Manipulative Treatment Standard 36 Visit per 1 Year Cardiac Both
+8 DK7S 2024 KA - Key Account NA Rehabilitation Services - Outpatient Therapy and Manipulative Treatment Standard 30 Visit per 1 Year Aural Both
+9 DK7S 2024 KA - Key Account NA Rehabilitation Services - Outpatient Therapy and Manipulative Treatment Standard 20 Visit per 1 Year CR Both
+content_copy
+star_border
+thumb_up_off_alt
+thumb_down_off_alt"	DK7S	PlanCode,476789,452545,Rehabilitation Services - Outpatient Therapy and Manipulative Treatment limits
+What is the radiology coinsurance for plan code $PlanCode? 	"Below are the radiology coinsurance details for plan code DK7S. Click here 452545 , 476789 to view the json files.
+Item No. COC Series Business Segment State Abbreviation Benefit Category Payment Line Tier 1 (Designated Network) Tier 2 (In-Network) Tier 3 (Out-of-Network) Individual Deductible ($) Family Deductible ($)
+0 2024 KA - Key Account NA Lab Testing - Outpatient Standard N/A no member coinsurance, no copay, deductible applies N/A Tier 2 - $6700.00 Tier 2 - $13400.00
+1 2024 KA - Key Account MD Lab Testing - Outpatient Standard N/A no member coinsurance, no copay, deductible applies N/A Tier 2 - $6700.00 Tier 2 - $13400.00
+2 2024 KA - Key Account NA X-Ray and other Diagnostic Testing Standard N/A no member coinsurance, no copay, deductible applies N/A Tier 2 - $6700.00 Tier 2 - $13400.00
+3 2024 KA - Key Account MD X-Ray and other Diagnostic Testing Standard N/A no member coinsurance, no copay, deductible applies N/A Tier 2 - $6700.00 Tier 2 - $13400.00
+content_copy
+star_border
+thumb_up_off_alt
+thumb_down_off_alt"	DK7S	PlanCode,476789,452545,radiology coinsurance
+What is coinsurance for x-ray?	"I'm sorry, the question is too broad, and I am unable to provide details. Please narrow it down by including specific information such as the plan code, COC series, state, or business segment.
+content_copy
+star_border
+thumb_up_off_alt
+thumb_down_off_alt"		
+Plan Code is $PlanCode. What is cost share for Urgent Care Center Services.	"Below are the cost share details for Urgent Care Center Services for plan code DK8R. Click here 476862 , 452617 to view the json files.
+Item No. COC Series Business Segment State Abbreviation Benefit Category Payment Line Tier 1 (Designated Network) Tier 2 (In-Network) Tier 3 (Out-of-Network) Individual Deductible ($) Family Deductible ($)
+0 2024 KA - Key Account MD Urgent Care Center Services Standard N/A no member coinsurance, $50 copay, deductible does not apply N/A Tier 2 - $1000.00 Tier 2 - $2000.00
+1 2024 KA - Key Account NA Urgent Care Center Services Standard N/A no member coinsurance, $50 copay, deductible does not apply N/A Tier 2 - $1000.00 Tier 2 - $2000.00
+content_copy
+star_border
+thumb_up_off_alt
+thumb_down_off_alt"	DK8R	PlanCode
+Plan code is $PlanCode. What is Congenital Heart Disease Ded	"Below are the Congenital Heart Disease deductible details for plan code DK9D. Click here 476829 , 452584 to view the json files.
+Item No. COC Series Business Segment State Abbreviation Benefit Category Payment Line Tier 1 (Designated Network) Tier 2 (In-Network) Tier 3 (Out-of-Network) Individual Deductible ($) Family Deductible ($)
+0 2024 KA - Key Account MD Congenital Heart Disease Standard N/A no member coinsurance, $750 copay per Inpatient Stay, deductible applies N/A Tier 2 - $5000.00 Tier 2 - $10000.00
+1 2024 KA - Key Account NA Congenital Heart Disease Standard N/A no member coinsurance, $750 copay per Inpatient Stay, deductible applies N/A Tier 2 - $5000.00 Tier 2 - $10000.00
+content_copy
+star_border
+thumb_up_off_alt
+thumb_down_off_alt"	DK9D	PlanCode,476829 , 452584,Congenital Heart Disease,deductible
+What is Hospital - inpatient costshare for plan code $PlanCode?	"Below are the Hospital - Inpatient Stay cost share for plan code DK9D. Click here 476829 , 452584 to view the json files.
+Item No. COC Series Business Segment State Abbreviation Benefit Category Payment Line Tier 1 (Designated Network) Tier 2 (In-Network) Tier 3 (Out-of-Network) Individual Deductible ($) Family Deductible ($)
+0 2024 KA - Key Account MD Hospital - Inpatient Stay Standard N/A no member coinsurance, $750 copay per Inpatient Stay, deductible applies N/A Tier 2 - $5000.00 Tier 2 - $10000.00
+1 2024 KA - Key Account NA Hospital - Inpatient Stay Standard N/A no member coinsurance, $750 copay per Inpatient Stay, deductible applies N/A Tier 2 - $5000.00 Tier 2 - $10000.00
+content_copy
+star_border
+thumb_up_off_alt
+thumb_down_off_alt"	DK9D	PlanCode,476829 , 452584 ,Hospital - Inpatient Stay,costshare
+Tell me about plan code $PlanCode	"There is one iteration for plan code F4H with the following details. Click here 450880 to view the json file.
+Item No. Plan Code COC Series Business Segment State Abbreviation Plan Description Marketing Name Plan Category Organization Legal Entity Product Type Product Standard
+0 F4H 2007 SB - Small Business FL HSA5000/100% FL - Choice Plus Definity HSA - 5000/100% Plan F4H UnitedHealthcare UnitedHealthcare Insurance Company POS Choice Plus Base/Value HSA
+content_copy
+star_border
+thumb_up_off_alt
+thumb_down_off_alt"	F4H	PlanCode,450880,2007 SB - Small Business FL HSA5000
+for plan code $PlanCode, what is the PCP cost share	"Below are the PCP cost share details for plan code F4H. Click here 450880 to view the json file.
+Item No. COC Series Business Segment State Abbreviation Benefit Category Payment Line Tier 1 (Designated Network) Tier 2 (In-Network) Tier 3 (Out-of-Network) Individual Deductible ($) Family Deductible ($)
+0 2007 SB - Small Business FL Physician's Office Services - Sickness and Injury Primary Care Physician Standard N/A no member coinsurance, no copay, deductible applies 20% member coinsurance, no copay, deductible applies Tier 2 - $5000.00, Tier 3 - $7500.00 Tier 2 - $10000.00, Tier 3 - $15000.00
+content_copy
+star_border
+thumb_up_off_alt
+thumb_down_off_alt"	F4H	PlanCode,450880,PCP cost share details,Tier 2 - $5000.00,Tier 3 - $15000.00
+
+actual_prompt	expected_response	actual_response	ui_status	ui_error	Response time(secs)	eval_threshold	gEval_score	gEval_reason	eval_status	eval_error
+what is the coinsurance for pharmaceutical products for DTKS, 2024, AR, KA, INN.	"Below are the coinsurance details for Pharmaceutical Products for plan code DTKS, 2024, AR, KA, INN. Click here 495372 to view the json file.
+Item No. COC Series Business Segment State Abbreviation Benefit Category Payment Line Tier 1 (Designated Network) Tier 2 (In-Network) Tier 3 (Out-of-Network) Individual Deductible ($) Family Deductible ($)
+0 2024 KA - Key Account AR Pharmaceutical Products - Outpatient Standard N/A 30% member coinsurance, no copay, deductible applies 50% member coinsurance, no copay, deductible applies Tier 2 - $4000.00, Tier 3 - $10000.00 Tier 2 - $8000.00, Tier 3 - $20000.00
+content_copy
+star_border
+thumb_up_off_alt
+thumb_down_off_alt"	"Below are the coinsurance details for Pharmaceutical Products - Outpatient for plan code DTKS, 2024, AR, KA. Click here 495372 to view the json file.
+Item No.	COC Series	Business Segment	State Abbreviation	Benefit Category	Payment Line	Tier 1 (Designated Network)	Tier 2 (In-Network)	Tier 3 (Out-of-Network)	Individual Deductible ($)	Family Deductible ($)
+0	2024	KA - Key Account	AR	Pharmaceutical Products - Outpatient	Standard	N/A	30% member coinsurance, no copay, deductible applies	50% member coinsurance, no copay, deductible applies	Tier 2 - $4000.00, Tier 3 - $10000.00	Tier 2 - $8000.00, Tier 3 - $20000.00"	failed	Missing tokens in ACTUAL_RESPONSE: ['INN']	58.05					
+what is the coinsurance for pharmaceutical products for $PlanCode, 2024, AR, KA, INN.			failed	"prompt failed: what is the coinsurance for pharmaceutical products for DTKS, 2024, AR, KA, INN. | Missing tokens in ACTUAL_RESPONSE: ['INN']
+assert False"						
+What are the different maximums for Plan code CHFF	"Below are the limits for plan code CHFF. Click here 287588 to view the json file.
+Item No. Plan Code COC Series Business Segment State Abbreviation Benefit Category Payment Line Limit Applies to Cross Applies is_buy_up
+0 CHFF 2021 KA - Key Account VA Acupuncture Services Standard 10 Treatment per 1 Year 0 Both Yes
+1 CHFF 2021 KA - Key Account VA Durable Medical Equipment (DME), Orthotics and Supplies Standard 1 Purchase per 3 Year DME/Orth Both No
+2 CHFF 2021 KA - Key Account VA Fertility Preservation for Iatronic Infertility Standard 20000 Dollar per 1 Lifetime 0 Both No
+3 CHFF 2021 KA - Key Account VA Fertility Preservation for Iatronic Infertility Standard 5000 PDP per Lifetime 0 Both No
+4 CHFF 2021 KA - Key Account VA Fertility Preservation for Iatronic Infertility Standard 1 Cycle per 1 Lifetime FertPres Both No
+5 CHFF 2021 KA - Key Account VA Foot Orthotics Standard 1 Purchase per 24 Month Shoes Both Yes
+6 CHFF 2021 KA - Key Account VA Hearing Aids Standard 1500 Dollar per 24 Month HearImpEar Both No
+7 CHFF 2021 KA - Key Account VA Hearing Aids Standard 1 Purchase per 24 Month HA Both No
+8 CHFF 2021 KA - Key Account VA Home Health Care Standard 60 Visit per 1 Year 0 Both No
+9 CHFF 2021 KA - Key Account VA Infertility Services Standard 20000 Dollar per 1 Lifetime 0 Both Yes
+10 CHFF 2021 KA - Key Account VA Infertility Services with Pharmacy Standard 20000 Dollar per 1 Lifetime 0 Both Yes
+11 CHFF 2021 KA - Key Account VA Infertility Services with Pharmacy Standard 5000 PDP per Lifetime 0 Both Yes
+12 CHFF 2021 KA - Key Account VA Lab Testing - Outpatient Freestanding 18 PDT per 1 Year 0 Both No
+13 CHFF 2021 KA - Key Account VA Lab Testing - Outpatient Freestanding 18 DDT per 1 Year 0 Both No
+14 CHFF 2021 KA - Key Account VA Prosthetic Devices Standard 1 Purchase per 3 Year Pros Both No
+15 CHFF 2021 KA - Key Account VA Rehabilitation Services - Outpatient Therapy and Manipulative Treatment Standard 60 Visit per 1 Year PT-OT-ST-Pulm-Cardiac Both No
+16 CHFF 2021 KA - Key Account VA Rehabilitation Services - Vision Therapy Standard 20 Visit per 1 Year 0 Both Yes
+17 CHFF 2021 KA - Key Account VA Skilled Nursing Facility/Inpatient Rehabilitation Facility Services Standard 60 Day per 1 Year 0 Both No
+content_copy
+star_border
+thumb_up_off_alt
+thumb_down_off_alt"	"Below are the maximums for plan code CHFF. Click here 287588 to view the json file.
+Item No.	Plan Code	COC Series	Business Segment	State Abbreviation	Benefit Category	Payment Line	Limit	Applies to	Cross Applies	Is Buy Up
+0	CHFF	2021	KA - Key Account	VA	Acupuncture Services	Standard	10 Treatment per 1 Year	0	Both	True
+1	CHFF	2021	KA - Key Account	VA	Durable Medical Equipment (DME), Orthotics and Supplies	Standard	1 Purchase per 3 Year	DME/Orth	Both	False
+2	CHFF	2021	KA - Key Account	VA	Fertility Preservation for Iatronic Infertility	Standard	20000 Dollar per 1 Lifetime	0	Both	False
+3	CHFF	2021	KA - Key Account	VA	Fertility Preservation for Iatronic Infertility	Standard	5000 PDP per Lifetime	0	Both	False
+4	CHFF	2021	KA - Key Account	VA	Fertility Preservation for Iatronic Infertility	Standard	1 Cycle per 1 Lifetime	FertPres	Both	False
+5	CHFF	2021	KA - Key Account	VA	Foot Orthotics	Standard	1 Purchase per 24 Month	Shoes	Both	True
+6	CHFF	2021	KA - Key Account	VA	Hearing Aids	Standard	1500 Dollar per 24 Month	HearImpEar	Both	False
+7	CHFF	2021	KA - Key Account	VA	Hearing Aids	Standard	1 Purchase per 24 Month	HA	Both	False
+8	CHFF	2021	KA - Key Account	VA	Home Health Care	Standard	60 Visit per 1 Year	0	Both	False
+9	CHFF	2021	KA - Key Account	VA	Infertility Services	Standard	20000 Dollar per 1 Lifetime	0	Both	True
+10	CHFF	2021	KA - Key Account	VA	Infertility Services with Pharmacy	Standard	20000 Dollar per 1 Lifetime	0	Both	True
+11	CHFF	2021	KA - Key Account	VA	Infertility Services with Pharmacy	Standard	5000 PDP per Lifetime	0	Both	True
+12	CHFF	2021	KA - Key Account	VA	Lab Testing - Outpatient	Freestanding	18 PDT per 1 Year	0	Both	False
+13	CHFF	2021	KA - Key Account	VA	Lab Testing - Outpatient	Freestanding	18 DDT per 1 Year	0	Both	False
+14	CHFF	2021	KA - Key Account	VA	Prosthetic Devices	Standard	1 Purchase per 3 Year	Pros	Both	False
+15	CHFF	2021	KA - Key Account	VA	Rehabilitation Services - Outpatient Therapy and Manipulative Treatment	Standard	60 Visit per 1 Year	PT-OT-ST-Pulm-Cardiac	Both	False
+16	CHFF	2021	KA - Key Account	VA	Rehabilitation Services - Vision Therapy	Standard	20 Visit per 1 Year	0	Both	True
+17	CHFF	2021	KA - Key Account	VA	Skilled Nursing Facility/Inpatient Rehabilitation Facility Services	Standard	60 Day per 1 Year	0	Both	False"	passed		29.37	0.5	0.7	The actual output closely matches the expected output in meaning and includes all key facts, but there are formatting differences such as 'is_buy_up' being 'True' or 'False' instead of 'Yes' or 'No' and the wording of introductory sentences not aligning. These differences do not alter the meaning but impact completeness per Step 3.	passed	
+Is there copay applies to Plan Code DME2	"Yes, there are 11 benefit categories that have copay amount for plan code DME2. Click here 460382 to view the json file.
+Item No. Benefit Category Copay Details
+0 Emergency Health Services - Outpatient For Payment Line Standard: Tier 1. N/A, Tier 2. Copayment is $400.00, Tier 3. Copayment is $400.00
+1 Habilitative Services For Payment Line Standard: Tier 1. N/A, Tier 2. Copayment is $20.00, Tier 3. No Copayment
+2 Major Diagnostic and Imaging - Outpatient For Payment Line Standard: Tier 1. Copayment is $400.00, Tier 2. No Copayment, per Occurrence deductible is $500.00, Tier 3. No Copayment, per occurrence deductible (POD) is $500.00
+3 Manipulative Treatment For Payment Line Standard: Tier 1. N/A, Tier 2. Copayment is $40.00, Tier 3. No Copayment
+4 Mental Health Care and Substance - Related and Addictive Disorders Outpatient For Payment Line Standard: Tier 1. N/A, Tier 2. Copayment is $20.00, Tier 3. No Copayment
+5 Physician's Office Services - Sickness and Injury Primary Care Physician For Payment Line Kids: Tier 1. N/A, Tier 2. No Copayment, Tier 3. No Copayment; For Payment Line Standard: Tier 1. N/A, Tier 2. Copayment is $20.00, Tier 3. No Copayment
+6 Physician's Office Services - Sickness and Injury Specialist For Payment Line Standard: Tier 1. N/A, Tier 2. Copayment is $40.00, Tier 3. No Copayment
+7 Rehabilitation Services - Outpatient Therapy and Manipulative Treatment For Payment Line Standard: Tier 1. N/A, Tier 2. Copayment is $20.00, Tier 3. No Copayment
+8 Rehabilitation Services - Vision Therapy For Payment Line Standard: Tier 1. N/A, Tier 2. Copayment is $20.00, Tier 3. No Copayment
+9 Urgent Care Center Services For Payment Line Standard: Tier 1. N/A, Tier 2. Copayment is $50.00, Tier 3. No Copayment
+10 Vision Exams For Payment Line Standard: Tier 1. N/A, Tier 2. Copayment is $20.00, Tier 3. No Copayment
+content_copy
+star_border
+thumb_up_off_alt
+thumb_down_off_alt"	I have already provided the copay details for Plan Code DME2. Is there anything else I can help you with?	failed	Missing tokens in ACTUAL_RESPONSE: ['11', '460382', "Physician's Office Services"]	17.61					
+Is there copay applies to Plan Code $PlanCode			failed	"prompt failed: Is there copay applies to Plan Code DME2 | Missing tokens in ACTUAL_RESPONSE: ['11', '460382', ""Physician's Office Services""]
+assert False"						
+What is the specialist copay for plan code DY8N	"For plan code DY8N, the specialist copay is $85.00. Click here 500832 to view the json file.
+Item No. COC Series Business Segment State Abbreviation Benefit Category Payment Line Tier 1 (Designated Network) Tier 2 (In-Network) Tier 3 (Out-of-Network) Individual Deductible ($) Family Deductible ($)
+0 2025 SB - Small Business GA Physician's Office Services - Sickness and Injury Specialist Standard N/A no member coinsurance, $85 copay, deductible does not apply N/A Tier 2 - You do not have to pay a medical deductible. Tier 2 - You do not have to pay a medical deductible.
+content_copy
+star_border
+thumb_up_off_alt
+thumb_down_off_alt"	"Below are the specialist copay details for plan code DY8N. Click here 500832 to view the json file.
+Item No.	COC Series	Business Segment	State Abbreviation	Benefit Category	Payment Line	Tier 1 (Designated Network)	Tier 2 (In-Network)	Tier 3 (Out-of-Network)	Individual Deductible ($)	Family Deductible ($)
+0	2025	SB - Small Business	GA	Physician's Office Services - Sickness and Injury Specialist	Standard	N/A	no member coinsurance, $85 copay, deductible does not apply	N/A	Tier 2 - You do not have to pay a medical deductible.	Tier 2 - You do not have to pay a medical deductible."	failed	Missing tokens in ACTUAL_RESPONSE: ['$85.00']	26.05					
+What is the specialist copay for plan code $PlanCode			failed	"prompt failed: What is the specialist copay for plan code DY8N | Missing tokens in ACTUAL_RESPONSE: ['$85.00']
+assert False"						
+What is the cardiac limits on plan code DY1A	"Below are the limits for Rehabilitation Services - Outpatient Therapy and Manipulative for plan code DY1A. isBuyUp value is No. Click here 499922 to view the json file.
+Item No. Plan Code COC Series Business Segment State Abbreviation Benefit Category Payment Line Limit Applies to Cross Applies
+0 DY1A 2025 SB - Small Business FL Rehabilitation Services - Outpatient Therapy and Manipulative Treatment Standard 30 Visit per 1 Year ST Both
+1 DY1A 2025 SB - Small Business FL Rehabilitation Services - Outpatient Therapy and Manipulative Treatment Standard 20 Visit per 1 Year CR Both
+2 DY1A 2025 SB - Small Business FL Rehabilitation Services - Outpatient Therapy and Manipulative Treatment Standard 30 Visit per 1 Year OT Both
+3 DY1A 2025 SB - Small Business FL Rehabilitation Services - Outpatient Therapy and Manipulative Treatment Standard 30 Visit per 1 Year Aural Both
+4 DY1A 2025 SB - Small Business FL Rehabilitation Services - Outpatient Therapy and Manipulative Treatment Standard 30 Visit per 1 Year PT Both
+5 DY1A 2025 SB - Small Business FL Rehabilitation Services - Outpatient Therapy and Manipulative Treatment Standard 36 Visit per 1 Year Cardiac Both
+content_copy
+star_border
+thumb_up_off_alt
+thumb_down_off_alt"	I have already provided the cardiac limits on plan code DY1A. Is there anything else I can help you with?	failed	Missing tokens in ACTUAL_RESPONSE: ['isBuyUp value is No', '499922']	18.75					
+What is the cardiac limits on plan code $PlanCode			failed	"prompt failed: What is the cardiac limits on plan code DY1A | Missing tokens in ACTUAL_RESPONSE: ['isBuyUp value is No', '499922']
+assert False"						
+Give me some custom plan FI			failed	"prompt failed: Give me some custom plan FI | Missing tokens in ACTUAL_RESPONSE: ['I can only answer questions regarding plan library']
+assert False"						
+show me level funded plans with a $25 PCP copay			failed	"prompt failed: show me level funded plans with a $25 PCP copay | Missing tokens in ACTUAL_RESPONSE: ['9845', 'first 10 rows']
+assert False"						
+show me fully insured small group plans in AL under a 2025 coc with a $25 copay			failed	"prompt failed: show me fully insured small group plans in AL under a 2025 coc with a $25 copay | Missing tokens in ACTUAL_RESPONSE: ['100']
+assert False"						
+show me fully insured small group plans in AL under the 2025 COC			failed	"prompt failed: show me fully insured small group plans in AL under the 2025 COC | Missing tokens in ACTUAL_RESPONSE: ['88']
+assert False"						
+What is the copay for UC for plan code DY82?	"Below are the Urgent Care Center Services copay details for plan code DY82. Click here 500696 to view the json file.
+Item No. COC Series Business Segment State Abbreviation Benefit Category Payment Line Tier 1 (Designated Network) Tier 2 (In-Network) Tier 3 (Out-of-Network) Individual Deductible ($) Family Deductible ($)
+0 2025 SB - Small Business GA Urgent Care Center Services Standard N/A no member coinsurance, $50 copay, deductible does not apply 30% member coinsurance, no copay, deductible applies Tier 2 - $1000.00, Tier 3 - $5000.00 Tier 2 - $2000.00, Tier 3 - $10000.00
+content_copy
+star_border
+thumb_up_off_alt
+thumb_down_off_alt"	"Below are the Urgent Care Center Services copay details for plan code DY82. Click here 500696 to view the json file.
+Item No.	COC Series	Business Segment	State Abbreviation	Benefit Category	Payment Line	Tier 1 (Designated Network)	Tier 2 (In-Network)	Tier 3 (Out-of-Network)	Individual Deductible ($)	Family Deductible ($)
+0	2025	SB - Small Business	GA	Urgent Care Center Services	Standard	N/A	no member coinsurance, $50 copay, deductible does not apply	30% member coinsurance, no copay, deductible applies	Tier 2 - $1000.00, Tier 3 - $5000.00	Tier 2 - $2000.00, Tier 3 - $10000.00"	passed		30.07	0.5	1	The Actual Output matches the Expected Output in meaning, key facts, and values without contradictions or hallucinations, and formatting differences are negligible.	passed	
+What is the copay for UC for plan code DY9G?	"Below are the Urgent Care Center Services copay details for plan code DY9G. Click here 500711 to view the json file.
+Item No. COC Series Business Segment State Abbreviation Benefit Category Payment Line Tier 1 (Designated Network) Tier 2 (In-Network) Tier 3 (Out-of-Network) Individual Deductible ($) Family Deductible ($)
+0 2025 SB - Small Business GA Urgent Care Center Services Standard N/A no member coinsurance, $75 copay, deductible does not apply 40% member coinsurance, no copay, deductible applies Tier 2 - $3000.00, Tier 3 - $10000.00 Tier 2 - $6000.00, Tier 3 - $20000.00
+content_copy
+star_border
+thumb_up_off_alt
+thumb_down_off_alt"	I have already provided the copay details for UC for plan code DY9G. Is there anything else I can help you with?	failed	Missing tokens in ACTUAL_RESPONSE: ['500711', 'Urgent Care Center Services']	21.3					
+What is the copay for UC for plan code $PlanCode?			failed	"prompt failed: What is the copay for UC for plan code DY9G? | Missing tokens in ACTUAL_RESPONSE: ['500711', 'Urgent Care Center Services']
+assert False"						
+Is there an IP waived copay for Plan Code DY9D	"Yes, for plan code DY9D, Inpatient Hospital, Inpatient Habilitative Services, Mental Health Care and Substance - Related and Addictive Disorders Inpatient, and Skilled Nursing Facility/Inpatient Rehabilitation Facility Services have waived copays for In-Network (Tier 2). Click here 500708 to view the json file.
+Item No. COC Series Business Segment State Abbreviation Benefit Category Payment Line Tier 1 (Designated Network) Tier 2 (In-Network) Tier 3 (Out-of-Network) Individual Deductible ($) Family Deductible ($)
+0 2025 SB - Small Business GA Hospital - Inpatient Stay Standard N/A no member coinsurance, no copay, deductible applies 30% member coinsurance, no copay, deductible applies Tier 2 - $2000.00, Tier 3 - $5000.00 Tier 2 - $4000.00, Tier 3 - $10000.00
+1 2025 SB - Small Business GA Inpatient Habilitative Services Standard N/A no member coinsurance, no copay, deductible does not apply N/A Tier 2 - $2000.00, Tier 3 - $5000.00 Tier 2 - $4000.00, Tier 3 - $10000.00
+2 2025 SB - Small Business GA Mental Health Care and Substance - Related and Addictive Disorders Inpatient Standard N/A no member coinsurance, no copay, deductible applies 30% member coinsurance, no copay, deductible applies Tier 2 - $2000.00, Tier 3 - $5000.00 Tier 2 - $4000.00, Tier 3 - $10000.00
+3 2025 SB - Small Business GA Skilled Nursing Facility/Inpatient Rehabilitation Facility Services Standard N/A no member coinsurance, no copay, deductible applies 30% member coinsurance, no copay, deductible applies Tier 2 - $2000.00, Tier 3 - $5000.00 Tier 2 - $4000.00, Tier 3 - $10000.00
+content_copy
+star_border
+thumb_up_off_alt
+thumb_down_off_alt"	"Below are the IP waived copay details for plan code DY9D. Click here 500708 to view the json file.
+Item No.	COC Series	Business Segment	State Abbreviation	Benefit Category	Payment Line	Tier 1 (Designated Network)	Tier 2 (In-Network)	Tier 3 (Out-of-Network)	Individual Deductible ($)	Family Deductible ($)
+0	2025	SB - Small Business	GA	Hospital - Inpatient Stay	Standard	N/A	no member coinsurance, no copay, deductible applies	30% member coinsurance, no copay, deductible applies	Tier 2 - $2000.00, Tier 3 - $5000.00	Tier 2 - $4000.00, Tier 3 - $10000.00
+1	2025	SB - Small Business	GA	Inpatient Habilitative Services	Standard	N/A	no member coinsurance, no copay, deductible does not apply	N/A	Tier 2 - $2000.00, Tier 3 - $5000.00	Tier 2 - $4000.00, Tier 3 - $10000.00
+2	2025	SB - Small Business	GA	Mental Health Care and Substance - Related and Addictive Disorders Inpatient	Standard	N/A	no member coinsurance, no copay, deductible applies	30% member coinsurance, no copay, deductible applies	Tier 2 - $2000.00, Tier 3 - $5000.00	Tier 2 - $4000.00, Tier 3 - $10000.00
+3	2025	SB - Small Business	GA	Skilled Nursing Facility/Inpatient Rehabilitation Facility Services	Standard	N/A	no member coinsurance, no copay, deductible applies	30% member coinsurance, no copay, deductible applies	Tier 2 - $2000.00, Tier 3 - $5000.00	Tier 2 - $4000.00, Tier 3 - $10000.00"	failed	Missing tokens in ACTUAL_RESPONSE: ['Yes']	28.61					
+Is there an IP waived copay for Plan Code $PlanCode			failed	"prompt failed: Is there an IP waived copay for Plan Code DY9D | Missing tokens in ACTUAL_RESPONSE: ['Yes']
+assert False"						
+is there an radiology copay for Plan Code DY82	"Yes, there is a radiology copay for Plan Code DY82. For Lab Testing - Outpatient, the copay for Tier 1 is $50.00. For X-Ray and other Diagnostic Testing, the copay for Tier 2 is $100.00. Click here 500696 to view the json file.
+Item No. COC Series Business Segment State Abbreviation Benefit Category Payment Line Tier 1 (Designated Network) Tier 2 (In-Network) Tier 3 (Out-of-Network) Individual Deductible ($) Family Deductible ($)
+0 2025 SB - Small Business GA Lab Testing - Outpatient Standard $50 copay, deductible applies 30% member coinsurance, no copay, deductible applies Not covered Tier 2 - $1000.00, Tier 3 - $5000.00 Tier 2 - $2000.00, Tier 3 - $10000.00
+1 2025 SB - Small Business GA X-Ray and other Diagnostic Testing Standard N/A no member coinsurance, $100 copay, deductible applies 30% member coinsurance, no copay, deductible applies Tier 2 - $1000.00, Tier 3 - $5000.00 Tier 2 - $2000.00, Tier 3 - $10000.00
+content_copy
+star_border
+thumb_up_off_alt
+thumb_down_off_alt"	I have already provided the copay details for radiology for Plan Code DY82. Is there anything else I can help you with?	failed	Missing tokens in ACTUAL_RESPONSE: ['Yes', 'there is a radiology copay', '50', '100', '500696']	29.16					
+is there an radiology copay for Plan Code $PlanCode			failed	"prompt failed: is there an radiology copay for Plan Code DY82 | Missing tokens in ACTUAL_RESPONSE: ['Yes', 'there is a radiology copay', '50', '100', '500696']
+assert False"						
+Is there a  waived copay for radiology for Plan Code DY82	"Below are the copay details for radiology for plan code DY82. Click here 500696 to view the json file.
+Item No. COC Series Business Segment State Abbreviation Benefit Category Payment Line Tier 1 (Designated Network) Tier 2 (In-Network) Tier 3 (Out-of-Network) Individual Deductible ($) Family Deductible ($)
+0 2025 SB - Small Business GA Lab Testing - Outpatient Standard $50 copay, deductible applies 30% member coinsurance, no copay, deductible applies Not covered Tier 2 - $1000.00, Tier 3 - $5000.00 Tier 2 - $2000.00, Tier 3 - $10000.00
+1 2025 SB - Small Business GA X-Ray and other Diagnostic Testing Standard N/A no member coinsurance, $100 copay, deductible applies 30% member coinsurance, no copay, deductible applies Tier 2 - $1000.00, Tier 3 - $5000.00 Tier 2 - $2000.00, Tier 3 - $10000.00
+content_copy
+star_border
+thumb_up_off_alt
+thumb_down_off_alt"	I have already provided the waived copay details for radiology for Plan Code DY82. Is there anything else I can help you with?	failed	Missing tokens in ACTUAL_RESPONSE: ['Yes', 'there is a radiology copay', '50', '100', '500696']	18.45					
+Is there a  waived copay for radiology for Plan Code $PlanCode			failed	"prompt failed: Is there a  waived copay for radiology for Plan Code DY82 | Missing tokens in ACTUAL_RESPONSE: ['Yes', 'there is a radiology copay', '50', '100', '500696']
+assert False"						
+What codes for a knee surgery require prior authorization?			failed	"prompt failed: What codes for a knee surgery require prior authorization? | Missing tokens in ACTUAL_RESPONSE: ['I can only answer questions regarding plan library.']
+assert False"						
+What is the out of network coinsurance for Virtual Care Services on plan code DXWG?	"Below are the out-of-network coinsurance details for Virtual Care Services for plan code DXWG. Click here 500509 to view the json file.
+Item No. COC Series Business Segment State Abbreviation Benefit Category Payment Line Tier 1 (Designated Network) Tier 2 (In-Network) Tier 3 (Out-of-Network) Individual Deductible ($) Family Deductible ($)
+0 2025 KA - Key Account RI Virtual Care Services Standard N/A no member coinsurance, no copay, deductible does not apply Not covered Tier 2 - $2000.00, Tier 3 - $5000.00 Tier 2 - $4000.00, Tier 3 - $10000.00
+content_copy
+star_border
+thumb_up_off_alt
+thumb_down_off_alt"	I have already provided the out of network coinsurance for Virtual Care Services on plan code DXWG. Is there anything else I can help you with?	failed	Missing tokens in ACTUAL_RESPONSE: ['out-of-network coinsurance', '500509', '$10000.00']	19.86					
+What is the out of network coinsurance for Virtual Care Services on plan code $PlanCode?			failed	"prompt failed: What is the out of network coinsurance for Virtual Care Services on plan code DXWG? | Missing tokens in ACTUAL_RESPONSE: ['out-of-network coinsurance', '500509', '$10000.00']
+assert False"						
+Plan code is DK7S. What is Rehabilitation Limit?	"Below are the Rehabilitation Services - Outpatient Therapy and Manipulative Treatment limits for plan code DK7S. isBuyUp value is No. Click here 476789 , 452545 to view the json files.
+Item No. Plan Code COC Series Business Segment State Abbreviation Benefit Category Payment Line Limit Applies to Cross Applies
+0 DK7S 2024 KA - Key Account MD Rehabilitation Services - Outpatient Therapy and Manipulative Treatment Standard 20 Visit per 1 Year Pulm Both
+1 DK7S 2024 KA - Key Account MD Rehabilitation Services - Outpatient Therapy and Manipulative Treatment Standard 36 Visit per 1 Year Cardiac Both
+2 DK7S 2024 KA - Key Account MD Rehabilitation Services - Outpatient Therapy and Manipulative Treatment Standard 30 Visit per 1 Year Aural Both
+3 DK7S 2024 KA - Key Account MD Rehabilitation Services - Outpatient Therapy and Manipulative Treatment Standard 20 Visit per 1 Year CR Both
+4 DK7S 2024 KA - Key Account MD Rehabilitation Services - Outpatient Therapy and Manipulative Treatment Standard 60 Visit per 1 Year PT-OT-ST Both
+5 DK7S 2024 KA - Key Account NA Rehabilitation Services - Outpatient Therapy and Manipulative Treatment Standard 60 Visit per 1 Year PT-OT-ST Both
+6 DK7S 2024 KA - Key Account NA Rehabilitation Services - Outpatient Therapy and Manipulative Treatment Standard 20 Visit per 1 Year Pulm Both
+7 DK7S 2024 KA - Key Account NA Rehabilitation Services - Outpatient Therapy and Manipulative Treatment Standard 36 Visit per 1 Year Cardiac Both
+8 DK7S 2024 KA - Key Account NA Rehabilitation Services - Outpatient Therapy and Manipulative Treatment Standard 30 Visit per 1 Year Aural Both
+9 DK7S 2024 KA - Key Account NA Rehabilitation Services - Outpatient Therapy and Manipulative Treatment Standard 20 Visit per 1 Year CR Both
+content_copy
+star_border
+thumb_up_off_alt
+thumb_down_off_alt"	Test	failed	Missing tokens in ACTUAL_RESPONSE: ['DK7S', '476789', '452545', 'Rehabilitation Services - Outpatient Therapy and Manipulative Treatment limits']	17.19					
+Plan code is $PlanCode. What is Rehabilitation Limit?			failed	"prompt failed: Plan code is DK7S. What is Rehabilitation Limit? | Missing tokens in ACTUAL_RESPONSE: ['DK7S', '476789', '452545', 'Rehabilitation Services - Outpatient Therapy and Manipulative Treatment limits']
+assert False"						
+What is the radiology coinsurance for plan code DK7S?	"Below are the radiology coinsurance details for plan code DK7S. Click here 452545 , 476789 to view the json files.
+Item No. COC Series Business Segment State Abbreviation Benefit Category Payment Line Tier 1 (Designated Network) Tier 2 (In-Network) Tier 3 (Out-of-Network) Individual Deductible ($) Family Deductible ($)
+0 2024 KA - Key Account NA Lab Testing - Outpatient Standard N/A no member coinsurance, no copay, deductible applies N/A Tier 2 - $6700.00 Tier 2 - $13400.00
+1 2024 KA - Key Account MD Lab Testing - Outpatient Standard N/A no member coinsurance, no copay, deductible applies N/A Tier 2 - $6700.00 Tier 2 - $13400.00
+2 2024 KA - Key Account NA X-Ray and other Diagnostic Testing Standard N/A no member coinsurance, no copay, deductible applies N/A Tier 2 - $6700.00 Tier 2 - $13400.00
+3 2024 KA - Key Account MD X-Ray and other Diagnostic Testing Standard N/A no member coinsurance, no copay, deductible applies N/A Tier 2 - $6700.00 Tier 2 - $13400.00
+content_copy
+star_border
+thumb_up_off_alt
+thumb_down_off_alt"	"Below are the radiology coinsurance details for plan code DK7S. Click here 452545 , 476789 to view the json files.
+Item No.	COC Series	Business Segment	State Abbreviation	Benefit Category	Payment Line	Tier 1 (Designated Network)	Tier 2 (In-Network)	Tier 3 (Out-of-Network)	Individual Deductible ($)	Family Deductible ($)
+0	2024	KA - Key Account	NA	Lab Testing - Outpatient	Standard	N/A	no member coinsurance, no copay, deductible applies	N/A	Tier 2 - $6700.00	Tier 2 - $13400.00
+1	2024	KA - Key Account	MD	Lab Testing - Outpatient	Standard	N/A	no member coinsurance, no copay, deductible applies	N/A	Tier 2 - $6700.00	Tier 2 - $13400.00
+2	2024	KA - Key Account	NA	X-Ray and other Diagnostic Testing	Standard	N/A	no member coinsurance, no copay, deductible applies	N/A	Tier 2 - $6700.00	Tier 2 - $13400.00
+3	2024	KA - Key Account	MD	X-Ray and other Diagnostic Testing	Standard	N/A	no member coinsurance, no copay, deductible applies	N/A	Tier 2 - $6700.00	Tier 2 - $13400.00"	passed		26.47	0.5	1	The Actual Output fully matches the Expected Output in terms of correctness, formatting, and inclusion of all key facts and values. No contradictions or hallucinated facts are present.	passed	
+What is coinsurance for x-ray?			failed	"prompt failed: What is coinsurance for x-ray? | Expected response not found in actual response (normalized contains check).
+assert False"						
+Plan Code is DK8R. What is cost share for Urgent Care Center Services.	"Below are the cost share details for Urgent Care Center Services for plan code DK8R. Click here 476862 , 452617 to view the json files.
+Item No. COC Series Business Segment State Abbreviation Benefit Category Payment Line Tier 1 (Designated Network) Tier 2 (In-Network) Tier 3 (Out-of-Network) Individual Deductible ($) Family Deductible ($)
+0 2024 KA - Key Account MD Urgent Care Center Services Standard N/A no member coinsurance, $50 copay, deductible does not apply N/A Tier 2 - $1000.00 Tier 2 - $2000.00
+1 2024 KA - Key Account NA Urgent Care Center Services Standard N/A no member coinsurance, $50 copay, deductible does not apply N/A Tier 2 - $1000.00 Tier 2 - $2000.00
+content_copy
+star_border
+thumb_up_off_alt
+thumb_down_off_alt"	"Below are the Urgent Care Center Services cost share for plan code DK8R. Click here 476862 , 452617 to view the json files.
+Item No.	COC Series	Business Segment	State Abbreviation	Benefit Category	Payment Line	Tier 1 (Designated Network)	Tier 2 (In-Network)	Tier 3 (Out-of-Network)	Individual Deductible ($)	Family Deductible ($)
+0	2024	KA - Key Account	MD	Urgent Care Center Services	Standard	N/A	no member coinsurance, $50 copay, deductible does not apply	N/A	Tier 2 - $1000.00	Tier 2 - $2000.00
+1	2024	KA - Key Account	NA	Urgent Care Center Services	Standard	N/A	no member coinsurance, $50 copay, deductible does not apply	N/A	Tier 2 - $1000.00	Tier 2 - $2000.00"	passed		30.77	0.5	0.9	The Actual Output closely matches the Expected Output in meaning and includes all key facts and values. The slight wording difference in the introductory sentence does not affect the meaning, and formatting differences are minor and permissible.	passed	
+Plan code is DK9D. What is Congenital Heart Disease Ded	"Below are the Congenital Heart Disease deductible details for plan code DK9D. Click here 476829 , 452584 to view the json files.
+Item No. COC Series Business Segment State Abbreviation Benefit Category Payment Line Tier 1 (Designated Network) Tier 2 (In-Network) Tier 3 (Out-of-Network) Individual Deductible ($) Family Deductible ($)
+0 2024 KA - Key Account MD Congenital Heart Disease Standard N/A no member coinsurance, $750 copay per Inpatient Stay, deductible applies N/A Tier 2 - $5000.00 Tier 2 - $10000.00
+1 2024 KA - Key Account NA Congenital Heart Disease Standard N/A no member coinsurance, $750 copay per Inpatient Stay, deductible applies N/A Tier 2 - $5000.00 Tier 2 - $10000.00
+content_copy
+star_border
+thumb_up_off_alt
+thumb_down_off_alt"	I have already provided the Congenital Heart Disease deductible details for plan code DK9D. Is there anything else I can help you with?	failed	Missing tokens in ACTUAL_RESPONSE: ['476829', '452584']	21.96					
+Plan code is $PlanCode. What is Congenital Heart Disease Ded			failed	"prompt failed: Plan code is DK9D. What is Congenital Heart Disease Ded | Missing tokens in ACTUAL_RESPONSE: ['476829', '452584']
+assert False"						
+What is Hospital - inpatient costshare for plan code DK9D?	"Below are the Hospital - Inpatient Stay cost share for plan code DK9D. Click here 476829 , 452584 to view the json files.
+Item No. COC Series Business Segment State Abbreviation Benefit Category Payment Line Tier 1 (Designated Network) Tier 2 (In-Network) Tier 3 (Out-of-Network) Individual Deductible ($) Family Deductible ($)
+0 2024 KA - Key Account MD Hospital - Inpatient Stay Standard N/A no member coinsurance, $750 copay per Inpatient Stay, deductible applies N/A Tier 2 - $5000.00 Tier 2 - $10000.00
+1 2024 KA - Key Account NA Hospital - Inpatient Stay Standard N/A no member coinsurance, $750 copay per Inpatient Stay, deductible applies N/A Tier 2 - $5000.00 Tier 2 - $10000.00
+content_copy
+star_border
+thumb_up_off_alt
+thumb_down_off_alt"	"Below are the Hospital - inpatient costshare details for plan code DK9D. Click here 476829 , 452584 to view the json files.
+Item No.	COC Series	Business Segment	State Abbreviation	Benefit Category	Payment Line	Tier 1 (Designated Network)	Tier 2 (In-Network)	Tier 3 (Out-of-Network)	Individual Deductible ($)	Family Deductible ($)
+0	2024	KA - Key Account	MD	Hospital - Inpatient Stay	Standard	N/A	no member coinsurance, $750 copay per Inpatient Stay, deductible applies	N/A	Tier 2 - $5000.00	Tier 2 - $10000.00
+1	2024	KA - Key Account	NA	Hospital - Inpatient Stay	Standard	N/A	no member coinsurance, $750 copay per Inpatient Stay, deductible applies	N/A	Tier 2 - $5000.00	Tier 2 - $10000.00"	failed	Missing tokens in ACTUAL_RESPONSE: ['cost share']	35.08					
+What is Hospital - inpatient costshare for plan code $PlanCode?			failed	"prompt failed: What is Hospital - inpatient costshare for plan code DK9D? | Missing tokens in ACTUAL_RESPONSE: ['cost share']
+assert False"						
+Tell me about plan code F4H	"There is one iteration for plan code F4H with the following details. Click here 450880 to view the json file.
+Item No. Plan Code COC Series Business Segment State Abbreviation Plan Description Marketing Name Plan Category Organization Legal Entity Product Type Product Standard
+0 F4H 2007 SB - Small Business FL HSA5000/100% FL - Choice Plus Definity HSA - 5000/100% Plan F4H UnitedHealthcare UnitedHealthcare Insurance Company POS Choice Plus Base/Value HSA
+content_copy
+star_border
+thumb_up_off_alt
+thumb_down_off_alt"	"There is one iteration for plan code F4H with the following details. Click here 450880 to view the json file.
+Item No.	Plan Code	COC Series	Business Segment	State Abbreviation	Plan Description	Marketing Name	Plan Category	Organization	Legal Entity	Product Type	Product	Standard
+0	F4H	2007	SB - Small Business	FL	N/A	N/A	N/A	UnitedHealthcare	N/A	PS1	Choice Plus	Base/Value HSA"	failed	Missing tokens in ACTUAL_RESPONSE: ['2007 SB - Small Business FL HSA5000']	24.34					
+Tell me about plan code $PlanCode			failed	"prompt failed: Tell me about plan code F4H | Missing tokens in ACTUAL_RESPONSE: ['2007 SB - Small Business FL HSA5000']
+assert False"						
+for plan code F4H, what is the PCP cost share	"Below are the PCP cost share details for plan code F4H. Click here 450880 to view the json file.
+Item No. COC Series Business Segment State Abbreviation Benefit Category Payment Line Tier 1 (Designated Network) Tier 2 (In-Network) Tier 3 (Out-of-Network) Individual Deductible ($) Family Deductible ($)
+0 2007 SB - Small Business FL Physician's Office Services - Sickness and Injury Primary Care Physician Standard N/A no member coinsurance, no copay, deductible applies 20% member coinsurance, no copay, deductible applies Tier 2 - $5000.00, Tier 3 - $7500.00 Tier 2 - $10000.00, Tier 3 - $15000.00
+content_copy
+star_border
+thumb_up_off_alt
+thumb_down_off_alt"	"Below are the Physician's Office Services - Sickness and Injury Primary Care Physician cost share details for plan code F4H. Click here 450880 to view the json file.
+Item No.	COC Series	Business Segment	State Abbreviation	Benefit Category	Payment Line	Tier 1 (Designated Network)	Tier 2 (In-Network)	Tier 3 (Out-of-Network)	Individual Deductible ($)	Family Deductible ($)
+0	2007	SB - Small Business	FL	Physician's Office Services - Sickness and Injury Primary Care Physician	Standard	Not covered	Not covered	20% member coinsurance, no copay, deductible does not apply	Tier 2 - $5000.00, Tier 3 - $7500.00	Tier 2 - $10000.00, Tier 3 - $15000.00"	failed	Missing tokens in ACTUAL_RESPONSE: ['PCP cost share details']	25.69					
+for plan code $PlanCode, what is the PCP cost share			failed	"prompt failed: for plan code F4H, what is the PCP cost share | Missing tokens in ACTUAL_RESPONSE: ['PCP cost share details']
+assert False"						
+
+code
+import allure
+import pytest
+
+from settings import BECCA_XL
+from tests.vikings.fw.common.CommonUtils import CommonUtils
+from tests.vikings.fw.common.FW import FW
+
+from ..ui_pages.BeccaPage import BeccaPage
+from ..ui_pages.LogoutPage import LogoutPage
+
+
+COLUMNS_ORDER = [
+    "actual_prompt",
+    "expected_response",
+    "actual_response",
+    "ui_status",
+    "ui_error",
+    "Response time(secs)",
+    "eval_threshold",
+    "gEval_score",
+    "gEval_reason",
+    "eval_status",
+    "eval_error",
+]
+from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
+import allure
+
+def test_login_becca_helper(request, becca_page, testcase, rows_accumulator):
+    request.node.COLUMNS_ORDER = COLUMNS_ORDER
+
+    becca = BeccaPage(becca_page)
+    logout = LogoutPage(becca_page)
+
+    try:
+        CommonUtils.setupTest(testcase)
+
+        becca.open_becca()
+        ui_row = becca.execute_testcase(testcase, rows_accumulator)
+
+        # ✅ Always evaluate before attempting logout
+        becca.evaluate_testcase(ui_row, rows_accumulator)
+
+        # ✅ Logout should not fail BECCA validation
+        try:
+            logout.logout()
+        except PlaywrightTimeoutError as e:
+            # Attach debug but don't fail
+            allure.attach(
+                str(e),
+                name="Logout skipped (Tools not found)",
+                attachment_type=allure.attachment_type.TEXT
+            )
+            becca.attach_screenshot("Logout skipped - Tools not found")
+
+    except Exception as e:
+        CommonUtils.handleException(testcase, rows_accumulator, e)
+        raise
+
+@pytest.mark.parametrize("testcase", FW.get_test_data(BECCA_XL))
+@pytest.mark.uieval
+@allure.feature("becca")
+@allure.story("ui_eval_e2e")
+def test_login_becca_logout_e2e(request, becca_page, testcase, rows_accumulator):
+    test_login_becca_helper(request, becca_page, testcase, rows_accumulator)
+
+
+@pytest.mark.parametrize("testcase", FW.get_test_data(BECCA_XL)[:1])
+@pytest.mark.smoke
+@allure.feature("becca")
+@allure.story("ui_eval_e2e")
+def test_login_becca_logout_smoke(request, becca_page, testcase, rows_accumulator):
+    test_login_becca_helper(request, becca_page, testcase, rows_accumulator)
+
+import logging
+import traceback
+import time
+import re
+from typing import Dict, Any, Tuple, List
 
 import allure
 
+from tests.vikings.apps.becca.config.Constants import Constants
+from tests.vikings.conftest import THRESHOLD
+from tests.vikings.fw.common.Results import Results
+from tests.vikings.fw.ui.BasePage import BasePage
+from tests.vikings.fw.utils import get_multiple_scores
+
+
+class BeccaPage(BasePage):
+    CHAT_INPUT_SELECTOR = ".input-section textarea[matInput]"
+    SUBMIT_BUTTON_SELECTOR = "button.submit-button"
+    START_NEW_CHAT_SELECTOR = 'button:has-text("Start New Chat")'
+    CHAT_MESSAGE_SELECTOR = "div.chat-box app-chat-message"
+
+    GENERATION_START_TIMEOUT_SECS = 10
+    GENERATION_END_TIMEOUT_SECS = 180
+
+    def __init__(self, page):
+        self.page = page
+
+    def open_becca(self):
+        with allure.step("Open Becca UI"):
+            self.page.goto(Constants.BECCA_URL, wait_until="domcontentloaded")
+
+    def start_new_chat_if_present(self):
+        with allure.step("Start New Chat (if present)"):
+            try:
+                btn = self.page.locator(self.START_NEW_CHAT_SELECTOR)
+                if btn.count() > 0 and btn.first.is_visible():
+                    btn.first.click()
+                    self.sleep(1)
+            except Exception:
+                pass
+
+    def _wait_for_button_text(self, selector: str, expected_text: str, timeout_secs: int):
+        end = time.time() + timeout_secs
+        btn = self.page.locator(selector).first
+
+        while time.time() < end:
+            try:
+                if btn.is_visible():
+                    txt = btn.inner_text().strip()
+                    if txt == expected_text:
+                        return
+            except Exception:
+                pass
+            time.sleep(0.25)
+
+        raise TimeoutError(f"Button '{selector}' did not show text '{expected_text}' within {timeout_secs}s")
+
+    def _get_message_count(self) -> int:
+        try:
+            return self.page.locator(self.CHAT_MESSAGE_SELECTOR).count()
+        except Exception:
+            return 0
+
+    def _wait_for_message_count_increase(self, previous_count: int, timeout_secs: int = 15):
+        end = time.time() + timeout_secs
+        while time.time() < end:
+            current = self._get_message_count()
+            if current > previous_count:
+                return
+            time.sleep(0.25)
+
+    def _get_latest_message_text(self) -> str:
+        last = self.page.locator(self.CHAT_MESSAGE_SELECTOR).last
+        last.wait_for(state="visible", timeout=30000)
+        return last.inner_text().strip()
+
+    def send_prompt_and_wait(self, prompt: str) -> str:
+        self.start_new_chat_if_present()
+        with allure.step("Send prompt in Becca and wait for response"):
+            input_box = self.page.locator(self.CHAT_INPUT_SELECTOR).first
+            submit_btn = self.page.locator(self.SUBMIT_BUTTON_SELECTOR).first
+
+            prev_count = self._get_message_count()
+
+            input_box.wait_for(state="visible", timeout=30000)
+            input_box.click()
+            input_box.fill(prompt)
+
+            submit_btn.wait_for(state="visible", timeout=30000)
+            submit_btn.click()
+
+            self._wait_for_button_text(self.SUBMIT_BUTTON_SELECTOR, "Cancel", self.GENERATION_START_TIMEOUT_SECS)
+            self._wait_for_button_text(self.SUBMIT_BUTTON_SELECTOR, "Submit", self.GENERATION_END_TIMEOUT_SECS)
+
+            self._wait_for_message_count_increase(prev_count, timeout_secs=15)
+            response_text = self._strip_ui_chrome(self._get_latest_message_text())
+            self.attach_screenshot("Becca response Screenshot")
+            return response_text
+
+    def run_prompt_and_get_response(self, prompt: str) -> Tuple[str, float]:
+        start = time.time()
+        response = self.send_prompt_and_wait(prompt)
+        return response, round(time.time() - start, 2)
+
+
+    def _normalize_for_match(self, s: str) -> str:
+        if s is None:
+            return ""
+        s = str(s).lower().replace("\n", " ").replace("\t", " ")
+        s = re.sub(r"[^\w\s%$.-]", " ", s)    # remove punctuation to stabilize matching
+        s = re.sub(r"\s+", " ", s).strip()
+        return s
+
+    def _format_prompt_with_row_values(self, prompt: str, testcase: Dict[str, Any]) -> str:
+        if not prompt:
+            return ""
+
+        def repl(match):
+            key = match.group(1)  # after $
+            if key in testcase and str(testcase.get(key, "")).strip():
+                return str(testcase.get(key)).strip()
+
+            lower_map = {str(k).lower(): k for k in testcase.keys()}
+            if key.lower() in lower_map:
+                real_key = lower_map[key.lower()]
+                val = str(testcase.get(real_key, "")).strip()
+                return val if val else match.group(0)
+
+            return match.group(0)
+
+        return re.sub(r"\$(\w+)", repl, prompt).strip()
+
+    def _validate_becca_response(
+            self,
+            actual_response: str,
+            expected_response: str,
+            validation_text: str,
+            testcase: Dict[str, Any],
+    ) -> Tuple[str, str]:
+        actual_norm = self._normalize_for_match(actual_response)
+
+        # Fail fast on empty / none-like responses
+        if not actual_response or actual_norm in {"none", ""}:
+            return "failed", "ACTUAL_RESPONSE is empty/none"
+
+        validation_text = (validation_text or "").strip()
+
+        # CASE 1: validation_text present -> token based validation
+        if validation_text:
+            raw_tokens = [t.strip() for t in validation_text.split(",") if t.strip()]
+            col_map = {str(k).strip().lower(): k for k in testcase.keys()}
+
+            resolved_tokens: List[str] = []
+            for token in raw_tokens:
+                token_l = token.lower()
+                if token_l in col_map:
+                    col_name = col_map[token_l]
+                    col_val = str(testcase.get(col_name, "")).strip()
+                    resolved_tokens.append(col_val if col_val else token)
+                else:
+                    resolved_tokens.append(token)
+
+            missing = []
+            for tok in resolved_tokens:
+                tok_norm = self._normalize_for_match(tok)
+                if tok_norm and tok_norm not in actual_norm:
+                    missing.append(tok)
+
+            if missing:
+                return "failed", f"Missing tokens in ACTUAL_RESPONSE: {missing}"
+            return "passed", ""
+
+        # CASE 2: no validation_text -> compare expected and actual (normalized contains)
+        expected_response = (expected_response or "").strip()
+        if expected_response:
+            exp_norm = self._normalize_for_match(expected_response)
+            if exp_norm and exp_norm in actual_norm:
+                return "passed", ""
+            return "failed", "Expected response not found in actual response (normalized contains check)."
+
+        # CASE 3: both empty -> pass since actual is non-empty already
+        return "passed", ""
+
+
+    def execute_testcase(self, testcase: Dict[str, Any], rows_accumulator: Dict[str, Any]):
+        with allure.step("Ask a Question (Becca UI)"):
+
+            expected = str(testcase.get("expected_response", testcase.get("expected_answer", ""))).strip()
+            raw_prompt = str(testcase.get("prompt", "")).strip()
+            row_key = raw_prompt
+
+            validation_text = str(testcase.get("validation_text", "")).strip()
+
+            prompt = self._format_prompt_with_row_values(raw_prompt, testcase)
+
+            allure.dynamic.title(prompt if prompt else "Becca testcase")
+
+            test_failure_reason = ""
+            try:
+                actual_response, time_taken = self.run_prompt_and_get_response(prompt)
+                Results.report_event(f"Becca prompt response time: {time_taken}")
+
+                ui_status, test_failure_reason = self._validate_becca_response(
+                    actual_response=actual_response,
+                    expected_response=expected,
+                    validation_text=validation_text,
+                    testcase=testcase
+                )
+
+                result = {
+                    "actual_prompt": prompt,
+                    "expected_response": expected,
+                    "actual_response": actual_response,
+                    "ui_status": ui_status,
+                    "Response time(secs)": time_taken,
+                    "ui_error": test_failure_reason or ""
+                }
+                merged = {**testcase, **result}
+
+                Results.report_event("Becca question searched successfully: " + prompt)
+                Results.report_event("validation_text: " + validation_text)
+                Results.report_event("LLM response: " + actual_response)
+                self.attach_screenshot("Becca question Screenshot")
+
+            except Exception as e:
+                logging.info(f"UI execution exception: {e}")
+                allure.attach(traceback.format_exc(), name="UI execution exception",
+                              attachment_type=allure.attachment_type.TEXT)
+                result = {
+                    "actual_prompt": prompt,
+                    "expected_response": expected,
+                    "actual_response": "error while fetching ui response",
+                    "ui_status": "failed",
+                    "Response time(secs)": "0",
+                    "ui_error": f"{str(e)}"
+                }
+                merged = {**testcase, **result}
+                test_failure_reason = f"UI execution exception: {str(e)}"
+
+            ui_row = merged
+            rows_accumulator[row_key] = ui_row
+
+            Results.report_event_assert_bool(
+                ui_row["ui_status"] == "passed",
+                f"prompt failed: {ui_row['actual_prompt']}" +
+                (f" | {test_failure_reason}" if test_failure_reason else "")
+            )
+            return ui_row
+
+
+    def evaluate_testcase(self, ui_row: Dict[str, Any], rows_accumulator: Dict[str, Any]):
+        with allure.step("Evaluate Becca Testcase"):
+            try:
+                threshold = THRESHOLD
+
+                if not ui_row.get("expected_response", ""):
+                    ui_row["expected_response"] = ui_row.get("actual_response", "")
+
+                eval_payload = {
+                    "question": ui_row.get("actual_prompt", ""),
+                    "llmAnswer": ui_row.get("actual_response", ""),
+                    "groundAnswer": ui_row.get("expected_response", ""),
+                    "contextualPrecision": False,
+                    "contextualRecall": False,
+                    "faithfulness": False,
+                    "gEval": True
+                }
+
+                data = get_multiple_scores(eval_payload)
+                gEval_score = data.get("gEval", {}).get("score", 0)
+                gEval_reason = data.get("gEval", {}).get("reason", "")
+
+                pass_geval = gEval_score >= threshold
+
+                eval_result = {
+                    "eval_threshold": threshold,
+                    "gEval_score": gEval_score,
+                    "gEval_reason": gEval_reason,
+                    "eval_error": "",
+                    "eval_status": "passed" if pass_geval else "failed"
+                }
+
+                merged_ui_eval = {**ui_row, **eval_result}
+
+            except Exception as e:
+                logging.info(f"Evaluation exception: {e}")
+                allure.attach(traceback.format_exc(), name="Evaluation exception",
+                              attachment_type=allure.attachment_type.TEXT)
+
+                eval_result = {
+                    "eval_threshold": "",
+                    "gEval_score": 0,
+                    "gEval_reason": "evaluation error",
+                    "eval_status": "failed",
+                    "eval_error": f"{str(e)}"
+                }
+                merged_ui_eval = {**ui_row, **eval_result}
+
+            rows_accumulator[merged_ui_eval.get("actual_prompt", "")] = merged_ui_eval
+            return merged_ui_eval
+
+    def _strip_ui_chrome(self, text: str) -> str:
+        noise = ["content_copy", "star_border", "thumb_up_off_alt", "thumb_down_off_alt"]
+        for n in noise:
+            text = text.replace(n, "")
+        return text.strip()
+import allure
+from playwright.sync_api import Page, expect
+from tests.vikings.apps.becca.config.Constants import Constants
+from tests.vikings.fw.common.FW import FW
+from tests.vikings.fw.common.Results import Results
+from tests.vikings.fw.ui.BasePage import BasePage
+
+class LoginPage(BasePage):
+    AZURE_USERNAME_INPUT = 'input[name="loginfmt"]'
+    AZURE_PASSWORD_INPUT = 'input[name="passwd"]'
+    AZURE_SUBMIT_BUTTON = 'input[type="submit"]'
+    AZURE_STAY_SIGNED_IN_YES = 'input[value="Yes"]'
+    def __init__(self, page: Page):
+        super().__init__(page)
+    def login(self):
+        with allure.step("Login to BECCA via Azure AD"):
+            username = FW.get_env("BECCA_APP_CIRRUS_UI_USERNAME")
+            password = FW.get_env("BECCA_APP_CIRRUS_UI_PASSWORD")
+            if not username or not password:
+                Results.report_event(
+                    "Missing BECCA_APP_CIRRUS_UI_USERNAME or BECCA_APP_CIRRUS_UI_PASSWORD"
+                )
+                raise RuntimeError("Credentials not provided via environment variables")
+            self.page.goto(Constants.BECCA_URL, wait_until="domcontentloaded")
+            self.page.wait_for_selector(self.AZURE_USERNAME_INPUT, timeout=30000)
+            self.page.fill(self.AZURE_USERNAME_INPUT, username)
+            self.page.click(self.AZURE_SUBMIT_BUTTON)
+            self.page.wait_for_selector(self.AZURE_PASSWORD_INPUT, timeout=30000)
+            self.page.fill(self.AZURE_PASSWORD_INPUT, password)
+            self.page.click(self.AZURE_SUBMIT_BUTTON)
+            try:
+                self.page.wait_for_selector(self.AZURE_STAY_SIGNED_IN_YES, timeout=5000)
+                self.page.click(self.AZURE_STAY_SIGNED_IN_YES)
+            except Exception:
+                pass
+            self.page.wait_for_load_state("networkidle", timeout=30000)
+            expect(self.page).not_to_have_url(lambda url: "login.microsoftonline.com" in url)
+            Results.report_event("User logged in successfully")
+            self.attach_screenshot("Login Successful")
+# python
+import allure
+from playwright.sync_api import Page, TimeoutError as PlaywrightTimeoutError
+from tests.vikings.fw.common.Results import Results
+from tests.vikings.fw.ui.BasePage import BasePage
+
+class LogoutPage(BasePage):
+    def __init__(self, page: Page):
+        super().__init__(page)
+
+    def _safe_click(self, locator):
+        # Try normal click with scroll
+        locator.wait_for(state="attached", timeout=10000)
+        locator.scroll_into_view_if_needed(timeout=5000)
+        try:
+            locator.click(timeout=5000)
+            return
+        except PlaywrightTimeoutError:
+            pass
+        except Exception:
+            pass
+
+        # Fallback: center scroll via JS and retry
+        el = locator.element_handle(timeout=5000)
+        if el:
+            try:
+                self.page.evaluate("el => el.scrollIntoView({block: 'center', inline: 'center'})", el)
+                locator.click(timeout=5000)
+                return
+            except Exception:
+                pass
+
+            # Final fallback: direct JS click to bypass viewport/actionability
+            try:
+                self.page.evaluate("el => el.click()", el)
+                return
+            except Exception:
+                # As a last resort, dispatch a click event
+                locator.dispatch_event("click", timeout=5000)
+
+    def logout(self):
+        with allure.step("Logout from the application"):
+            tools = self.page.get_by_role("link", name="Tools")
+            self._safe_click(tools)
+
+            sign_off = self.page.get_by_role("link", name="Sign Off")
+            self._safe_click(sign_off)
+
+            self.page.locator("text=Logged out Successfully.").wait_for(state="visible", timeout=10000)
+            Results.report_event("User logged out successfully")
+            self.attach_screenshot("Logoff Screenshot")
+
+import logging
+import os
+
+import allure
+import pandas as pd
+import pytest
+from tests.vikings.apps.becca.config.Constants import Constants
+from tests.vikings.fw.common.FW import FW
+from tests.vikings.apps.becca.ui_pages.LoginPage import LoginPage
 from tests.vikings.fw.common.CommonUtils import CommonUtils
-from tests.vikings.fw.common.Status import Status
 
+@pytest.fixture(scope="function")
+def rows_accumulator(request):
+    rows_dict = {}
+    yield rows_dict
 
-class Results:
+@pytest.fixture(scope="function", autouse=True)
+def generate_result(request,rows_accumulator, tmp_path_factory):
+    yield
+    COLUMNS_ORDER = getattr(request.node, "COLUMNS_ORDER", [])
+    if COLUMNS_ORDER:
+        temp_dir = tmp_path_factory.getbasetemp()
+        temp_file = temp_dir / f"{FW.get_result_file_name(os.getpid())}"
+        logging.info(f"base temp:{temp_dir}")
+        logging.info(f"file path:{temp_file}")
+        if rows_accumulator:
+            df = pd.DataFrame(list(rows_accumulator.values()))
+            for col in COLUMNS_ORDER:
+                if col not in df.columns:
+                    df[col] = ""
+            df = df[COLUMNS_ORDER]
+            if temp_file.exists():
+                df.to_csv(temp_file, mode='a', header=False, index=False)
+            else:
+                df.to_csv(temp_file, index=False)
+    else:
+        logging.info("No COLUMNS_ORDER found on the test node.")
 
-    @staticmethod
-    def log_event(description, overview):
-        allure.attach(
-            description,
-            name=overview,
-            attachment_type=allure.attachment_type.TEXT
+@pytest.fixture(scope="function", autouse=True)
+def test_summary(request, rows_accumulator):
+    yield
+    try:
+        COLUMNS_ORDER = getattr(request.node, "COLUMNS_ORDER", [])
+        if COLUMNS_ORDER :
+            if rows_accumulator:
+                df = pd.DataFrame(list(rows_accumulator.values()))
+                for col in COLUMNS_ORDER:
+                    if col not in df.columns:
+                        df[col] = ""
+                df = df[COLUMNS_ORDER]
+                csv_buffer = io.StringIO()
+                df.to_csv(csv_buffer, index=False)
+                allure.attach(csv_buffer.getvalue(), name="Test summary", attachment_type=allure.attachment_type.CSV)
+        else:
+            logging.info("No COLUMNS_ORDER found on the test node for summary attachment.")
+    except Exception as e:
+        logging.info(f"CSV Attach Error: {e}")
+
+@pytest.fixture(scope="session")
+def authenticated_context(browser):
+    state_path = Constants.BECCA_STORAGE_STATE_PATH
+
+    if not os.path.exists(state_path):
+        raise RuntimeError(
+            f"Storage state not found at {state_path}. "
+            f"Run: python -m tests.vikings.apps.becca.auth.generate_storage_state"
         )
 
-    @staticmethod
-    def __report_event_basic(description, overview):
-        allure.attach(
-            overview,
-            name=description,
-            attachment_type=allure.attachment_type.TEXT
-        )
+    # Create ONE persistent context for all tests
+    context = browser.new_context(storage_state=state_path)
 
-    @staticmethod
-    def report_timestamp(description="Captured Timestamp"):
-        allure.attach(
-            "Current timestamp is: "+CommonUtils.getTimeStamp(),
-            name=description,
-            attachment_type=allure.attachment_type.TEXT
-        )
+    # Warm up session (ensures Azure login is bypassed)
+    page = context.new_page()
+    page.goto(Constants.BECCA_URL, wait_until="networkidle")
 
-    @staticmethod
-    def report_event(description,status=Status.INFO,overview=""):
-        case_status = ""
-        if status == Status.PASS:
-            case_status = "PASS            "
-        elif status == Status.FAIL:
-            case_status = "FAIL            "
-        elif status == Status.INFO:
-            case_status = "INFO            "
-        else:
-            case_status = ""
-        message = case_status + description
+    yield context
+    context.close()
 
-        Results.__report_event_basic(message, overview)
+@pytest.fixture()
+def becca_page(browser):
+    is_local = CommonUtils.is_local_run()
+    state_path = Constants.BECCA_STORAGE_STATE_PATH
+    if is_local:
+        if not os.path.exists(state_path):
+            raise RuntimeError(
+                f"[LOCAL RUN] Storage state not found at {state_path}.\n"
+                "Generate it using:\n"
+                "  python -m tests.vikings.apps.becca.auth.generate_storage_state\n"
+            )
 
-        if CommonUtils.is_local_run():
-            print(message)
+        logging.info(f"[BECCA AUTH] Local run detected -> using storageState: {state_path}")
+        context = browser.new_context(storage_state=state_path)
+        page = context.new_page()
+        page.goto(Constants.BECCA_URL, wait_until="domcontentloaded")
+        yield page
+        context.close()
 
-    @staticmethod
-    def report_event_assert(field_name, expected, actual, message=None):
-        assert expected == actual, f"{field_name} value didn't match"
-        if message:
-            Results.report_event(f"{message} and {field_name} value is : {expected}",Status.PASS,"", )
-        else:
-            Results.report_event(f"{field_name} is populated as expected with value: {expected}",Status.PASS,"", )
-
-    def report_event_assert_bool(evaluated_result, message=None):
-        if message:
-            assert evaluated_result, message
-            Results.report_event(message, Status.PASS)
-        else:
-            assert evaluated_result, "Test failure"
-            Results.report_event("Test validation", Status.PASS)
-
+    else:
+        logging.info("[BECCA AUTH] Non-local run detected -> using LoginPage.login()")
+        context = browser.new_context()
+        page = context.new_page()
+        login = LoginPage(page)
+        login.login()
+        yield page
+        context.close()
