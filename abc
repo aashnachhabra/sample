@@ -1,497 +1,173 @@
-/Users/achhab16/Library/Caches/pypoetry/virtualenvs/app-bPuqwu3B-py3.13/bin/python3.13 "/Users/achhab16/Library/Application Support/JetBrains/IdeaIC2025.2/plugins/python-ce/helpers/pycharm/_jb_pytest_runner.py" --path /Users/achhab16/Library/Caches/pypoetry/virtualenvs/app-bPuqwu3B-py3.13/lib/python3.13/site-packages/pytest -- tests/vikings/apps/becca -m smoke --tracing off -s --alluredir allure-results --reruns 0 -n 1 --html=reports/report.html --self-contained-html
-Testing started at 8:45 pm ...
-Launching pytest with arguments tests/vikings/apps/becca -m smoke --tracing off -s --alluredir allure-results --reruns 0 -n 1 --html=reports/report.html --self-contained-html /Users/achhab16/Library/Caches/pypoetry/virtualenvs/app-bPuqwu3B-py3.13/lib/python3.13/site-packages/pytest --no-header --no-summary -q in /Users/achhab16/Desktop/cirrus-apps_vikings-eval
-
-/Users/achhab16/Library/Caches/pypoetry/virtualenvs/app-bPuqwu3B-py3.13/lib/python3.13/site-packages/deepeval/__init__.py:52: UserWarning: You are using deepeval version 2.2.0, however version 3.8.4 is available. You should consider upgrading via the "pip install --upgrade deepeval" command.
-  warnings.warn(
-INFO 2026-02-10 20:45:06 conftest.py Loaded environment variables from .env.local
-INFO 2026-02-10 20:45:07 conftest.py pytest_configure started
-INFO 2026-02-10 20:45:07 conftest.py conftest is loading vars
-INFO 2026-02-10 20:45:07 conftest.py Resolved app env path: /Users/achhab16/Desktop/cirrus-apps_vikings-eval/tests/vikings/apps/becca/config/.env.alpha
-INFO 2026-02-10 20:45:07 conftest.py Loaded environment variables from tests/vikings/apps/becca/config/.env.alpha
-INFO 2026-02-10 20:45:07 conftest.py ENV: alpha
-INFO 2026-02-10 20:45:07 conftest.py APP: becca
-INFO 2026-02-10 20:45:07 conftest.py RUN_ID: 1
-INFO 2026-02-10 20:45:07 conftest.py SSLV: true
-INFO 2026-02-10 20:45:07 conftest.py THRESHOLD: 0.5
-INFO 2026-02-10 20:45:07 conftest.py pytest_configure ended
-INFO 2026-02-10 20:45:07 conftest.py Session started: <Session  exitstatus=<ExitCode.OK: 0> testsfailed=0 testscollected=0>
-Base temp dir init: /private/var/folders/pd/wzd_v7bx32n4byp72dqdzjkw0000gq/T/pytest-of-achhab16/pytest-85
-INFO 2026-02-10 20:45:07 conftest.py Current temp dir: /private/var/folders/pd/wzd_v7bx32n4byp72dqdzjkw0000gq/T/pytest-of-achhab16/pytest-85
-INFO 2026-02-10 20:45:07 conftest.py Base temp dir saved to /Users/achhab16/Desktop/cirrus-apps_vikings-eval/reports/base_temp.txt
-============================= test session starts ==============================
-created: 1/1 worker
-/Users/achhab16/Library/Caches/pypoetry/virtualenvs/app-bPuqwu3B-py3.13/lib/python3.13/site-packages/deepeval/__init__.py:52: UserWarning: You are using deepeval version 2.2.0, however version 3.8.4 is available. You should consider upgrading via the "pip install --upgrade deepeval" command.
-  warnings.warn(
-INFO 2026-02-10 20:45:10 conftest.py Loaded environment variables from .env.local
-INFO 2026-02-10 20:45:10 conftest.py pytest_configure started
-INFO 2026-02-10 20:45:10 conftest.py conftest is loading vars
-INFO 2026-02-10 20:45:10 conftest.py Resolved app env path: /Users/achhab16/Desktop/cirrus-apps_vikings-eval/tests/vikings/apps/becca/config/.env.alpha
-INFO 2026-02-10 20:45:10 conftest.py Loaded environment variables from tests/vikings/apps/becca/config/.env.alpha
-INFO 2026-02-10 20:45:10 conftest.py ENV: alpha
-INFO 2026-02-10 20:45:10 conftest.py APP: becca
-INFO 2026-02-10 20:45:10 conftest.py RUN_ID: 1
-INFO 2026-02-10 20:45:10 conftest.py SSLV: true
-INFO 2026-02-10 20:45:10 conftest.py THRESHOLD: 0.5
-INFO 2026-02-10 20:45:10 conftest.py pytest_configure ended
-INFO 2026-02-10 20:45:10 conftest.py Session started: <Session  exitstatus=<ExitCode.OK: 0> testsfailed=0 testscollected=0>
-INFO 2026-02-10 20:45:10 conftest.py Current temp dir: /private/var/folders/pd/wzd_v7bx32n4byp72dqdzjkw0000gq/T/pytest-of-achhab16/pytest-85/popen-gw0
-1 worker [1 item]
-
-scheduling tests via LoadScheduling
-
-tests/vikings/apps/becca/ui_tests/test_becca_eval_pipeline.py::test_login_becca_logout_smoke[chromium-testcase0] INFO 2026-02-10 20:46:26 conftest.py pytest_sessionfinish started
-INFO 2026-02-10 20:46:26 conftest.py pytest_sessionfinish ended
-Running teardown with pytest sessionfinish...
-INFO 2026-02-10 20:46:27 conftest.py pytest_sessionfinish started
-INFO 2026-02-10 20:46:27 conftest.py pytest_sessionfinish ended
-INFO 2026-02-10 20:46:27 ReportsMerger.py Starting merge of worker files.
-INFO 2026-02-10 20:46:27 FW.py worker files found for merge.
-INFO 2026-02-10 20:46:27 FW.py Merged 1 files into /Users/achhab16/Desktop/cirrus-apps_vikings-eval/reports/test_results.xlsx
-INFO 2026-02-10 20:46:27 ReportsMerger.py Completed merge of worker files.
-
-
-=================== 1 failed, 4 warnings in 79.73s (0:01:19) ===================
-INFO 2026-02-10 20:45:10 conftest.py Setup fixture before session: Eval
-INFO 2026-02-10 20:45:10 conftest.py db_session started
-INFO 2026-02-10 20:45:10 conftest.py Setting up database connection for session: 82af9cbd-b285-47e9-94f5-32c195e436b4
-INFO 2026-02-10 20:45:10 db_utils.py Opened database connection:{'db_name': 'test_db', 'user': 'test_user', 'session_id': '82af9cbd-b285-47e9-94f5-32c195e436b4'}
-INFO 2026-02-10 20:45:10 conftest.py properties_info started
-INFO 2026-02-10 20:45:10 conftest.py from env info
-INFO 2026-02-10 20:45:10 conftest.py ENV: alpha
-INFO 2026-02-10 20:45:10 conftest.py ROLE: DEVELOPER
-INFO 2026-02-10 20:45:10 conftest.py properties_info ended
-INFO 2026-02-10 20:45:12 conftest.py Setup before test: test_login_becca_logout_smoke[chromium-testcase0]
-INFO 2026-02-10 20:45:12 conftest.py [BECCA AUTH] Local run detected -> using storageState: artifacts/becca_storage_state.json
-INFO 2026-02-10 20:46:26 conftest.py CSV Attach Error: name 'io' is not defined
-INFO 2026-02-10 20:46:26 conftest.py base temp:/private/var/folders/pd/wzd_v7bx32n4byp72dqdzjkw0000gq/T/pytest-of-achhab16/pytest-85/popen-gw0
-INFO 2026-02-10 20:46:26 conftest.py file path:/private/var/folders/pd/wzd_v7bx32n4byp72dqdzjkw0000gq/T/pytest-of-achhab16/pytest-85/popen-gw0/result_74078.csv
-INFO 2026-02-10 20:46:26 conftest.py Teardown after test: test_login_becca_logout_smoke[chromium-testcase0]
-INFO 2026-02-10 20:46:26 db_utils.py Closed database connection:{'db_name': 'test_db', 'user': 'test_user', 'session_id': '82af9cbd-b285-47e9-94f5-32c195e436b4'}
-INFO 2026-02-10 20:46:26 conftest.py db_session ended
-INFO 2026-02-10 20:46:26 conftest.py Teardown fixture after session: Eval
-
-[gw0] FAILED tests/vikings/apps/becca/ui_tests/test_becca_eval_pipeline.py::test_login_becca_logout_smoke[chromium-testcase0] 
-tests/vikings/apps/becca/ui_tests/test_becca_eval_pipeline.py:66 (test_login_becca_logout_smoke[chromium-testcase0])
-request = <FixtureRequest for <Function test_login_becca_logout_smoke[chromium-testcase0]>>
-becca_page = <Page url='https://becca-stg.prod.internal-gcp.optum.com/chat'>
-testcase = {'PlanCode': 'DTKS', 'expected_answer': 'Below are the coinsurance details for Pharmaceutical Products for plan code D...e for pharmaceutical products for $PlanCode, 2024, AR, KA, INN.', 'validation_text': 'PlanCode,2024,AR,KA, In-Network'}
-rows_accumulator = {'89355132': {'PlanCode': 'DTKS', 'actual_prompt': 'what is the coinsurance for pharmaceutical products for $PlanCode,...date. Please consider rephrasing your question or asking about the plan library, which might be available soon.", ...}}
-
-    @pytest.mark.parametrize("testcase", FW.get_test_data(BECCA_XL)[:1])
-    @pytest.mark.smoke
-    @allure.feature("becca")
-    @allure.story("ui_eval_e2e")
-    def test_login_becca_logout_smoke(request, becca_page, testcase, rows_accumulator):
->       test_login_becca_helper(request, becca_page, testcase, rows_accumulator)
-
-tests/vikings/apps/becca/ui_tests/test_becca_eval_pipeline.py:72: 
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
-tests/vikings/apps/becca/ui_tests/test_becca_eval_pipeline.py:38: in test_login_becca_helper
-    ui_row = becca.execute_testcase(testcase, rows_accumulator)
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-tests/vikings/apps/becca/ui_pages/BeccaPage.py:570: in execute_testcase
-    Results.report_event_assert_bool(
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
-
-evaluated_result = False
-message = "prompt failed: what is the coinsurance for pharmaceutical products for DTKS, 2024, AR, KA, INN. | Missing tokens in ACTUAL_RESPONSE: ['DTKS', '2024', 'KA', 'In-Network']"
-
-    def report_event_assert_bool(evaluated_result, message=None):
-        if message:
->           assert evaluated_result, message
-E           AssertionError: prompt failed: what is the coinsurance for pharmaceutical products for DTKS, 2024, AR, KA, INN. | Missing tokens in ACTUAL_RESPONSE: ['DTKS', '2024', 'KA', 'In-Network']
-E           assert False
-
-tests/vikings/fw/common/Results.py:62: AssertionError
-
-Process finished with exit code 1
-
-
-threw error on the smoke command
-tests/vikings/apps/becca -m "smoke" --tracing off -s --alluredir allure-results --reruns 0 -n 1 --html=reports/report.html --self-contained-html
-but working for uieval 
-heres the code
-
+import logging
+import os
+import io
 import allure
+import pandas as pd
 import pytest
-
-from settings import BECCA_XL
-from tests.vikings.fw.common.CommonUtils import CommonUtils
+from tests.vikings.apps.becca.config.Constants import Constants
 from tests.vikings.fw.common.FW import FW
+from tests.vikings.apps.becca.ui_pages.LoginPage import LoginPage
+from tests.vikings.fw.common.CommonUtils import CommonUtils
 
-from ..ui_pages.BeccaPage import BeccaPage
-from ..ui_pages.LogoutPage import LogoutPage
+@pytest.fixture(scope="function")
+def rows_accumulator(request):
+    rows_dict = {}
+    yield rows_dict
 
+@pytest.fixture(scope="function", autouse=True)
+def generate_result(request,rows_accumulator, tmp_path_factory):
+    yield
+    COLUMNS_ORDER = getattr(request.node, "COLUMNS_ORDER", [])
+    if COLUMNS_ORDER:
+        temp_dir = tmp_path_factory.getbasetemp()
+        temp_file = temp_dir / f"{FW.get_result_file_name(os.getpid())}"
+        logging.info(f"base temp:{temp_dir}")
+        logging.info(f"file path:{temp_file}")
+        if rows_accumulator:
+            df = pd.DataFrame(list(rows_accumulator.values()))
+            for col in COLUMNS_ORDER:
+                if col not in df.columns:
+                    df[col] = ""
+            df = df[COLUMNS_ORDER]
+            if temp_file.exists():
+                df.to_csv(temp_file, mode='a', header=False, index=False)
+            else:
+                df.to_csv(temp_file, index=False)
+    else:
+        logging.info("No COLUMNS_ORDER found on the test node.")
 
-COLUMNS_ORDER = [
-    "actual_prompt",
-    "expected_response",
-    "actual_response",
-    "ui_status",
-    "ui_error",
-    "Response time(secs)",
-    "eval_threshold",
-    "gEval_score",
-    "gEval_reason",
-    "eval_status",
-    "eval_error",
-]
-from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
-import allure
-
-def test_login_becca_helper(request, becca_page, testcase, rows_accumulator):
-    request.node.COLUMNS_ORDER = COLUMNS_ORDER
-
-    becca = BeccaPage(becca_page)
-    logout = LogoutPage(becca_page)
-
+@pytest.fixture(scope="function", autouse=True)
+def test_summary(request, rows_accumulator):
+    yield
     try:
-        CommonUtils.setupTest(testcase)
-
-        becca.open_becca()
-        ui_row = becca.execute_testcase(testcase, rows_accumulator)
-
-        if ui_row["ui_status"] == "passed":
-            becca.evaluate_testcase(ui_row, rows_accumulator)
-
-        # ✅ Logout should not fail BECCA validation
-        try:
-            logout.logout()
-        except PlaywrightTimeoutError as e:
-            # Attach debug but don't fail
-            allure.attach(
-                str(e),
-                name="Logout skipped (Tools not found)",
-                attachment_type=allure.attachment_type.TEXT
-            )
-            becca.attach_screenshot("Logout skipped - Tools not found")
-
+        COLUMNS_ORDER = getattr(request.node, "COLUMNS_ORDER", [])
+        if COLUMNS_ORDER :
+            if rows_accumulator:
+                df = pd.DataFrame(list(rows_accumulator.values()))
+                for col in COLUMNS_ORDER:
+                    if col not in df.columns:
+                        df[col] = ""
+                df = df[COLUMNS_ORDER]
+                csv_buffer = io.StringIO()
+                df.to_csv(csv_buffer, index=False)
+                allure.attach(csv_buffer.getvalue(), name="Test summary", attachment_type=allure.attachment_type.CSV)
+        else:
+            logging.info("No COLUMNS_ORDER found on the test node for summary attachment.")
     except Exception as e:
-        CommonUtils.handleException(testcase, rows_accumulator, e)
-        raise
+        logging.info(f"CSV Attach Error: {e}")
 
-@pytest.mark.parametrize("testcase", FW.get_test_data(BECCA_XL))
-@pytest.mark.uieval
-@allure.feature("becca")
-@allure.story("ui_eval_e2e")
-def test_login_becca_logout_e2e(request, becca_page, testcase, rows_accumulator):
-    test_login_becca_helper(request, becca_page, testcase, rows_accumulator)
+@pytest.fixture(scope="session")
+def authenticated_context(browser):
+    state_path = Constants.BECCA_STORAGE_STATE_PATH
+
+    if not os.path.exists(state_path):
+        raise RuntimeError(
+            f"Storage state not found at {state_path}. "
+            f"Run: python -m tests.vikings.apps.becca.auth.generate_storage_state"
+        )
+
+    # Create ONE persistent context for all tests
+    context = browser.new_context(storage_state=state_path)
+
+    # Warm up session (ensures Azure login is bypassed)
+    page = context.new_page()
+    page.goto(Constants.BECCA_URL, wait_until="networkidle")
+
+    yield context
+    context.close()
+
+@pytest.fixture()
+def becca_page(browser):
+    is_local = CommonUtils.is_local_run()
+    state_path = Constants.BECCA_STORAGE_STATE_PATH
+    if is_local:
+        if not os.path.exists(state_path):
+            raise RuntimeError(
+                f"[LOCAL RUN] Storage state not found at {state_path}.\n"
+                "Generate it using:\n"
+                "  python -m tests.vikings.apps.becca.auth.generate_storage_state\n"
+            )
+
+        logging.info(f"[BECCA AUTH] Local run detected -> using storageState: {state_path}")
+        context = browser.new_context(storage_state=state_path)
+        page = context.new_page()
+        page.goto(Constants.BECCA_URL, wait_until="domcontentloaded")
+        yield page
+        context.close()
+
+    else:
+        logging.info("[BECCA AUTH] Non-local run detected -> using LoginPage.login()")
+        context = browser.new_context()
+        page = context.new_page()
+        login = LoginPage(page)
+        login.login()
+        yield page
+        context.close()
+
+import os
+from playwright.sync_api import sync_playwright, expect
+from tests.vikings.apps.becca.config.Constants import Constants
+from tests.vikings.fw.common.FW import FW
+from tests.vikings.fw.common.Results import Results
+import re
+from dotenv import load_dotenv
+load_dotenv(".env.local")
+
+AZURE_USERNAME_INPUT = 'input[name="loginfmt"]'
+AZURE_PASSWORD_INPUT = 'input[name="passwd"]'
+AZURE_SUBMIT_BUTTON = 'input[type="submit"]'
+AZURE_STAY_SIGNED_IN_YES = 'input[value="Yes"]'
 
 
-@pytest.mark.parametrize("testcase", FW.get_test_data(BECCA_XL)[:1])
-@pytest.mark.smoke
-@allure.feature("becca")
-@allure.story("ui_eval_e2e")
-def test_login_becca_logout_smoke(request, becca_page, testcase, rows_accumulator):
-    test_login_becca_helper(request, becca_page, testcase, rows_accumulator)
+def generate_storage_state():
+    username = FW.get_env("BECCA_APP_CIRRUS_UI_USERNAME")
+    password = FW.get_env("BECCA_APP_CIRRUS_UI_PASSWORD")
 
-# import logging
-# import traceback
-# import time
-# import re
-# from typing import Dict, Any, Tuple, List
-#
-# import allure
-#
-# from tests.vikings.apps.becca.config.Constants import Constants
-# from tests.vikings.conftest import THRESHOLD
-# from tests.vikings.fw.common.Results import Results
-# from tests.vikings.fw.ui.BasePage import BasePage
-# from tests.vikings.fw.utils import get_multiple_scores
-#
-#
-# class BeccaPage(BasePage):
-#     CHAT_INPUT_SELECTOR = ".input-section textarea[matInput]"
-#     SUBMIT_BUTTON_SELECTOR = "button.submit-button"
-#     START_NEW_CHAT_SELECTOR = 'button:has-text("Start New Chat")'
-#     CHAT_MESSAGE_SELECTOR = "div.chat-box app-chat-message"
-#
-#     GENERATION_START_TIMEOUT_SECS = 10
-#     GENERATION_END_TIMEOUT_SECS = 180
-#
-#     def __init__(self, page):
-#         self.page = page
-#
-#     def open_becca(self):
-#         with allure.step("Open Becca UI"):
-#             self.page.goto(Constants.BECCA_URL, wait_until="domcontentloaded")
-#
-#     def start_new_chat_if_present(self):
-#         with allure.step("Start New Chat (if present)"):
-#             try:
-#                 btn = self.page.locator(self.START_NEW_CHAT_SELECTOR)
-#                 if btn.count() > 0 and btn.first.is_visible():
-#                     btn.first.click()
-#                     self.sleep(1)
-#             except Exception:
-#                 pass
-#
-#     def _wait_for_button_text(self, selector: str, expected_text: str, timeout_secs: int):
-#         end = time.time() + timeout_secs
-#         btn = self.page.locator(selector).first
-#
-#         while time.time() < end:
-#             try:
-#                 if btn.is_visible():
-#                     txt = btn.inner_text().strip()
-#                     if txt == expected_text:
-#                         return
-#             except Exception:
-#                 pass
-#             time.sleep(0.25)
-#
-#         raise TimeoutError(f"Button '{selector}' did not show text '{expected_text}' within {timeout_secs}s")
-#
-#     def _get_message_count(self) -> int:
-#         try:
-#             return self.page.locator(self.CHAT_MESSAGE_SELECTOR).count()
-#         except Exception:
-#             return 0
-#
-#     def _wait_for_message_count_increase(self, previous_count: int, timeout_secs: int = 15):
-#         end = time.time() + timeout_secs
-#         while time.time() < end:
-#             current = self._get_message_count()
-#             if current > previous_count:
-#                 return
-#             time.sleep(0.25)
-#
-#     def _get_latest_message_text(self) -> str:
-#         last = self.page.locator(self.CHAT_MESSAGE_SELECTOR).last
-#         last.wait_for(state="visible", timeout=30000)
-#         return last.inner_text().strip()
-#
-#     def send_prompt_and_wait(self, prompt: str) -> str:
-#         self.start_new_chat_if_present()
-#         with allure.step("Send prompt in Becca and wait for response"):
-#             input_box = self.page.locator(self.CHAT_INPUT_SELECTOR).first
-#             submit_btn = self.page.locator(self.SUBMIT_BUTTON_SELECTOR).first
-#
-#             prev_count = self._get_message_count()
-#
-#             input_box.wait_for(state="visible", timeout=30000)
-#             input_box.click()
-#             input_box.fill(prompt)
-#
-#             submit_btn.wait_for(state="visible", timeout=30000)
-#             submit_btn.click()
-#
-#             self._wait_for_button_text(self.SUBMIT_BUTTON_SELECTOR, "Cancel", self.GENERATION_START_TIMEOUT_SECS)
-#             self._wait_for_button_text(self.SUBMIT_BUTTON_SELECTOR, "Submit", self.GENERATION_END_TIMEOUT_SECS)
-#
-#             self._wait_for_message_count_increase(prev_count, timeout_secs=15)
-#             response_text = self._strip_ui_chrome(self._get_latest_message_text())
-#             self.attach_screenshot("Becca response Screenshot")
-#             return response_text
-#
-#     def run_prompt_and_get_response(self, prompt: str) -> Tuple[str, float]:
-#         start = time.time()
-#         response = self.send_prompt_and_wait(prompt)
-#         return response, round(time.time() - start, 2)
-#
-#
-#     def _normalize_for_match(self, s: str) -> str:
-#         if s is None:
-#             return ""
-#         s = str(s).lower().replace("\n", " ").replace("\t", " ")
-#         s = re.sub(r"[^\w\s%$.-]", " ", s)    # remove punctuation to stabilize matching
-#         s = re.sub(r"\s+", " ", s).strip()
-#         return s
-#
-#     def _format_prompt_with_row_values(self, prompt: str, testcase: Dict[str, Any]) -> str:
-#         if not prompt:
-#             return ""
-#
-#         def repl(match):
-#             key = match.group(1)  # after $
-#             if key in testcase and str(testcase.get(key, "")).strip():
-#                 return str(testcase.get(key)).strip()
-#
-#             lower_map = {str(k).lower(): k for k in testcase.keys()}
-#             if key.lower() in lower_map:
-#                 real_key = lower_map[key.lower()]
-#                 val = str(testcase.get(real_key, "")).strip()
-#                 return val if val else match.group(0)
-#
-#             return match.group(0)
-#
-#         return re.sub(r"\$(\w+)", repl, prompt).strip()
-#
-#     def _validate_becca_response(
-#             self,
-#             actual_response: str,
-#             expected_response: str,
-#             validation_text: str,
-#             testcase: Dict[str, Any],
-#     ) -> Tuple[str, str]:
-#         actual_norm = self._normalize_for_match(actual_response)
-#
-#         # Fail fast on empty / none-like responses
-#         if not actual_response or actual_norm in {"none", ""}:
-#             return "failed", "ACTUAL_RESPONSE is empty/none"
-#
-#         validation_text = (validation_text or "").strip()
-#
-#         # CASE 1: validation_text present -> token based validation
-#         if validation_text:
-#             raw_tokens = [t.strip() for t in validation_text.split(",") if t.strip()]
-#             col_map = {str(k).strip().lower(): k for k in testcase.keys()}
-#
-#             resolved_tokens: List[str] = []
-#             for token in raw_tokens:
-#                 token_l = token.lower()
-#                 if token_l in col_map:
-#                     col_name = col_map[token_l]
-#                     col_val = str(testcase.get(col_name, "")).strip()
-#                     resolved_tokens.append(col_val if col_val else token)
-#                 else:
-#                     resolved_tokens.append(token)
-#
-#             missing = []
-#             for tok in resolved_tokens:
-#                 tok_norm = self._normalize_for_match(tok)
-#                 if tok_norm and tok_norm not in actual_norm:
-#                     missing.append(tok)
-#
-#             if missing:
-#                 return "failed", f"Missing tokens in ACTUAL_RESPONSE: {missing}"
-#             return "passed", ""
-#
-#         # CASE 2: no validation_text -> compare expected and actual (normalized contains)
-#         expected_response = (expected_response or "").strip()
-#         if expected_response:
-#             exp_norm = self._normalize_for_match(expected_response)
-#             if exp_norm and exp_norm in actual_norm:
-#                 return "passed", ""
-#             return "failed", "Expected response not found in actual response (normalized contains check)."
-#
-#         # CASE 3: both empty -> pass since actual is non-empty already
-#         return "passed", ""
-#
-#
-#     def execute_testcase(self, testcase: Dict[str, Any], rows_accumulator: Dict[str, Any]):
-#         with allure.step("Ask a Question (Becca UI)"):
-#
-#             expected = str(testcase.get("expected_response", testcase.get("expected_answer", ""))).strip()
-#             raw_prompt = str(testcase.get("prompt", "")).strip()
-#             row_key = raw_prompt
-#
-#             validation_text = str(testcase.get("validation_text", "")).strip()
-#
-#             prompt = self._format_prompt_with_row_values(raw_prompt, testcase)
-#
-#             allure.dynamic.title(prompt if prompt else "Becca testcase")
-#
-#             test_failure_reason = ""
-#             try:
-#                 actual_response, time_taken = self.run_prompt_and_get_response(prompt)
-#                 Results.report_event(f"Becca prompt response time: {time_taken}")
-#
-#                 ui_status, test_failure_reason = self._validate_becca_response(
-#                     actual_response=actual_response,
-#                     expected_response=expected,
-#                     validation_text=validation_text,
-#                     testcase=testcase
-#                 )
-#
-#                 result = {
-#                     "actual_prompt": prompt,
-#                     "expected_response": expected,
-#                     "actual_response": actual_response,
-#                     "ui_status": ui_status,
-#                     "Response time(secs)": time_taken,
-#                     "ui_error": test_failure_reason or ""
-#                 }
-#                 merged = {**testcase, **result}
-#
-#                 Results.report_event("Becca question searched successfully: " + prompt)
-#                 Results.report_event("validation_text: " + validation_text)
-#                 Results.report_event("LLM response: " + actual_response)
-#                 self.attach_screenshot("Becca question Screenshot")
-#
-#             except Exception as e:
-#                 logging.info(f"UI execution exception: {e}")
-#                 allure.attach(traceback.format_exc(), name="UI execution exception",
-#                               attachment_type=allure.attachment_type.TEXT)
-#                 result = {
-#                     "actual_prompt": prompt,
-#                     "expected_response": expected,
-#                     "actual_response": "error while fetching ui response",
-#                     "ui_status": "failed",
-#                     "Response time(secs)": "0",
-#                     "ui_error": f"{str(e)}"
-#                 }
-#                 merged = {**testcase, **result}
-#                 test_failure_reason = f"UI execution exception: {str(e)}"
-#
-#             ui_row = merged
-#             rows_accumulator[row_key] = ui_row
-#
-#             Results.report_event_assert_bool(
-#                 ui_row["ui_status"] == "passed",
-#                 f"prompt failed: {ui_row['actual_prompt']}" +
-#                 (f" | {test_failure_reason}" if test_failure_reason else "")
-#             )
-#             return ui_row
-#
-#
-#     def evaluate_testcase(self, ui_row: Dict[str, Any], rows_accumulator: Dict[str, Any]):
-#         with allure.step("Evaluate Becca Testcase"):
-#             try:
-#                 threshold = THRESHOLD
-#
-#                 if not ui_row.get("expected_response", ""):
-#                     ui_row["expected_response"] = ui_row.get("actual_response", "")
-#
-#                 eval_payload = {
-#                     "question": ui_row.get("actual_prompt", ""),
-#                     "llmAnswer": ui_row.get("actual_response", ""),
-#                     "groundAnswer": ui_row.get("expected_response", ""),
-#                     "contextualPrecision": False,
-#                     "contextualRecall": False,
-#                     "faithfulness": False,
-#                     "gEval": True
-#                 }
-#
-#                 data = get_multiple_scores(eval_payload)
-#                 gEval_score = data.get("gEval", {}).get("score", 0)
-#                 gEval_reason = data.get("gEval", {}).get("reason", "")
-#
-#                 pass_geval = gEval_score >= threshold
-#
-#                 eval_result = {
-#                     "eval_threshold": threshold,
-#                     "gEval_score": gEval_score,
-#                     "gEval_reason": gEval_reason,
-#                     "eval_error": "",
-#                     "eval_status": "passed" if pass_geval else "failed"
-#                 }
-#
-#                 merged_ui_eval = {**ui_row, **eval_result}
-#
-#             except Exception as e:
-#                 logging.info(f"Evaluation exception: {e}")
-#                 allure.attach(traceback.format_exc(), name="Evaluation exception",
-#                               attachment_type=allure.attachment_type.TEXT)
-#
-#                 eval_result = {
-#                     "eval_threshold": "",
-#                     "gEval_score": 0,
-#                     "gEval_reason": "evaluation error",
-#                     "eval_status": "failed",
-#                     "eval_error": f"{str(e)}"
-#                 }
-#                 merged_ui_eval = {**ui_row, **eval_result}
-#
-#             rows_accumulator[merged_ui_eval.get("actual_prompt", "")] = merged_ui_eval
-#             return merged_ui_eval
-#
-#     def _strip_ui_chrome(self, text: str) -> str:
-#         noise = ["content_copy", "star_border", "thumb_up_off_alt", "thumb_down_off_alt"]
-#         for n in noise:
-#             text = text.replace(n, "")
-#         return text.strip()
+    if not username or not password:
+        raise RuntimeError("Missing BECCA_APP_CIRRUS_UI_USERNAME or BECCA_APP_CIRRUS_UI_PASSWORD")
+
+    state_path = Constants.BECCA_STORAGE_STATE_PATH
+    os.makedirs(os.path.dirname(state_path), exist_ok=True)
+
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=False, slow_mo=200)
+        context = browser.new_context()
+        page = context.new_page()
+
+        page.goto(Constants.BECCA_URL, wait_until="domcontentloaded")
+
+        page.wait_for_selector(AZURE_USERNAME_INPUT, timeout=30000)
+        page.fill(AZURE_USERNAME_INPUT, username)
+        page.click(AZURE_SUBMIT_BUTTON)
+
+        page.wait_for_selector(AZURE_PASSWORD_INPUT, timeout=30000)
+        page.fill(AZURE_PASSWORD_INPUT, password)
+        page.click(AZURE_SUBMIT_BUTTON)
+
+        try:
+            page.wait_for_selector(AZURE_STAY_SIGNED_IN_YES, timeout=5000)
+            page.click(AZURE_STAY_SIGNED_IN_YES)
+        except Exception:
+            pass
+
+        print("\n✅ Complete MFA in the opened browser window.")
+        print("✅ Once BECCA loads, come back and press Resume in the Playwright Inspector.\n")
+
+        page.pause()
+
+        page.wait_for_load_state("networkidle", timeout=60000)
+        expect(page).not_to_have_url(re.compile(r".*login\.microsoftonline\.com.*"))
+
+        context.storage_state(path=state_path)
+        Results.report_event(f"Saved storage state to: {state_path}")
+        print(f"\n✅ storageState saved at: {state_path}\n")
+
+        context.close()
+        browser.close()
+
+
+if __name__ == "__main__":
+    generate_storage_state()
 
 import logging
 import traceback
@@ -507,7 +183,6 @@ from tests.vikings.fw.utils import get_multiple_scores
 
 
 class BeccaPage(BasePage):
-    # ---------------- SELECTORS ---------------- #
     CHAT_INPUT_SELECTOR = ".input-section textarea[matInput]"
     SUBMIT_BUTTON_SELECTOR = "button.submit-button"
     START_NEW_CHAT_SELECTOR = "button:has-text('Start New Chat')"
@@ -517,10 +192,6 @@ class BeccaPage(BasePage):
 
     def __init__(self, page):
         self.page = page
-
-    # =========================================================
-    # UI HELPERS
-    # =========================================================
 
     def open_becca(self):
         with allure.step("Open Becca UI"):
@@ -541,17 +212,12 @@ class BeccaPage(BasePage):
             btn.first.wait_for(state="visible", timeout=3000)
             btn.first.click()
 
-            # Wait until messages are cleared
             self.page.wait_for_function(
                 "document.querySelectorAll('app-chat-message').length === 0",
                 timeout=5000
             )
         except Exception:
             pass
-
-    # =========================================================
-    # STREAMING-SAFE GENERATION HANDLING
-    # =========================================================
 
     def _wait_for_generation_complete(self):
         """
@@ -591,9 +257,6 @@ class BeccaPage(BasePage):
             text = text.replace(n, "")
         return text.strip()
 
-    # =========================================================
-    # PROMPT PLACEHOLDER REPLACEMENT
-    # =========================================================
 
     def _format_prompt_with_testcase(self, prompt: str, testcase: Dict[str, Any]) -> str:
         """
@@ -612,10 +275,6 @@ class BeccaPage(BasePage):
 
         return re.sub(r"\$(\w+)", replacer, prompt).strip()
 
-    # =========================================================
-    # NORMALIZATION
-    # =========================================================
-
     def _normalize(self, text: str) -> str:
         if not text:
             return ""
@@ -624,9 +283,6 @@ class BeccaPage(BasePage):
         text = re.sub(r"\s+", " ", text)
         return text.strip()
 
-    # =========================================================
-    # SEND PROMPT
-    # =========================================================
 
     def send_prompt_and_wait(self, prompt: str) -> str:
         self.start_new_chat_if_present()
@@ -636,7 +292,6 @@ class BeccaPage(BasePage):
 
         input_box.wait_for(state="visible", timeout=30000)
 
-        # IMPORTANT: never press Enter (Angular already binds it)
         input_box.fill("")
         input_box.fill(prompt)
 
@@ -655,9 +310,6 @@ class BeccaPage(BasePage):
         response = self.send_prompt_and_wait(prompt)
         return response, round(time.time() - start, 2)
 
-    # =========================================================
-    # FINAL VALIDATION LOGIC (EXCEL CONTRACT)
-    # =========================================================
 
     def _validate_response(
             self,
@@ -672,7 +324,6 @@ class BeccaPage(BasePage):
 
         actual_norm = self._normalize(actual_response)
 
-        # ---------- CASE 1: validation_text exists ----------
         if validation_text:
             tokens = [t.strip() for t in validation_text.split(",") if t.strip()]
 
@@ -696,19 +347,14 @@ class BeccaPage(BasePage):
 
             return "passed", ""
 
-        # ---------- CASE 2: expected vs actual ----------
         if expected_answer:
             expected_norm = self._normalize(expected_answer)
             if expected_norm and expected_norm in actual_norm:
                 return "passed", ""
             return "failed", "Expected response not found in actual response"
 
-        # ---------- CASE 3: nothing to validate ----------
         return "passed", ""
 
-    # =========================================================
-    # EXECUTE TESTCASE
-    # =========================================================
 
     def execute_testcase(self, testcase: Dict[str, Any], rows_accumulator: Dict[str, Any]):
         with allure.step("Ask Question in Becca"):
@@ -718,7 +364,6 @@ class BeccaPage(BasePage):
 
             formatted_prompt = self._format_prompt_with_testcase(raw_prompt, testcase)
 
-            # Stable Astra-style key
             row_key = testcase.get("id") or formatted_prompt
 
             try:
@@ -761,10 +406,6 @@ class BeccaPage(BasePage):
                 )
 
             return ui_row
-
-    # =========================================================
-    # EVALUATION (ONLY IF UI PASSED)
-    # =========================================================
 
     def evaluate_testcase(self, ui_row: Dict[str, Any], rows_accumulator: Dict[str, Any]):
         with allure.step("Evaluate Becca Testcase"):
@@ -812,3 +453,666 @@ class BeccaPage(BasePage):
                 })
 
             return ui_row
+
+import allure
+import pytest
+
+from settings import BECCA_XL
+from tests.vikings.fw.common.CommonUtils import CommonUtils
+from tests.vikings.fw.common.FW import FW
+
+from ..ui_pages.BeccaPage import BeccaPage
+from ..ui_pages.LogoutPage import LogoutPage
+
+
+COLUMNS_ORDER = [
+    "actual_prompt",
+    "expected_response",
+    "actual_response",
+    "ui_status",
+    "ui_error",
+    "Response time(secs)",
+    "eval_threshold",
+    "gEval_score",
+    "gEval_reason",
+    "eval_status",
+    "eval_error",
+]
+from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
+import allure
+
+def test_login_becca_helper(request, becca_page, testcase, rows_accumulator):
+    request.node.COLUMNS_ORDER = COLUMNS_ORDER
+
+    becca = BeccaPage(becca_page)
+    logout = LogoutPage(becca_page)
+
+    try:
+        CommonUtils.setupTest(testcase)
+
+        becca.open_becca()
+        ui_row = becca.execute_testcase(testcase, rows_accumulator)
+
+        if ui_row["ui_status"] == "passed":
+            becca.evaluate_testcase(ui_row, rows_accumulator)
+
+        try:
+            logout.logout()
+        except PlaywrightTimeoutError as e:
+            allure.attach(
+                str(e),
+                name="Logout skipped (Tools not found)",
+                attachment_type=allure.attachment_type.TEXT
+            )
+            becca.attach_screenshot("Logout skipped - Tools not found")
+
+    except Exception as e:
+        CommonUtils.handleException(testcase, rows_accumulator, e)
+        raise
+
+@pytest.mark.parametrize("testcase", FW.get_test_data(BECCA_XL))
+@pytest.mark.uieval
+@allure.feature("becca")
+@allure.story("ui_eval_e2e")
+def test_login_becca_logout_e2e(request, becca_page, testcase, rows_accumulator):
+    test_login_becca_helper(request, becca_page, testcase, rows_accumulator)
+
+
+@pytest.mark.parametrize("testcase", FW.get_test_data(BECCA_XL)[:1])
+@pytest.mark.smoke
+@allure.feature("becca")
+@allure.story("ui_eval_e2e")
+def test_login_becca_logout_smoke(request, becca_page, testcase, rows_accumulator):
+    test_login_becca_helper(request, becca_page, testcase, rows_accumulator)
+when i run the test with this command with parallel process its returna 429 too many requests and many test fail however in series it works fine
+command im using
+tests/vikings/apps/becca -m "uieval" --tracing off -s --alluredir allure-results --reruns 0 -n 10 --html=reports/report.html --self-contained-html
+
+is there a way i can fix it minimally so that it works perfecty in -n 1 and -n 10 both cases my manager gave me this code ref go through and let me know if its helpful
+except Exception as e:
+        # Handle rate limits and other errors
+        error_type = type(e).__name__
+        error_msg = str(e)
+ 
+        # Check for rate limit error (429)
+        if "RateLimitError" in error_type or "429" in error_msg or "rate limit" in error_msg.lower():
+            # Extract retry delay from error message (default to 5 seconds)
+            import re
+            delay_match = re.search(r'retry after (\d+)', error_msg)
+            retry_delay = int(delay_match.group(1)) if delay_match else 5
+ 
+            logging.warning(f"Rate limit exceeded. Waiting {retry_delay}s before continuing...")
+            allure.attach(f"Rate limit hit. Retry after {retry_delay}s",
+                          name="Rate Limit Warning",
+                          attachment_type=allure.attachment_type.TEXT)
+ 
+            # Wait for the suggested delay plus buffer
+            time.sleep(retry_delay + REQUEST_BUFFER_SEC)
+ 
+        if session_results:
+            session_results["failed"] += 1
+ 
+        csv_accumulator[question] = {
+            "question": question,
+            "ground_answer": ground_answer,
+            "context": context,
+            "LLM Answer": cody_response,
+            "Deepeval test": "Failed",
+            "gEval score": 0,
+            "gEval reason": error_msg,
+            "answer relevancy score": 0,
+            "answer relevancy reason": "",
+            "faithfulness score": 0,
+            "faithfulness reason": "",
+            "contextual precision score": 0,
+            "contextual precision reason": "",
+            "contextual recall score": 0,
+            "contextual recall reason": "",
+            "llm response time": llm_elapsed_ms
+        }
+ 
+        logging.info(f"Waiting {REQUEST_BUFFER_SEC}s before next request...")
+        time.sleep(REQUEST_BUFFER_SEC)
+
+
+import logging
+import pytest
+import requests
+import pandas as pd
+import json
+import allure
+import os
+import time
+import urllib3
+from tests.vikings.fw.utils import get_multiple_scores
+from settings import CODY_XL, COMMON_REPORTS_DIR
+import re
+import os
+from tests.vikings.conftest import SSLV
+from tests.vikings.conftest import THRESHOLD
+
+# Force SSL verification to False - Override any conftest settings
+# Disable SSL warnings globally
+#urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+#logging.warning("SSL verification is DISABLED for Cody tests")
+
+# Create a session with SSL disabled to ensure consistency
+
+#SESSION.verify = False
+
+import deepeval_utils.metrics.utils as deepeval_utils
+
+def patched_trimAndLoadJson(input_string: str, metric=None):
+    """Patched version with better escape handling"""
+    start = input_string.find("{")
+    end = input_string.rfind("}") + 1
+
+    if end == 0 and start != -1:
+        input_string = input_string + "}"
+        end = len(input_string)
+
+    jsonStr = input_string[start:end] if start != -1 and end != 0 else ""
+
+    # Fix common escape issues
+    jsonStr = jsonStr.replace("\\'", "'")  # Fix escaped single quotes
+    jsonStr = re.sub(r'\\(?!["\\/bfnrtu])', r'\\\\', jsonStr)  # Escape unescaped backslashes
+    jsonStr = re.sub(r",\s*([\]}])", r"\1", jsonStr)  # Remove trailing commas
+
+    try:
+        return json.loads(jsonStr)
+    except json.JSONDecodeError as e:
+        error_str = f"Evaluation LLM outputted invalid JSON: {e}"
+        if metric is not None:
+            metric.error = error_str
+        raise ValueError(error_str)
+
+# Apply monkey patch at module load
+deepeval_utils.trimAndLoadJson = patched_trimAndLoadJson
+
+
+def get_test_data():
+    df = pd.read_excel(CODY_XL, engine='openpyxl')
+    return df.to_dict('records')
+
+
+@pytest.fixture(scope="session", autouse=True)
+def summary_fixture(request):
+    results = {"total": 0, "passed": 0, "failed": 0}
+    request.session.results = results
+    yield
+    summary_html = f"""
+    <table>
+      <tr><th>Total Questions</th><td>{results['total']}</td></tr>
+      <tr><th>Passed Questions</th><td>{results['passed']}</td></tr>
+      <tr><th>Failed Questions</th><td>{results['failed']}</td></tr>
+    </table>
+    """
+    allure.attach(summary_html, name="Summary Table", attachment_type=allure.attachment_type.HTML)
+
+
+@pytest.fixture(scope="session")
+def csv_accumulator(request):
+    rows_dict = {}
+    request.session.csv_rows_dict = rows_dict
+    yield rows_dict
+
+
+def _make_llm_request(request, endpoint: str, payload: dict, headers: dict, verify: SSLV,timeout: float = 120.0, max_retries: int = 10) -> dict:
+    """
+    Make LLM request with retry logic.
+    Retries indefinitely on 504 Gateway Timeout with FIXED delay (no backoff).
+    Uses exponential backoff only for other errors.
+    """
+    attempt = 0
+    retry_delay_504 = float(os.getenv('RETRY_DELAY_504', '3.0'))
+
+    while True:
+        try:
+            start_ts = time.perf_counter()
+
+            # Use the session object with verify=False
+            response = request.session.post(
+                endpoint,
+                json=payload,
+                headers=headers,
+                timeout=timeout,
+                verify=verify  # Explicit SSL bypass
+            )
+
+            end_ts = time.perf_counter()
+            elapsed_ms = (end_ts - start_ts) * 1000.0
+
+            logging.info(f"LLM POST attempt {attempt + 1} completed in {elapsed_ms:.2f} ms (status={response.status_code})")
+
+            # Check for 504 Gateway Timeout - retry indefinitely with FIXED delay
+            if response.status_code == 504:
+                logging.warning(f"🔄 HTTP 504 Gateway Timeout on attempt {attempt + 1}. Retrying in {retry_delay_504}s...")
+                print(f"⚠️  HTTP 504 Gateway Timeout - Retry #{attempt + 1} after {retry_delay_504}s delay")
+                time.sleep(retry_delay_504)  # FIXED delay - no exponential backoff
+                attempt += 1
+                continue  # Retry indefinitely
+
+            # Raise for other HTTP errors
+            response.raise_for_status()
+
+            # Parse JSON response
+            try:
+                response_json = response.json()
+            except json.JSONDecodeError as e:
+                logging.warning(f"JSON decode failed: {e}. Using raw text.")
+                response_json = {"response": response.text, "context": ""}
+
+            print(f"✅ LLM request succeeded after {attempt + 1} attempts")
+
+            return {
+                "status_code": response.status_code,
+                "response": response_json.get('response', response.text),
+                "context": response_json.get('context', ""),
+                "error": None
+            }
+
+        except requests.exceptions.SSLError as e:
+            logging.error(f"SSL Error on attempt {attempt + 1}: {e}")
+            if attempt >= max_retries - 1:
+                return {
+                    "status_code": None,
+                    "response": "sslError",
+                    "context": f"SSL Certificate Error after {max_retries} attempts: {e}\nEndpoint: {endpoint}",
+                    "error": str(e)
+                }
+            attempt += 1
+
+        except (requests.exceptions.Timeout, requests.exceptions.ConnectionError) as e:
+            delay = min(2 ** min(attempt, 6), 60)  # Exponential backoff for network errors
+            logging.warning(f"Network error on attempt {attempt + 1}: {e}. Retrying in {delay}s...")
+            print(f"⚠️  Network error - Retry #{attempt + 1} after {delay}s delay")
+
+            if attempt < max_retries - 1:
+                time.sleep(delay)
+                attempt += 1
+            else:
+                return {
+                    "status_code": None,
+                    "response": "networkError",
+                    "context": f"Network Error after {max_retries} attempts: {type(e).__name__}\nError: {e}\nEndpoint: {endpoint}",
+                    "error": str(e)
+                }
+
+        except requests.exceptions.HTTPError as e:
+            status_code = response.status_code if 'response' in locals() else None
+
+            # Retry indefinitely on 504 with FIXED delay
+            if status_code == 504:
+                logging.warning(f"🔄 HTTP 504 Gateway Timeout on attempt {attempt + 1}. Retrying in {retry_delay_504}s...")
+                print(f"⚠️  HTTP 504 Gateway Timeout - Retry #{attempt + 1} after {retry_delay_504}s delay")
+                time.sleep(retry_delay_504)  # FIXED delay
+                attempt += 1
+                continue  # Retry indefinitely
+
+            # Exponential backoff for other 5xx errors
+            if status_code and 500 <= status_code < 600:
+                delay = min(2 ** min(attempt, 6), 60)
+                logging.warning(f"HTTP {status_code} error on attempt {attempt + 1}. Retrying in {delay}s...")
+                print(f"⚠️  HTTP {status_code} error - Retry #{attempt + 1} after {delay}s delay")
+
+                if attempt < max_retries - 1:
+                    time.sleep(delay)
+                    attempt += 1
+                else:
+                    return {
+                        "status_code": status_code,
+                        "response": "httpError",
+                        "context": f"HTTP Error after {max_retries} attempts: {e}\nStatus: {status_code}",
+                        "error": str(e)
+                    }
+            else:
+                # Don't retry on 4xx client errors
+                logging.error(f"HTTP Error: {e}")
+                return {
+                    "status_code": status_code,
+                    "response": "httpError",
+                    "context": f"HTTP Error: {e}\nStatus: {status_code}",
+                    "error": str(e)
+                }
+
+        except Exception as e:
+            logging.error(f"Unknown error on attempt {attempt + 1}: {type(e).__name__}: {e}")
+            if attempt >= max_retries - 1:
+                return {
+                    "status_code": None,
+                    "response": "runtimeError",
+                    "context": f"Runtime Error after {max_retries} attempts: {type(e).__name__}\nError: {e}",
+                    "error": str(e)
+                }
+            attempt += 1
+# Add at the top of the file with other constants
+REQUEST_BUFFER_SEC = float(os.getenv('REQUEST_BUFFER_SEC', '2.0'))  # 2 seconds default buffer
+
+def _process_question(row, request, csv_accumulator, test_type):
+    llm_endpoint = 'https://cody-dev.prod.internal-gcp.optum.com/api/external/contextandresponsebinderfortesteval'
+    threshold = THRESHOLD
+
+    session_results = getattr(request.session, "results", None)
+    if session_results:
+        session_results["total"] += 1
+
+    allure.dynamic.title(row['question'])
+    question = row['question']
+    ground_answer = row['expected_answer']
+    context=""
+
+    allure.dynamic.label("type", test_type)
+
+    with allure.step(f"{test_type.capitalize()} Test for question: {question}"):
+        jwt_token = "eyJhbGciOiJSUzI1NiIsImtpZCI6IjhlVGozRDVDTVR5cGZubzZaQVhQMTJ5TUVBdyIsInBpLmF0bSI6Ijhkdm4ifQ.eyJzY29wZSI6Im9wZW5pZCBwcm9maWxlIGFkZHJlc3MgZW1haWwgcGhvbmUiLCJjbGllbnRfaWQiOiJSZWcxRGV2X1BPQ19DT05GSUdfREVTS1RPUF9QTCIsInN0YW5kYXJkQVRNIjoiMG5mWEdLQ1FTZm12dVRHczU1eFVzTVB5dGZEQlVvY1ciLCJhY3IiOiJSMV9BQUwxX01TLUFELUtlcmJlcm9zIiwiYXVkIjoiUmVnMURldl9QT0NfQ09ORklHX0RFU0tUT1BfUEwiLCJzdWIiOiJhY2hoYWIxNiIsIm1zaWQiOiJhY2hoYWIxNiIsImlzcyI6Imh0dHBzOi8vYXV0aGdhdGV3YXkxLWRldi5lbnRpYW0udWhnLmNvbSIsImVtcGxveWVlSUQiOiIwMDIwNDM2NDUiLCJleHAiOjE2OTEwNTE1NTR9.X1tXnaZ6xFTrhJgSfq58z_C-tefSoKIbfC8m1VnFOYQrNdnYzlkNLykG-7ya794QWofnJ8_0L2CtrTg-oASRgP2j8ngNErRlhFRSjxtJMJYmqwx6WEXWf07FTUufEP9M5ZZpKPRMgCS-J0_cg_Dj9w6dqx9DDtzDGCPF1NOGXZM3TGf4HorFe01muieszujxttBRiMjSOFLFdumF_bG1FLUlYXostavBS7zxHc07YwRwi4gWznTqueIsg4XicWp8nbiegjVSWsQX2LGuO18upCQLEUZhO8-W7s1mopbk83Pz3fl1CXoXp77iYOMz3iheiZ42UyrFHYNgZYam4c8S4A"
+        headers = {
+            'Authorization': 'Bearer ' + jwt_token,
+            'Cookie': 'JSESSIONID=BA1FF4A64A7D5A72AD6FA2F0864B6C78'
+        }
+        payload = {"text": question}
+
+        llm_start_time = time.perf_counter()
+        result = _make_llm_request(request, llm_endpoint, payload, headers, SSLV)
+        llm_end_time = time.perf_counter()
+        llm_elapsed_ms = (llm_end_time - llm_start_time) * 1000.0
+
+        logging.info(f"LLM request completed in {llm_elapsed_ms:.2f} ms")
+
+        cody_response = result["response"]
+        context = result["context"]
+        error = result["error"]
+
+        # Attach to Allure
+        allure.attach(question, name="Question", attachment_type=allure.attachment_type.TEXT)
+        allure.attach(context or "No context available", name="Context", attachment_type=allure.attachment_type.TEXT)
+        allure.attach(ground_answer, name="Expected Answer", attachment_type=allure.attachment_type.TEXT)
+        allure.attach(cody_response or "No response", name="Actual Answer", attachment_type=allure.attachment_type.TEXT)
+        allure.attach(f"LLM Response Time: {llm_elapsed_ms:.2f} ms",
+                      name="LLM Response Timing",
+                      attachment_type=allure.attachment_type.TEXT
+                      )
+
+        if error:
+            allure.attach(error, name="Error Details", attachment_type=allure.attachment_type.TEXT)
+
+    # Validate required data before evaluation
+    if not cody_response or not context:
+        logging.warning(f"Missing data - Response: {bool(cody_response)}, Context: {bool(context)}")
+        if not cody_response:
+            cody_response = "No response generated"
+        if not context:
+            context = "No context available"
+
+    # Evaluation logic remains the same...
+    eval_payload = {
+        "question": question,
+        "llmAnswer": cody_response,
+        "groundAnswer": ground_answer,
+        "retrievalContext": [context],
+        "contextualPrecision": True,
+        "contextualRecall": True,
+        "faithfulness": True,
+        "answerRelevancy": True,
+        "gEval": True
+    }
+
+    try:
+        data = get_multiple_scores(eval_payload)
+
+        # Extract scores with defensive parsing
+        gEval_score = data.get("gEval", {}).get("score", 0)
+        gEval_reason = data.get("gEval", {}).get("reason", "")
+        answer_relevancy_score = data.get("answerRelevancy", {}).get("score", 0)
+        answer_relevancy_reason = data.get("answerRelevancy", {}).get("reason", "")
+        faithfulness_score = data.get("faithfulness", {}).get("score", 0)
+        faithfulness_reason = data.get("faithfulness", {}).get("reason", "")
+
+        # Print to console immediately
+        print(f" gEval Score: {gEval_score:.4f}")
+        print(f"📝 gEval Reason: {gEval_reason[:200]}...\n")
+
+        # Handle contextual precision parsing errors
+        try:
+            contextual_precision_score = data.get("contextualPrecision", {}).get("score", 0)
+            contextual_precision_reason = data.get("contextualPrecision", {}).get("reason", "")
+        except (TypeError, KeyError, AttributeError) as cp_error:
+            logging.warning(f"Contextual precision parsing error: {cp_error}. Using default values.")
+            contextual_precision_score = 0
+            contextual_precision_reason = f"Parsing error: {str(cp_error)}"
+        except ValueError as val_err:
+            # Handle deepeval JSON parsing errors
+            if "invalid JSON" in str(val_err).lower():
+                error_msg = f"Deepeval LLM generated malformed JSON: {str(val_err)}"
+                logging.error(f"{error_msg}. Skipping metric evaluation.")
+            else:
+                error_msg = f"Deepeval validation error: {str(val_err)}"
+
+        # Handle contextual recall parsing errors
+        try:
+            contextual_recall_score = data.get("contextualRecall", {}).get("score", 0)
+            contextual_recall_reason = data.get("contextualRecall", {}).get("reason", "")
+        except (TypeError, KeyError, AttributeError) as cr_error:
+            logging.warning(f"Contextual recall parsing error: {cr_error}. Using default values.")
+            contextual_recall_score = 0
+            contextual_recall_reason = f"Parsing error: {str(cr_error)}"
+
+        result = "Passed" if all([
+            gEval_score >= threshold,
+            answer_relevancy_score >= threshold,
+            faithfulness_score >= threshold,
+            contextual_precision_score >= threshold,
+            contextual_recall_score >= threshold
+        ]) else "Failed"
+
+        if session_results:
+            if result == "Passed":
+                session_results["passed"] += 1
+            else:
+                session_results["failed"] += 1
+
+        csv_accumulator[question] = {
+            "question": question,
+            "ground_answer": ground_answer,
+            "context": context,
+            "LLM Answer": cody_response,
+            "Deepeval test": result,
+            "gEval score": gEval_score,
+            "gEval reason": gEval_reason,
+            "answer relevancy score": answer_relevancy_score,
+            "answer relevancy reason": answer_relevancy_reason,
+            "faithfulness score": faithfulness_score,
+            "faithfulness reason": faithfulness_reason,
+            "contextual precision score": contextual_precision_score,
+            "contextual precision reason": contextual_precision_reason,
+            "contextual recall score": contextual_recall_score,
+            "contextual recall reason": contextual_recall_reason,
+            "llm response time": llm_elapsed_ms
+        }
+
+        logging.info(f"Evaluation completed - Result: {result}, gEval: {gEval_score}, "
+                     f"Relevancy: {answer_relevancy_score}, Faithfulness: {faithfulness_score}, "
+                     f"Precision: {contextual_precision_score}, Recall: {contextual_recall_score}")
+
+        # Add buffer time before next request
+        logging.info(f"Waiting {REQUEST_BUFFER_SEC}s before next request...")
+        time.sleep(REQUEST_BUFFER_SEC)
+
+        if result != "Passed":
+            pytest.fail(f"Question failed: {question}", pytrace=True)
+
+    except (TypeError, ValueError) as api_error:
+        # Handle deepeval API compatibility and JSON parsing errors
+        error_msg = f"Deepeval evaluation error: {str(api_error)}"
+        logging.error(error_msg, exc_info=True)
+        allure.attach(str(api_error), name="Deepeval Error", attachment_type=allure.attachment_type.TEXT)
+
+    except Exception as e:
+        # Handle rate limits and other errors
+        error_type = type(e).__name__
+        error_msg = str(e)
+
+        # Check for rate limit error (429)
+        if "RateLimitError" in error_type or "429" in error_msg or "rate limit" in error_msg.lower():
+            # Extract retry delay from error message (default to 5 seconds)
+            import re
+            delay_match = re.search(r'retry after (\d+)', error_msg)
+            retry_delay = int(delay_match.group(1)) if delay_match else 5
+
+            logging.warning(f"Rate limit exceeded. Waiting {retry_delay}s before continuing...")
+            allure.attach(f"Rate limit hit. Retry after {retry_delay}s",
+                          name="Rate Limit Warning",
+                          attachment_type=allure.attachment_type.TEXT)
+
+            # Wait for the suggested delay plus buffer
+            time.sleep(retry_delay + REQUEST_BUFFER_SEC)
+
+        if session_results:
+            session_results["failed"] += 1
+
+        csv_accumulator[question] = {
+            "question": question,
+            "ground_answer": ground_answer,
+            "context": context,
+            "LLM Answer": cody_response,
+            "Deepeval test": "Failed",
+            "gEval score": 0,
+            "gEval reason": error_msg,
+            "answer relevancy score": 0,
+            "answer relevancy reason": "",
+            "faithfulness score": 0,
+            "faithfulness reason": "",
+            "contextual precision score": 0,
+            "contextual precision reason": "",
+            "contextual recall score": 0,
+            "contextual recall reason": "",
+            "llm response time": llm_elapsed_ms
+        }
+
+        logging.info(f"Waiting {REQUEST_BUFFER_SEC}s before next request...")
+        time.sleep(REQUEST_BUFFER_SEC)
+
+        pytest.fail(f"Deepeval evaluation failed: {e}", pytrace=True)  # Changed from 'error' to 'e'
+
+    except json.JSONDecodeError as json_err:
+        error_msg = f"JSON parsing error: {str(json_err)}"
+        logging.error(error_msg, exc_info=True)
+        allure.attach(str(json_err), name="JSON Parse Error", attachment_type=allure.attachment_type.TEXT)
+
+        if session_results:
+            session_results["failed"] += 1
+
+        csv_accumulator[question] = {
+            "question": question,
+            "ground_answer": ground_answer,
+            "context": context,
+            "LLM Answer": cody_response,
+            "Deepeval test": "Failed",
+            "gEval score": 0,
+            "gEval reason": error_msg,
+            "answer relevancy score": 0,
+            "answer relevancy reason": "",
+            "faithfulness score": 0,
+            "faithfulness reason": "",
+            "contextual precision score": 0,
+            "contextual precision reason": "",
+            "contextual recall score": 0,
+            "contextual recall reason": "",
+            "llm response time": llm_elapsed_ms
+        }
+
+        logging.info(f"Waiting {REQUEST_BUFFER_SEC}s before next request...")
+        time.sleep(REQUEST_BUFFER_SEC)
+
+        pytest.fail(f"JSON parsing error: {json_err}", pytrace=True)
+
+    except Exception as e:
+        error_msg = f"Unknown evaluation error: {str(e)}"
+        logging.error(error_msg, exc_info=True)
+        allure.attach(str(e), name="Evaluation Error", attachment_type=allure.attachment_type.TEXT)
+
+        if session_results:
+            session_results["failed"] += 1
+
+        csv_accumulator[question] = {
+            "question": question,
+            "ground_answer": ground_answer,
+            "context": context,
+            "LLM Answer": cody_response,
+            "Deepeval test": "Failed",
+            "gEval score": 0,
+            "gEval reason": error_msg,
+            "answer relevancy score": 0,
+            "answer relevancy reason": "",
+            "faithfulness score": 0,
+            "faithfulness reason": "",
+            "contextual precision score": 0,
+            "contextual precision reason": "",
+            "contextual recall score": 0,
+            "contextual recall reason": "",
+            "llm response time": llm_elapsed_ms
+        }
+
+        logging.info(f"Waiting {REQUEST_BUFFER_SEC}s before next request...")
+        time.sleep(REQUEST_BUFFER_SEC)
+
+        pytest.fail(f"Deepeval evaluation failed: {e}", pytrace=True)
+
+
+@pytest.mark.smoke
+@pytest.mark.parametrize("row", get_test_data())
+@allure.feature("cody")
+@allure.story("eval")
+def test_process_question_primary(row, request, csv_accumulator):
+    _process_question(row, request, csv_accumulator, "normal")
+
+
+@pytest.fixture(scope="session", autouse=True)
+def attach_csv_fixture(request, csv_accumulator):
+    yield
+    try:
+        if not csv_accumulator:
+            logging.info("No evaluation rows to write.")
+            return
+
+        # Define columns outside the if block
+        columns = [
+            "question",
+            "ground_answer",
+            "context",
+            "LLM Answer",
+            "Deepeval test",
+            "gEval score", "gEval reason",
+            "answer relevancy score", "answer relevancy reason",
+            "faithfulness score", "faithfulness reason",
+            "contextual precision score", "contextual precision reason",
+            "contextual recall score", "contextual recall reason",
+            "llm response time"
+        ]
+
+        # Create DataFrame
+        df = pd.DataFrame(list(csv_accumulator.values()))[columns]
+
+        # Ensure output directory exists
+        os.makedirs(COMMON_REPORTS_DIR, exist_ok=True)
+
+        # Write CSV
+        csv_path = os.path.join(COMMON_REPORTS_DIR, "evaluation_results.csv")
+        df.to_csv(csv_path, index=False)
+        logging.info(f"CSV written to {csv_path}")
+
+        # Attach CSV to Allure
+        with open(csv_path, 'r') as csv_file:
+            allure.attach(csv_file.read(), name="Evaluation Data CSV", attachment_type=allure.attachment_type.CSV)
+
+        # Write Excel
+        output_path = os.path.join(COMMON_REPORTS_DIR, "deepeval_results.xlsx")
+        df.to_excel(output_path, index=False, engine='openpyxl')
+        logging.info(f"Excel written to {output_path}")
+
+        # Attach Excel to Allure
+        allure.attach.file(output_path, name="Evaluation Results Excel", attachment_type=allure.attachment_type.XLSX)
+
+        logging.info("CSV and Excel files successfully attached to Allure report")
+
+    except Exception as e:
+        logging.error(f"CSV/Excel Attach Error: {e}", exc_info=True)
