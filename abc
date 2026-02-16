@@ -527,6 +527,8 @@ i have this code for a becca chatbot test pipeline theres 2 things i wanna imple
 2) for some questions the expected answer is Apologies, I can only answer questions regarding plan library. Is there anything else I can help you with? (something like this)
 and this is fomat of my input excel, how to handle this case in validation_text and in code as well because i notice these keep failing in my response excel, help me understand what code changes and validation_text changes i can make to handle this case
 
+suggest exact code changes and where without hampering any other logic make sure changes are not too huge
+
 generated excel copy pasted if u see any other issues let me know
 actual_prompt	expected_response	actual_response	ui_status	ui_error	Response time(secs)	eval_threshold	gEval_score	gEval_reason	eval_status	eval_error
 What is the cardiac limits on plan code DY1A	"Below are the limits for Rehabilitation Services - Outpatient Therapy and Manipulative for plan code DY1A. isBuyUp value is No. Click here 499922 to view the json file.
