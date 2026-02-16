@@ -1,88 +1,32 @@
 actual_prompt	expected_response	actual_response	ui_status	ui_error	Response time(secs)	eval_threshold	gEval_score	gEval_reason	eval_status	eval_error
-what is the coinsurance for pharmaceutical products for DTKS, 2024, AR, KA, INN.	"Below are the coinsurance details for Pharmaceutical Products for plan code DTKS, 2024, AR, KA, INN. Click here 495372 to view the json file.
-Item No. COC Series Business Segment State Abbreviation Benefit Category Payment Line Tier 1 (Designated Network) Tier 2 (In-Network) Tier 3 (Out-of-Network) Individual Deductible ($) Family Deductible ($)
-0 2024 KA - Key Account AR Pharmaceutical Products - Outpatient Standard N/A 30% member coinsurance, no copay, deductible applies 50% member coinsurance, no copay, deductible applies Tier 2 - $4000.00, Tier 3 - $10000.00 Tier 2 - $8000.00, Tier 3 - $20000.00
+show me fully insured small group plans in AL under a 2025 coc with a $25 copay	"There are 100 plans with a $25 copay in AL under a 2025 COC. Here's a sample of the first 10 rows. Are you looking for something specific from the plan library (e.g., business segment, limits, marketing name)?Click here 701909 , 701981 , 701977 , 701849 , 701969 , 701965 , 701961 , 701831 , 701957 , 701953 to view the json files.
+Item No. Plan Code COC Series Business Segment State Abbreviation Benefit Category Payment Line Tier 1 (Designated Network) Tier 2 (In-Network) Tier 3 (Out-of-Network) Individual Deductible ($) Family Deductible ($)
+0 AL0025 2025 SB - Small Business AL Adult Vision - Contact Lenses (Formulary) Standard Not covered no member coinsurance, $25 copay, deductible does not apply Not covered Tier 2 - $750.00 Tier 2 - $1500.00
+1 AL0025 2025 SB - Small Business AL Adult Vision - Eyeglass Lenses Standard Not covered no member coinsurance, $25 copay, deductible does not apply Not covered Tier 2 - $750.00 Tier 2 - $1500.00
+2 AL0025B 2025 SB - Small Business AL Adult Vision - Contact Lenses (Formulary) Standard Not covered no member coinsurance, $25 copay, deductible does not apply Not covered Tier 2 - $750.00 Tier 2 - $1500.00
+3 AL0025B 2025 SB - Small Business AL Adult Vision - Eyeglass Lenses Standard Not covered no member coinsurance, $25 copay, deductible does not apply Not covered Tier 2 - $750.00 Tier 2 - $1500.00
+4 AL0025X 2025 SB - Small Business AL Adult Vision - Contact Lenses (Formulary) Standard Not covered no member coinsurance, $25 copay, deductible does not apply Not covered Tier 2 - $750.00 Tier 2 - $1500.00
+5 AL0025X 2025 SB - Small Business AL Adult Vision - Eyeglass Lenses Standard Not covered no member coinsurance, $25 copay, deductible does not apply Not covered Tier 2 - $750.00 Tier 2 - $1500.00
+6 AL0026 2025 SB - Small Business AL Adult Vision - Contact Lenses (Formulary) Standard Not covered no member coinsurance, $25 copay, deductible does not apply Not covered Tier 2 - $8300.00 Tier 2 - $16600.00
+7 AL0026 2025 SB - Small Business AL Adult Vision - Eyeglass Lenses Standard Not covered no member coinsurance, $25 copay, deductible does not apply Not covered Tier 2 - $8300.00 Tier 2 - $16600.00
+8 AL0026B 2025 SB - Small Business AL Adult Vision - Contact Lenses (Formulary) Standard Not covered no member coinsurance, $25 copay, deductible does not apply Not covered Tier 2 - $8300.00 Tier 2 - $16600.00
+9 AL0026B 2025 SB - Small Business AL Adult Vision - Eyeglass Lenses Standard Not covered no member coinsurance, $25 copay, deductible does not apply Not covered Tier 2 - $8300.00 Tier 2 - $16600.00
 content_copy
 star_border
 thumb_up_off_alt
-thumb_down_off_alt"	"Below are the Pharmaceutical Products - Outpatient coinsurance details for plan code DTKS. Click here 495372 to view the json file.
-Item No.	COC Series	Business Segment	State Abbreviation	Benefit Category	Payment Line	Tier 1 (Designated Network)	Tier 2 (In-Network)	Tier 3 (Out-of-Network)	Individual Deductible ($)	Family Deductible ($)
-0	2024	KA - Key Account	AR	Pharmaceutical Products - Outpatient	Standard	N/A	30% member coinsurance, no copay, deductible applies	50% member coinsurance, no copay, deductible applies	Tier 2 - $4000.00, Tier 3 - $10000.00	Tier 2 - $8000.00, Tier 3 - $20000.00"	passed		81.46					
-what is the coinsurance for pharmaceutical products for $PlanCode, 2024, AR, KA, INN.			failed	'BeccaPage' object has no attribute 'evaluate_testcase'						
-What are the different maximums for Plan code CHFF		error while fetching ui response	failed	"Locator.wait_for: Timeout 30000ms exceeded.
-Call log:
-  - waiting for locator("".input-section textarea[matInput]"").first to be visible
-    - waiting for"" https://authgateway1-stg.entiam.uhg.com/as/authorization.oauth2?response_type=code&client_id=Reg1Stg_Mandy&state=Sk5jNVpNTmhaUGY1LjRNYVhFNUR-ZDkxQkhTNWVVaDM4VUJvdzB1MVJua25a%3Bchat&redirect_uri=https…"" navigation to finish...
-    - navigated to ""https://authgateway1-stg.entiam.uhg.com/as/sZQ6YMmbjD/resume/as/authorization.ping""
-    - waiting for"" https://device.login.microsoftonline.com/"" navigation to finish...
-    - navigated to ""https://device.login.microsoftonline.com/""
-"	0					
-What are the different maximums for Plan code $PlanCode			failed	"prompt failed: What are the different maximums for Plan code CHFF | Locator.wait_for: Timeout 30000ms exceeded.
-  Call log:
-    - waiting for locator("".input-section textarea[matInput]"").first to be visible
-      - waiting for"" https://authgateway1-stg.entiam.uhg.com/as/authorization.oauth2?response_type=code&client_id=Reg1Stg_Mandy&state=Sk5jNVpNTmhaUGY1LjRNYVhFNUR-ZDkxQkhTNWVVaDM4VUJvdzB1MVJua25a%3Bchat&redirect_uri=https…"" navigation to finish...
-      - navigated to ""https://authgateway1-stg.entiam.uhg.com/as/sZQ6YMmbjD/resume/as/authorization.ping""
-      - waiting for"" https://device.login.microsoftonline.com/"" navigation to finish...
-      - navigated to ""https://device.login.microsoftonline.com/""
-  
-assert False"						
-Is there an IP waived copay for Plan Code DY9D	"Yes, for plan code DY9D, Inpatient Hospital, Inpatient Habilitative Services, Mental Health Care and Substance - Related and Addictive Disorders Inpatient, and Skilled Nursing Facility/Inpatient Rehabilitation Facility Services have waived copays for In-Network (Tier 2). Click here 500708 to view the json file.
-Item No. COC Series Business Segment State Abbreviation Benefit Category Payment Line Tier 1 (Designated Network) Tier 2 (In-Network) Tier 3 (Out-of-Network) Individual Deductible ($) Family Deductible ($)
-0 2025 SB - Small Business GA Hospital - Inpatient Stay Standard N/A no member coinsurance, no copay, deductible applies 30% member coinsurance, no copay, deductible applies Tier 2 - $2000.00, Tier 3 - $5000.00 Tier 2 - $4000.00, Tier 3 - $10000.00
-1 2025 SB - Small Business GA Inpatient Habilitative Services Standard N/A no member coinsurance, no copay, deductible does not apply N/A Tier 2 - $2000.00, Tier 3 - $5000.00 Tier 2 - $4000.00, Tier 3 - $10000.00
-2 2025 SB - Small Business GA Mental Health Care and Substance - Related and Addictive Disorders Inpatient Standard N/A no member coinsurance, no copay, deductible applies 30% member coinsurance, no copay, deductible applies Tier 2 - $2000.00, Tier 3 - $5000.00 Tier 2 - $4000.00, Tier 3 - $10000.00
-3 2025 SB - Small Business GA Skilled Nursing Facility/Inpatient Rehabilitation Facility Services Standard N/A no member coinsurance, no copay, deductible applies 30% member coinsurance, no copay, deductible applies Tier 2 - $2000.00, Tier 3 - $5000.00 Tier 2 - $4000.00, Tier 3 - $10000.00
-content_copy
-star_border
-thumb_up_off_alt
-thumb_down_off_alt"	Apologies, I'm currently unable to provide a full response to this question. This feature is expected to become available in a future update. Please consider rephrasing your question or asking about the plan library, which might be available soon.	failed	Missing tokens in ACTUAL_RESPONSE: ['DY9D', 'Yes', '500708']	66					
-Is there an IP waived copay for Plan Code $PlanCode			failed	"prompt failed: Is there an IP waived copay for Plan Code DY9D | Missing tokens in ACTUAL_RESPONSE: ['DY9D', 'Yes', '500708']
-assert False"						
-is there an radiology copay for Plan Code DY82	"Yes, there is a radiology copay for Plan Code DY82. For Lab Testing - Outpatient, the copay for Tier 1 is $50.00. For X-Ray and other Diagnostic Testing, the copay for Tier 2 is $100.00. Click here 500696 to view the json file.
-Item No. COC Series Business Segment State Abbreviation Benefit Category Payment Line Tier 1 (Designated Network) Tier 2 (In-Network) Tier 3 (Out-of-Network) Individual Deductible ($) Family Deductible ($)
-0 2025 SB - Small Business GA Lab Testing - Outpatient Standard $50 copay, deductible applies 30% member coinsurance, no copay, deductible applies Not covered Tier 2 - $1000.00, Tier 3 - $5000.00 Tier 2 - $2000.00, Tier 3 - $10000.00
-1 2025 SB - Small Business GA X-Ray and other Diagnostic Testing Standard N/A no member coinsurance, $100 copay, deductible applies 30% member coinsurance, no copay, deductible applies Tier 2 - $1000.00, Tier 3 - $5000.00 Tier 2 - $2000.00, Tier 3 - $10000.00
-content_copy
-star_border
-thumb_up_off_alt
-thumb_down_off_alt"	"Below are the copay details for radiology for plan code DY82. Click here 500696 to view the json file.
-Item No.	COC Series	Business Segment	State Abbreviation	Benefit Category	Payment Line	Tier 1 (Designated Network)	Tier 2 (In-Network)	Tier 3 (Out-of-Network)	Individual Deductible ($)	Family Deductible ($)
-0	2025	SB - Small Business	GA	Lab Testing - Outpatient	Standard	$50 copay, deductible applies	30% member coinsurance, no copay, deductible applies	Not covered	Tier 2 - $1000.00, Tier 3 - $5000.00	Tier 2 - $2000.00, Tier 3 - $10000.00
-1	2025	SB - Small Business	GA	X-Ray and other Diagnostic Testing	Standard	N/A	no member coinsurance, $100 copay, deductible applies	30% member coinsurance, no copay, deductible applies	Tier 2 - $1000.00, Tier 3 - $5000.00	Tier 2 - $2000.00, Tier 3 - $10000.00"	failed	Missing tokens in ACTUAL_RESPONSE: ['Yes', 'there is a radiology copay']	26.69					
-is there an radiology copay for Plan Code $PlanCode			failed	"prompt failed: is there an radiology copay for Plan Code DY82 | Missing tokens in ACTUAL_RESPONSE: ['Yes', 'there is a radiology copay']
-assert False"						
-Plan code is DK9D. What is Congenital Heart Disease Ded		error while fetching ui response	failed	"Locator.wait_for: Timeout 30000ms exceeded.
-Call log:
-  - waiting for locator("".input-section textarea[matInput]"").first to be visible
-"	0					
-Plan code is $PlanCode. What is Congenital Heart Disease Ded			failed	"prompt failed: Plan code is DK9D. What is Congenital Heart Disease Ded | Locator.wait_for: Timeout 30000ms exceeded.
-  Call log:
-    - waiting for locator("".input-section textarea[matInput]"").first to be visible
-  
-assert False"						
-What is the radiology coinsurance for plan code DK7S?	"Below are the radiology coinsurance details for plan code DK7S. Click here 452545 , 476789 to view the json files.
-Item No. COC Series Business Segment State Abbreviation Benefit Category Payment Line Tier 1 (Designated Network) Tier 2 (In-Network) Tier 3 (Out-of-Network) Individual Deductible ($) Family Deductible ($)
-0 2024 KA - Key Account NA Lab Testing - Outpatient Standard N/A no member coinsurance, no copay, deductible applies N/A Tier 2 - $6700.00 Tier 2 - $13400.00
-1 2024 KA - Key Account MD Lab Testing - Outpatient Standard N/A no member coinsurance, no copay, deductible applies N/A Tier 2 - $6700.00 Tier 2 - $13400.00
-2 2024 KA - Key Account NA X-Ray and other Diagnostic Testing Standard N/A no member coinsurance, no copay, deductible applies N/A Tier 2 - $6700.00 Tier 2 - $13400.00
-3 2024 KA - Key Account MD X-Ray and other Diagnostic Testing Standard N/A no member coinsurance, no copay, deductible applies N/A Tier 2 - $6700.00 Tier 2 - $13400.00
-content_copy
-star_border
-thumb_up_off_alt
-thumb_down_off_alt"	"Below are the radiology coinsurance details for plan code DK7S. Click here 476789 , 452545 to view the json files.
-Item No.	COC Series	Business Segment	State Abbreviation	Benefit Category	Payment Line	Tier 1 (Designated Network)	Tier 2 (In-Network)	Tier 3 (Out-of-Network)	Individual Deductible ($)	Family Deductible ($)
-0	2024	KA - Key Account	MD	Lab Testing - Outpatient	Standard	N/A	no member coinsurance, no copay, deductible applies	N/A	Tier 2 - $6700.00	Tier 2 - $13400.00
-1	2024	KA - Key Account	MD	X-Ray and other Diagnostic Testing	Standard	N/A	no member coinsurance, no copay, deductible applies	N/A	Tier 2 - $6700.00	Tier 2 - $13400.00
-2	2024	KA - Key Account	NA	Lab Testing - Outpatient	Standard	N/A	no member coinsurance, no copay, deductible applies	N/A	Tier 2 - $6700.00	Tier 2 - $13400.00
-3	2024	KA - Key Account	NA	X-Ray and other Diagnostic Testing	Standard	N/A	no member coinsurance, no copay, deductible applies	N/A	Tier 2 - $6700.00	Tier 2 - $13400.00"	passed		66.3					
-What is the radiology coinsurance for plan code $PlanCode?			failed	'BeccaPage' object has no attribute 'evaluate_testcase'						
-What is coinsurance for x-ray?			failed	"prompt failed: What is coinsurance for x-ray? | Expected response not found in actual response
-assert False"						
-What is Hospital - inpatient costshare for plan code DK9D?		error while fetching ui response	failed	"Locator.wait_for: Timeout 30000ms exceeded.
-Call log:
-  - waiting for locator("".input-section textarea[matInput]"").first to be visible
-"	0					
-What is Hospital - inpatient costshare for plan code $PlanCode?			failed	"prompt failed: What is Hospital - inpatient costshare for plan code DK9D? | Locator.wait_for: Timeout 30000ms exceeded.
+thumb_down_off_alt"	"I found 100 plans. Here's a sample of the first 10 rows. Do you need more detailed information about any of these? Click here 701909 , 701981 , 701977 , 701849 , 701969 , 701967 , 701890 , 701959 , 701955 , 701831 to view the json files.
+Item No.	Plan Code	COC Series	Business Segment	State Abbreviation	Benefit Category	Payment Line	Tier 1 (Designated Network)	Tier 2 (In-Network)	Tier 3 (Out-of-Network)	Individual Deductible ($)	Family Deductible ($)
+0	AL0025	2025	SB - Small Business	AL	Adult Vision - Contact Lenses (Formulary)	Standard	N/A	no member coinsurance, $25 copay, deductible does not apply	Not covered	Tier 2 - $750.00	Tier 2 - $1500.00
+1	AL0025	2025	SB - Small Business	AL	Adult Vision - Eyeglass Lenses	Standard	N/A	no member coinsurance, $25 copay, deductible does not apply	Not covered	Tier 2 - $750.00	Tier 2 - $1500.00
+2	AL0025B	2025	SB - Small Business	AL	Adult Vision - Contact Lenses (Formulary)	Standard	N/A	no member coinsurance, $25 copay, deductible does not apply	Not covered	Tier 2 - $750.00	Tier 2 - $1500.00
+3	AL0025B	2025	SB - Small Business	AL	Adult Vision - Eyeglass Lenses	Standard	N/A	no member coinsurance, $25 copay, deductible does not apply	Not covered	Tier 2 - $750.00	Tier 2 - $1500.00
+4	AL0025X	2025	SB - Small Business	AL	Adult Vision - Contact Lenses (Formulary)	Standard	N/A	no member coinsurance, $25 copay, deductible does not apply	Not covered	Tier 2 - $750.00	Tier 2 - $1500.00
+5	AL0025X	2025	SB - Small Business	AL	Adult Vision - Eyeglass Lenses	Standard	N/A	no member coinsurance, $25 copay, deductible does not apply	Not covered	Tier 2 - $750.00	Tier 2 - $1500.00
+6	AL0026	2025	SB - Small Business	AL	Adult Vision - Contact Lenses (Formulary)	Standard	N/A	no member coinsurance, $25 copay, deductible does not apply	Not covered	Tier 2 - $8300.00	Tier 2 - $16600.00
+7	AL0026	2025	SB - Small Business	AL	Adult Vision - Eyeglass Lenses	Standard	N/A	no member coinsurance, $25 copay, deductible does not apply	Not covered	Tier 2 - $8300.00	Tier 2 - $16600.00
+8	AL0026B	2025	SB - Small Business	AL	Adult Vision - Contact Lenses (Formulary)	Standard	N/A	no member coinsurance, $25 copay, deductible does not apply	Not covered	Tier 2 - $8300.00	Tier 2 - $16600.00
+9	AL0026B	2025	SB - Small Business	AL	Adult Vision - Eyeglass Lenses	Standard	N/A	no member coinsurance, $25 copay, deductible does not apply	Not covered	Tier 2 - $8300.00	Tier 2 - $16600.00"	passed		35.16				failed	name 'EVAL_LOCK_PATH' is not defined
+show me fully insured small group plans in AL under the 2025 COC			failed	"prompt failed: show me fully insured small group plans in AL under the 2025 COC | Locator.wait_for: Timeout 30000ms exceeded.
   Call log:
     - waiting for locator("".input-section textarea[matInput]"").first to be visible
   
@@ -94,10 +38,10 @@ Item No. COC Series Business Segment State Abbreviation Benefit Category Payment
 content_copy
 star_border
 thumb_up_off_alt
-thumb_down_off_alt"	"For plan code DY82, for the benefit category Lab Testing - Outpatient and for the payment line Standard, Tier 3 has no copayment. For the benefit category X-Ray and other Diagnostic Testing and for the payment line Standard, there is no waived copay. Click here 500696 to view the json file.
+thumb_down_off_alt"	"Below are the copay details for radiology for plan code DY82. Click here 500696 to view the json file.
 Item No.	COC Series	Business Segment	State Abbreviation	Benefit Category	Payment Line	Tier 1 (Designated Network)	Tier 2 (In-Network)	Tier 3 (Out-of-Network)	Individual Deductible ($)	Family Deductible ($)
 0	2025	SB - Small Business	GA	Lab Testing - Outpatient	Standard	$50 copay, deductible applies	30% member coinsurance, no copay, deductible applies	Not covered	Tier 2 - $1000.00, Tier 3 - $5000.00	Tier 2 - $2000.00, Tier 3 - $10000.00
-1	2025	SB - Small Business	GA	X-Ray and other Diagnostic Testing	Standard	N/A	no member coinsurance, $100 copay, deductible applies	30% member coinsurance, no copay, deductible applies	Tier 2 - $1000.00, Tier 3 - $5000.00	Tier 2 - $2000.00, Tier 3 - $10000.00"	failed	Missing tokens in ACTUAL_RESPONSE: ['Yes', 'there is a radiology copay']	43.14					
+1	2025	SB - Small Business	GA	X-Ray and other Diagnostic Testing	Standard	N/A	no member coinsurance, $100 copay, deductible applies	30% member coinsurance, no copay, deductible applies	Tier 2 - $1000.00, Tier 3 - $5000.00	Tier 2 - $2000.00, Tier 3 - $10000.00"	failed	Missing tokens in ACTUAL_RESPONSE: ['Yes', 'there is a radiology copay']	39.54					
 Is there a  waived copay for radiology for Plan Code $PlanCode			failed	"prompt failed: Is there a  waived copay for radiology for Plan Code DY82 | Missing tokens in ACTUAL_RESPONSE: ['Yes', 'there is a radiology copay']
 assert False"						
 What codes for a knee surgery require prior authorization?			failed	"prompt failed: What codes for a knee surgery require prior authorization? | Locator.wait_for: Timeout 30000ms exceeded.
@@ -113,55 +57,40 @@ star_border
 thumb_up_off_alt
 thumb_down_off_alt"	"Below are the out-of-network coinsurance details for Virtual Care Services for plan code DXWG. Click here 500509 to view the json file.
 Item No.	COC Series	Business Segment	State Abbreviation	Benefit Category	Payment Line	Tier 1 (Designated Network)	Tier 2 (In-Network)	Tier 3 (Out-of-Network)	Individual Deductible ($)	Family Deductible ($)
-0	2025	KA - Key Account	RI	Virtual Care Services	Standard	N/A	no member coinsurance, no copay, deductible does not apply	Not covered	Tier 2 - $2000.00, Tier 3 - $5000.00	Tier 2 - $4000.00, Tier 3 - $10000.00"	passed		60.64					
-What is the out of network coinsurance for Virtual Care Services on plan code $PlanCode?			failed	'BeccaPage' object has no attribute 'evaluate_testcase'						
-Plan code is DK7S. What is Rehabilitation Limit?	"Below are the Rehabilitation Services - Outpatient Therapy and Manipulative Treatment limits for plan code DK7S. isBuyUp value is No. Click here 476789 , 452545 to view the json files.
-Item No. Plan Code COC Series Business Segment State Abbreviation Benefit Category Payment Line Limit Applies to Cross Applies
-0 DK7S 2024 KA - Key Account MD Rehabilitation Services - Outpatient Therapy and Manipulative Treatment Standard 20 Visit per 1 Year Pulm Both
-1 DK7S 2024 KA - Key Account MD Rehabilitation Services - Outpatient Therapy and Manipulative Treatment Standard 36 Visit per 1 Year Cardiac Both
-2 DK7S 2024 KA - Key Account MD Rehabilitation Services - Outpatient Therapy and Manipulative Treatment Standard 30 Visit per 1 Year Aural Both
-3 DK7S 2024 KA - Key Account MD Rehabilitation Services - Outpatient Therapy and Manipulative Treatment Standard 20 Visit per 1 Year CR Both
-4 DK7S 2024 KA - Key Account MD Rehabilitation Services - Outpatient Therapy and Manipulative Treatment Standard 60 Visit per 1 Year PT-OT-ST Both
-5 DK7S 2024 KA - Key Account NA Rehabilitation Services - Outpatient Therapy and Manipulative Treatment Standard 60 Visit per 1 Year PT-OT-ST Both
-6 DK7S 2024 KA - Key Account NA Rehabilitation Services - Outpatient Therapy and Manipulative Treatment Standard 20 Visit per 1 Year Pulm Both
-7 DK7S 2024 KA - Key Account NA Rehabilitation Services - Outpatient Therapy and Manipulative Treatment Standard 36 Visit per 1 Year Cardiac Both
-8 DK7S 2024 KA - Key Account NA Rehabilitation Services - Outpatient Therapy and Manipulative Treatment Standard 30 Visit per 1 Year Aural Both
-9 DK7S 2024 KA - Key Account NA Rehabilitation Services - Outpatient Therapy and Manipulative Treatment Standard 20 Visit per 1 Year CR Both
-content_copy
-star_border
-thumb_up_off_alt
-thumb_down_off_alt"	"Below are the Rehabilitation limits for plan code DK7S. Click here 476789 , 452545 to view the json files.
-Item No.	Plan Code	COC Series	Business Segment	State Abbreviation	Benefit Category	Payment Line	Limit	Applies to	Cross Applies	Is Buy Up
-0	DK7S	2024	KA - Key Account	MD	Rehabilitation Services - Outpatient Therapy and Manipulative Treatment	Standard	20 Visit per 1 Year	Pulm	Both	False
-1	DK7S	2024	KA - Key Account	MD	Rehabilitation Services - Outpatient Therapy and Manipulative Treatment	Standard	36 Visit per 1 Year	Cardiac	Both	False
-2	DK7S	2024	KA - Key Account	MD	Rehabilitation Services - Outpatient Therapy and Manipulative Treatment	Standard	30 Visit per 1 Year	Aural	Both	False
-3	DK7S	2024	KA - Key Account	MD	Rehabilitation Services - Outpatient Therapy and Manipulative Treatment	Standard	20 Visit per 1 Year	CR	Both	False
-4	DK7S	2024	KA - Key Account	MD	Rehabilitation Services - Outpatient Therapy and Manipulative Treatment	Standard	60 Visit per 1 Year	PT-OT-ST	Both	False
-5	DK7S	2024	KA - Key Account	NA	Rehabilitation Services - Outpatient Therapy and Manipulative Treatment	Standard	60 Visit per 1 Year	PT-OT-ST	Both	False
-6	DK7S	2024	KA - Key Account	NA	Rehabilitation Services - Outpatient Therapy and Manipulative Treatment	Standard	20 Visit per 1 Year	Pulm	Both	False
-7	DK7S	2024	KA - Key Account	NA	Rehabilitation Services - Outpatient Therapy and Manipulative Treatment	Standard	36 Visit per 1 Year	Cardiac	Both	False
-8	DK7S	2024	KA - Key Account	NA	Rehabilitation Services - Outpatient Therapy and Manipulative Treatment	Standard	30 Visit per 1 Year	Aural	Both	False
-9	DK7S	2024	KA - Key Account	NA	Rehabilitation Services - Outpatient Therapy and Manipulative Treatment	Standard	20 Visit per 1 Year	CR	Both	False
-10	DK7S	2024	KA - Key Account	MD	Skilled Nursing Facility/Inpatient Rehabilitation Facility Services	Standard	60 Day per 1 Year	0	Both	False
-11	DK7S	2024	KA - Key Account	NA	Skilled Nursing Facility/Inpatient Rehabilitation Facility Services	Standard	60 Day per 1 Year	0	Both	False"	failed	Missing tokens in ACTUAL_RESPONSE: ['Rehabilitation Services - Outpatient Therapy and Manipulative Treatment limits']	34.35					
-Plan code is $PlanCode. What is Rehabilitation Limit?			failed	"prompt failed: Plan code is DK7S. What is Rehabilitation Limit? | Missing tokens in ACTUAL_RESPONSE: ['Rehabilitation Services - Outpatient Therapy and Manipulative Treatment limits']
-assert False"						
-Plan Code is DK8R. What is cost share for Urgent Care Center Services.		error while fetching ui response	failed	"Locator.wait_for: Timeout 30000ms exceeded.
+0	2025	KA - Key Account	RI	Virtual Care Services	Standard	N/A	no member coinsurance, no copay, deductible does not apply	Not covered	Tier 2 - $2000.00, Tier 3 - $5000.00	Tier 2 - $4000.00, Tier 3 - $10000.00"	passed		42.25				failed	name 'EVAL_LOCK_PATH' is not defined
+Plan code is DK7S. What is Rehabilitation Limit?		error while fetching ui response	failed	"Locator.wait_for: Timeout 30000ms exceeded.
 Call log:
   - waiting for locator("".input-section textarea[matInput]"").first to be visible
 "	0					
-Plan Code is $PlanCode. What is cost share for Urgent Care Center Services.			failed	"prompt failed: Plan Code is DK8R. What is cost share for Urgent Care Center Services. | Locator.wait_for: Timeout 30000ms exceeded.
+Plan code is $PlanCode. What is Rehabilitation Limit?			failed	"prompt failed: Plan code is DK7S. What is Rehabilitation Limit? | Locator.wait_for: Timeout 30000ms exceeded.
   Call log:
     - waiting for locator("".input-section textarea[matInput]"").first to be visible
   
 assert False"						
-show me level funded plans with a $25 PCP copay			failed	"prompt failed: show me level funded plans with a $25 PCP copay | Locator.wait_for: Timeout 30000ms exceeded.
+What is the radiology coinsurance for plan code DK7S?	"Below are the radiology coinsurance details for plan code DK7S. Click here 452545 , 476789 to view the json files.
+Item No. COC Series Business Segment State Abbreviation Benefit Category Payment Line Tier 1 (Designated Network) Tier 2 (In-Network) Tier 3 (Out-of-Network) Individual Deductible ($) Family Deductible ($)
+0 2024 KA - Key Account NA Lab Testing - Outpatient Standard N/A no member coinsurance, no copay, deductible applies N/A Tier 2 - $6700.00 Tier 2 - $13400.00
+1 2024 KA - Key Account MD Lab Testing - Outpatient Standard N/A no member coinsurance, no copay, deductible applies N/A Tier 2 - $6700.00 Tier 2 - $13400.00
+2 2024 KA - Key Account NA X-Ray and other Diagnostic Testing Standard N/A no member coinsurance, no copay, deductible applies N/A Tier 2 - $6700.00 Tier 2 - $13400.00
+3 2024 KA - Key Account MD X-Ray and other Diagnostic Testing Standard N/A no member coinsurance, no copay, deductible applies N/A Tier 2 - $6700.00 Tier 2 - $13400.00
+content_copy
+star_border
+thumb_up_off_alt
+thumb_down_off_alt"	Please specify the COC series, and state for which you would like to know the radiology coinsurance for plan code DK7S.	failed	Missing tokens in ACTUAL_RESPONSE: ['476789', '452545']	32.59					
+What is the radiology coinsurance for plan code $PlanCode?			failed	"prompt failed: What is the radiology coinsurance for plan code DK7S? | Missing tokens in ACTUAL_RESPONSE: ['476789', '452545']
+assert False"						
+What is coinsurance for x-ray?			failed	"prompt failed: What is coinsurance for x-ray? | Locator.wait_for: Timeout 30000ms exceeded.
   Call log:
     - waiting for locator("".input-section textarea[matInput]"").first to be visible
-      - waiting for"" https://authgateway1-stg.entiam.uhg.com/as/authorization.oauth2?response_type=code&client_id=Reg1Stg_Mandy&state=ZW1SVnh4LUJVdWNrbmQzSjNSRzJTdksyZzVRUGh2VlZtYUYubEM3NnhiTlBG%3Bchat&redirect_uri=https…"" navigation to finish...
-      - navigated to ""https://authgateway1-stg.entiam.uhg.com/as/PsYUTTl7ri/resume/as/authorization.ping""
-      - waiting for"" https://device.login.microsoftonline.com/"" navigation to finish...
-      - navigated to ""https://device.login.microsoftonline.com/""
+  
+assert False"						
+Tell me about plan code F4H		error while fetching ui response	failed	"Locator.wait_for: Timeout 30000ms exceeded.
+Call log:
+  - waiting for locator("".input-section textarea[matInput]"").first to be visible
+"	0					
+Tell me about plan code $PlanCode			failed	"prompt failed: Tell me about plan code F4H | Locator.wait_for: Timeout 30000ms exceeded.
+  Call log:
+    - waiting for locator("".input-section textarea[matInput]"").first to be visible
   
 assert False"						
 What is the copay for UC for plan code DY82?	"Below are the Urgent Care Center Services copay details for plan code DY82. Click here 500696 to view the json file.
@@ -172,54 +101,61 @@ star_border
 thumb_up_off_alt
 thumb_down_off_alt"	"Below are the Urgent Care Center Services copay details for plan code DY82. Click here 500696 to view the json file.
 Item No.	COC Series	Business Segment	State Abbreviation	Benefit Category	Payment Line	Tier 1 (Designated Network)	Tier 2 (In-Network)	Tier 3 (Out-of-Network)	Individual Deductible ($)	Family Deductible ($)
-0	2025	SB - Small Business	GA	Urgent Care Center Services	Standard	N/A	no member coinsurance, $50 copay, deductible does not apply	30% member coinsurance, no copay, deductible applies	Tier 2 - $1000.00, Tier 3 - $5000.00	Tier 2 - $2000.00, Tier 3 - $10000.00"	passed		71.82					
-What is the copay for UC for plan code DY9G?	"Below are the Urgent Care Center Services copay details for plan code DY9G. Click here 500711 to view the json file.
-Item No. COC Series Business Segment State Abbreviation Benefit Category Payment Line Tier 1 (Designated Network) Tier 2 (In-Network) Tier 3 (Out-of-Network) Individual Deductible ($) Family Deductible ($)
-0 2025 SB - Small Business GA Urgent Care Center Services Standard N/A no member coinsurance, $75 copay, deductible does not apply 40% member coinsurance, no copay, deductible applies Tier 2 - $3000.00, Tier 3 - $10000.00 Tier 2 - $6000.00, Tier 3 - $20000.00
-content_copy
-star_border
-thumb_up_off_alt
-thumb_down_off_alt"	"Below are the Urgent Care Center Services copay details for plan code DY9G. Click here 500711 to view the json file.
-Item No.	COC Series	Business Segment	State Abbreviation	Benefit Category	Payment Line	Tier 1 (Designated Network)	Tier 2 (In-Network)	Tier 3 (Out-of-Network)	Individual Deductible ($)	Family Deductible ($)
-0	2025	SB - Small Business	GA	Urgent Care Center Services	Standard	N/A	no member coinsurance, $75 copay, deductible does not apply	40% member coinsurance, no copay, deductible applies	Tier 2 - $3000.00, Tier 3 - $10000.00	Tier 2 - $6000.00, Tier 3 - $20000.00"	passed		25.92					
-What is the copay for UC for plan code $PlanCode?			failed	'BeccaPage' object has no attribute 'evaluate_testcase'						
-Tell me about plan code F4H		error while fetching ui response	failed	"Locator.wait_for: Timeout 30000ms exceeded.
+0	2025	SB - Small Business	GA	Urgent Care Center Services	Standard	N/A	no member coinsurance, $50 copay, deductible does not apply	30% member coinsurance, no copay, deductible applies	Tier 2 - $1000.00, Tier 3 - $5000.00	Tier 2 - $2000.00, Tier 3 - $10000.00"	passed		49.99				failed	name 'EVAL_LOCK_PATH' is not defined
+What is the copay for UC for plan code DY9G?		error while fetching ui response	failed	"Locator.wait_for: Timeout 30000ms exceeded.
 Call log:
   - waiting for locator("".input-section textarea[matInput]"").first to be visible
 "	0					
-Tell me about plan code $PlanCode			failed	"prompt failed: Tell me about plan code F4H | Locator.wait_for: Timeout 30000ms exceeded.
+What is the copay for UC for plan code $PlanCode?			failed	"prompt failed: What is the copay for UC for plan code DY9G? | Locator.wait_for: Timeout 30000ms exceeded.
   Call log:
     - waiting for locator("".input-section textarea[matInput]"").first to be visible
   
 assert False"						
-What is the cardiac limits on plan code DY1A	"Below are the limits for Rehabilitation Services - Outpatient Therapy and Manipulative for plan code DY1A. isBuyUp value is No. Click here 499922 to view the json file.
-Item No. Plan Code COC Series Business Segment State Abbreviation Benefit Category Payment Line Limit Applies to Cross Applies
-0 DY1A 2025 SB - Small Business FL Rehabilitation Services - Outpatient Therapy and Manipulative Treatment Standard 30 Visit per 1 Year ST Both
-1 DY1A 2025 SB - Small Business FL Rehabilitation Services - Outpatient Therapy and Manipulative Treatment Standard 20 Visit per 1 Year CR Both
-2 DY1A 2025 SB - Small Business FL Rehabilitation Services - Outpatient Therapy and Manipulative Treatment Standard 30 Visit per 1 Year OT Both
-3 DY1A 2025 SB - Small Business FL Rehabilitation Services - Outpatient Therapy and Manipulative Treatment Standard 30 Visit per 1 Year Aural Both
-4 DY1A 2025 SB - Small Business FL Rehabilitation Services - Outpatient Therapy and Manipulative Treatment Standard 30 Visit per 1 Year PT Both
-5 DY1A 2025 SB - Small Business FL Rehabilitation Services - Outpatient Therapy and Manipulative Treatment Standard 36 Visit per 1 Year Cardiac Both
-content_copy
-star_border
-thumb_up_off_alt
-thumb_down_off_alt"	"Below are the limits for Rehabilitation Services - Outpatient Therapy and Manipulative for plan code DY1A. Click here 499922 to view the json file.
-Item No.	Plan Code	COC Series	Business Segment	State Abbreviation	Benefit Category	Payment Line	Limit	Applies to	Cross Applies	Is Buy Up
-0	DY1A	2025	SB - Small Business	FL	Rehabilitation Services - Outpatient Therapy and Manipulative Treatment	Standard	30 Visit per 1 Year	ST	Both	False
-1	DY1A	2025	SB - Small Business	FL	Rehabilitation Services - Outpatient Therapy and Manipulative Treatment	Standard	20 Visit per 1 Year	CR	Both	False
-2	DY1A	2025	SB - Small Business	FL	Rehabilitation Services - Outpatient Therapy and Manipulative Treatment	Standard	30 Visit per 1 Year	OT	Both	False
-3	DY1A	2025	SB - Small Business	FL	Rehabilitation Services - Outpatient Therapy and Manipulative Treatment	Standard	30 Visit per 1 Year	Aural	Both	False
-4	DY1A	2025	SB - Small Business	FL	Rehabilitation Services - Outpatient Therapy and Manipulative Treatment	Standard	30 Visit per 1 Year	PT	Both	False
-5	DY1A	2025	SB - Small Business	FL	Rehabilitation Services - Outpatient Therapy and Manipulative Treatment	Standard	36 Visit per 1 Year	Cardiac	Both	False"	failed	Missing tokens in ACTUAL_RESPONSE: ['isBuyUp value is No']	75.12					
-What is the cardiac limits on plan code $PlanCode			failed	"prompt failed: What is the cardiac limits on plan code DY1A | Missing tokens in ACTUAL_RESPONSE: ['isBuyUp value is No']
+show me level funded plans with a $25 PCP copay			failed	"prompt failed: show me level funded plans with a $25 PCP copay | Locator.wait_for: Timeout 30000ms exceeded.
+  Call log:
+    - waiting for locator("".input-section textarea[matInput]"").first to be visible
+  
 assert False"						
-Give me some custom plan FI			failed	"prompt failed: Give me some custom plan FI | Missing tokens in ACTUAL_RESPONSE: ['I can only answer questions regarding plan library']
-assert False"						
-for plan code F4H, what is the PCP cost share		error while fetching ui response	failed	"Locator.wait_for: Timeout 30000ms exceeded.
+Plan code is DK9D. What is Congenital Heart Disease Ded		error while fetching ui response	failed	"Locator.wait_for: Timeout 30000ms exceeded.
 Call log:
   - waiting for locator("".input-section textarea[matInput]"").first to be visible
 "	0					
-for plan code $PlanCode, what is the PCP cost share			failed	"prompt failed: for plan code F4H, what is the PCP cost share | Locator.wait_for: Timeout 30000ms exceeded.
+Plan code is $PlanCode. What is Congenital Heart Disease Ded			failed	"prompt failed: Plan code is DK9D. What is Congenital Heart Disease Ded | Locator.wait_for: Timeout 30000ms exceeded.
+  Call log:
+    - waiting for locator("".input-section textarea[matInput]"").first to be visible
+  
+assert False"						
+Is there an IP waived copay for Plan Code DY9D		error while fetching ui response	failed	"Locator.wait_for: Timeout 30000ms exceeded.
+Call log:
+  - waiting for locator("".input-section textarea[matInput]"").first to be visible
+    - waiting for"" https://authgateway1-stg.entiam.uhg.com/as/authorization.oauth2?response_type=code&client_id=Reg1Stg_Mandy&state=Z09RU1g1akdCZHBHcG9kbXprZUg5SW85ei5BTldRX3hyMEszcU5mcFpDY2tW%3Bchat&redirect_uri=https…"" navigation to finish...
+    - navigated to ""https://authgateway1-stg.entiam.uhg.com/as/4zPOkgPtyv/resume/as/authorization.ping""
+    - waiting for"" https://device.login.microsoftonline.com/"" navigation to finish...
+    - navigated to ""https://device.login.microsoftonline.com/""
+"	0					
+Is there an IP waived copay for Plan Code $PlanCode			failed	"prompt failed: Is there an IP waived copay for Plan Code DY9D | Locator.wait_for: Timeout 30000ms exceeded.
+  Call log:
+    - waiting for locator("".input-section textarea[matInput]"").first to be visible
+      - waiting for"" https://authgateway1-stg.entiam.uhg.com/as/authorization.oauth2?response_type=code&client_id=Reg1Stg_Mandy&state=Z09RU1g1akdCZHBHcG9kbXprZUg5SW85ei5BTldRX3hyMEszcU5mcFpDY2tW%3Bchat&redirect_uri=https…"" navigation to finish...
+      - navigated to ""https://authgateway1-stg.entiam.uhg.com/as/4zPOkgPtyv/resume/as/authorization.ping""
+      - waiting for"" https://device.login.microsoftonline.com/"" navigation to finish...
+      - navigated to ""https://device.login.microsoftonline.com/""
+  
+assert False"						
+is there an radiology copay for Plan Code DY82		error while fetching ui response	failed	"Locator.wait_for: Timeout 30000ms exceeded.
+Call log:
+  - waiting for locator("".input-section textarea[matInput]"").first to be visible
+"	0					
+is there an radiology copay for Plan Code $PlanCode			failed	"prompt failed: is there an radiology copay for Plan Code DY82 | Locator.wait_for: Timeout 30000ms exceeded.
+  Call log:
+    - waiting for locator("".input-section textarea[matInput]"").first to be visible
+  
+assert False"						
+What is Hospital - inpatient costshare for plan code DK9D?		error while fetching ui response	failed	"Locator.wait_for: Timeout 30000ms exceeded.
+Call log:
+  - waiting for locator("".input-section textarea[matInput]"").first to be visible
+"	0					
+What is Hospital - inpatient costshare for plan code $PlanCode?			failed	"prompt failed: What is Hospital - inpatient costshare for plan code DK9D? | Locator.wait_for: Timeout 30000ms exceeded.
   Call log:
     - waiting for locator("".input-section textarea[matInput]"").first to be visible
   
@@ -252,35 +188,77 @@ Item No.	Benefit Category	Copay Details
 7	Rehabilitation Services - Outpatient Therapy and Manipulative Treatment	For Payment Line Standard: Tier 1. N/A, Tier 2. Copayment is $20.00, Tier 3. No Copayment
 8	Rehabilitation Services - Vision Therapy	For Payment Line Standard: Tier 1. N/A, Tier 2. Copayment is $20.00, Tier 3. No Copayment
 9	Urgent Care Center Services	For Payment Line Standard: Tier 1. N/A, Tier 2. Copayment is $50.00, Tier 3. No Copayment
-10	Vision Exams	For Payment Line Standard: Tier 1. N/A, Tier 2. Copayment is $20.00, Tier 3. No Copayment"	passed		85.2					
-Is there copay applies to Plan Code $PlanCode			failed	'BeccaPage' object has no attribute 'evaluate_testcase'						
+10	Vision Exams	For Payment Line Standard: Tier 1. N/A, Tier 2. Copayment is $20.00, Tier 3. No Copayment"	passed		34.26				failed	name 'EVAL_LOCK_PATH' is not defined
 What is the specialist copay for plan code DY8N		error while fetching ui response	failed	"Locator.wait_for: Timeout 30000ms exceeded.
 Call log:
   - waiting for locator("".input-section textarea[matInput]"").first to be visible
-    - waiting for"" https://authgateway1-stg.entiam.uhg.com/as/authorization.oauth2?response_type=code&client_id=Reg1Stg_Mandy&state=TW1WV2wxdXV5YU1nYTVKNTE1UGZzaUxfVnY2WG53RW5JN0RLckJ5LnVBdlVp%3Bchat&redirect_uri=https…"" navigation to finish...
-    - navigated to ""https://authgateway1-stg.entiam.uhg.com/as/cBje9unhHX/resume/as/authorization.ping""
-    - waiting for"" https://device.login.microsoftonline.com/"" navigation to finish...
-    - navigated to ""https://device.login.microsoftonline.com/""
 "	0					
 What is the specialist copay for plan code $PlanCode			failed	"prompt failed: What is the specialist copay for plan code DY8N | Locator.wait_for: Timeout 30000ms exceeded.
   Call log:
     - waiting for locator("".input-section textarea[matInput]"").first to be visible
-      - waiting for"" https://authgateway1-stg.entiam.uhg.com/as/authorization.oauth2?response_type=code&client_id=Reg1Stg_Mandy&state=TW1WV2wxdXV5YU1nYTVKNTE1UGZzaUxfVnY2WG53RW5JN0RLckJ5LnVBdlVp%3Bchat&redirect_uri=https…"" navigation to finish...
-      - navigated to ""https://authgateway1-stg.entiam.uhg.com/as/cBje9unhHX/resume/as/authorization.ping""
-      - waiting for"" https://device.login.microsoftonline.com/"" navigation to finish...
-      - navigated to ""https://device.login.microsoftonline.com/""
   
 assert False"						
-show me fully insured small group plans in AL under a 2025 coc with a $25 copay			failed	"prompt failed: show me fully insured small group plans in AL under a 2025 coc with a $25 copay | Missing tokens in ACTUAL_RESPONSE: ['$25 copay']
+What is the cardiac limits on plan code DY1A	"Below are the limits for Rehabilitation Services - Outpatient Therapy and Manipulative for plan code DY1A. isBuyUp value is No. Click here 499922 to view the json file.
+Item No. Plan Code COC Series Business Segment State Abbreviation Benefit Category Payment Line Limit Applies to Cross Applies
+0 DY1A 2025 SB - Small Business FL Rehabilitation Services - Outpatient Therapy and Manipulative Treatment Standard 30 Visit per 1 Year ST Both
+1 DY1A 2025 SB - Small Business FL Rehabilitation Services - Outpatient Therapy and Manipulative Treatment Standard 20 Visit per 1 Year CR Both
+2 DY1A 2025 SB - Small Business FL Rehabilitation Services - Outpatient Therapy and Manipulative Treatment Standard 30 Visit per 1 Year OT Both
+3 DY1A 2025 SB - Small Business FL Rehabilitation Services - Outpatient Therapy and Manipulative Treatment Standard 30 Visit per 1 Year Aural Both
+4 DY1A 2025 SB - Small Business FL Rehabilitation Services - Outpatient Therapy and Manipulative Treatment Standard 30 Visit per 1 Year PT Both
+5 DY1A 2025 SB - Small Business FL Rehabilitation Services - Outpatient Therapy and Manipulative Treatment Standard 36 Visit per 1 Year Cardiac Both
+content_copy
+star_border
+thumb_up_off_alt
+thumb_down_off_alt"	"Below are the limits for Rehabilitation Services - Outpatient Therapy and Manipulative for plan code DY1A. Click here 499922 to view the json file.
+Item No.	Plan Code	COC Series	Business Segment	State Abbreviation	Benefit Category	Payment Line	Limit	Applies to	Cross Applies	Is Buy Up
+0	DY1A	2025	SB - Small Business	FL	Rehabilitation Services - Outpatient Therapy and Manipulative Treatment	Standard	30 Visit per 1 Year	ST	Both	False
+1	DY1A	2025	SB - Small Business	FL	Rehabilitation Services - Outpatient Therapy and Manipulative Treatment	Standard	20 Visit per 1 Year	CR	Both	False
+2	DY1A	2025	SB - Small Business	FL	Rehabilitation Services - Outpatient Therapy and Manipulative Treatment	Standard	30 Visit per 1 Year	OT	Both	False
+3	DY1A	2025	SB - Small Business	FL	Rehabilitation Services - Outpatient Therapy and Manipulative Treatment	Standard	30 Visit per 1 Year	Aural	Both	False
+4	DY1A	2025	SB - Small Business	FL	Rehabilitation Services - Outpatient Therapy and Manipulative Treatment	Standard	30 Visit per 1 Year	PT	Both	False
+5	DY1A	2025	SB - Small Business	FL	Rehabilitation Services - Outpatient Therapy and Manipulative Treatment	Standard	36 Visit per 1 Year	Cardiac	Both	False"	failed	Missing tokens in ACTUAL_RESPONSE: ['isBuyUp value is No']	28.62					
+What is the cardiac limits on plan code $PlanCode			failed	"prompt failed: What is the cardiac limits on plan code DY1A | Missing tokens in ACTUAL_RESPONSE: ['isBuyUp value is No']
 assert False"						
-show me fully insured small group plans in AL under the 2025 COC			failed	"prompt failed: show me fully insured small group plans in AL under the 2025 COC | Locator.wait_for: Timeout 30000ms exceeded.
+Give me some custom plan FI			failed	"prompt failed: Give me some custom plan FI | Locator.wait_for: Timeout 30000ms exceeded.
   Call log:
     - waiting for locator("".input-section textarea[matInput]"").first to be visible
-      - waiting for"" https://authgateway1-stg.entiam.uhg.com/as/authorization.oauth2?response_type=code&client_id=Reg1Stg_Mandy&state=NnlWNUR1Q1VfZUlLQjh3c0ZnTEx2QWk5NDcxVmJ-ajhmd1AtZDZqellLYnpj%3Bchat&redirect_uri=https…"" navigation to finish...
-      - navigated to ""https://authgateway1-stg.entiam.uhg.com/as/Pl1MVp2APK/resume/as/authorization.ping""
-      - waiting for"" https://device.login.microsoftonline.com/"" navigation to finish...
-      - navigated to ""https://device.login.microsoftonline.com/""
+  
+assert False"						
+Plan Code is DK8R. What is cost share for Urgent Care Center Services.		error while fetching ui response	failed	"Locator.wait_for: Timeout 30000ms exceeded.
+Call log:
+  - waiting for locator("".input-section textarea[matInput]"").first to be visible
+"	0					
+Plan Code is $PlanCode. What is cost share for Urgent Care Center Services.			failed	"prompt failed: Plan Code is DK8R. What is cost share for Urgent Care Center Services. | Locator.wait_for: Timeout 30000ms exceeded.
+  Call log:
+    - waiting for locator("".input-section textarea[matInput]"").first to be visible
+  
+assert False"						
+what is the coinsurance for pharmaceutical products for DTKS, 2024, AR, KA, INN.	"Below are the coinsurance details for Pharmaceutical Products for plan code DTKS, 2024, AR, KA, INN. Click here 495372 to view the json file.
+Item No. COC Series Business Segment State Abbreviation Benefit Category Payment Line Tier 1 (Designated Network) Tier 2 (In-Network) Tier 3 (Out-of-Network) Individual Deductible ($) Family Deductible ($)
+0 2024 KA - Key Account AR Pharmaceutical Products - Outpatient Standard N/A 30% member coinsurance, no copay, deductible applies 50% member coinsurance, no copay, deductible applies Tier 2 - $4000.00, Tier 3 - $10000.00 Tier 2 - $8000.00, Tier 3 - $20000.00
+content_copy
+star_border
+thumb_up_off_alt
+thumb_down_off_alt"	"Below are the Pharmaceutical Products coinsurance details for plan code DTKS, 2024, AR, KA. Click here 495372 to view the json file.
+Item No.	COC Series	Business Segment	State Abbreviation	Benefit Category	Payment Line	Tier 1 (Designated Network)	Tier 2 (In-Network)	Tier 3 (Out-of-Network)	Individual Deductible ($)	Family Deductible ($)
+0	2024	KA - Key Account	AR	Pharmaceutical Products - Outpatient	Standard	N/A	30% member coinsurance, no copay, deductible applies	50% member coinsurance, no copay, deductible applies	Tier 2 - $4000.00, Tier 3 - $10000.00	Tier 2 - $8000.00, Tier 3 - $20000.00"	passed		21.9				failed	name 'EVAL_LOCK_PATH' is not defined
+What are the different maximums for Plan code CHFF		error while fetching ui response	failed	"Locator.wait_for: Timeout 30000ms exceeded.
+Call log:
+  - waiting for locator("".input-section textarea[matInput]"").first to be visible
+"	0					
+What are the different maximums for Plan code $PlanCode			failed	"prompt failed: What are the different maximums for Plan code CHFF | Locator.wait_for: Timeout 30000ms exceeded.
+  Call log:
+    - waiting for locator("".input-section textarea[matInput]"").first to be visible
+  
+assert False"						
+for plan code F4H, what is the PCP cost share		error while fetching ui response	failed	"Locator.wait_for: Timeout 30000ms exceeded.
+Call log:
+  - waiting for locator("".input-section textarea[matInput]"").first to be visible
+"	0					
+for plan code $PlanCode, what is the PCP cost share			failed	"prompt failed: for plan code F4H, what is the PCP cost share | Locator.wait_for: Timeout 30000ms exceeded.
+  Call log:
+    - waiting for locator("".input-section textarea[matInput]"").first to be visible
   
 assert False"						
 
-EVAL columns are also not populated please do not disturb any existing functionality
+still getting 429 do u need anything from becca repo? help me fix
