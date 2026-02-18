@@ -1,860 +1,152 @@
-import logging
-import traceback
-import time
-import re
-from typing import Dict, Any, Tuple
-
-import allure
-from tests.vikings.conftest import THRESHOLD
-from tests.vikings.fw.common.Results import Results
-from tests.vikings.fw.ui.BasePage import BasePage
-from tests.vikings.fw.utils import get_multiple_scores
-
-
-class BeccaPage(BasePage):
-    CHAT_INPUT_SELECTOR = ".input-section textarea[matInput]"
-    SUBMIT_BUTTON_SELECTOR = "button.submit-button"
-    START_NEW_CHAT_SELECTOR = "button:has-text('Start New Chat')"
-    CHAT_MESSAGE_SELECTOR = "div.chat-box app-chat-message"
-
-    GENERATION_TIMEOUT_SECS = 180
-
-    def __init__(self, page):
-        self.page = page
-
-    def open_becca(self):
-        with allure.step("Open Becca UI"):
-            self.page.goto(self.page.url, wait_until="domcontentloaded")
-
-    def start_new_chat_if_present(self):
-        """
-        Angular-safe Start New Chat:
-        - Button is conditional
-        - Messages clear asynchronously
-        """
-        btn = self.page.locator(self.START_NEW_CHAT_SELECTOR)
-
-        if btn.count() == 0:
-            return
-
-        try:
-            btn.first.wait_for(state="visible", timeout=3000)
-            btn.first.click()
-
-            self.page.wait_for_function(
-                "document.querySelectorAll('app-chat-message').length === 0",
-                timeout=5000
-            )
-        except Exception:
-            pass
-
-    def _wait_for_generation_complete(self):
-        """
-        Waits for Submit -> Cancel -> Submit cycle.
-        This is the ONLY reliable signal that generation finished.
-        """
-        self.page.wait_for_function(
-            """() => {
-                const btn = document.querySelector('button.submit-button');
-                return btn && btn.innerText.trim() === 'Submit';
-            }""",
-            timeout=self.GENERATION_TIMEOUT_SECS * 1000
-        )
-
-    def _get_stable_latest_message(self, timeout_secs: int = 5) -> str:
-        last = self.page.locator(self.CHAT_MESSAGE_SELECTOR).last
-        last.wait_for(state="visible", timeout=30000)
-
-        previous = ""
-        end = time.time() + timeout_secs
-
-        while time.time() < end:
-            current = last.inner_text().strip()
-            if current == previous:
-                return current
-            previous = current
-            time.sleep(0.5)
-
-        return previous
-
-    def _strip_ui_chrome(self, text: str) -> str:
-        noise = ["content_copy", "star_border", "thumb_up_off_alt", "thumb_down_off_alt"]
-        for n in noise:
-            text = text.replace(n, "")
-        return text.strip()
-
-
-    def _format_prompt_with_testcase(self, prompt: str, testcase: Dict[str, Any]) -> str:
-        """
-        Replaces $ColumnName placeholders using testcase values.
-        Example: $PlanCode -> DY82
-        """
-        if not prompt:
-            return ""
-
-        def replacer(match):
-            key = match.group(1)
-            for col, val in testcase.items():
-                if col.lower() == key.lower() and str(val).strip():
-                    return str(val).strip()
-            return match.group(0)
-
-        return re.sub(r"\$(\w+)", replacer, prompt).strip()
-
-    def _normalize(self, text: str) -> str:
-        if not text:
-            return ""
-        text = text.lower()
-        text = re.sub(r"[^\w\s%$.-]", " ", text)
-        text = re.sub(r"\s+", " ", text)
-        return text.strip()
-
-
-    def send_prompt_and_wait(self, prompt: str) -> str:
-        self.start_new_chat_if_present()
-
-        input_box = self.page.locator(self.CHAT_INPUT_SELECTOR).first
-        submit_btn = self.page.locator(self.SUBMIT_BUTTON_SELECTOR).first
-
-        input_box.wait_for(state="visible", timeout=30000)
-
-        input_box.fill("")
-        input_box.fill(prompt)
-
-        submit_btn.wait_for(state="visible", timeout=30000)
-        submit_btn.click()
-
-        self._wait_for_generation_complete()
-
-        response = self._get_stable_latest_message()
-        self.attach_screenshot("Becca response")
-
-        return self._strip_ui_chrome(response)
-
-    def run_prompt_and_get_response(self, prompt: str) -> Tuple[str, float]:
-        start = time.time()
-        response = self.send_prompt_and_wait(prompt)
-        return response, round(time.time() - start, 2)
-
-
-    def _validate_response(
-            self,
-            actual_response: str,
-            expected_answer: str,
-            validation_text: str,
-            testcase: Dict[str, Any],
-    ) -> Tuple[str, str]:
-
-        if not actual_response or self._normalize(actual_response) in {"", "none"}:
-            return "failed", "ACTUAL_RESPONSE is empty"
-
-        actual_norm = self._normalize(actual_response)
-        if not validation_text or not validation_text.strip():
-            if expected_answer and expected_answer.strip():
-                return "passed", ""
-
-            return "failed", "Both validation_text and expected_answer are empty"
-        tokens_raw = [t.strip() for t in validation_text.split(",") if t.strip()]
-        mode_any = False
-
-        if tokens_raw and tokens_raw[0].lower().startswith("any:"):
-            mode_any = True
-            tokens_raw[0] = tokens_raw[0][4:].strip()
-
-        col_map = {
-            k.lower(): str(v).strip()
-            for k, v in testcase.items()
-            if str(v).strip()
-        }
-
-        resolved_tokens = [col_map.get(tok.lower(), tok) for tok in tokens_raw]
-        normalized_tokens = [self._normalize(tok) for tok in resolved_tokens if tok]
-
-        if mode_any:
-            hit = any(tok and tok in actual_norm for tok in normalized_tokens)
-            if not hit:
-                return "failed", f"Missing ANY of keywords from validation text in ACTUAL_RESPONSE: {resolved_tokens}"
-            return "passed", ""
-        else:
-            missing = [orig for tok, orig in zip(normalized_tokens, resolved_tokens) if tok and tok not in actual_norm]
-            if missing:
-                return "failed", f"Missing keywords from validation text in ACTUAL_RESPONSE: {missing}"
-            return "passed", ""
-
-    def execute_testcase(self, testcase: Dict[str, Any], rows_accumulator: Dict[str, Any]):
-        with allure.step("Ask Question in Becca"):
-            raw_prompt = str(testcase.get("prompt", "")).strip()
-            expected_answer = str(testcase.get("expected_answer", "")).strip()
-            validation_text = str(testcase.get("validation_text", "")).strip()
-
-            formatted_prompt = self._format_prompt_with_testcase(raw_prompt, testcase)
-
-            row_key = testcase.get("id") or formatted_prompt
-
-            try:
-                actual_response, time_taken = self.run_prompt_and_get_response(formatted_prompt)
-
-                ui_status, ui_error = self._validate_response(
-                    actual_response=actual_response,
-                    expected_answer=expected_answer,
-                    validation_text=validation_text,
-                    testcase=testcase,
-                )
-
-                ui_row = {
-                    **testcase,
-                    "actual_prompt": formatted_prompt,
-                    "expected_response": expected_answer,
-                    "actual_response": actual_response,
-                    "ui_status": ui_status,
-                    "ui_error": ui_error,
-                    "Response time(secs)": time_taken,
-                    "validation_text": validation_text,
-                }
-
-            except Exception as e:
-                logging.error(e)
-                allure.attach(traceback.format_exc(), "UI exception", allure.attachment_type.TEXT)
-                ui_row = {
-                    **testcase,
-                    "actual_prompt": formatted_prompt,
-                    "actual_response": "error while fetching ui response",
-                    "ui_status": "failed",
-                    "ui_error": str(e),
-                    "Response time(secs)": 0,
-                    "validation_text": validation_text,
-                }
-
-            rows_accumulator[row_key] = ui_row
-
-            Results.report_event_assert_bool(
-                ui_row["ui_status"] == "passed",
-                f"prompt failed: {formatted_prompt} | {ui_row['ui_error']}",
-                )
-
-            return ui_row
-
-    def evaluate_testcase(self, ui_row: Dict[str, Any], rows_accumulator: Dict[str, Any]):
-        with allure.step("Evaluate Becca Testcase"):
-
-            if ui_row["ui_status"] != "passed":
-                ui_row.update({
-                    "eval_status": "skipped",
-                    "eval_error": "UI validation failed",
-                    "eval_threshold": "",
-                    "gEval_score": "",
-                    "gEval_reason": "",
-                })
-                return ui_row
-
-            try:
-                threshold = THRESHOLD
-                expected = ui_row.get("expected_response","").strip()
-                payload = {
-                    "question": ui_row["actual_prompt"],
-                    "llmAnswer": ui_row["actual_response"],
-                    "groundAnswer": expected,
-                    "contextualPrecision": False,
-                    "contextualRecall": False,
-                    "faithfulness": False,
-                    "gEval": True,
-                }
-
-                data = get_multiple_scores(payload)
-                score = data.get("gEval", {}).get("score", 0)
-                reason = data.get("gEval", {}).get("reason", "")
-
-                ui_row.update({
-                    "eval_threshold": threshold,
-                    "gEval_score": score,
-                    "gEval_reason": reason,
-                    "eval_status": "passed" if score >= threshold else "failed",
-                    "eval_error": "",
-                })
-
-            except Exception as e:
-                allure.attach(traceback.format_exc(), "Eval exception", allure.attachment_type.TEXT)
-                ui_row.update({
-                    "eval_status": "failed",
-                    "eval_error": str(e),
-                })
-
-            return ui_rowthis is beccaimport logging
-import traceback
-from typing import Dict, Any
-import allure
-from tests.vikings.conftest import THRESHOLD
-from tests.vikings.fw.common.CommonConstants import CommonConstants
-from tests.vikings.fw.common.CommonUtils import CommonUtils
-from tests.vikings.fw.common.Results import Results
-from tests.vikings.fw.ui.BasePage import BasePage
-from tests.vikings.fw.utils import get_multiple_scores
-
-
-class AstraPage(BasePage):
-    CHAT_INPUT_TEXTAREA = "altus-widget-chat-input-textarea"
-
-    def __init__(self, page):
-        self.page = page
-
-    def select_versions(self):
-        with allure.step("Toggle different Versions"):
-            v1 = self.page.get_by_text("v1")
-            v1.click()
-
-            v2 = self.page.get_by_text("v2")
-            v2.wait_for(state="visible")
-            self.sleep(3)
-            self.attach_screenshot("Toggled to v2 prompt Screenshot")
-
-    def open_astra(self):
-        with allure.step("Open Astra UI"):
-            self.click_button_by_name("Astra ASTRA")
-
-    def ask_question(self):
-        with allure.step("Ask a Question"):
-            question = "Give me members from group 5207564 as of 11/02/2025 without any custom attributes."
-            self.get_element_by_id(self.CHAT_INPUT_TEXTAREA).click()
-            self.get_element_by_id(self.CHAT_INPUT_TEXTAREA).fill(question)
-            self.click_button_by_name("send")
-            self.page.locator(".altus-widget-dot-elastic").wait_for(state="detached")
-            self.page.locator('svg[data-icon="like"]').wait_for(state="visible")
-            Results.report_event("Astra question searched successfully:" + question)
-            self.attach_screenshot("Astra question search Screenshot")
-
-    def kacey_testcase(self, testcase, rows_accumulator):
-        with allure.step("Ask a Question - Kacey"):
-            try:
-                prompt = str(testcase.get("query", "")).strip()
-                allure.dynamic.title(prompt)
-                actual_response, time_taken = CommonUtils.run_prompt_and_get_response(self,prompt)
-                ui_status = "passed" if actual_response and actual_response != "none" else "failed"
-
-                result = {
-                    "actual_prompt": prompt,
-                    "actual_response": actual_response,
-                    "ui_status": ui_status,
-                    "Response time(secs)": time_taken,
-                    "ui_error": ""
-                }
-
-                merged = {**testcase, **result}
-                ui_row = merged
-                rows_accumulator[ui_row['actual_prompt']] = ui_row
-                Results.report_event("Astra question searched successfully:" + prompt)
-                Results.report_event("LLM response:" + actual_response)
-                self.attach_screenshot("Astra question search Screenshot")
-
-            except Exception as e:
-                logging.info(f"UI execution exception: {e}")
-                allure.attach(
-                    traceback.format_exc(),
-                    name="UI execution exception",
-                    attachment_type=allure.attachment_type.TEXT
-                )
-                actual_prompt_key = (
-                    prompt if 'prompt' in locals() and prompt else str(testcase.get("query", "")).strip())
-                result = {
-                    "actual_prompt": actual_prompt_key,
-                    "actual_response": "error while fetching ui response",
-                    "ui_status": "failed",
-                    "Response time(secs)": "0",
-                    "ui_error": f"{str(e)}"
-                }
-                merged = {**testcase, **result}
-                # test_failure_reason = f"UI execution exception: {str(e)}"
-
-            ui_row = merged
-            rows_accumulator[ui_row["actual_prompt"]] = ui_row
-            Results.report_event_assert_bool(
-                ui_row["ui_status"] == "passed",
-                f"prompt failed: {ui_row['actual_prompt']}"
-            )
-            return ui_row
-
-
-    def execute_testcase(self, testcase, rows_accumulator):
-        with allure.step("Ask a Question"):
-            try:
-                prompt = str(testcase.get("prompt", "")).strip()
-                mem_group_id = str(testcase.get("MemGroupID", ""))
-                effective_date = str(testcase.get("EffectiveDate", ""))
-                validation_text = str(testcase.get("validation_text", "")).strip()
-                formatted_prompt = ( prompt.replace("$MemGroupID", mem_group_id).replace("$EffectiveDate", effective_date)).strip()
-                allure.dynamic.title(formatted_prompt)
-                actual_response, time_taken = CommonUtils.run_prompt_and_get_response(self, formatted_prompt)
-                Results.report_event(f"Astra prompt response time:{time_taken}")
-
-                ui_status, test_failure_reason, actual_response = CommonUtils.validate_response(actual_response, validation_text, mem_group_id)
-                result = {
-                    "actual_prompt": formatted_prompt,
-                    "actual_response": actual_response,
-                    "ui_status": ui_status,
-                    "Response time(secs)": time_taken,
-                    "ui_error": ""
-                }
-                merged = {**testcase, **result}
-                Results.report_event("Astra question searched successfully:" + formatted_prompt)
-                Results.report_event("validation text :" + validation_text)
-                Results.report_event("LLM response:" + actual_response)
-                self.attach_screenshot("Astra question search Screenshot")
-
-            except Exception as e:
-                logging.info(f"UI execution exception: {e}")
-                allure.attach(traceback.format_exc(),name="UI execution exception", attachment_type=allure.attachment_type.TEXT)
-                actual_prompt_key = (formatted_prompt if formatted_prompt is not None else str(testcase.get("prompt", "")).strip())
-                result = {
-                    "actual_prompt": actual_prompt_key,
-                    "actual_response": "error while fetching ui response",
-                    "ui_status": "failed",
-                    "Response time(secs)": "0",
-                    "ui_error": f"{str(e)}"
-                }
-                merged = {**testcase, **result}
-                test_failure_reason = f"UI execution exception: {str(e)}"
-
-            ui_row = merged
-            rows_accumulator[ui_row['actual_prompt']] = ui_row
-            Results.report_event_assert_bool( ui_row['ui_status'] == "passed",f"prompt failed: {ui_row['actual_prompt']} and more details for failure is {test_failure_reason}")
-            return ui_row
-
-
-    def evaluate_testcase(self, ui_row: Dict[str, Any],rows_accumulator):
-
-        with allure.step("Evaluate Astra Testcase"):
-            try:
-                threshold = THRESHOLD
-                if not ui_row.get("expected_response", ""):
-                    ui_row["expected_response"] = ui_row["actual_response"]
-                eval_payload = {
-                    "question": ui_row["actual_prompt"],
-                    "llmAnswer": ui_row["actual_response"],
-                    "groundAnswer": ui_row["expected_response"],
-                    "contextualPrecision": False,
-                    "contextualRecall": False,
-                    "faithfulness": False,
-                    # "answerRelevancy": True,
-                    "gEval": True
-                }
-                data = get_multiple_scores(eval_payload)
-                gEval_score = data.get("gEval", {}).get("score", 0)
-                gEval_reason = data.get("gEval", {}).get("reason", "")
-                # answer_relevancy_score = data.get("answerRelevancy", {}).get("score", 0)
-                # answer_relevancy_reason = data.get("answerRelevancy", {}).get("reason", "")
-
-                pass_geval = gEval_score >= threshold
-                # pass_answer_rel = answer_relevancy_score >= threshold
-
-                eval_dict_list = [pass_geval]
-                eval_result = {
-                    "eval_threshold": threshold,
-                    "gEval_score": gEval_score,
-                    "gEval_reason": gEval_reason,
-                    "eval_error": ""
-                }
-                # if not ("report" in ui_row["actual_response"].lower() and "download" in ui_row["actual_response"].lower()):
-                #     eval_dict_list.append(pass_answer_rel)
-                #     eval_result["answer_relevancy_score"] = answer_relevancy_score
-                #     eval_result["answer_relevancy_reason"] = answer_relevancy_reason
-                # else:
-                #     eval_result["answer_relevancy_score"] = 0
-                #     eval_result["answer_relevancy_reason"] = ""
-
-                eval_status = "passed" if all(eval_dict_list) else "failed"
-                eval_result["eval_status"] = eval_status
-
-                merged_ui_eval = {**ui_row, **eval_result}
-                # return merged_ui_eval
-            except Exception as e:
-                logging.info(f"Evaluation exception: {e}")
-                allure.attach(traceback.format_exc(), name="Evaluation exception", attachment_type=allure.attachment_type.TEXT)
-                eval_result = {
-                    "eval_threshold": "",
-                    "gEval_score": 0,
-                    "gEval_reason": "evaluation error",
-                    # "answer_relevancy_score": 0,
-                    # "answer_relevancy_reason": "evaluation error",
-                    "eval_status": "failed",
-                    "eval_error": f"{str(e)}"
-                }
-                merged_ui_eval = {**ui_row, **eval_result}
-                # return merged_ui_eval
-            ui_eval_row=merged_ui_eval
-            rows_accumulator[ui_eval_row['actual_prompt']]=ui_eval_row
-            # assert ui_eval_row['eval_status'] == CommonConstants.PASSED, f"eval failed: {ui_eval_row['actual_prompt']}"
-            # Results.report_event(ui_eval_row['eval_status'] == CommonConstants.PASSED,f"eval failed: {ui_eval_row['actual_prompt']}")
-            return merged_ui_eval
-
-    # python
-    def evaluate_kacey_testcase(self, ui_row: Dict[str, Any], rows_accumulator):
-        with allure.step("Evaluate Kacey Testcase"):
-            try:
-                threshold = THRESHOLD
-                # Align expected field name to match non-Kacey flow
-                if not ui_row.get("expected_response", ""):
-                    # Prefer existing expected_answer if present, else fall back to actual_response
-                    expected = ui_row.get("expected_answer", ui_row.get("actual_response", ""))
-                    ui_row["expected_response"] = expected
-
-                # Align question field to 'actual_prompt'
-                question = ui_row.get("actual_prompt", ui_row.get("query", ""))
-
-                eval_payload = {
-                    "question": question,
-                    "llmAnswer": ui_row.get("actual_response", ""),
-                    "groundAnswer": ui_row.get("expected_response", ""),
-                    "contextualPrecision": False,
-                    "contextualRecall": False,
-                    "faithfulness": False,
-                    # "answerRelevancy": True,
-                    "gEval": True
-                }
-
-                data = get_multiple_scores(eval_payload)
-                gEval_score = data.get("gEval", {}).get("score", 0)
-                gEval_reason = data.get("gEval", {}).get("reason", "")
-                # answer_relevancy_score = data.get("answerRelevancy", {}).get("score", 0)
-                # answer_relevancy_reason = data.get("answerRelevancy", {}).get("reason", "")
-
-                pass_geval = gEval_score >= threshold
-                # pass_answer_rel = answer_relevancy_score >= threshold
-
-                eval_result = {
-                    "eval_threshold": threshold,
-                    "gEval_score": gEval_score,
-                    "gEval_reason": gEval_reason,
-                    "eval_error": ""
-                }
-                # if not ("report" in ui_row["actual_response"].lower() and "download" in ui_row["actual_response"].lower()):
-                #     eval_dict_list.append(pass_answer_rel)
-                #     eval_result["answer_relevancy_score"] = answer_relevancy_score
-                #     eval_result["answer_relevancy_reason"] = answer_relevancy_reason
-                # else:
-                #     eval_result["answer_relevancy_score"] = 0
-                #     eval_result["answer_relevancy_reason"] = ""
-
-                eval_status = "passed" if pass_geval else "failed"
-                eval_result["eval_status"] = eval_status
-
-                merged_ui_eval = {**ui_row, **eval_result}
-
-            except Exception as e:
-                logging.info(f"Evaluation exception: {e}")
-                allure.attach(
-                    traceback.format_exc(),
-                    name="Evaluation exception",
-                    attachment_type=allure.attachment_type.TEXT
-                )
-                eval_result = {
-                    "eval_threshold": "",
-                    "gEval_score": 0,
-                    "gEval_reason": "evaluation error",
-                    # "answer_relevancy_score": 0,
-                    # "answer_relevancy_reason": "evaluation error",
-                    "eval_status": "failed",
-                    "eval_error": f"{str(e)}"
-                }
-                merged_ui_eval = {**ui_row, **eval_result}
-
-            # Persist into rows_accumulator using the aligned key
-            key = merged_ui_eval.get("actual_prompt", merged_ui_eval.get("query", ""))
-            rows_accumulator[key] = merged_ui_eval
-
-            # Keep reporting/assertion consistent with non-Kacey flow
-            Results.report_event_assert_bool(
-                merged_ui_eval["eval_status"] == CommonConstants.PASSED,
-                f"eval failed: {key}"
-            )
-            return merged_ui_eval
-
-this is astra can u compare how response time is captured in evaluated in both astra and becca and make me understand in simple words
-
-helper codes : common utils code for astra
-common utilsimport os
-from datetime import datetime
-from zoneinfo import ZoneInfo
-import random
-import allure
-
-from tests.vikings.fw.common.FW import FW
-import re
-import time
-from typing import Tuple
-from bs4 import BeautifulSoup
-
-
-
-class CommonUtils:
-    @staticmethod
-    def getTimeStamp():
-        return str(datetime.now())
-
-    @staticmethod
-    def getTitle(testcase: dict, key: str = None) -> str:
-        keys_to_check = [key] if key else ["prompt", "input", "question", "name"] #add input data test column names here
-        for k in keys_to_check:
-            if k and k in testcase:
-                return str(testcase[k]).strip()
-        return ""
-
-    @staticmethod
-    def setupTest(testcase, testcaseNameColumnKey=None):
-        allure.dynamic.title(CommonUtils.getTitle(testcase, testcaseNameColumnKey))
-
-    @staticmethod
-    def handleException(testcase,rows_accumulator,exception, testcaseNameColumnKey=None):
-        key = str(random.randint(1, 1_000_000_000))
-        basic_xl_report_data_in_failure = {
-            **testcase,
-            "ui_error": str(exception),
-            "ui_status": "failed",
-            "actual_prompt":CommonUtils.getTitle(testcase)  # this actual_prompt is needed for report purpose
-        }
-        rows_accumulator[key]=basic_xl_report_data_in_failure
-        #rows_accumulator[basic_xl_report_data_in_failure['actual_prompt']] = basic_xl_report_data_in_failure
-
-
-    @staticmethod
-    def get_ist_timestamp():
-        return datetime.now(ZoneInfo("Asia/Kolkata")).strftime("%Y-%m-%d %H:%M:%S")
-
-    @staticmethod
-    def is_local_run():
-        run_id = os.environ.get("RUN_ID", "1")
-        return FW.is_empty_string(run_id) or run_id == "1" or len(run_id) > 6
-
-    @staticmethod
-    def get_app_name():
-        app_name = os.environ.get("APP", "cody")
-        return app_name
-
-    @staticmethod
-    def clean_text_from_html(html: str) -> str:
-        soup = BeautifulSoup(html, "html.parser")
-        for icon in soup.find_all('span', class_='anticon'):
-            icon.decompose()
-        return soup.get_text(separator=" | ").strip()
-
-    @staticmethod
-    def strip_widget_timestamp(text: str) -> str:
-        patterns = [
-            r'\s*\|\s*[A-Za-z]+ \d{1,2}, \d{4} (at )?\d{1,2}:\d{2}\s*(AM|PM)\s*$',
-            r'\s*\|\s*[A-Za-z]{3} \d{1,2}, \d{4} (at )?\d{1,2}:\d{2}\s*(AM|PM)\s*$',
-            r'\s*\|\s*\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}(:\d{2})?\s*$',
-            r'\s*\|\s*[A-Za-z]+ \d{1,2}, \d{4}\s*$',
-        ]
-        trimmed = text
-        for pat in patterns:
-            trimmed = re.sub(pat, '', trimmed)
-        return re.sub(r'\s*\|\s*$', '', trimmed).strip()
-
-    @staticmethod
-    def __is_interim(text: str, interim_phrases: list[str]) -> bool:
-        # Normalize to lowercase for case-insensitive checks
-        t = text.lower().strip()
-
-        # If it looks like an error occurrence, treat as final
-        if "error" in t and "occur" in t:
-            return False
-
-        # Normalize phrases: lowercase and strip trailing dots/ellipsis
-        norm_phrases = []
-        for p in interim_phrases:
-            p = (p or "").lower().strip()
-            # remove any trailing ".", "..." or "…"
-            p = re.sub(r'(?:\.{1,3}|…)\s*$', '', p)
-            if p:
-                norm_phrases.append(p)
-
-        # Match interim phrases even if they end with ".", "…", or "..."
-        for p in norm_phrases:
-            pat = rf'\b{re.escape(p)}(?:\.{{1,3}}|…)?\b'
-            if re.search(pat, t):
-                return True
-        return False
-
-
-    @staticmethod
-    def contiguous_words_phrase_present(val_text: str, resp_text: str) -> bool:
-        if not val_text or not val_text.strip():
-            return False
-        resp = resp_text or ""
-        val_words = re.findall(r'[A-Za-z0-9]+', val_text, flags=re.UNICODE)
-        if not val_words:
-            return False
-        pattern = r'\b' + r'\b\W+\b'.join(map(re.escape, val_words)) + r'\b'
-        return re.search(pattern, resp, flags=re.IGNORECASE) is not None
-
-    @staticmethod
-    def run_prompt_and_get_response(page_obj, prompt: str) -> tuple[str, float]:
-        CHAT_INPUT_TEXTAREA = "altus-widget-chat-input-textarea"
-
-        response_containing_element = page_obj.page.locator("div.altus-widget-chat-message.altus")
-        before_count = response_containing_element.count()
-
-        page_obj.get_element_by_id(CHAT_INPUT_TEXTAREA).click()
-        page_obj.get_element_by_id(CHAT_INPUT_TEXTAREA).fill(prompt)
-        page_obj.attach_screenshot(f"Astra UI Screenshot immediately before hitting prompt :{CommonUtils.get_ist_timestamp()}")
-        page_obj.click_button_by_name("send")
-        start_time = time.time()
-
-        actual_response = "No response has been received from Astra UI after waiting for 60 seconds. "
-        timeout_time = start_time + 60
-
-        interim_phrases = [
-            "report is currently being generated",
-            "please hold on",
-            "working on it",
-            "generating",
-            "preparing",
-            "Loading SOP content",
-        ]
-
-        while time.time() < timeout_time:
-            count_after = response_containing_element.count()
-            if count_after > before_count:
-                latest_response_containing_element = response_containing_element.nth(count_after - 1)
-                try:
-                    latest_response_containing_element.wait_for(state="visible", timeout=5000)
-                except Exception:
-                    pass
-
-                while time.time() < timeout_time:
-                    try:
-                        # Retrieves the inner HTML content of the latest response element from the chat widget
-                        html = latest_response_containing_element.inner_html()
-                    except Exception:
-                        time.sleep(0.2)
-                        continue
-
-                    # Extracts and cleans the visible text from the HTML content, removing unwanted elements like icons
-                    text = CommonUtils.clean_text_from_html(html)
-                    is_final_text = ( bool(text.strip()) and (("report is ready" in text.lower()) or not CommonUtils.__is_interim(text, interim_phrases)))
-                    if is_final_text:
-                        actual_response = CommonUtils.strip_widget_timestamp(text)
-                        break
-
-                    time.sleep(0.2)
-                break
-            else:
-                time.sleep(0.2)
-
-        page_obj.attach_screenshot(f"Astra UI Screenshot immediately after result/timeout:{CommonUtils.get_ist_timestamp()}")
-        time_taken = round(time.time() - start_time, 2)
-        return actual_response, time_taken
-
-    @staticmethod
-    def validate_response(actual_response: str, validation_text: str, mem_group_id: str) -> Tuple[str, str, str]:
-        test_failure_reason = ""
-        if actual_response and actual_response != "none":
-            phrase_pass = CommonUtils.contiguous_words_phrase_present(validation_text, actual_response)
-
-            if "group" in validation_text.lower():
-                has_group_id = bool(mem_group_id) and re.search(
-                    rf'\b{re.escape(mem_group_id)}\b', actual_response
-                )
-                ui_status = "passed" if (phrase_pass and has_group_id) else "failed"
-                if ui_status == "failed":
-                    test_failure_reason = (
-                        f"either validation text or mem group id not found in response. "
-                        f"actual_response:{actual_response}, mem_group_id:{mem_group_id}, "
-                        f"validation_text:{validation_text}"
-                    )
-            else:
-                ui_status = "passed" if phrase_pass else "failed"
-                if ui_status == "failed":
-                    test_failure_reason = (
-                        f"validation text not found in response. "
-                        f"actual_response:{actual_response}, validation_text:{validation_text}"
-                    )
-        else:
-            ui_status = "failed"
-            actual_response = "No response has been received from Astra UI after waiting for 60 seconds."
-            test_failure_reason = (
-                f"validation text not found in response. "
-                f"actual_response:{actual_response}, validation_text:{validation_text}"
-            )
-
-        return ui_status , test_failure_reason , actual_response
-
-html for becca
-<div class="chat-container">
-  <div
-    *ngIf="messages.length > 0 && !navigatedToFavoritesOrHistory"
-    class="d-flex justify-content-end"
-  >
-    <button class="btn btn-primary" (click)="clearChat()">Start New Chat</button>
-  </div>
-  <div class="message-container">
-    <div #chatContainer class="chat-box my-3 px-1">
-      <div *ngIf="messages.length === 0 && !navigatedToFavoritesOrHistory">
-        <app-welcome-message></app-welcome-message>
-      </div>
-      <div *ngIf="messages.length > 0 && !navigatedToFavoritesOrHistory">
-        <app-chat-message
-          *ngFor="let message of messages"
-          [message]="message"
-          [typingIndicator]="typingIndicator"
-          (actionClicked)="handleAction($event)"
-        >
-        </app-chat-message>
-      </div>
-      <div *ngIf="navigatedToFavoritesOrHistory">
-        <router-outlet></router-outlet>
-      </div>
-      <div
-        *ngIf="isautonomous_plan_build && !navigatedToFavoritesOrHistory"
-        class="quick-start-section"
-      >
-        <h3 class="section-title">Quick Start Prompts:</h3>
-        <div class="prompts-container">
-          <mat-card
-            *ngFor="let prompt of customPrompts"
-            class="prompt-card"
-            (click)="handlePromptClick(prompt.prompt)"
-          >
-            <mat-card-content>
-              <div class="prompt-content">
-                <div class="prompt-icon">
-                  <mat-icon>{{ prompt.icon }}</mat-icon>
-                </div>
-                <div class="prompt-details">
-                  <h4 class="prompt-title">{{ prompt.title }}</h4>
-                  <p class="prompt-description">{{ prompt.description }}</p>
-                  <p class="prompt-text">{{ prompt.prompt }}</p>
-                </div>
-              </div>
-            </mat-card-content>
-          </mat-card>
-        </div>
-      </div>
-    </div>
-    <div class="input-section">
-      <mat-form-field appearance="outline" class="message-field">
-        <textarea
-          matInput
-          [(ngModel)]="userInput"
-          placeholder="Type your message here"
-          (keydown.enter)="onEnter($event)"
-        ></textarea>
-      </mat-form-field>
-      <button
-        class="submit-button"
-        (click)="isSubmitting ? stopResponse() : sendMessage()"
-        [ngClass]="{ 'cancel-button': isSubmitting }"
-      >
-        {{ isSubmitting ? 'Cancel' : 'Submit' }}
-      </button>
-    </div>
-  </div>
-  <app-dislike-modal
-    *ngIf="isModalOpen"
-    [chatHistoryID]="selectedChatHistoryId"
-    (closeModalEvent)="closeModal()"
-    (feedbackSavedEvent)="handleDislikeFeedback()"
-  >
-  </app-dislike-modal>
-</div>
-
-
-i actually wanna implement similar response time process for becca also like astra
+actual_prompt	expected_response	actual_response	ui_status	ui_error	Response time(secs)	eval_threshold	gEval_score	gEval_reason	eval_status	eval_error
+what is the coinsurance for pharmaceutical products for DTKS, 2024, AR, KA, INN.		error while fetching ui response	failed	'tuple' object has no attribute 'lower'	0					
+what is the coinsurance for pharmaceutical products for $PlanCode, 2024, AR, KA, INN.			failed	"prompt failed: what is the coinsurance for pharmaceutical products for DTKS, 2024, AR, KA, INN. | 'tuple' object has no attribute 'lower'
+assert False"						
+What are the different maximums for Plan code CHFF		error while fetching ui response	failed	'tuple' object has no attribute 'lower'	0					
+What are the different maximums for Plan code $PlanCode			failed	"prompt failed: What are the different maximums for Plan code CHFF | 'tuple' object has no attribute 'lower'
+assert False"						
+Is there a  waived copay for radiology for Plan Code DY82		error while fetching ui response	failed	"Locator.wait_for: Timeout 30000ms exceeded.
+Call log:
+  - waiting for locator("".input-section textarea[matInput]"").first to be visible
+    - waiting for"" https://authgateway1-stg.entiam.uhg.com/as/authorization.oauth2?response_type=code&client_id=Reg1Stg_Mandy&state=TEZkU2suNWZiVGtNMzFHdUJINWVCTDZFd2FvcXo1T1JZcTl6cnk5X1BxSE1r%3Bchat&redirect_uri=https…"" navigation to finish...
+    - navigated to ""https://authgateway1-stg.entiam.uhg.com/as/9c7jXcOKfo/resume/as/authorization.ping""
+    - waiting for"" https://device.login.microsoftonline.com/"" navigation to finish...
+    - navigated to ""https://device.login.microsoftonline.com/""
+"	0					
+Is there a  waived copay for radiology for Plan Code $PlanCode			failed	"prompt failed: Is there a  waived copay for radiology for Plan Code DY82 | Locator.wait_for: Timeout 30000ms exceeded.
+  Call log:
+    - waiting for locator("".input-section textarea[matInput]"").first to be visible
+      - waiting for"" https://authgateway1-stg.entiam.uhg.com/as/authorization.oauth2?response_type=code&client_id=Reg1Stg_Mandy&state=TEZkU2suNWZiVGtNMzFHdUJINWVCTDZFd2FvcXo1T1JZcTl6cnk5X1BxSE1r%3Bchat&redirect_uri=https…"" navigation to finish...
+      - navigated to ""https://authgateway1-stg.entiam.uhg.com/as/9c7jXcOKfo/resume/as/authorization.ping""
+      - waiting for"" https://device.login.microsoftonline.com/"" navigation to finish...
+      - navigated to ""https://device.login.microsoftonline.com/""
+  
+assert False"						
+What is coinsurance for x-ray?			failed	"prompt failed: What is coinsurance for x-ray? | Locator.wait_for: Timeout 30000ms exceeded.
+  Call log:
+    - waiting for locator("".input-section textarea[matInput]"").first to be visible
+  
+assert False"						
+for plan code F4H, what is the PCP cost share		error while fetching ui response	failed	"Locator.wait_for: Timeout 30000ms exceeded.
+Call log:
+  - waiting for locator("".input-section textarea[matInput]"").first to be visible
+"	0					
+for plan code $PlanCode, what is the PCP cost share			failed	"prompt failed: for plan code F4H, what is the PCP cost share | Locator.wait_for: Timeout 30000ms exceeded.
+  Call log:
+    - waiting for locator("".input-section textarea[matInput]"").first to be visible
+  
+assert False"						
+Is there copay applies to Plan Code DME2		error while fetching ui response	failed	'tuple' object has no attribute 'lower'	0					
+Is there copay applies to Plan Code $PlanCode			failed	"prompt failed: Is there copay applies to Plan Code DME2 | 'tuple' object has no attribute 'lower'
+assert False"						
+What is the specialist copay for plan code DY8N		error while fetching ui response	failed	'tuple' object has no attribute 'lower'	0					
+What is the specialist copay for plan code $PlanCode			failed	"prompt failed: What is the specialist copay for plan code DY8N | 'tuple' object has no attribute 'lower'
+assert False"						
+What is the copay for UC for plan code DY9G?		error while fetching ui response	failed	'tuple' object has no attribute 'lower'	0					
+What is the out of network coinsurance for Virtual Care Services on plan code DXWG?		error while fetching ui response	failed	"Locator.wait_for: Timeout 30000ms exceeded.
+Call log:
+  - waiting for locator("".input-section textarea[matInput]"").first to be visible
+    - waiting for"" https://authgateway1-stg.entiam.uhg.com/as/authorization.oauth2?response_type=code&client_id=Reg1Stg_Mandy&state=anczTngwUnE1Smc0b1lrZ1JzSFZpNnphLmFGbTJqR0Z0cVEzbW5TS2R5VFFh%3Bchat&redirect_uri=https…"" navigation to finish...
+    - navigated to ""https://authgateway1-stg.entiam.uhg.com/as/Pc2tauP4Gs/resume/as/authorization.ping""
+    - waiting for"" https://device.login.microsoftonline.com/"" navigation to finish...
+    - navigated to ""https://device.login.microsoftonline.com/""
+"	0					
+What is the out of network coinsurance for Virtual Care Services on plan code $PlanCode?			failed	"prompt failed: What is the out of network coinsurance for Virtual Care Services on plan code DXWG? | Locator.wait_for: Timeout 30000ms exceeded.
+  Call log:
+    - waiting for locator("".input-section textarea[matInput]"").first to be visible
+      - waiting for"" https://authgateway1-stg.entiam.uhg.com/as/authorization.oauth2?response_type=code&client_id=Reg1Stg_Mandy&state=anczTngwUnE1Smc0b1lrZ1JzSFZpNnphLmFGbTJqR0Z0cVEzbW5TS2R5VFFh%3Bchat&redirect_uri=https…"" navigation to finish...
+      - navigated to ""https://authgateway1-stg.entiam.uhg.com/as/Pc2tauP4Gs/resume/as/authorization.ping""
+      - waiting for"" https://device.login.microsoftonline.com/"" navigation to finish...
+      - navigated to ""https://device.login.microsoftonline.com/""
+  
+assert False"						
+Plan code is DK9D. What is Congenital Heart Disease Ded		error while fetching ui response	failed	"Locator.wait_for: Timeout 30000ms exceeded.
+Call log:
+  - waiting for locator("".input-section textarea[matInput]"").first to be visible
+"	0					
+Plan code is $PlanCode. What is Congenital Heart Disease Ded			failed	"prompt failed: Plan code is DK9D. What is Congenital Heart Disease Ded | Locator.wait_for: Timeout 30000ms exceeded.
+  Call log:
+    - waiting for locator("".input-section textarea[matInput]"").first to be visible
+  
+assert False"						
+show me level funded plans with a $25 PCP copay			failed	"prompt failed: show me level funded plans with a $25 PCP copay | 'tuple' object has no attribute 'lower'
+assert False"						
+is there an radiology copay for Plan Code DY82		error while fetching ui response	failed	'tuple' object has no attribute 'lower'	0					
+is there an radiology copay for Plan Code $PlanCode			failed	"prompt failed: is there an radiology copay for Plan Code DY82 | 'tuple' object has no attribute 'lower'
+assert False"						
+What is the radiology coinsurance for plan code DK7S?		error while fetching ui response	failed	"Locator.wait_for: Timeout 30000ms exceeded.
+Call log:
+  - waiting for locator("".input-section textarea[matInput]"").first to be visible
+"	0					
+What is the radiology coinsurance for plan code $PlanCode?			failed	"prompt failed: What is the radiology coinsurance for plan code DK7S? | Locator.wait_for: Timeout 30000ms exceeded.
+  Call log:
+    - waiting for locator("".input-section textarea[matInput]"").first to be visible
+  
+assert False"						
+Tell me about plan code F4H		error while fetching ui response	failed	"Locator.wait_for: Timeout 30000ms exceeded.
+Call log:
+  - waiting for locator("".input-section textarea[matInput]"").first to be visible
+"	0					
+Tell me about plan code $PlanCode			failed	"prompt failed: Tell me about plan code F4H | Locator.wait_for: Timeout 30000ms exceeded.
+  Call log:
+    - waiting for locator("".input-section textarea[matInput]"").first to be visible
+  
+assert False"						
+show me fully insured small group plans in AL under a 2025 coc with a $25 copay			failed	"prompt failed: show me fully insured small group plans in AL under a 2025 coc with a $25 copay | 'tuple' object has no attribute 'lower'
+assert False"						
+show me fully insured small group plans in AL under the 2025 COC			failed	"prompt failed: show me fully insured small group plans in AL under the 2025 COC | 'tuple' object has no attribute 'lower'
+assert False"						
+What is the copay for UC for plan code DY82?		error while fetching ui response	failed	'tuple' object has no attribute 'lower'	0					
+What is the copay for UC for plan code $PlanCode?			failed	"prompt failed: What is the copay for UC for plan code DY82? | 'tuple' object has no attribute 'lower'
+assert False"						
+What codes for a knee surgery require prior authorization?			failed	"prompt failed: What codes for a knee surgery require prior authorization? | Locator.wait_for: Timeout 30000ms exceeded.
+  Call log:
+    - waiting for locator("".input-section textarea[matInput]"").first to be visible
+      - waiting for"" https://authgateway1-stg.entiam.uhg.com/as/authorization.oauth2?response_type=code&client_id=Reg1Stg_Mandy&state=dUxEMkpiTGRDQnZxcDlaMHNWZC4xY1JIUmhYWEVXT0hVfmIxQi4wTzlPM3px%3Bchat&redirect_uri=https…"" navigation to finish...
+      - navigated to ""https://authgateway1-stg.entiam.uhg.com/as/eDpMj9kGQf/resume/as/authorization.ping""
+      - waiting for"" https://device.login.microsoftonline.com/"" navigation to finish...
+      - navigated to ""https://device.login.microsoftonline.com/""
+  
+assert False"						
+Plan Code is DK8R. What is cost share for Urgent Care Center Services.		error while fetching ui response	failed	"Locator.wait_for: Timeout 30000ms exceeded.
+Call log:
+  - waiting for locator("".input-section textarea[matInput]"").first to be visible
+"	0					
+Plan Code is $PlanCode. What is cost share for Urgent Care Center Services.			failed	"prompt failed: Plan Code is DK8R. What is cost share for Urgent Care Center Services. | Locator.wait_for: Timeout 30000ms exceeded.
+  Call log:
+    - waiting for locator("".input-section textarea[matInput]"").first to be visible
+  
+assert False"						
+What is the cardiac limits on plan code DY1A		error while fetching ui response	failed	'tuple' object has no attribute 'lower'	0					
+What is the cardiac limits on plan code $PlanCode			failed	"prompt failed: What is the cardiac limits on plan code DY1A | 'tuple' object has no attribute 'lower'
+assert False"						
+Give me some custom plan FI			failed	"prompt failed: Give me some custom plan FI | Locator.wait_for: Timeout 30000ms exceeded.
+  Call log:
+    - waiting for locator("".input-section textarea[matInput]"").first to be visible
+      - waiting for"" https://authgateway1-stg.entiam.uhg.com/as/authorization.oauth2?response_type=code&client_id=Reg1Stg_Mandy&state=enVpZDhuLkM5OE5oNUEzaXFiMzhCZUFNMlgzVH5kZTAyflpRcUdvTzRhbTFw%3Bchat&redirect_uri=https…"" navigation to finish...
+      - navigated to ""https://authgateway1-stg.entiam.uhg.com/as/XAWVdc6sHH/resume/as/authorization.ping""
+      - waiting for"" https://device.login.microsoftonline.com/"" navigation to finish...
+      - navigated to ""https://device.login.microsoftonline.com/""
+  
+assert False"						
+Is there an IP waived copay for Plan Code DY9D		error while fetching ui response	failed	'tuple' object has no attribute 'lower'	0					
+Is there an IP waived copay for Plan Code $PlanCode			failed	"prompt failed: Is there an IP waived copay for Plan Code DY9D | 'tuple' object has no attribute 'lower'
+assert False"						
+Plan code is DK7S. What is Rehabilitation Limit?		error while fetching ui response	failed	"Locator.wait_for: Timeout 30000ms exceeded.
+Call log:
+  - waiting for locator("".input-section textarea[matInput]"").first to be visible
+"	0					
+Plan code is $PlanCode. What is Rehabilitation Limit?			failed	"prompt failed: Plan code is DK7S. What is Rehabilitation Limit? | Locator.wait_for: Timeout 30000ms exceeded.
+  Call log:
+    - waiting for locator("".input-section textarea[matInput]"").first to be visible
+  
+assert False"						
+What is Hospital - inpatient costshare for plan code DK9D?		error while fetching ui response	failed	"Locator.wait_for: Timeout 30000ms exceeded.
+Call log:
+  - waiting for locator("".input-section textarea[matInput]"").first to be visible
+"	0					
+What is Hospital - inpatient costshare for plan code $PlanCode?			failed	"prompt failed: What is Hospital - inpatient costshare for plan code DK9D? | Locator.wait_for: Timeout 30000ms exceeded.
+  Call log:
+    - waiting for locator("".input-section textarea[matInput]"").first to be visible
+  
+assert False"						
