@@ -1,20 +1,20 @@
 /Users/achhab16/Library/Caches/pypoetry/virtualenvs/app-bPuqwu3B-py3.13/lib/python3.13/site-packages/deepeval/__init__.py:52: UserWarning: You are using deepeval version 2.2.0, however version 3.8.9 is available. You should consider upgrading via the "pip install --upgrade deepeval" command.
   warnings.warn(
-INFO 2026-03-12 15:05:11 conftest.py Loaded environment variables from .env.local
-INFO 2026-03-12 15:05:11 conftest.py pytest_configure started
-INFO 2026-03-12 15:05:11 conftest.py conftest is loading vars
-INFO 2026-03-12 15:05:11 conftest.py Resolved app env path: /Users/achhab16/Desktop/cirrus-apps_vikings-eval/tests/vikings/apps/becca/config/.env.dev
-INFO 2026-03-12 15:05:11 conftest.py App env file not found: tests/vikings/apps/becca/config/.env.dev
-INFO 2026-03-12 15:05:11 conftest.py ENV: dev
-INFO 2026-03-12 15:05:11 conftest.py APP: becca
-INFO 2026-03-12 15:05:11 conftest.py RUN_ID: 1
-INFO 2026-03-12 15:05:11 conftest.py SSLV: true
-INFO 2026-03-12 15:05:11 conftest.py THRESHOLD: 0.5
-INFO 2026-03-12 15:05:11 conftest.py pytest_configure ended
-INFO 2026-03-12 15:05:11 conftest.py Session started: <Session  exitstatus=<ExitCode.OK: 0> testsfailed=0 testscollected=0>
-INFO 2026-03-12 15:05:11 conftest.py Current temp dir: /private/var/folders/pd/wzd_v7bx32n4byp72dqdzjkw0000gq/T/pytest-of-achhab16/pytest-27
-Base temp dir init: /private/var/folders/pd/wzd_v7bx32n4byp72dqdzjkw0000gq/T/pytest-of-achhab16/pytest-27
-INFO 2026-03-12 15:05:11 conftest.py Base temp dir saved to /Users/achhab16/Desktop/cirrus-apps_vikings-eval/reports/base_temp.txt
+INFO 2026-03-12 15:21:58 conftest.py Loaded environment variables from .env.local
+INFO 2026-03-12 15:21:58 conftest.py pytest_configure started
+INFO 2026-03-12 15:21:58 conftest.py conftest is loading vars
+INFO 2026-03-12 15:21:58 conftest.py Resolved app env path: /Users/achhab16/Desktop/cirrus-apps_vikings-eval/tests/vikings/apps/becca/config/.env.dev
+INFO 2026-03-12 15:21:58 conftest.py App env file not found: tests/vikings/apps/becca/config/.env.dev
+INFO 2026-03-12 15:21:58 conftest.py ENV: dev
+INFO 2026-03-12 15:21:58 conftest.py APP: becca
+INFO 2026-03-12 15:21:58 conftest.py RUN_ID: 1
+INFO 2026-03-12 15:21:58 conftest.py SSLV: true
+INFO 2026-03-12 15:21:58 conftest.py THRESHOLD: 0.5
+INFO 2026-03-12 15:21:58 conftest.py pytest_configure ended
+INFO 2026-03-12 15:21:58 conftest.py Session started: <Session  exitstatus=<ExitCode.OK: 0> testsfailed=0 testscollected=0>
+INFO 2026-03-12 15:21:58 conftest.py Current temp dir: /private/var/folders/pd/wzd_v7bx32n4byp72dqdzjkw0000gq/T/pytest-of-achhab16/pytest-30
+Base temp dir init: /private/var/folders/pd/wzd_v7bx32n4byp72dqdzjkw0000gq/T/pytest-of-achhab16/pytest-30
+INFO 2026-03-12 15:21:58 conftest.py Base temp dir saved to /Users/achhab16/Desktop/cirrus-apps_vikings-eval/reports/base_temp.txt
 ============================= test session starts ==============================
 platform darwin -- Python 3.13.7, pytest-8.4.1, pluggy-1.6.0
 rootdir: /Users/achhab16/Desktop/cirrus-apps_vikings-eval
@@ -23,80 +23,179 @@ plugins: repeat-0.9.4, allure-pytest-2.15.0, anyio-4.9.0, html-4.1.1, env-1.1.5,
 asyncio: mode=Mode.STRICT, asyncio_default_fixture_loop_scope=None
 collected 1 item                                                               
 
-tests/vikings/apps/becca_jl/jl_tests/test_becca_jl_eval_pipeline.py INFO 2026-03-12 15:05:14 conftest.py Setup fixture before session: Eval
-INFO 2026-03-12 15:05:14 conftest.py db_session started
-INFO 2026-03-12 15:05:14 conftest.py Setting up database connection for session: a42aeb93-b8e3-4696-afec-bd73feb8c2ab
-INFO 2026-03-12 15:05:14 db_utils.py Opened database connection:{'db_name': 'test_db', 'user': 'test_user', 'session_id': 'a42aeb93-b8e3-4696-afec-bd73feb8c2ab'}
-INFO 2026-03-12 15:05:14 conftest.py properties_info started
-INFO 2026-03-12 15:05:14 conftest.py from env info
-INFO 2026-03-12 15:05:14 conftest.py ENV: dev
-INFO 2026-03-12 15:05:14 conftest.py ROLE: unable to get role
-INFO 2026-03-12 15:05:14 conftest.py properties_info ended
-INFO 2026-03-12 15:05:14 conftest.py Setup before test: test_becca_jl_eval_pipeline
-ERROR 2026-03-12 15:05:14 BeccaJLPage.py name 'false' is not defined
-FINFO 2026-03-12 15:05:14 conftest.py No COLUMNS_ORDER found on the test node for summary attachment.
-INFO 2026-03-12 15:05:14 conftest.py Teardown after test: test_becca_jl_eval_pipeline
-INFO 2026-03-12 15:05:14 conftest.py No COLUMNS_ORDER found on the test node.
-INFO 2026-03-12 15:05:14 db_utils.py Closed database connection:{'db_name': 'test_db', 'user': 'test_user', 'session_id': 'a42aeb93-b8e3-4696-afec-bd73feb8c2ab'}
-INFO 2026-03-12 15:05:14 conftest.py db_session ended
-INFO 2026-03-12 15:05:14 conftest.py Teardown fixture after session: Eval
+tests/vikings/apps/becca_jl/jl_tests/test_becca_jl_eval_pipeline.py INFO 2026-03-12 15:21:59 conftest.py Setup fixture before session: Eval
+INFO 2026-03-12 15:21:59 conftest.py db_session started
+INFO 2026-03-12 15:21:59 conftest.py Setting up database connection for session: 1174c80d-b8d1-4f34-bdc7-40ea2a8a2201
+INFO 2026-03-12 15:21:59 db_utils.py Opened database connection:{'db_name': 'test_db', 'user': 'test_user', 'session_id': '1174c80d-b8d1-4f34-bdc7-40ea2a8a2201'}
+INFO 2026-03-12 15:21:59 conftest.py properties_info started
+INFO 2026-03-12 15:21:59 conftest.py from env info
+INFO 2026-03-12 15:21:59 conftest.py ENV: dev
+INFO 2026-03-12 15:21:59 conftest.py ROLE: unable to get role
+INFO 2026-03-12 15:21:59 conftest.py properties_info ended
+INFO 2026-03-12 15:21:59 conftest.py Setup before test: test_becca_jl_eval_pipeline
+PASS            prompt failed: what is the coinsurance for pharmaceutical products for DTKS, 2024, AR, KA, INN. | 
+✨ You're running DeepEval's latest Response relevancy (GEval) Metric! (using C…INFO 2026-03-12 15:22:03 _client.py HTTP Request: POST https://kgnwl0lm6yi5ugbopenai.openai.azure.com/openai/deployments/gpt-4-deployment/chat/completions?api-version=2024-10-01-preview "HTTP/1.1 200 OK"
+**************************************************
+Response relevancy (GEval) Verbose Logsponse relevancy (GEval) Metric! (using C…
+**************************************************ancy (GEval) Metric! (using C…
+u're running DeepEval's latest Response relevancy (GEval) Metric! (using C…
+Criteria:ing DeepEval's latest Response relevancy (GEval) Metric! (using C…
+None 
+ 
+Evaluation Steps:
+[
+    "
+           Evaluate ACTUAL_OUTPUT against EXPECTED_OUTPUT for correctness and 
+completeness.
+            1.0 — All numeric values (copays, deductibles, coinsurance %, plan 
+IDs etc), plan codes,
+                   in EXPECTED_OUTPUT appear exactly in ACTUAL_OUTPUT with no 
+missing/extra/altered values. 
+                   Formatting differences allowed.
+            
+            0.5 — Numeric/ID details mostly correct with only minor, 
+non‑meaning‑changing deviations.
+            
+            0.0 — Any required number, plan code, plan ID, or literal phrase 
+missing, wrong, hallucinated, or contradictory; 
+                   or ACTUAL_OUTPUT refuses/errors/contains fabricated details.
+            
+            RULES:
+            • Enforce numeric matching ONLY when EXPECTED_OUTPUT contains 
+numbers.  
+              If not, do not require numeric content—extra numbers count as 
+hallucinations only if incorrect or contradictory.
+            • If EXPECTED_OUTPUT has no IDs or numeric values, judge purely on 
+meaning.
+            • Extra numeric values allowed only if EXPECTED_OUTPUT contains 
+numbers AND meaning is unchanged.
+            • Order of IDs/rows irrelevant unless meaning changes.
+            • Minor wording/formatting differences allowed; structure changes 
+allowed.
+            • Contradictions or invented plan details → 0.0.
+            Summary: Be strict with numeric and ID accuracy *when expected*, 
+meaning-based when no numbers appear.
+            "
+]
+ 
+Score: 0.1
+Reason: All numeric values, plan codes, and key details from EXPECTED_OUTPUT are(using C…
+accurately represented in ACTUAL_OUTPUT, with only formatting differences 
+allowed by rules.
+u're running DeepEval's latest Response relevancy (GEval) Metric! (using C…
+======================================================================[0m! (using C…
+✨ You're running DeepEval's latest Response relevancy (GEval) Metric! (using C…
+data: {'question': 'what is the coinsurance for pharmaceutical products for DTKS, 2024, AR, KA, INN.', 'llmAnswer': 'Below are the Pharmaceutical Products coinsurance details for plan code DTKS, COC 2024, AR, KA, INN. Click here <495372> to view the json file.\n\n| Item No. | COC Series | Business Segment | State Abbreviation | Benefit Category| Payment Line | Tier 1 (Designated Network) | Tier 2 (In-Network) | Tier 3 (Out-of-Network) | Individual Deductible ($) | Family Deductible ($) |\n|---|---|---|---|---|---|---|---|---|---|---|\n| 0 | 2024 | KA - Key Account | AR | Pharmaceutical Products - Outpatient | Standard | N/A | 30% member coinsurance, no copay, deductible applies | 50% member coinsurance, no copay, deductible applies | Tier 2 - $4000.00, Tier 3 - $10000.00 | Tier 2 - $8000.00, Tier 3 - $20000.00 |', 'groundAnswer': 'Below are the coinsurance details for Pharmaceutical Products for plan code DTKS, 2024, AR, KA, INN. Click here 495372 to view the json file.\nItem No. COC Series Business Segment State Abbreviation Benefit Category Payment Line Tier 1 (Designated Network) Tier 2 (In-Network) Tier 3 (Out-of-Network) Individual Deductible ($) Family Deductible ($)\n0 2024 KA - Key Account AR Pharmaceutical Products - Outpatient Standard N/A 30% member coinsurance, no copay, deductible applies 50% member coinsurance, no copay, deductible applies Tier 2 - $4000.00, Tier 3 - $10000.00 Tier 2 - $8000.00, Tier 3 - $20000.00\ncontent_copy\nstar_border\nthumb_up_off_alt\nthumb_down_off_alt', 'contextualPrecision': False, 'contextualRecall': False, 'faithfulness': False, 'gEval': True}
+Response: {'gEval': {'score': 0.1, 'reason': 'All numeric values, plan codes, and key details from EXPECTED_OUTPUT are accurately represented in ACTUAL_OUTPUT, with only formatting differences allowed by rules.'}}
+INFO 2026-03-12 15:22:03 utils.py Input to FW: {
+  "question": "what is the coinsurance for pharmaceutical products for DTKS, 2024, AR, KA, INN.",
+  "llmAnswer": "Below are the Pharmaceutical Products coinsurance details for plan code DTKS, COC 2024, AR, KA, INN. Click here <495372> to view the json file.\n\n| Item No. | COC Series | Business Segment | State Abbreviation | Benefit Category| Payment Line | Tier 1 (Designated Network) | Tier 2 (In-Network) | Tier 3 (Out-of-Network) | Individual Deductible ($) | Family Deductible ($) |\n|---|---|---|---|---|---|---|---|---|---|---|\n| 0 | 2024 | KA - Key Account | AR | Pharmaceutical Products - Outpatient | Standard | N/A | 30% member coinsurance, no copay, deductible applies | 50% member coinsurance, no copay, deductible applies | Tier 2 - $4000.00, Tier 3 - $10000.00 | Tier 2 - $8000.00, Tier 3 - $20000.00 |",
+  "groundAnswer": "Below are the coinsurance details for Pharmaceutical Products for plan code DTKS, 2024, AR, KA, INN. Click here 495372 to view the json file.\nItem No. COC Series Business Segment State Abbreviation Benefit Category Payment Line Tier 1 (Designated Network) Tier 2 (In-Network) Tier 3 (Out-of-Network) Individual Deductible ($) Family Deductible ($)\n0 2024 KA - Key Account AR Pharmaceutical Products - Outpatient Standard N/A 30% member coinsurance, no copay, deductible applies 50% member coinsurance, no copay, deductible applies Tier 2 - $4000.00, Tier 3 - $10000.00 Tier 2 - $8000.00, Tier 3 - $20000.00\ncontent_copy\nstar_border\nthumb_up_off_alt\nthumb_down_off_alt",
+  "contextualPrecision": false,
+  "contextualRecall": false,
+  "faithfulness": false,
+  "gEval": true
+}
+INFO 2026-03-12 15:22:03 utils.py Evaluation Result: {
+  "gEval": {
+    "score": 0.1,
+    "reason": "All numeric values, plan codes, and key details from EXPECTED_OUTPUT are accurately represented in ACTUAL_OUTPUT, with only formatting differences allowed by rules."
+  }
+}
+PASS            prompt failed: What are the different maximums for Plan code CHFF | 
+✨ You're running DeepEval's latest Response relevancy (GEval) Metric! (using C…INFO 2026-03-12 15:22:05 _client.py HTTP Request: POST https://kgnwl0lm6yi5ugbopenai.openai.azure.com/openai/deployments/gpt-4-deployment/chat/completions?api-version=2024-10-01-preview "HTTP/1.1 200 OK"
+**************************************************
+Response relevancy (GEval) Verbose Logsponse relevancy (GEval) Metric! (using C…
+**************************************************ancy (GEval) Metric! (using C…
+u're running DeepEval's latest Response relevancy (GEval) Metric! (using C…
+Criteria:ing DeepEval's latest Response relevancy (GEval) Metric! (using C…
+None 
+ 
+Evaluation Steps:
+[
+    "
+           Evaluate ACTUAL_OUTPUT against EXPECTED_OUTPUT for correctness and 
+completeness.
+            1.0 — All numeric values (copays, deductibles, coinsurance %, plan 
+IDs etc), plan codes,
+                   in EXPECTED_OUTPUT appear exactly in ACTUAL_OUTPUT with no 
+missing/extra/altered values. 
+                   Formatting differences allowed.
+            
+            0.5 — Numeric/ID details mostly correct with only minor, 
+non‑meaning‑changing deviations.
+            
+            0.0 — Any required number, plan code, plan ID, or literal phrase 
+missing, wrong, hallucinated, or contradictory; 
+                   or ACTUAL_OUTPUT refuses/errors/contains fabricated details.
+            
+            RULES:
+            • Enforce numeric matching ONLY when EXPECTED_OUTPUT contains 
+numbers.  
+              If not, do not require numeric content—extra numbers count as 
+hallucinations only if incorrect or contradictory.
+            • If EXPECTED_OUTPUT has no IDs or numeric values, judge purely on 
+meaning.
+            • Extra numeric values allowed only if EXPECTED_OUTPUT contains 
+numbers AND meaning is unchanged.
+            • Order of IDs/rows irrelevant unless meaning changes.
+            • Minor wording/formatting differences allowed; structure changes 
+allowed.
+            • Contradictions or invented plan details → 0.0.
+            Summary: Be strict with numeric and ID accuracy *when expected*, 
+meaning-based when no numbers appear.
+            "
+]
+ 
+Score: 0.0
+Reason: Actual Output incorrectly lists limits and details for Plan code CHFF, m(using C…
+omitting multiple expected values such as Acupuncture, DME, and Infertility 
+Services. Numeric details and phrases are either missing or contradicted.
+u're running DeepEval's latest Response relevancy (GEval) Metric! (using C…
+======================================================================[0m! (using C…
+✨ You're running DeepEval's latest Response relevancy (GEval) Metric! (using C…
+data: {'question': 'What are the different maximums for Plan code CHFF', 'llmAnswer': 'Below are the different maximums for Plan code CHFF. Click here <287588> to view the json file.\n\n| Item No. | Plan Code | COC Series | Business Segment | State Abbreviation | Combined Therapy Limits | Combined Therapy Limits Details | Benefit Category | Payment Line | Limit | Applies to | Cross Applies | Is Buy Up |\n|---|---|---|---|---|---|---|---|---|---|---|---|---|\n| 0 | CHFF | 2021 | KA - Key Account | VA | Y | PT/OT/ST/Pulmonary/Cardiac | Rehabilitation Services - Outpatient Therapy and Manipulative Treatment | Standard | 60 Visit per 1 Year | PT-OT-ST-Pulm-Cardiac | Both | False |', 'groundAnswer': 'Below are the limits for plan code CHFF. Click here 287588 to view the json file.\nItem No. Plan Code COC Series Business Segment State Abbreviation Benefit Category Payment Line Limit Applies to Cross Applies is_buy_up\n0 CHFF 2021 KA - Key Account VA Acupuncture Services Standard 10 Treatment per 1 Year 0 Both Yes\n1 CHFF 2021 KA - Key Account VA Durable Medical Equipment (DME), Orthotics and Supplies Standard 1 Purchase per 3 Year DME/Orth Both No\n2 CHFF 2021 KA - Key Account VA Fertility Preservation for Iatronic Infertility Standard 20000 Dollar per 1 Lifetime 0 Both No\n3 CHFF 2021 KA - Key Account VA Fertility Preservation for Iatronic Infertility Standard 5000 PDP per Lifetime 0 Both No\n4 CHFF 2021 KA - Key Account VA Fertility Preservation for Iatronic Infertility Standard 1 Cycle per 1 Lifetime FertPres Both No\n5 CHFF 2021 KA - Key Account VA Foot Orthotics Standard 1 Purchase per 24 Month Shoes Both Yes\n6 CHFF 2021 KA - Key Account VA Hearing Aids Standard 1500 Dollar per 24 Month HearImpEar Both No\n7 CHFF 2021 KA - Key Account VA Hearing Aids Standard 1 Purchase per 24 Month HA Both No\n8 CHFF 2021 KA - Key Account VA Home Health Care Standard 60 Visit per 1 Year 0 Both No\n9 CHFF 2021 KA - Key Account VA Infertility Services Standard 20000 Dollar per 1 Lifetime 0 Both Yes\n10 CHFF 2021 KA - Key Account VA Infertility Services with Pharmacy Standard 20000 Dollar per 1 Lifetime 0 Both Yes\n11 CHFF 2021 KA - Key Account VA Infertility Services with Pharmacy Standard 5000 PDP per Lifetime 0 Both Yes\n12 CHFF 2021 KA - Key Account VA Lab Testing - Outpatient Freestanding 18 PDT per 1 Year 0 Both No\n13 CHFF 2021 KA - Key Account VA Lab Testing - Outpatient Freestanding 18 DDT per 1 Year 0 Both No\n14 CHFF 2021 KA - Key Account VA Prosthetic Devices Standard 1 Purchase per 3 Year Pros Both No\n15 CHFF 2021 KA - Key Account VA Rehabilitation Services - Outpatient Therapy and Manipulative Treatment Standard 60 Visit per 1 Year PT-OT-ST-Pulm-Cardiac Both No\n16 CHFF 2021 KA - Key Account VA Rehabilitation Services - Vision Therapy Standard 20 Visit per 1 Year 0 Both Yes\n17 CHFF 2021 KA - Key Account VA Skilled Nursing Facility/Inpatient Rehabilitation Facility Services Standard 60 Day per 1 Year 0 Both No\ncontent_copy\nstar_border\nthumb_up_off_alt\nthumb_down_off_alt', 'contextualPrecision': False, 'contextualRecall': False, 'faithfulness': False, 'gEval': True}
+Response: {'gEval': {'score': 0.0, 'reason': 'Actual Output incorrectly lists limits and details for Plan code CHFF, omitting multiple expected values such as Acupuncture, DME, and Infertility Services. Numeric details and phrases are either missing or contradicted.'}}
+INFO 2026-03-12 15:22:05 utils.py Input to FW: {
+  "question": "What are the different maximums for Plan code CHFF",
+  "llmAnswer": "Below are the different maximums for Plan code CHFF. Click here <287588> to view the json file.\n\n| Item No. | Plan Code | COC Series | Business Segment | State Abbreviation | Combined Therapy Limits | Combined Therapy Limits Details | Benefit Category | Payment Line | Limit | Applies to | Cross Applies | Is Buy Up |\n|---|---|---|---|---|---|---|---|---|---|---|---|---|\n| 0 | CHFF | 2021 | KA - Key Account | VA | Y | PT/OT/ST/Pulmonary/Cardiac | Rehabilitation Services - Outpatient Therapy and Manipulative Treatment | Standard | 60 Visit per 1 Year | PT-OT-ST-Pulm-Cardiac | Both | False |",
+  "groundAnswer": "Below are the limits for plan code CHFF. Click here 287588 to view the json file.\nItem No. Plan Code COC Series Business Segment State Abbreviation Benefit Category Payment Line Limit Applies to Cross Applies is_buy_up\n0 CHFF 2021 KA - Key Account VA Acupuncture Services Standard 10 Treatment per 1 Year 0 Both Yes\n1 CHFF 2021 KA - Key Account VA Durable Medical Equipment (DME), Orthotics and Supplies Standard 1 Purchase per 3 Year DME/Orth Both No\n2 CHFF 2021 KA - Key Account VA Fertility Preservation for Iatronic Infertility Standard 20000 Dollar per 1 Lifetime 0 Both No\n3 CHFF 2021 KA - Key Account VA Fertility Preservation for Iatronic Infertility Standard 5000 PDP per Lifetime 0 Both No\n4 CHFF 2021 KA - Key Account VA Fertility Preservation for Iatronic Infertility Standard 1 Cycle per 1 Lifetime FertPres Both No\n5 CHFF 2021 KA - Key Account VA Foot Orthotics Standard 1 Purchase per 24 Month Shoes Both Yes\n6 CHFF 2021 KA - Key Account VA Hearing Aids Standard 1500 Dollar per 24 Month HearImpEar Both No\n7 CHFF 2021 KA - Key Account VA Hearing Aids Standard 1 Purchase per 24 Month HA Both No\n8 CHFF 2021 KA - Key Account VA Home Health Care Standard 60 Visit per 1 Year 0 Both No\n9 CHFF 2021 KA - Key Account VA Infertility Services Standard 20000 Dollar per 1 Lifetime 0 Both Yes\n10 CHFF 2021 KA - Key Account VA Infertility Services with Pharmacy Standard 20000 Dollar per 1 Lifetime 0 Both Yes\n11 CHFF 2021 KA - Key Account VA Infertility Services with Pharmacy Standard 5000 PDP per Lifetime 0 Both Yes\n12 CHFF 2021 KA - Key Account VA Lab Testing - Outpatient Freestanding 18 PDT per 1 Year 0 Both No\n13 CHFF 2021 KA - Key Account VA Lab Testing - Outpatient Freestanding 18 DDT per 1 Year 0 Both No\n14 CHFF 2021 KA - Key Account VA Prosthetic Devices Standard 1 Purchase per 3 Year Pros Both No\n15 CHFF 2021 KA - Key Account VA Rehabilitation Services - Outpatient Therapy and Manipulative Treatment Standard 60 Visit per 1 Year PT-OT-ST-Pulm-Cardiac Both No\n16 CHFF 2021 KA - Key Account VA Rehabilitation Services - Vision Therapy Standard 20 Visit per 1 Year 0 Both Yes\n17 CHFF 2021 KA - Key Account VA Skilled Nursing Facility/Inpatient Rehabilitation Facility Services Standard 60 Day per 1 Year 0 Both No\ncontent_copy\nstar_border\nthumb_up_off_alt\nthumb_down_off_alt",
+  "contextualPrecision": false,
+  "contextualRecall": false,
+  "faithfulness": false,
+  "gEval": true
+}
+INFO 2026-03-12 15:22:05 utils.py Evaluation Result: {
+  "gEval": {
+    "score": 0.0,
+    "reason": "Actual Output incorrectly lists limits and details for Plan code CHFF, omitting multiple expected values such as Acupuncture, DME, and Infertility Services. Numeric details and phrases are either missing or contradicted."
+  }
+}
+.INFO 2026-03-12 15:22:05 conftest.py No COLUMNS_ORDER found on the test node for summary attachment.
+INFO 2026-03-12 15:22:05 conftest.py Teardown after test: test_becca_jl_eval_pipeline
+INFO 2026-03-12 15:22:05 conftest.py No COLUMNS_ORDER found on the test node.
+INFO 2026-03-12 15:22:05 db_utils.py Closed database connection:{'db_name': 'test_db', 'user': 'test_user', 'session_id': '1174c80d-b8d1-4f34-bdc7-40ea2a8a2201'}
+INFO 2026-03-12 15:22:05 conftest.py db_session ended
+INFO 2026-03-12 15:22:05 conftest.py Teardown fixture after session: Eval
 Running teardown with pytest sessionfinish...
-INFO 2026-03-12 15:05:14 conftest.py pytest_sessionfinish started
-INFO 2026-03-12 15:05:14 conftest.py pytest_sessionfinish ended
-INFO 2026-03-12 15:05:14 ReportsMerger.py Starting merge of worker files.
-INFO 2026-03-12 15:05:14 FW.py No worker files found for merge.
-INFO 2026-03-12 15:05:14 ReportsMerger.py Completed merge of worker files.
+INFO 2026-03-12 15:22:05 conftest.py pytest_sessionfinish started
+INFO 2026-03-12 15:22:05 conftest.py pytest_sessionfinish ended
+INFO 2026-03-12 15:22:05 ReportsMerger.py Starting merge of worker files.
+INFO 2026-03-12 15:22:05 FW.py No worker files found for merge.
+INFO 2026-03-12 15:22:05 ReportsMerger.py Completed merge of worker files.
 
 
-=================================== FAILURES ===================================
-_________________________ test_becca_jl_eval_pipeline __________________________
+=============================== warnings summary ===============================
+tests/vikings/apps/becca_jl/jl_tests/test_becca_jl_eval_pipeline.py::test_becca_jl_eval_pipeline
+  /Users/achhab16/Desktop/cirrus-apps_vikings-eval/app/eval/gen_ai/openai_client.py:35: LangChainDeprecationWarning: The class `AzureChatOpenAI` was deprecated in LangChain 0.0.10 and will be removed in 1.0. An updated version of the class exists in the :class:`~langchain-openai package and should be used instead. To use it run `pip install -U :class:`~langchain-openai` and import as `from :class:`~langchain_openai import AzureChatOpenAI``.
+    model = AzureChatOpenAI(
 
-rows_accumulator = {'what is the coinsurance for pharmaceutical products for DTKS, 2024, AR, KA, INN.': {'Response time(secs)': 0, 'actua...10000.00 Tier 2 - $8000.00, Tier 3 - $20000.00\ncontent_copy\nstar_border\nthumb_up_off_alt\nthumb_down_off_alt', ...}}
-testcases = [{'expected_answer': 'Below are the coinsurance details for Pharmaceutical Products for plan code DTKS, 2024, AR, KA, ...y\nstar_border\nthumb_up_off_alt\nthumb_down_off_alt', 'prompt': 'What are the different maximums for Plan code CHFF'}]
+tests/vikings/apps/becca_jl/jl_tests/test_becca_jl_eval_pipeline.py::test_becca_jl_eval_pipeline
+tests/vikings/apps/becca_jl/jl_tests/test_becca_jl_eval_pipeline.py::test_becca_jl_eval_pipeline
+  /Users/achhab16/Library/Caches/pypoetry/virtualenvs/app-bPuqwu3B-py3.13/lib/python3.13/site-packages/langchain_community/chat_models/azure_openai.py:274: PydanticDeprecatedSince20: The `dict` method is deprecated; use `model_dump` instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.11/migration/
+    response = response.dict()
 
-    def test_becca_jl_eval_pipeline(rows_accumulator, testcases):
-        page = BeccaJLPage()
-        for testcase in testcases:
->           ui_row = page.execute_testcase(testcase, rows_accumulator)
-                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================== 1 passed, 3 warnings in 7.09s =========================
+this now also idk where result excel will be generated do u need any more functions or code to help me understand
 
-tests/vikings/apps/becca_jl/jl_tests/test_becca_jl_eval_pipeline.py:12: 
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
-tests/vikings/apps/becca_jl/jl_pages/BeccaJLPage.py:44: in execute_testcase
-    Results.report_event_assert_bool(
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
-
-evaluated_result = False
-message = "prompt failed: what is the coinsurance for pharmaceutical products for DTKS, 2024, AR, KA, INN. | name 'false' is not defined"
-
-    def report_event_assert_bool(evaluated_result, message=None):
-        if message:
->           assert evaluated_result, message
-E           AssertionError: prompt failed: what is the coinsurance for pharmaceutical products for DTKS, 2024, AR, KA, INN. | name 'false' is not defined
-E           assert False
-
-tests/vikings/fw/common/Results.py:62: AssertionError
------------------------------- Captured log setup ------------------------------
-INFO     root:conftest.py:97 Setup fixture before session: Eval
-INFO     root:conftest.py:104 db_session started
-INFO     root:conftest.py:106 Setting up database connection for session: a42aeb93-b8e3-4696-afec-bd73feb8c2ab
-INFO     root:db_utils.py:13 Opened database connection:{'db_name': 'test_db', 'user': 'test_user', 'session_id': 'a42aeb93-b8e3-4696-afec-bd73feb8c2ab'}
-INFO     root:conftest.py:115 properties_info started
-INFO     root:conftest.py:116 from env info
-INFO     root:conftest.py:117 ENV: dev
-INFO     root:conftest.py:118 ROLE: unable to get role
-INFO     root:conftest.py:119 properties_info ended
-INFO     root:conftest.py:126 Setup before test: test_becca_jl_eval_pipeline
------------------------------- Captured log call -------------------------------
-ERROR    root:BeccaJLPage.py:33 name 'false' is not defined
----------------------------- Captured log teardown -----------------------------
-INFO     root:conftest.py:318 No COLUMNS_ORDER found on the test node for summary attachment.
-INFO     root:conftest.py:129 Teardown after test: test_becca_jl_eval_pipeline
-INFO     root:conftest.py:300 No COLUMNS_ORDER found on the test node.
-INFO     root:db_utils.py:22 Closed database connection:{'db_name': 'test_db', 'user': 'test_user', 'session_id': 'a42aeb93-b8e3-4696-afec-bd73feb8c2ab'}
-INFO     root:conftest.py:110 db_session ended
-INFO     root:conftest.py:99 Teardown fixture after session: Eval
-=========================== short test summary info ============================
-FAILED tests/vikings/apps/becca_jl/jl_tests/test_becca_jl_eval_pipeline.py::test_becca_jl_eval_pipeline - AssertionError: prompt failed: what is the coinsurance for pharmaceutical p...
-============================== 1 failed in 2.84s ===============================
-Click to add a cell.
