@@ -1,596 +1,177 @@
-import os
-from playwright.sync_api import sync_playwright, expect
-from tests.vikings.apps.becca_jl.config.Constants import Constants
-from tests.vikings.fw.common.FW import FW
-from tests.vikings.fw.common.Results import Results
-import re
-from dotenv import load_dotenv
-load_dotenv(".env.local")
-
-AZURE_USERNAME_INPUT = 'input[name="loginfmt"]'
-AZURE_PASSWORD_INPUT = 'input[name="passwd"]'
-AZURE_SUBMIT_BUTTON = 'input[type="submit"]'
-AZURE_STAY_SIGNED_IN_YES = 'input[value="Yes"]'
-
-
-def generate_storage_state():
-    username = FW.get_env("BECCA_V2_APP_CIRRUS_UI_USERNAME")
-    password = FW.get_env("BECCA_V2_APP_CIRRUS_UI_PASSWORD")
-
-    if not username or not password:
-        raise RuntimeError("Missing BECCA_APP_CIRRUS_UI_USERNAME or BECCA_APP_CIRRUS_UI_PASSWORD")
-
-    state_path = Constants.BECCA_V2_STORAGE_STATE_PATH
-    os.makedirs(os.path.dirname(state_path), exist_ok=True)
-
-    with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False, slow_mo=200)
-        context = browser.new_context()
-        page = context.new_page()
-
-        page.goto(Constants.BECCA_V2_URL, wait_until="domcontentloaded")
-
-        page.wait_for_selector(AZURE_USERNAME_INPUT, timeout=30000)
-        page.fill(AZURE_USERNAME_INPUT, username)
-        page.click(AZURE_SUBMIT_BUTTON)
-
-        page.wait_for_selector(AZURE_PASSWORD_INPUT, timeout=30000)
-        page.fill(AZURE_PASSWORD_INPUT, password)
-        page.click(AZURE_SUBMIT_BUTTON)
-
-        try:
-            page.wait_for_selector(AZURE_STAY_SIGNED_IN_YES, timeout=5000)
-            page.click(AZURE_STAY_SIGNED_IN_YES)
-        except Exception:
-            pass
-
-        print("\n✅ Complete MFA in the opened browser window.")
-        print("✅ Once BECCA loads, come back and press Resume in the Playwright Inspector.\n")
-
-        page.pause()
-
-        page.wait_for_load_state("networkidle", timeout=60000)
-        expect(page).not_to_have_url(re.compile(r".*login\.microsoftonline\.com.*"))
-
-        context.storage_state(path=state_path)
-        Results.report_event(f"Saved storage state to: {state_path}")
-        print(f"\n✅ storageState saved at: {state_path}\n")
-
-        context.close()
-        browser.close()
-
-
-if __name__ == "__main__":
-    generate_storage_state()
-
-import logging
-import os
-import io
-import allure
-import pandas as pd
-import pytest
-from tests.vikings.apps.becca_jl.config.Constants import Constants
-from tests.vikings.fw.common.FW import FW
-from tests.vikings.apps.becca_jl.ui_pages.LoginPage import LoginPage
-from tests.vikings.fw.common.CommonUtils import CommonUtils
-
-@pytest.fixture(scope="session")
-def authenticated_context(browser):
-    state_path = Constants.BECCA_V2_STORAGE_STATE_PATH
-
-    if not os.path.exists(state_path):
-        raise RuntimeError(
-            f"Storage state not found at {state_path}. "
-            f"Run: python -m tests.vikings.apps.becca.auth.generate_storage_state"
-        )
-
-    context = browser.new_context(storage_state=state_path)
-
-    page = context.new_page()
-    page.goto(Constants.BECCA_V2_URL, wait_until="networkidle")
-
-    yield context
-    context.close()
-
-@pytest.fixture()
-def becca_page(browser):
-    is_local = CommonUtils.is_local_run()
-    state_path = Constants.BECCA_V2_STORAGE_STATE_PATH
-    if is_local:
-        if not os.path.exists(state_path):
-            raise RuntimeError(
-                f"[LOCAL RUN] Storage state not found at {state_path}.\n"
-                "Generate it using:\n"
-                "  python -m tests.vikings.apps.becca_jl.auth.generate_storage_state\n"
-            )
-
-        logging.info(f"[BECCA AUTH] Local run detected -> using storageState: {state_path}")
-        context = browser.new_context(storage_state=state_path)
-        page = context.new_page()
-        page.on("console", lambda msg: print(f"[console:{msg.type}] {msg.text()}"))
-        page.on("requestfailed", lambda req: print(f"[requestfailed] {req.method} {req.url} → {req.failure}"))
-        page.goto(Constants.BECCA_V2_URL, wait_until="domcontentloaded")
-        yield page
-        context.close()
-
-    else:
-        logging.info("[BECCA AUTH] Non-local run detected -> using LoginPage.login()")
-        context = browser.new_context()
-        page = context.new_page()
-        login = LoginPage(page)
-        login.login()
-        yield page
-        context.close()
-import allure
-import pytest
-
-from settings import BECCA_V2_XL
-from tests.vikings.fw.common.CommonUtils import CommonUtils
-from tests.vikings.fw.common.FW import FW
-
-from ..ui_pages.BeccaPage import BeccaPage
-from ..ui_pages.LogoutPage import LogoutPage
-
-
-COLUMNS_ORDER = [
-    "actual_prompt",
-    "validation_text",
-    "expected_response",
-    "actual_response",
-    "ui_status",
-    "ui_error",
-    "Response time(secs)",
-    "eval_threshold",
-    "gEval_score",
-    "gEval_reason",
-    "eval_status",
-    "eval_error",
-]
-from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
-import allure
-
-def test_login_becca_helper(request, becca_page, testcase, rows_accumulator):
-    request.node.COLUMNS_ORDER = COLUMNS_ORDER
-
-    becca = BeccaPage(becca_page)
-    # logout = LogoutPage(becca_page)
-
-    try:
-        CommonUtils.setupTest(testcase)
-
-        becca.open_becca()
-        ui_row = becca.execute_testcase(testcase, rows_accumulator)
-
-        if ui_row["ui_status"] == "passed":
-            becca.evaluate_testcase(ui_row, rows_accumulator)
-
-        # try:
-        #     logout.logout()
-        # except PlaywrightTimeoutError as e:
-        #     allure.attach(
-        #         str(e),
-        #         name="Logout skipped (Tools not found)",
-        #         attachment_type=allure.attachment_type.TEXT
-        #     )
-        #     becca.attach_screenshot("Logout skipped - Tools not found")
-
-    except Exception as e:
-        CommonUtils.handleException(testcase, rows_accumulator, e)
-        raise
-
-@pytest.mark.parametrize("testcase", FW.get_test_data(BECCA_V2_XL))
-@pytest.mark.uieval
-@allure.feature("becca")
-@allure.story("ui_eval_e2e")
-def test_login_becca_logout_e2e(request, becca_page, testcase, rows_accumulator):
-    test_login_becca_helper(request, becca_page, testcase, rows_accumulator)
-
-
-@pytest.mark.parametrize("testcase", FW.get_test_data(BECCA_V2_XL)[:1])
-@pytest.mark.smoke
-@allure.feature("becca")
-@allure.story("ui_eval_e2e")
-def test_login_becca_logout_smoke(request, becca_page, testcase, rows_accumulator):
-    test_login_becca_helper(request, becca_page, testcase, rows_accumulator)
-
-import logging
-import traceback
-import time
-import re
-from typing import Dict, Any, Tuple
-
-import allure
-from tests.vikings.conftest import THRESHOLD
-from tests.vikings.fw.common.Results import Results
-from tests.vikings.fw.ui.BasePage import BasePage
-from tests.vikings.fw.utils import get_multiple_scores
-
-
-class BeccaPage(BasePage):
-    CHAT_INPUT_SELECTOR = ".input-section textarea[matInput]"
-    SUBMIT_BUTTON_SELECTOR = "button.submit-button"
-    START_NEW_CHAT_SELECTOR = "button:has-text('Start New Chat')"
-    CHAT_MESSAGE_SELECTOR = "div.chat-box app-chat-message"
-
-    GENERATION_TIMEOUT_SECS = 180
-
-    def __init__(self, page):
-        self.page = page
-
-    def open_becca(self):
-        with allure.step("Open Becca UI"):
-            self.page.goto(self.page.url, wait_until="domcontentloaded")
-
-    def start_new_chat_if_present(self):
-        """
-        Angular-safe Start New Chat:
-        - Button is conditional
-        - Messages clear asynchronously
-        """
-        btn = self.page.locator(self.START_NEW_CHAT_SELECTOR)
-
-        if btn.count() == 0:
-            return
-
-        try:
-            btn.first.wait_for(state="visible", timeout=3000)
-            btn.first.click()
-
-            self.page.wait_for_function(
-                "document.querySelectorAll('app-chat-message').length === 0",
-                timeout=5000
-            )
-        except Exception:
-            pass
-
-    def _wait_for_generation_complete(self):
-        """
-        Waits for Submit -> Cancel -> Submit cycle.
-        This is the ONLY reliable signal that generation finished.
-        """
-        self.page.wait_for_function(
-            """() => {
-                const btn = document.querySelector('button.submit-button');
-                return btn && btn.innerText.trim() === 'Submit';
-            }""",
-            timeout=self.GENERATION_TIMEOUT_SECS * 1000
-        )
-
-    def _get_stable_latest_message(self, timeout_secs: int = 5) -> str:
-        last = self.page.locator(self.CHAT_MESSAGE_SELECTOR).last
-        last.wait_for(state="visible", timeout=30000)
-
-        previous = ""
-        end = time.time() + timeout_secs
-
-        while time.time() < end:
-            current = last.inner_text().strip()
-            if current == previous:
-                return current
-            previous = current
-            time.sleep(0.5)
-
-        return previous
-
-    def _strip_ui_chrome(self, text: str) -> str:
-        noise = ["content_copy", "star_border", "thumb_up_off_alt", "thumb_down_off_alt"]
-        for n in noise:
-            text = text.replace(n, "")
-        return text.strip()
-
-
-    def _format_prompt_with_testcase(self, prompt: str, testcase: Dict[str, Any]) -> str:
-        """
-        Replaces $ColumnName placeholders using testcase values.
-        Example: $PlanCode -> DY82
-        """
-        if not prompt:
-            return ""
-
-        def replacer(match):
-            key = match.group(1)
-            for col, val in testcase.items():
-                if col.lower() == key.lower() and str(val).strip():
-                    return str(val).strip()
-            return match.group(0)
-
-        return re.sub(r"\$(\w+)", replacer, prompt).strip()
-
-    def _normalize(self, text: str) -> str:
-        if not text:
-            return ""
-        text = text.lower()
-        text = re.sub(r"[^\w\s%$.-]", " ", text)
-        text = re.sub(r"\s+", " ", text)
-        return text.strip()
-
-
-    def send_prompt_and_wait(self, prompt: str) -> Tuple[str, float]:
-        self.start_new_chat_if_present()
-
-        input_box = self.page.locator(self.CHAT_INPUT_SELECTOR).first
-        submit_btn = self.page.locator(self.SUBMIT_BUTTON_SELECTOR).first
-
-        input_box.wait_for(state="visible", timeout=30000)
-
-        input_box.fill("")
-        input_box.fill(prompt)
-
-        submit_btn.wait_for(state="visible", timeout=30000)
-        submit_btn.click()
-
-        start_time = time.time()
-
-        self._wait_for_generation_complete()
-
-        response = self._get_stable_latest_message()
-        self.attach_screenshot("Becca response")
-
-        clean_response = self._strip_ui_chrome(response)
-        elapsed_secs = round(time.time() - start_time, 2)
-
-        return clean_response, elapsed_secs
-
-    def run_prompt_and_get_response(self, prompt: str) -> Tuple[str, float]:
-        return self.send_prompt_and_wait(prompt)
-
-    def _validate_response(
-            self,
-            actual_response: str,
-            expected_answer: str,
-            validation_text: str,
-            testcase: Dict[str, Any],
-    ) -> Tuple[str, str]:
-
-        if not actual_response or self._normalize(actual_response) in {"", "none"}:
-            return "failed", "ACTUAL_RESPONSE is empty"
-
-        actual_norm = self._normalize(actual_response)
-        if not validation_text or not validation_text.strip():
-            if expected_answer and expected_answer.strip():
-                return "passed", ""
-
-            return "failed", "Both validation_text and expected_answer are empty"
-        tokens_raw = [t.strip() for t in validation_text.split(",") if t.strip()]
-        mode_any = False
-
-        if tokens_raw and tokens_raw[0].lower().startswith("any:"):
-            mode_any = True
-            tokens_raw[0] = tokens_raw[0][4:].strip()
-
-        col_map = {
-            k.lower(): str(v).strip()
-            for k, v in testcase.items()
-            if str(v).strip()
-        }
-
-        resolved_tokens = [col_map.get(tok.lower(), tok) for tok in tokens_raw]
-        normalized_tokens = [self._normalize(tok) for tok in resolved_tokens if tok]
-
-        if mode_any:
-            hit = any(tok and tok in actual_norm for tok in normalized_tokens)
-            if not hit:
-                return "failed", f"Missing ANY of keywords from validation text in ACTUAL_RESPONSE: {resolved_tokens}"
-            return "passed", ""
-        else:
-            missing = [orig for tok, orig in zip(normalized_tokens, resolved_tokens) if tok and tok not in actual_norm]
-            if missing:
-                return "failed", f"Missing keywords from validation text in ACTUAL_RESPONSE: {missing}"
-            return "passed", ""
-
-    def execute_testcase(self, testcase: Dict[str, Any], rows_accumulator: Dict[str, Any]):
-        with allure.step("Ask Question in Becca"):
-            raw_prompt = str(testcase.get("prompt", "")).strip()
-            expected_answer = str(testcase.get("expected_answer", "")).strip()
-            validation_text = str(testcase.get("validation_text", "")).strip()
-
-            formatted_prompt = self._format_prompt_with_testcase(raw_prompt, testcase)
-
-            row_key = testcase.get("id") or formatted_prompt
-
-            try:
-                actual_response, time_taken = self.run_prompt_and_get_response(formatted_prompt)
-
-                ui_status, ui_error = self._validate_response(
-                    actual_response=actual_response,
-                    expected_answer=expected_answer,
-                    validation_text=validation_text,
-                    testcase=testcase,
-                )
-
-                ui_row = {
-                    **testcase,
-                    "actual_prompt": formatted_prompt,
-                    "expected_response": expected_answer,
-                    "actual_response": actual_response,
-                    "ui_status": ui_status,
-                    "ui_error": ui_error,
-                    "Response time(secs)": time_taken,
-                    "validation_text": validation_text,
-                }
-
-            except Exception as e:
-                logging.error(e)
-                allure.attach(traceback.format_exc(), "UI exception", allure.attachment_type.TEXT)
-                ui_row = {
-                    **testcase,
-                    "actual_prompt": formatted_prompt,
-                    "actual_response": "error while fetching ui response",
-                    "ui_status": "failed",
-                    "ui_error": str(e),
-                    "Response time(secs)": 0,
-                    "validation_text": validation_text,
-                }
-
-            rows_accumulator[row_key] = ui_row
-
-            Results.report_event_assert_bool(
-                ui_row["ui_status"] == "passed",
-                f"prompt failed: {formatted_prompt} | {ui_row['ui_error']}",
-                )
-
-            return ui_row
-
-    def evaluate_testcase(self, ui_row: Dict[str, Any], rows_accumulator: Dict[str, Any]):
-        with allure.step("Evaluate Becca Testcase"):
-
-            if ui_row["ui_status"] != "passed":
-                ui_row.update({
-                    "eval_status": "skipped",
-                    "eval_error": "UI validation failed",
-                    "eval_threshold": "",
-                    "gEval_score": "",
-                    "gEval_reason": "",
-                })
-                return ui_row
-
-            try:
-                threshold = THRESHOLD
-                expected = ui_row.get("expected_response","").strip()
-                payload = {
-                    "question": ui_row["actual_prompt"],
-                    "llmAnswer": ui_row["actual_response"],
-                    "groundAnswer": expected,
-                    "contextualPrecision": False,
-                    "contextualRecall": False,
-                    "faithfulness": False,
-                    "gEval": True,
-                }
-
-                data = get_multiple_scores(payload)
-                score = data.get("gEval", {}).get("score", 0)
-                reason = data.get("gEval", {}).get("reason", "")
-
-                ui_row.update({
-                    "eval_threshold": threshold,
-                    "gEval_score": score,
-                    "gEval_reason": reason,
-                    "eval_status": "passed" if score >= threshold else "failed",
-                    "eval_error": "",
-                })
-
-            except Exception as e:
-                allure.attach(traceback.format_exc(), "Eval exception", allure.attachment_type.TEXT)
-                ui_row.update({
-                    "eval_status": "failed",
-                    "eval_error": str(e),
-                })
-
-            return ui_row
-import allure
-from playwright.sync_api import Page, expect
-from tests.vikings.apps.becca_jl.config.Constants import Constants
-from tests.vikings.fw.common.FW import FW
-from tests.vikings.fw.common.Results import Results
-from tests.vikings.fw.ui.BasePage import BasePage
-from urllib.parse import urlparse
-
-class LoginPage(BasePage):
-    AZURE_USERNAME_INPUT = 'input[name="loginfmt"]'
-    AZURE_PASSWORD_INPUT = 'input[name="passwd"]'
-    AZURE_SUBMIT_BUTTON = 'input[type="submit"]'
-    AZURE_STAY_SIGNED_IN_YES = 'input[value="Yes"]'
-    def __init__(self, page: Page):
-        super().__init__(page)
-    def login(self):
-        with allure.step("Login to BECCA via Azure AD"):
-            username = FW.get_env("BECCA_V2_APP_CIRRUS_UI_USERNAME")
-            password = FW.get_env("BECCA_V2_APP_CIRRUS_UI_PASSWORD")
-            if not username or not password:
-                Results.report_event(
-                    "Missing BECCA_V2_APP_CIRRUS_UI_USERNAME or BECCA_V2_APP_CIRRUS_UI_PASSWORD"
-                )
-                raise RuntimeError("Credentials not provided via environment variables")
-            self.page.goto(Constants.BECCA_V2_URL, wait_until="domcontentloaded")
-            self.page.wait_for_selector(self.AZURE_USERNAME_INPUT, timeout=30000)
-            self.page.fill(self.AZURE_USERNAME_INPUT, username)
-            self.page.click(self.AZURE_SUBMIT_BUTTON)
-            self.page.wait_for_selector(self.AZURE_PASSWORD_INPUT, timeout=30000)
-            self.page.fill(self.AZURE_PASSWORD_INPUT, password)
-            self.page.click(self.AZURE_SUBMIT_BUTTON)
-            try:
-                self.page.wait_for_selector(self.AZURE_STAY_SIGNED_IN_YES, timeout=5000)
-                self.page.click(self.AZURE_STAY_SIGNED_IN_YES)
-            except Exception:
-                pass
-            self.page.wait_for_load_state("networkidle", timeout=30000)
-            expect(self.page).not_to_have_url(
-                lambda url: urlparse(url).hostname == "login.microsoftonline.com"
-            )
-            Results.report_event("User logged in successfully")
-            self.attach_screenshot("Login Successful")
-import allure
-from playwright.sync_api import Page, TimeoutError as PlaywrightTimeoutError
-from tests.vikings.fw.common.Results import Results
-from tests.vikings.fw.ui.BasePage import BasePage
-
-class LogoutPage(BasePage):
-    def __init__(self, page: Page):
-        super().__init__(page)
-
-    def _safe_click(self, locator):
-        locator.wait_for(state="attached", timeout=10000)
-        locator.scroll_into_view_if_needed(timeout=5000)
-        try:
-            locator.click(timeout=5000)
-            return
-        except PlaywrightTimeoutError:
-            pass
-        except Exception:
-            pass
-
-        el = locator.element_handle(timeout=5000)
-        if el:
-            try:
-                self.page.evaluate("el => el.scrollIntoView({block: 'center', inline: 'center'})", el)
-                locator.click(timeout=5000)
-                return
-            except Exception:
-                pass
-
-            try:
-                self.page.evaluate("el => el.click()", el)
-                return
-            except Exception:
-                locator.dispatch_event("click", timeout=5000)
-
-    def logout(self):
-        with allure.step("Logout from the application"):
-            tools = self.page.get_by_role("link", name="Tools")
-            self._safe_click(tools)
-
-            sign_off = self.page.get_by_role("link", name="Sign Off")
-            self._safe_click(sign_off)
-
-            self.page.locator("text=Logged out Successfully.").wait_for(state="visible", timeout=10000)
-            Results.report_event("User logged out successfully")
-            self.attach_screenshot("Logoff Screenshot")
-import os
-
-class Constants:
-    BECCA_V2_URL = os.getenv("BECCA_V2_URL", "https://becca-dev-v2.prod.internal-gcp.optum.com/chat")
-
-    BECCA_V2_STORAGE_STATE_PATH = os.getenv(
-        "BECCA_V2_STORAGE_STATE_PATH",
-        os.path.join("artifacts", "becca_v2_storage_state.json")
+logs
+/Users/achhab16/Library/Caches/pypoetry/virtualenvs/app-bPuqwu3B-py3.13/bin/python3.13 "/Users/achhab16/Library/Application Support/JetBrains/IdeaIC2025.2/plugins/python-ce/helpers/pycharm/_jb_pytest_runner.py" --path /Users/achhab16/Library/Caches/pypoetry/virtualenvs/app-bPuqwu3B-py3.13/lib/python3.13/site-packages/pytest -- tests/vikings/apps/becca_jl -m smoke --tracing off -s --alluredir allure-results --reruns 0 -n 1 --html=reports/report.html --self-contained-html
+Testing started at 3:06 pm ...
+Launching pytest with arguments tests/vikings/apps/becca_jl -m smoke --tracing off -s --alluredir allure-results --reruns 0 -n 1 --html=reports/report.html --self-contained-html /Users/achhab16/Library/Caches/pypoetry/virtualenvs/app-bPuqwu3B-py3.13/lib/python3.13/site-packages/pytest --no-header --no-summary -q in /Users/achhab16/Desktop/cirrus-apps_vikings-eval
+
+/Users/achhab16/Library/Caches/pypoetry/virtualenvs/app-bPuqwu3B-py3.13/lib/python3.13/site-packages/deepeval/__init__.py:52: UserWarning: You are using deepeval version 2.2.0, however version 3.8.9 is available. You should consider upgrading via the "pip install --upgrade deepeval" command.
+  warnings.warn(
+INFO 2026-03-16 15:06:33 conftest.py Loaded environment variables from .env.local
+INFO 2026-03-16 15:06:33 conftest.py pytest_configure started
+INFO 2026-03-16 15:06:33 conftest.py conftest is loading vars
+INFO 2026-03-16 15:06:33 conftest.py Resolved app env path: /Users/achhab16/Desktop/cirrus-apps_vikings-eval/tests/vikings/apps/becca_jl/config/.env.dev
+INFO 2026-03-16 15:06:33 conftest.py App env file not found: tests/vikings/apps/becca_jl/config/.env.dev
+INFO 2026-03-16 15:06:33 conftest.py ENV: dev
+INFO 2026-03-16 15:06:33 conftest.py APP: becca_jl
+INFO 2026-03-16 15:06:33 conftest.py RUN_ID: 1
+INFO 2026-03-16 15:06:33 conftest.py SSLV: True
+INFO 2026-03-16 15:06:33 conftest.py THRESHOLD: 0.5
+INFO 2026-03-16 15:06:33 conftest.py pytest_configure ended
+Base temp dir init: /private/var/folders/pd/wzd_v7bx32n4byp72dqdzjkw0000gq/T/pytest-of-achhab16/pytest-15
+INFO 2026-03-16 15:06:33 conftest.py Session started: <Session  exitstatus=<ExitCode.OK: 0> testsfailed=0 testscollected=0>
+INFO 2026-03-16 15:06:33 conftest.py Current temp dir: /private/var/folders/pd/wzd_v7bx32n4byp72dqdzjkw0000gq/T/pytest-of-achhab16/pytest-15
+INFO 2026-03-16 15:06:33 conftest.py Base temp dir saved to /Users/achhab16/Desktop/cirrus-apps_vikings-eval/reports/base_temp.txt
+============================= test session starts ==============================
+created: 1/1 worker
+/Users/achhab16/Library/Caches/pypoetry/virtualenvs/app-bPuqwu3B-py3.13/lib/python3.13/site-packages/deepeval/__init__.py:52: UserWarning: You are using deepeval version 2.2.0, however version 3.8.9 is available. You should consider upgrading via the "pip install --upgrade deepeval" command.
+  warnings.warn(
+INFO 2026-03-16 15:06:37 conftest.py Loaded environment variables from .env.local
+INFO 2026-03-16 15:06:37 conftest.py pytest_configure started
+INFO 2026-03-16 15:06:37 conftest.py conftest is loading vars
+INFO 2026-03-16 15:06:37 conftest.py Resolved app env path: /Users/achhab16/Desktop/cirrus-apps_vikings-eval/tests/vikings/apps/becca_jl/config/.env.dev
+INFO 2026-03-16 15:06:37 conftest.py App env file not found: tests/vikings/apps/becca_jl/config/.env.dev
+INFO 2026-03-16 15:06:37 conftest.py ENV: dev
+INFO 2026-03-16 15:06:37 conftest.py APP: becca_jl
+INFO 2026-03-16 15:06:37 conftest.py RUN_ID: 1
+INFO 2026-03-16 15:06:37 conftest.py SSLV: True
+INFO 2026-03-16 15:06:37 conftest.py THRESHOLD: 0.5
+INFO 2026-03-16 15:06:37 conftest.py pytest_configure ended
+INFO 2026-03-16 15:06:37 conftest.py Session started: <Session  exitstatus=<ExitCode.OK: 0> testsfailed=0 testscollected=0>
+INFO 2026-03-16 15:06:37 conftest.py Current temp dir: /private/var/folders/pd/wzd_v7bx32n4byp72dqdzjkw0000gq/T/pytest-of-achhab16/pytest-15/popen-gw0
+1 worker [1 item]
+
+scheduling tests via LoadScheduling
+
+tests/vikings/apps/becca_jl/ui_tests/test_becca_eval_pipeline.py::test_login_becca_logout_smoke[chromium-testcase0] Running teardown with pytest sessionfinish...
+INFO 2026-03-16 15:06:54 conftest.py pytest_sessionfinish started
+INFO 2026-03-16 15:06:54 conftest.py pytest_sessionfinish ended
+INFO 2026-03-16 15:06:54 ReportsMerger.py Starting merge of worker files.
+INFO 2026-03-16 15:06:54 FW.py worker files found for merge.
+INFO 2026-03-16 15:06:54 FW.py Merged 1 files into /Users/achhab16/Desktop/cirrus-apps_vikings-eval/reports/test_results.xlsx
+INFO 2026-03-16 15:06:54 ReportsMerger.py Completed merge of worker files.
+
+
+======================== 1 failed, 2 warnings in 20.84s ========================
+INFO 2026-03-16 15:06:39 conftest.py Setup fixture before session: Eval
+INFO 2026-03-16 15:06:39 conftest.py db_session started
+INFO 2026-03-16 15:06:39 conftest.py Setting up database connection for session: 460b8e48-fe1c-4152-9a0d-c518ca08a2a8
+INFO 2026-03-16 15:06:39 db_utils.py Opened database connection:{'db_name': 'test_db', 'user': 'test_user', 'session_id': '460b8e48-fe1c-4152-9a0d-c518ca08a2a8'}
+INFO 2026-03-16 15:06:39 conftest.py properties_info started
+INFO 2026-03-16 15:06:39 conftest.py from env info
+INFO 2026-03-16 15:06:39 conftest.py ENV: dev
+INFO 2026-03-16 15:06:39 conftest.py ROLE: unable to get role
+INFO 2026-03-16 15:06:39 conftest.py properties_info ended
+INFO 2026-03-16 15:06:45 conftest.py Setup before test: test_login_becca_logout_smoke[chromium-testcase0]
+INFO 2026-03-16 15:06:45 conftest.py [BECCA AUTH] Local run detected -> using storageState: artifacts/becca_v2_storage_state.json
+Error occurred in event listener
+Traceback (most recent call last):
+  File "/Users/achhab16/Library/Caches/pypoetry/virtualenvs/app-bPuqwu3B-py3.13/lib/python3.13/site-packages/playwright/_impl/_connection.py", line 481, in dispatch
+    g.switch(self._replace_guids_with_channels(params))
+    ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/achhab16/Library/Caches/pypoetry/virtualenvs/app-bPuqwu3B-py3.13/lib/python3.13/site-packages/playwright/_impl/_connection.py", line 472, in _listener_with_error_handler_attached
+    potential_future = listener(params)
+  File "/Users/achhab16/Library/Caches/pypoetry/virtualenvs/app-bPuqwu3B-py3.13/lib/python3.13/site-packages/playwright/_impl/_browser_context.py", line 159, in <lambda>
+    lambda event: self._on_console_message(event),
+                  ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/Users/achhab16/Library/Caches/pypoetry/virtualenvs/app-bPuqwu3B-py3.13/lib/python3.13/site-packages/playwright/_impl/_browser_context.py", line 694, in _on_console_message
+    page.emit(Page.Events.Console, message)
+    ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/achhab16/Library/Caches/pypoetry/virtualenvs/app-bPuqwu3B-py3.13/lib/python3.13/site-packages/pyee/asyncio.py", line 70, in emit
+    return super().emit(event, *args, **kwargs)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/achhab16/Library/Caches/pypoetry/virtualenvs/app-bPuqwu3B-py3.13/lib/python3.13/site-packages/pyee/base.py", line 220, in emit
+    handled = self._call_handlers(event, args, kwargs)
+  File "/Users/achhab16/Library/Caches/pypoetry/virtualenvs/app-bPuqwu3B-py3.13/lib/python3.13/site-packages/pyee/base.py", line 196, in _call_handlers
+    self._emit_run(f, args, kwargs)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/Users/achhab16/Library/Caches/pypoetry/virtualenvs/app-bPuqwu3B-py3.13/lib/python3.13/site-packages/pyee/asyncio.py", line 81, in _emit_run
+    self.emit("error", exc)
+    ~~~~~~~~~^^^^^^^^^^^^^^
+  File "/Users/achhab16/Library/Caches/pypoetry/virtualenvs/app-bPuqwu3B-py3.13/lib/python3.13/site-packages/pyee/asyncio.py", line 70, in emit
+    return super().emit(event, *args, **kwargs)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/achhab16/Library/Caches/pypoetry/virtualenvs/app-bPuqwu3B-py3.13/lib/python3.13/site-packages/pyee/base.py", line 223, in emit
+    self._emit_handle_potential_error(event, args[0] if args else None)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/achhab16/Library/Caches/pypoetry/virtualenvs/app-bPuqwu3B-py3.13/lib/python3.13/site-packages/pyee/base.py", line 181, in _emit_handle_potential_error
+    raise error
+  File "/Users/achhab16/Library/Caches/pypoetry/virtualenvs/app-bPuqwu3B-py3.13/lib/python3.13/site-packages/pyee/asyncio.py", line 79, in _emit_run
+    coro: Any = f(*args, **kwargs)
+                ~^^^^^^^^^^^^^^^^^
+  File "/Users/achhab16/Library/Caches/pypoetry/virtualenvs/app-bPuqwu3B-py3.13/lib/python3.13/site-packages/playwright/_impl/_impl_to_api_mapping.py", line 123, in wrapper_func
+    return handler(
+        *list(map(lambda a: self.from_maybe_impl(a), args))[:arg_count]
     )
-#%%
-REPO_ROOT = "/Users/achhab16/Desktop/cirrus-apps_vikings-eval"   # <-- update this
+  File "/Users/achhab16/Desktop/cirrus-apps_vikings-eval/tests/vikings/apps/becca_jl/conftest.py", line 45, in <lambda>
+    page.on("console", lambda msg: print(f"[console:{msg.type}] {msg.text()}"))
+                                                                 ~~~~~~~~^^
+TypeError: 'str' object is not callable
+INFO 2026-03-16 15:06:53 conftest.py Teardown after test: test_login_becca_logout_smoke[chromium-testcase0]
+INFO 2026-03-16 15:06:53 conftest.py base temp:/private/var/folders/pd/wzd_v7bx32n4byp72dqdzjkw0000gq/T/pytest-of-achhab16/pytest-15/popen-gw0
+INFO 2026-03-16 15:06:53 conftest.py file path:/private/var/folders/pd/wzd_v7bx32n4byp72dqdzjkw0000gq/T/pytest-of-achhab16/pytest-15/popen-gw0/result_37362.csv
+INFO 2026-03-16 15:06:53 db_utils.py Closed database connection:{'db_name': 'test_db', 'user': 'test_user', 'session_id': '460b8e48-fe1c-4152-9a0d-c518ca08a2a8'}
+INFO 2026-03-16 15:06:53 conftest.py db_session ended
+INFO 2026-03-16 15:06:53 conftest.py Teardown fixture after session: Eval
 
-import os
-os.chdir(REPO_ROOT)
-print("CWD:", os.getcwd())
-#%%
-!pytest tests/vikings/apps/becca_jl \
-  -m "smoke" \
-  --tracing off \
-  -s \
-  --alluredir allure-results \
-  --reruns 0 \
-  -n 5 \
-  --html=reports/report.html \
-  --self-contained-html
-#%%
+[gw0] FAILED tests/vikings/apps/becca_jl/ui_tests/test_becca_eval_pipeline.py::test_login_becca_logout_smoke[chromium-testcase0] INFO 2026-03-16 15:06:53 conftest.py pytest_sessionfinish started
+INFO 2026-03-16 15:06:53 conftest.py pytest_sessionfinish ended
 
-This is a clone i made from my working pipeline the only diff i did was add a jupyter notebook as trigger and url is changed for becca but it shows unable to connect to server when it opens becca from playwright but i tried to open it directly and feed the same prompt and it worked
-i renamed a few things only i do not understand whats the issue here can u help and if u need code refs from the code i cloned from or any other let me know
+tests/vikings/apps/becca_jl/ui_tests/test_becca_eval_pipeline.py:65 (test_login_becca_logout_smoke[chromium-testcase0])
+request = <FixtureRequest for <Function test_login_becca_logout_smoke[chromium-testcase0]>>
+becca_page = <Page url='https://becca-dev-v2.prod.internal-gcp.optum.com/chat'>
+testcase = {'PlanCode': 'DTKS', 'expected_answer': 'Below are the coinsurance details for Pharmaceutical Products for plan code D...e for pharmaceutical products for $PlanCode, 2024, AR, KA, INN.', 'validation_text': 'PlanCode,2024,AR,KA, In-Network'}
+rows_accumulator = {'729743433': {'PlanCode': 'DTKS', 'actual_prompt': 'what is the coinsurance for pharmaceutical products for $PlanCode...down_off_alt', 'prompt': 'what is the coinsurance for pharmaceutical products for $PlanCode, 2024, AR, KA, INN.', ...}}
+
+    @pytest.mark.parametrize("testcase", FW.get_test_data(BECCA_V2_XL)[:1])
+    @pytest.mark.smoke
+    @allure.feature("becca")
+    @allure.story("ui_eval_e2e")
+    def test_login_becca_logout_smoke(request, becca_page, testcase, rows_accumulator):
+>       test_login_becca_helper(request, becca_page, testcase, rows_accumulator)
+
+tests/vikings/apps/becca_jl/ui_tests/test_becca_eval_pipeline.py:71: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/vikings/apps/becca_jl/ui_tests/test_becca_eval_pipeline.py:38: in test_login_becca_helper
+    becca.open_becca()
+tests/vikings/apps/becca_jl/ui_pages/BeccaPage.py:27: in open_becca
+    self.page.goto(self.page.url, wait_until="domcontentloaded")
+../../Library/Caches/pypoetry/virtualenvs/app-bPuqwu3B-py3.13/lib/python3.13/site-packages/playwright/sync_api/_generated.py:9019: in goto
+    self._sync(
+/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/futures.py:199: in result
+    raise self._exception.with_traceback(self._exception_tb)
+/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/tasks.py:304: in __step_run_and_handle_result
+    result = coro.send(None)
+             ^^^^^^^^^^^^^^^
+../../Library/Caches/pypoetry/virtualenvs/app-bPuqwu3B-py3.13/lib/python3.13/site-packages/playwright/_impl/_page.py:555: in goto
+    return await self._main_frame.goto(**locals_to_params(locals()))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../Library/Caches/pypoetry/virtualenvs/app-bPuqwu3B-py3.13/lib/python3.13/site-packages/playwright/_impl/_frame.py:153: in goto
+    await self._channel.send(
+../../Library/Caches/pypoetry/virtualenvs/app-bPuqwu3B-py3.13/lib/python3.13/site-packages/playwright/_impl/_connection.py:69: in send
+    return await self._connection.wrap_api_call(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <playwright._impl._connection.Connection object at 0x11b0b4ec0>
+cb = <function Channel.send.<locals>.<lambda> at 0x11b4d7b00>
+is_internal = False, title = None
+
+    async def wrap_api_call(
+        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
+    ) -> Any:
+        if self._api_zone.get():
+            return await cb()
+        task = asyncio.current_task(self._loop)
+        st: List[inspect.FrameInfo] = getattr(
+            task, "__pw_stack__", None
+        ) or inspect.stack(0)
+    
+        parsed_st = _extract_stack_trace_information_from_stack(st, is_internal, title)
+        self._api_zone.set(parsed_st)
+        try:
+            return await cb()
+        except Exception as error:
+>           raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+E           TypeError: Page.goto: 'str' object is not callable
+
+../../Library/Caches/pypoetry/virtualenvs/app-bPuqwu3B-py3.13/lib/python3.13/site-packages/playwright/_impl/_connection.py:559: TypeError
+
+Process finished with exit code 1
