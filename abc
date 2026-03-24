@@ -1,19 +1,33 @@
-    [
-        "705287",
-        "TestJay0305",
-        "2024",
-        "AK",
-        "On Exchange Base Plan",
-        null,
-        "",
-        "Draft",
-        "",
-        "<th style='text-align: center'><input type='checkbox'  class='defaultCheckbox' disabled /></th>",
-        "",
-        "2025-11-17 09:28:33",
-        "",
-        "3",
-        "Unlocked"
-    ]
+jquery-3.5.1.js:4046 jQuery.Deferred exception: datatable.getRows is not a function TypeError: datatable.getRows is not a function
+    at getSelectedPortfolioAssignments (https://localhost/ifp/js/app/portfolio-management.js:1387:28)
+    at toggleBulkCascadeButton (https://localhost/ifp/js/app/portfolio-management.js:1406:20)
+    at HTMLDocument.<anonymous> (https://localhost/ifp/js/app/portfolio-management.js:1414:5)
+    at mightThrow (https://localhost/ifp/js/external/jquery-3.5.1.js:3762:60)
+    at process (https://localhost/ifp/js/external/jquery-3.5.1.js:3830:49) undefined
+jQuery.Deferred.exceptionHook @ jquery-3.5.1.js:4046
+process @ jquery-3.5.1.js:3834
+jquery-3.5.1.js:4055 Uncaught TypeError: datatable.getRows is not a function
+    at getSelectedPortfolioAssignments (portfolio-management.js:1387:28)
+    at toggleBulkCascadeButton (portfolio-management.js:1406:20)
+    at HTMLDocument.<anonymous> (portfolio-management.js:1414:5)
+    at mightThrow (jquery-3.5.1.js:3762:60)
+    at process (jquery-3.5.1.js:3830:49)
+getSelectedPortfolioAssignments @ portfolio-management.js:1387
+toggleBulkCascadeButton @ portfolio-management.js:1406
+(anonymous) @ portfolio-management.js:1414
+mightThrow @ jquery-3.5.1.js:3762
+process @ jquery-3.5.1.js:3830
+frappe-datatable.min.js:2313 Uncaught TypeError: Cannot read properties of undefined (reading 'naturalWidth')
+    at frappe-datatable.min.js:2313:48
+    at Array.map (<anonymous>)
+    at xn.setupNaturalColumnWidth (frappe-datatable.min.js:2309:67)
+    at xn.setDimensions (frappe-datatable.min.js:2285:62)
+    at Ln.setDimensions (frappe-datatable.min.js:2566:24)
+    at _n.render (frappe-datatable.min.js:2157:47)
+    at Ln.renderBody (frappe-datatable.min.js:2562:31)
+    at Ln.render (frappe-datatable.min.js:2554:39)
+    at Ln.refresh (frappe-datatable.min.js:2538:47)
+    at new Ln (frappe-datatable.min.js:2509:165)
 
-i didnt want it to affect other indexes so im sending at end now what to change and where
+
+error on console
