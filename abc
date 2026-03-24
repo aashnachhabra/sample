@@ -1,6 +1,5 @@
     [
         "705287",
-        "Unlocked",
         "TestJay0305",
         "2024",
         "AK",
@@ -13,7 +12,8 @@
         "",
         "2025-11-17 09:28:33",
         "",
-        "3"
-    ],
+        "3",
+        "Unlocked"
+    ]
 
-coming like this how should i adjust indexing so others remain unchanged
+i didnt want it to affect other indexes so im sending at end now what to change and where
