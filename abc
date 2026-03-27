@@ -1,20 +1,404 @@
-this is core page of my testing pipeline for becca
-beccapage.py
-import logging import traceback import time import re from typing import Dict, Any, Tuple import allure from playwright.sync_api import expect from tests.vikings.conftest import THRESHOLD from tests.vikings.fw.common.Results import Results from tests.vikings.fw.ui.BasePage import BasePage from tests.vikings.fw.utils import get_multiple_scores class BeccaPage(BasePage): CHAT_INPUT_SELECTOR = ".input-section textarea[matInput]" SUBMIT_BUTTON_SELECTOR = "button.submit-button" START_NEW_CHAT_SELECTOR = "button:has-text('Start New Chat')" CHAT_MESSAGE_SELECTOR = "div.chat-box app-chat-message" GENERATION_TIMEOUT_SECS = 180 INPUT_READY_TIMEOUT_MS = 60000 ACTION_TIMEOUT_MS = 10000 def __init__(self, page): super().__init__(page) def open_becca(self): """ Open/wait for Becca UI without forcing a re-navigation. We wait for the chat input to be attached + visible + editable. """ with allure.step("Open Becca UI"): self.page.wait_for_load_state("domcontentloaded") self._wait_for_chat_input_ready(timeout=self.INPUT_READY_TIMEOUT_MS) self.page.wait_for_timeout(1500) def start_new_chat_if_present(self): """ Angular-safe Start New Chat: - Button is conditional - Messages clear asynchronously - Input may be re-rendered after clearing """ btn = self.page.locator(self.START_NEW_CHAT_SELECTOR) try: if btn.count() == 0: return btn.first.wait_for(state="visible", timeout=3000) btn.first.click() self.page.wait_for_function( "document.querySelectorAll('app-chat-message').length === 0", timeout=5000 ) self.page.wait_for_timeout(1000) except Exception: pass def _wait_for_chat_input_ready(self, timeout: int = 60000): """ Wait until the chat textarea and submit button are both usable. This is more reliable than only checking `visible`. """ input_box = self.page.locator(self.CHAT_INPUT_SELECTOR).first submit_btn = self.page.locator(self.SUBMIT_BUTTON_SELECTOR).first try: input_box.wait_for(state="attached", timeout=timeout) expect(input_box).to_be_visible(timeout=timeout) expect(input_box).to_be_editable(timeout=timeout) submit_btn.wait_for(state="attached", timeout=timeout) expect(submit_btn).to_be_visible(timeout=timeout) expect(submit_btn).to_be_enabled(timeout=timeout) return input_box, submit_btn except Exception: allure.attach(self.page.url, "Current URL", allure.attachment_type.TEXT) self.attach_screenshot("Chat input not ready") raise def _wait_for_generation_complete(self): """ Wait until the submit button text becomes 'Submit' again. This is used as the completion signal after generation ends. """ self.page.wait_for_function( """() => { const btn = document.querySelector('button.submit-button'); return btn && btn.innerText && btn.innerText.trim() === 'Submit'; }""", timeout=self.GENERATION_TIMEOUT_SECS * 1000 ) def _get_stable_latest_message(self, timeout_secs: int = 5) -> str: """ Read the latest chat message and wait briefly until the text stops changing. """ last = self.page.locator(self.CHAT_MESSAGE_SELECTOR).last last.wait_for(state="visible", timeout=30000) previous = "" end = time.time() + timeout_secs while time.time() < end: current = last.inner_text().strip() if current == previous: return current previous = current time.sleep(0.5) return previous def _strip_ui_chrome(self, text: str) -> str: noise = [ "content_copy", "star_border", "thumb_up_off_alt", "thumb_down_off_alt", ] for n in noise: text = text.replace(n, "") return text.strip() def _format_prompt_with_testcase(self, prompt: str, testcase: Dict[str, Any]) -> str: """ Replaces $ColumnName placeholders using testcase values. Example: $PlanCode -> DY82 """ if not prompt: return "" def replacer(match): key = match.group(1) for col, val in testcase.items(): if col.lower() == key.lower() and str(val).strip(): return str(val).strip() return match.group(0) return re.sub(r"\$(\w+)", replacer, prompt).strip() def _normalize(self, text: str) -> str: if not text: return "" text = text.lower() text = re.sub(r"[^\w\s%$.-]", " ", text) text = re.sub(r"\s+", " ", text) return text.strip() def _send_prompt_once(self, prompt: str, start_new_chat: bool = True) -> Tuple[str, float]: """ Sends the prompt once and waits for the response. Includes a one-time retry if Angular re-renders the input while typing. """ if start_new_chat: self.start_new_chat_if_present() input_box, submit_btn = self._wait_for_chat_input_ready(timeout=self.INPUT_READY_TIMEOUT_MS) try: input_box.click(timeout=self.ACTION_TIMEOUT_MS) input_box.fill("", timeout=self.INPUT_READY_TIMEOUT_MS) input_box.fill(prompt, timeout=self.INPUT_READY_TIMEOUT_MS) except Exception: self.page.wait_for_timeout(2000) input_box, submit_btn = self._wait_for_chat_input_ready(timeout=self.INPUT_READY_TIMEOUT_MS) input_box.click(timeout=self.ACTION_TIMEOUT_MS) input_box.fill("", timeout=self.INPUT_READY_TIMEOUT_MS) input_box.fill(prompt, timeout=self.INPUT_READY_TIMEOUT_MS) start_time = time.time() submit_btn.click(timeout=self.ACTION_TIMEOUT_MS) self._wait_for_generation_complete() response = self._get_stable_latest_message() self.attach_screenshot("Becca response") clean_response = self._strip_ui_chrome(response) elapsed_secs = round(time.time() - start_time, 2) return clean_response, elapsed_secs def send_prompt_and_wait(self, prompt: str) -> Tuple[str, float]: """ Sends the prompt. If the first response is the known transient bootstrap message, retry once in the same chat window without starting a new chat again. """ actual_response, elapsed_secs = self._send_prompt_once(prompt, start_new_chat=True) if "Unable to connect to the server" in actual_response: logging.warning( "First prompt hit connection/bootstrap issue. Retrying once in same chat window..." ) self.page.wait_for_timeout(2000) actual_response, elapsed_secs = self._send_prompt_once(prompt, start_new_chat=False) return actual_response, elapsed_secs def run_prompt_and_get_response(self, prompt: str) -> Tuple[str, float]: return self.send_prompt_and_wait(prompt) def _validate_response( self, actual_response: str, expected_answer: str, validation_text: str, testcase: Dict[str, Any], ) -> Tuple[str, str]: """ UI validation rules: 1. Fail only if chatbot returned no response 2. If validation_text is missing, pass UI 3. If validation_text exists, validate keywords against actual response """ if not actual_response or self._normalize(actual_response) in {"", "none"}: return "failed", "ACTUAL_RESPONSE is empty" actual_norm = self._normalize(actual_response) if not validation_text or not validation_text.strip(): return "passed", "" tokens_raw = [t.strip() for t in validation_text.split(",") if t.strip()] mode_any = False if tokens_raw and tokens_raw[0].lower().startswith("any:"): mode_any = True tokens_raw[0] = tokens_raw[0][4:].strip() col_map = { k.lower(): str(v).strip() for k, v in testcase.items() if str(v).strip() } resolved_tokens = [col_map.get(tok.lower(), tok) for tok in tokens_raw] normalized_tokens = [self._normalize(tok) for tok in resolved_tokens if tok] if mode_any: hit = any(tok and tok in actual_norm for tok in normalized_tokens) if not hit: return "failed", ( f"Missing ANY of keywords from validation text in ACTUAL_RESPONSE: {resolved_tokens}" ) return "passed", "" else: missing = [ orig for tok, orig in zip(normalized_tokens, resolved_tokens) if tok and tok not in actual_norm ] if missing: return "failed", ( f"Missing keywords from validation text in ACTUAL_RESPONSE: {missing}" ) return "passed", "" def execute_testcase(self, testcase: Dict[str, Any], rows_accumulator: Dict[str, Any]): with allure.step("Ask Question in Becca"): raw_prompt = str(testcase.get("prompt", "")).strip() expected_answer = str(testcase.get("expected_answer", "")).strip() validation_text = str(testcase.get("validation_text", "")).strip() formatted_prompt = self._format_prompt_with_testcase(raw_prompt, testcase) row_key = testcase.get("id") or formatted_prompt actual_response = "" time_taken = 0 ui_status = "failed" ui_error = "" try: actual_response, time_taken = self.run_prompt_and_get_response(formatted_prompt) ui_status, ui_error = self._validate_response( actual_response=actual_response, expected_answer=expected_answer, validation_text=validation_text, testcase=testcase, ) except Exception as e: logging.error(e) allure.attach(traceback.format_exc(), "UI exception", allure.attachment_type.TEXT) if not actual_response: actual_response = "error while fetching ui response" ui_status = "failed" ui_error = str(e) ui_row = { **testcase, "actual_prompt": formatted_prompt, "expected_response": expected_answer, "actual_response": actual_response, "ui_status": ui_status, "ui_error": ui_error, "Response time(secs)": time_taken, "validation_text": validation_text, } rows_accumulator[row_key] = ui_row Results.report_event_assert_bool( ui_row["ui_status"] == "passed", f"prompt failed: {formatted_prompt} | {ui_row['ui_error']}", ) return ui_row def evaluate_testcase(self, ui_row: Dict[str, Any], rows_accumulator: Dict[str, Any]): with allure.step("Evaluate Becca Testcase"): if ui_row["ui_status"] != "passed": ui_row.update({ "eval_status": "skipped", "eval_error": "UI validation failed", "eval_threshold": "", "gEval_score": "", "gEval_reason": "", }) return ui_row try: threshold = THRESHOLD expected = ui_row.get("expected_response", "").strip() payload = { "question": ui_row["actual_prompt"], "llmAnswer": ui_row["actual_response"], "groundAnswer": expected, "contextualPrecision": False, "contextualRecall": False, "faithfulness": False, "gEval": True, } data = get_multiple_scores(payload) score = data.get("gEval", {}).get("score", 0) reason = data.get("gEval", {}).get("reason", "") ui_row.update({ "eval_threshold": threshold, "gEval_score": score, "gEval_reason": reason, "eval_status": "passed" if score >= threshold else "failed", "eval_error": "", }) except Exception as e: allure.attach(traceback.format_exc(), "Eval exception", allure.attachment_type.TEXT) ui_row.update({ "eval_status": "failed", "eval_error": str(e), }) return ui_row
+import logging
+import traceback
+import time
+import re
+import json
+from typing import Dict, Any, Tuple
 
-loginpage.py
-import allure from playwright.sync_api import Page, expect from tests.vikings.apps.becca_v2.config.Constants import Constants from tests.vikings.fw.common.FW import FW from tests.vikings.fw.common.Results import Results from tests.vikings.fw.ui.BasePage import BasePage from urllib.parse import urlparse class LoginPage(BasePage): AZURE_USERNAME_INPUT = 'input[name="loginfmt"]' AZURE_PASSWORD_INPUT = 'input[name="passwd"]' AZURE_SUBMIT_BUTTON = 'input[type="submit"]' AZURE_STAY_SIGNED_IN_YES = 'input[value="Yes"]' def __init__(self, page: Page): super().__init__(page) def login(self): with allure.step("Login to BECCA via Azure AD"): username = FW.get_env("BECCA_V2_APP_CIRRUS_UI_USERNAME") password = FW.get_env("BECCA_V2_APP_CIRRUS_UI_PASSWORD") if not username or not password: Results.report_event( "Missing BECCA_V2_APP_CIRRUS_UI_USERNAME or BECCA_V2_APP_CIRRUS_UI_PASSWORD" ) raise RuntimeError("Credentials not provided via environment variables") self.page.goto(Constants.BECCA_V2_URL, wait_until="domcontentloaded") self.page.wait_for_selector(self.AZURE_USERNAME_INPUT, timeout=30000) self.page.fill(self.AZURE_USERNAME_INPUT, username) self.page.click(self.AZURE_SUBMIT_BUTTON) self.page.wait_for_selector(self.AZURE_PASSWORD_INPUT, timeout=30000) self.page.fill(self.AZURE_PASSWORD_INPUT, password) self.page.click(self.AZURE_SUBMIT_BUTTON) try: self.page.wait_for_selector(self.AZURE_STAY_SIGNED_IN_YES, timeout=5000) self.page.click(self.AZURE_STAY_SIGNED_IN_YES) except Exception: pass self.page.wait_for_load_state("networkidle", timeout=30000) expect(self.page).not_to_have_url("**login.microsoftonline.com**") Results.report_event("User logged in successfully") self.attach_screenshot("Login Successful")
+import allure
+from playwright.sync_api import expect
+from tests.vikings.conftest import THRESHOLD
+from tests.vikings.fw.common.Results import Results
+from tests.vikings.fw.ui.BasePage import BasePage
+from tests.vikings.fw.utils import get_multiple_scores
 
-logoutpage.py
-import allure from playwright.sync_api import Page, TimeoutError as PlaywrightTimeoutError from tests.vikings.fw.common.Results import Results from tests.vikings.fw.ui.BasePage import BasePage class LogoutPage(BasePage): def __init__(self, page: Page): super().__init__(page) def _safe_click(self, locator): locator.wait_for(state="attached", timeout=10000) locator.scroll_into_view_if_needed(timeout=5000) try: locator.click(timeout=5000) return except PlaywrightTimeoutError: pass except Exception: pass el = locator.element_handle(timeout=5000) if el: try: self.page.evaluate("el => el.scrollIntoView({block: 'center', inline: 'center'})", el) locator.click(timeout=5000) return except Exception: pass try: self.page.evaluate("el => el.click()", el) return except Exception: locator.dispatch_event("click", timeout=5000) def logout(self): with allure.step("Logout from the application"): tools = self.page.get_by_role("link", name="Tools") self._safe_click(tools) sign_off = self.page.get_by_role("link", name="Sign Off") self._safe_click(sign_off) self.page.locator("text=Logged out Successfully.").wait_for(state="visible", timeout=10000) Results.report_event("User logged out successfully") self.attach_screenshot("Logoff Screenshot")
 
-main pipeline
-import allure import pytest import logging from settings import BECCA_V2_XL from tests.vikings.fw.common.CommonUtils import CommonUtils from tests.vikings.fw.common.FW import FW from ..ui_pages.BeccaPage import BeccaPage from ..ui_pages.LogoutPage import LogoutPage from tests.vikings.fw.common.Results import Results import pathlib notebook_excel = list(pathlib.Path.cwd().glob("notebooks/becca/*.xlsx")) if notebook_excel: logging.info(f"[TESTS] Using uploaded Excel instead of default: {notebook_excel[0]}") BECCA_V2_XL = str(notebook_excel[0]) else: logging.info(f"[TESTS] Using default Excel: {BECCA_V2_XL}") COLUMNS_ORDER = [ "actual_prompt", "validation_text", "expected_response", "actual_response", "ui_status", "ui_error", "Response time(secs)", "eval_threshold", "gEval_score", "gEval_reason", "eval_status", "eval_error", ] from playwright.sync_api import TimeoutError as PlaywrightTimeoutError import allure def test_login_becca_helper(request, becca_page, testcase, rows_accumulator): request.node.COLUMNS_ORDER = COLUMNS_ORDER becca = BeccaPage(becca_page) logout = LogoutPage(becca_page) CommonUtils.setupTest(testcase) try: becca.open_becca() ui_row = becca.execute_testcase(testcase, rows_accumulator) if ui_row["ui_status"] == "passed": becca.evaluate_testcase(ui_row, rows_accumulator) try: logout.logout() except PlaywrightTimeoutError as e: allure.attach( str(e), name="Logout skipped (Tools not found)", attachment_type=allure.attachment_type.TEXT ) becca.attach_screenshot("Logout skipped - Tools not found") except Exception as e: # Only true unexpected execution failures should come here CommonUtils.handleException(testcase, rows_accumulator, e) raise # Assert AFTER the try/except so the row is not overwritten Results.report_event_assert_bool( ui_row["ui_status"] == "passed", f"prompt failed: {ui_row.get('actual_prompt')} | {ui_row.get('ui_error')}" ) if ui_row["ui_status"] == "passed": Results.report_event_assert_bool( ui_row["eval_status"] == "passed", f"eval failed: {ui_row.get('actual_prompt')} | " f"score={ui_row.get('gEval_score')} | " f"reason={ui_row.get('gEval_reason')}" ) @pytest.mark.parametrize("testcase", FW.get_test_data(BECCA_V2_XL)) @pytest.mark.uieval @allure.feature("becca_v2") @allure.story("ui_eval_e2e") def test_login_becca_logout_e2e(request, becca_page, testcase, rows_accumulator): test_login_becca_helper(request, becca_page, testcase, rows_accumulator) @pytest.mark.parametrize("testcase", FW.get_test_data(BECCA_V2_XL)[:1]) @pytest.mark.smoke @allure.feature("becca_v2") @allure.story("ui_eval_e2e") def test_login_becca_logout_smoke(request, becca_page, testcase, rows_accumulator): test_login_becca_helper(request, becca_page, testcase, rows_accumulator)
-it used becca_page instead of page
+class BeccaPage(BasePage):
+    CHAT_INPUT_SELECTOR = ".input-section textarea[matInput]"
+    SUBMIT_BUTTON_SELECTOR = "button.submit-button"
+    START_NEW_CHAT_SELECTOR = "button:has-text('Start New Chat')"
+    CHAT_MESSAGE_SELECTOR = "div.chat-box app-chat-message"
 
-it was working with this conftest i made for becca perfectly
-import logging import pytest from tests.vikings.apps.becca_v2.config.Constants import Constants from tests.vikings.apps.becca_v2.ui_pages.LoginPage import LoginPage @pytest.fixture(scope="session") def authenticated_context(browser): logging.info("[BECCA AUTH] Creating authenticated browser context via UI login (no storage state)") context = browser.new_context() page = context.new_page() page.goto(Constants.BECCA_V2_URL, wait_until="domcontentloaded") LoginPage(page).login() yield context context.close() @pytest.fixture() def becca_page(browser): logging.info("[BECCA AUTH] Per-test login via UI") context = browser.new_context() page = context.new_page() page.goto(Constants.BECCA_V2_URL, wait_until="domcontentloaded") LoginPage(page).login() yield page context.close()
+    GENERATION_TIMEOUT_SECS = 180
+    INPUT_READY_TIMEOUT_MS = 60000
+    ACTION_TIMEOUT_MS = 10000
 
-but now its using a conftest that is common for the repo used by all so i need to make by becca work acc to it and not change anything there
-common conftest
-import logging import os import uuid import pytest from dotenv import load_dotenv from settings import COMMON_REPORTS_DIR from .apps.cody.db.db_utils import open_db, close_db from .fw.common import ReportsMerger from .fw.common.Results import Results from .fw.ui.BasePage import BasePage import io import logging import os import allure import pandas as pd import pytest from tests.vikings.fw.common.FW import FW logging.basicConfig( level=logging.INFO, format="%(levelname)s %(asctime)s %(filename)s %(message)s", datefmt="%Y-%m-%d %H:%M:%S" ) def __load_local_env(): """Load base .env.local if present.""" LOCAL_ENV_FILE = ".env.local" if os.path.exists(LOCAL_ENV_FILE): load_dotenv(LOCAL_ENV_FILE, override=False) logging.info(f"Loaded environment variables from {LOCAL_ENV_FILE}") else: logging.info(f"{LOCAL_ENV_FILE} not found, skipping") __load_local_env() sslv_str = os.environ.get("SSLV", "true") SSLV = sslv_str.lower() == "true" STATIC_DATA = os.environ.get("STATIC_DATA", "false").lower() == "true" THRESHOLD = float(os.environ.get("THRESHOLD", "0.5")) ATTACKS_PER_VULN_TYPE = int(os.environ.get("ATTACKS_PER_VULN_TYPE", "1")) RUN_ID = os.environ.get("RUN_ID", "987") BRANCH = os.environ.get("BRANCH", "master") MODULE = os.environ.get("MODULE", "smoke") ENV = os.environ.get("ENV", "dev") APP = os.environ.get("APP", "cody") # BASE_TEMP = None SESSION_ID = uuid.uuid4() def _load_app_env_file(): dotenv_file = f"tests/vikings/apps/{APP}/config/.env.{ENV}" abs_path = os.path.abspath(dotenv_file) logging.info(f"Resolved app env path: {abs_path}") if os.path.exists(dotenv_file): load_dotenv(dotenv_file, override=True) logging.info(f"Loaded environment variables from {dotenv_file}") else: logging.info(f"App env file not found: {dotenv_file}") def pytest_configure(config): config.option.slowmo = 0 # 1000 millisecs delay between actions logging.info("pytest_configure started") logging.info(f"conftest is loading vars") # Load app-specific env now that ENV/APP are known _load_app_env_file() # Log final values (after potential app env load) logging.info(f"ENV: {os.getenv('ENV', ENV)}") logging.info(f"APP: {os.getenv('APP', APP)}") logging.info(f"RUN_ID: {os.getenv('RUN_ID', RUN_ID)}") logging.info(f"SSLV: {os.getenv('SSLV', str(SSLV))}") logging.info(f"THRESHOLD: {os.getenv('THRESHOLD', str(THRESHOLD))}") logging.info("pytest_configure ended") def pytest_sessionstart(session): logging.info(f"Session started: {session}") current_temp_dir=session.config._tmp_path_factory.getbasetemp() logging.info(f"Current temp dir: {current_temp_dir}") if os.environ.get("BASE_TEMP",None) is None: os.environ["BASE_TEMP"] = str(current_temp_dir) print(f"Base temp dir init: {os.environ["BASE_TEMP"]}") base_temp_file = os.path.join(COMMON_REPORTS_DIR, "base_temp.txt") with open(base_temp_file, "w") as f: f.write(os.environ["BASE_TEMP"]) logging.info(f"Base temp dir saved to {base_temp_file}") else: print(f"Base temp dir skip: {os.environ["BASE_TEMP"]}") @pytest.fixture(scope="session",autouse=True) def session_listener(request): logging.info(f"Setup fixture before session: Eval") yield logging.info(f"Teardown fixture after session: Eval") @pytest.fixture(scope="session", autouse=True) def db_session(session_listener): """Fixture to manage database connection for the session.""" logging.info("db_session started") info = {"db_name": "test_db", "user": "test_user", "session_id": str(SESSION_ID)} logging.info(f"Setting up database connection for session: {SESSION_ID}") open_db(info) yield close_db(info) logging.info("db_session ended") @pytest.fixture(scope="session", autouse=True) def print_properties_info(): logging.info("properties_info started") logging.info("from env info") logging.info(f"ENV: {os.getenv("ENV")}") logging.info(f"ROLE: {os.getenv("ROLE", "unable to get role")}") logging.info("properties_info ended") @pytest.fixture(autouse=True) def test_listener(request): test_name = request.node.name logging.info(f"Setup before test: {test_name}") Results.report_timestamp("before test starts") yield logging.info(f"Teardown after test: {test_name}") Results.report_timestamp("after test ends") @pytest.hookimpl(tryfirst=True, hookwrapper=True) def pytest_runtest_makereport(item, call): outcome = yield rep = outcome.get_result() if rep.when == "call" and rep.failed: page = item.funcargs.get("page", None) if page: try: BasePage.page_screenshot(page,"Failure Screenshot") except Exception as e: logging.info(f"Could not capture screenshot: {e}") def pytest_sessionfinish(session, exitstatus): logging.info("pytest_sessionfinish started") os.makedirs("allure-results", exist_ok=True) with open("allure-results/environment.properties", "w") as f: f.write(f"RUN_ID={RUN_ID}\n") f.write(f"RUN_URL=https://github.com/uhc-tech-employer-individual/cirrus-apps_vikings-eval/actions/runs/{RUN_ID}\n") f.write("WORKFLOW_URL=https://github.com/uhc-tech-employer-individual/cirrus-apps_vikings-eval/actions/workflows/Eval_Regression_Suite.yml?query=is%3Asuccess+branch%3Amaster\n") f.write(f"APP={APP}\n") f.write(f"ENV={ENV}\n") f.write(f"Module={MODULE}\n") f.write(f"Branch={BRANCH}\n") f.write(f"sslv_str={SSLV}\n") logging.info("pytest_sessionfinish ended") if hasattr(session.config, "workerinput"): return ReportsMerger.execute_merge() @pytest.fixture(scope="session") def browser_context_args(browser_context_args): return { **browser_context_args, # "no_viewport": True, "viewport": { "width": 1920, "height": 1080, }, "ignore_https_errors": True } @pytest.fixture(scope="function") def rows_accumulator(request): rows_dict = {} yield rows_dict @pytest.fixture(scope="function", autouse=True) def generate_result(request,rows_accumulator, tmp_path_factory): yield COLUMNS_ORDER = getattr(request.node, "COLUMNS_ORDER", []) if COLUMNS_ORDER: temp_dir = tmp_path_factory.getbasetemp() temp_file = temp_dir / f"{FW.get_result_file_name(os.getpid())}" logging.info(f"base temp:{temp_dir}") logging.info(f"file path:{temp_file}") if rows_accumulator: df = pd.DataFrame(list(rows_accumulator.values())) for col in COLUMNS_ORDER: if col not in df.columns: df[col] = "" df = df[COLUMNS_ORDER] # Append if file exists, else write new if temp_file.exists(): df.to_csv(temp_file, mode='a', header=False, index=False) else: df.to_csv(temp_file, index=False) else: logging.info("No COLUMNS_ORDER found on the test node.") @pytest.fixture(scope="function", autouse=True) def test_summary(request, rows_accumulator): yield try: COLUMNS_ORDER = getattr(request.node, "COLUMNS_ORDER", []) if COLUMNS_ORDER : if rows_accumulator: df = pd.DataFrame(list(rows_accumulator.values())) for col in COLUMNS_ORDER: if col not in df.columns: df[col] = "" df = df[COLUMNS_ORDER] csv_buffer = io.StringIO() df.to_csv(csv_buffer, index=False) allure.attach(csv_buffer.getvalue(), name="Test summary", attachment_type=allure.attachment_type.CSV) else: logging.info("No COLUMNS_ORDER found on the test node for summary attachment.") except Exception as e: logging.info(f"CSV Attach Error: {e}") @pytest.fixture(scope="function") def rows_accumulator(request): rows_dict = {} yield rows_dict @pytest.fixture(scope="function", autouse=True) def generate_result(request,rows_accumulator, tmp_path_factory): yield COLUMNS_ORDER = getattr(request.node, "COLUMNS_ORDER", []) if COLUMNS_ORDER: temp_dir = tmp_path_factory.getbasetemp() temp_file = temp_dir / f"{FW.get_result_file_name(os.getpid())}" logging.info(f"base temp:{temp_dir}") logging.info(f"file path:{temp_file}") if rows_accumulator: df = pd.DataFrame(list(rows_accumulator.values())) for col in COLUMNS_ORDER: if col not in df.columns: df[col] = "" df = df[COLUMNS_ORDER] # Append if file exists, else write new if temp_file.exists(): df.to_csv(temp_file, mode='a', header=False, index=False) else: df.to_csv(temp_file, index=False) else: logging.info("No COLUMNS_ORDER found on the test node.") @pytest.fixture(scope="function", autouse=True) def test_summary(request, rows_accumulator): yield try: COLUMNS_ORDER = getattr(request.node, "COLUMNS_ORDER", []) if COLUMNS_ORDER : if rows_accumulator: df = pd.DataFrame(list(rows_accumulator.values())) for col in COLUMNS_ORDER: if col not in df.columns: df[col] = "" df = df[COLUMNS_ORDER] csv_buffer = io.StringIO() df.to_csv(csv_buffer, index=False) allure.attach(csv_buffer.getvalue(), name="Test summary", attachment_type=allure.attachment_type.CSV) else: logging.info("No COLUMNS_ORDER found on the test node for summary attachment.") except Exception as e: logging.info(f"CSV Attach Error: {e}") @pytest.fixture(scope="function") def rows_accumulator(request): rows_dict = {} yield rows_dict @pytest.fixture(scope="function", autouse=True) def generate_result(request,rows_accumulator, tmp_path_factory): yield COLUMNS_ORDER = getattr(request.node, "COLUMNS_ORDER", []) if COLUMNS_ORDER: temp_dir = tmp_path_factory.getbasetemp() temp_file = temp_dir / f"{FW.get_result_file_name(os.getpid())}" logging.info(f"base temp:{temp_dir}") logging.info(f"file path:{temp_file}") if rows_accumulator: df = pd.DataFrame(list(rows_accumulator.values())) for col in COLUMNS_ORDER: if col not in df.columns: df[col] = "" df = df[COLUMNS_ORDER] # Append if file exists, else write new if temp_file.exists(): df.to_csv(temp_file, mode='a', header=False, index=False) else: df.to_csv(temp_file, index=False) else: logging.info("No COLUMNS_ORDER found on the test node.") @pytest.fixture(scope="function", autouse=True) def test_summary(request, rows_accumulator): yield try: COLUMNS_ORDER = getattr(request.node, "COLUMNS_ORDER", []) if COLUMNS_ORDER : if rows_accumulator: df = pd.DataFrame(list(rows_accumulator.values())) for col in COLUMNS_ORDER: if col not in df.columns: df[col] = "" df = df[COLUMNS_ORDER] csv_buffer = io.StringIO() df.to_csv(csv_buffer, index=False) allure.attach(csv_buffer.getvalue(), name="Test summary", attachment_type=allure.attachment_type.CSV) else: logging.info("No COLUMNS_ORDER found on the test node for summary attachment.") except Exception as e: logging.info(f"CSV Attach Error: {e}")
+    def __init__(self, page):
+        super().__init__(page)
+        self._console_logs = []
+        try:
+            self.page.on("console", lambda m: self._console_logs.append(f"[{m.type}] {m.text}"))
+        except Exception:
+            pass
+
+    def open_becca(self):
+        with allure.step("Setup"):
+            self.page.wait_for_load_state("domcontentloaded")
+            self._wait_for_chat_input_ready(timeout=self.INPUT_READY_TIMEOUT_MS)
+            allure.attach(self.page.url, "URL", allure.attachment_type.TEXT)
+            self.attach_screenshot("Setup Screenshot")
+            self.page.wait_for_timeout(1500)
+
+
+    def start_new_chat_if_present(self):
+        with allure.step("Start New Chat"):
+            btn = self.page.locator(self.START_NEW_CHAT_SELECTOR)
+            try:
+                if btn.count() == 0:
+                    return
+                btn.first.wait_for(state="visible", timeout=3000)
+                btn.first.click()
+                self.page.wait_for_function(
+                    "document.querySelectorAll('app-chat-message').length === 0",
+                    timeout=5000
+                )
+                self.page.wait_for_timeout(1000)
+                self.attach_screenshot("After Start New Chat")
+            except Exception:
+                pass
+
+    def _wait_for_chat_input_ready(self, timeout: int = 60000):
+        """
+        Wait until the chat textarea and submit button are both usable.
+        This is more reliable than only checking `visible`.
+        """
+        input_box = self.page.locator(self.CHAT_INPUT_SELECTOR).first
+        submit_btn = self.page.locator(self.SUBMIT_BUTTON_SELECTOR).first
+
+        try:
+            input_box.wait_for(state="attached", timeout=timeout)
+            expect(input_box).to_be_visible(timeout=timeout)
+            expect(input_box).to_be_editable(timeout=timeout)
+
+            submit_btn.wait_for(state="attached", timeout=timeout)
+            expect(submit_btn).to_be_visible(timeout=timeout)
+            expect(submit_btn).to_be_enabled(timeout=timeout)
+
+            return input_box, submit_btn
+
+        except Exception:
+            allure.attach(self.page.url, "Current URL", allure.attachment_type.TEXT)
+            self.attach_screenshot("Chat input not ready")
+            raise
+
+    def _wait_for_generation_complete(self):
+        """
+        Wait until the submit button text becomes 'Submit' again.
+        This is used as the completion signal after generation ends.
+        """
+        self.page.wait_for_function(
+            """() => {
+                const btn = document.querySelector('button.submit-button');
+                return btn && btn.innerText && btn.innerText.trim() === 'Submit';
+            }""",
+            timeout=self.GENERATION_TIMEOUT_SECS * 1000
+        )
+
+    def _get_stable_latest_message(self, timeout_secs: int = 5) -> str:
+        """
+        Read the latest chat message and wait briefly until the text stops changing.
+        """
+        last = self.page.locator(self.CHAT_MESSAGE_SELECTOR).last
+        last.wait_for(state="visible", timeout=30000)
+
+        previous = ""
+        end = time.time() + timeout_secs
+
+        while time.time() < end:
+            current = last.inner_text().strip()
+            if current == previous:
+                return current
+            previous = current
+            time.sleep(0.5)
+
+        return previous
+
+    def _strip_ui_chrome(self, text: str) -> str:
+        noise = [
+            "content_copy",
+            "star_border",
+            "thumb_up_off_alt",
+            "thumb_down_off_alt",
+        ]
+        for n in noise:
+            text = text.replace(n, "")
+        return text.strip()
+
+    def _format_prompt_with_testcase(self, prompt: str, testcase: Dict[str, Any]) -> str:
+        """
+        Replaces $ColumnName placeholders using testcase values.
+        Example: $PlanCode -> DY82
+        """
+        if not prompt:
+            return ""
+
+        def replacer(match):
+            key = match.group(1)
+            for col, val in testcase.items():
+                if col.lower() == key.lower() and str(val).strip():
+                    return str(val).strip()
+            return match.group(0)
+
+        return re.sub(r"\$(\w+)", replacer, prompt).strip()
+
+    def _normalize(self, text: str) -> str:
+        if not text:
+            return ""
+        text = text.lower()
+        text = re.sub(r"[^\w\s%$.-]", " ", text)
+        text = re.sub(r"\s+", " ", text)
+        return text.strip()
+
+    def _send_prompt_once(self, prompt: str, start_new_chat: bool = True) -> Tuple[str, float]:
+        if start_new_chat:
+            self.start_new_chat_if_present()
+        input_box, submit_btn = self._wait_for_chat_input_ready(timeout=self.INPUT_READY_TIMEOUT_MS)
+        with allure.step("Type Prompt"):
+            allure.attach(prompt, "Prompt", allure.attachment_type.TEXT)
+            try:
+                input_box.click(timeout=self.ACTION_TIMEOUT_MS)
+                input_box.fill("", timeout=self.INPUT_READY_TIMEOUT_MS)
+                input_box.fill(prompt, timeout=self.INPUT_READY_TIMEOUT_MS)
+            except Exception:
+                self.page.wait_for_timeout(2000)
+                input_box, submit_btn = self._wait_for_chat_input_ready(timeout=self.INPUT_READY_TIMEOUT_MS)
+                input_box.click(timeout=self.ACTION_TIMEOUT_MS)
+                input_box.fill("", timeout=self.INPUT_READY_TIMEOUT_MS)
+                input_box.fill(prompt, timeout=self.INPUT_READY_TIMEOUT_MS)
+            self.attach_screenshot("Prompt Typed")
+        with allure.step("Submit And Wait"):
+            start_time = time.time()
+            submit_btn.click(timeout=self.ACTION_TIMEOUT_MS)
+            self._wait_for_generation_complete()
+            response = self._get_stable_latest_message()
+            clean_response = self._strip_ui_chrome(response)
+            elapsed_secs = round(time.time() - start_time, 2)
+            allure.attach(str(elapsed_secs), "Response Time (secs)", allure.attachment_type.TEXT)
+            allure.attach(clean_response, "Raw Response", allure.attachment_type.TEXT)
+            self.attach_screenshot("Becca Response")
+        return clean_response, elapsed_secs
+
+    def send_prompt_and_wait(self, prompt: str) -> Tuple[str, float]:
+        """
+        Sends the prompt.
+        If the first response is the known transient bootstrap message,
+        retry once in the same chat window without starting a new chat again.
+        """
+        actual_response, elapsed_secs = self._send_prompt_once(prompt, start_new_chat=True)
+
+        if "Unable to connect to the server" in actual_response:
+            logging.warning(
+                "First prompt hit connection/bootstrap issue. Retrying once in same chat window..."
+            )
+            self.page.wait_for_timeout(2000)
+            actual_response, elapsed_secs = self._send_prompt_once(prompt, start_new_chat=False)
+
+        return actual_response, elapsed_secs
+
+    def run_prompt_and_get_response(self, prompt: str) -> Tuple[str, float]:
+        return self.send_prompt_and_wait(prompt)
+
+    def _validate_response(
+            self,
+            actual_response: str,
+            expected_answer: str,
+            validation_text: str,
+            testcase: Dict[str, Any],
+    ) -> Tuple[str, str]:
+        if not actual_response or self._normalize(actual_response) in {"", "none"}:
+            allure.attach("ACTUAL_RESPONSE is empty", "UI Validation Details", allure.attachment_type.TEXT)
+            return "failed", "ACTUAL_RESPONSE is empty"
+        actual_norm = self._normalize(actual_response)
+        if not validation_text or not validation_text.strip():
+            self._attach_json("UI Validation Details", {
+                "mode": "none",
+                "actual_norm": actual_norm,
+                "note": "No validation_text provided"
+            })
+            return "passed", ""
+        tokens_raw = [t.strip() for t in validation_text.split(",") if t.strip()]
+        mode_any = False
+        if tokens_raw and tokens_raw[0].lower().startswith("any:"):
+            mode_any = True
+            tokens_raw[0] = tokens_raw[0][4:].strip()
+        col_map = {
+            k.lower(): str(v).strip()
+            for k, v in testcase.items()
+            if str(v).strip()
+        }
+        resolved_tokens = [col_map.get(tok.lower(), tok) for tok in tokens_raw]
+        normalized_tokens = [self._normalize(tok) for tok in resolved_tokens if tok]
+        if mode_any:
+            hit = any(tok and tok in actual_norm for tok in normalized_tokens)
+            self._attach_json("UI Validation Details", {
+                "mode": "any",
+                "tokens": resolved_tokens,
+                "normalized_tokens": normalized_tokens,
+                "actual_norm": actual_norm,
+                "hit": hit
+            })
+            if not hit:
+                return "failed", f"Missing ANY of keywords from validation text in ACTUAL_RESPONSE: {resolved_tokens}"
+            return "passed", ""
+        else:
+            missing = [
+                orig for tok, orig in zip(normalized_tokens, resolved_tokens)
+                if tok and tok not in actual_norm
+            ]
+            self._attach_json("UI Validation Details", {
+                "mode": "all",
+                "tokens": resolved_tokens,
+                "normalized_tokens": normalized_tokens,
+                "actual_norm": actual_norm,
+                "missing": missing
+            })
+            if missing:
+                return "failed", f"Missing keywords from validation text in ACTUAL_RESPONSE: {missing}"
+            return "passed", ""
+
+    def execute_testcase(self, testcase: Dict[str, Any], rows_accumulator: Dict[str, Any]):
+        raw_prompt = str(testcase.get("prompt", "")).strip()
+        expected_answer = str(testcase.get("expected_answer", "")).strip()
+        validation_text = str(testcase.get("validation_text", "")).strip()
+        formatted_prompt = self._format_prompt_with_testcase(raw_prompt, testcase)
+        row_key = testcase.get("id") or formatted_prompt
+        title_seed = testcase.get("title") or testcase.get("name") or formatted_prompt[:140]
+        try:
+            allure.dynamic.title(title_seed)
+        except Exception:
+            pass
+        try:
+            allure.dynamic.feature("BECCA v2")
+            if testcase.get("id"):
+                allure.dynamic.story(str(testcase["id"]))
+            allure.dynamic.label("suite", "test_becca_eval_pipeline")
+            allure.dynamic.label("application", "becca_v2")
+            sev = str(testcase.get("severity", "critical")).lower()
+            allure.dynamic.severity(sev if sev in {"blocker","critical","normal","minor","trivial"} else "critical")
+        except Exception:
+            pass
+        self._attach_json("Parameters", {
+            "id": testcase.get("id"),
+            "prompt": raw_prompt,
+            "formatted_prompt": formatted_prompt,
+            "expected_answer": expected_answer,
+            "validation_text": validation_text
+        })
+        actual_response = ""
+        time_taken = 0
+        ui_status = "failed"
+        ui_error = ""
+        with allure.step("Ask Question in Becca"):
+            try:
+                actual_response, time_taken = self.run_prompt_and_get_response(formatted_prompt)
+                ui_status, ui_error = self._validate_response(
+                    actual_response=actual_response,
+                    expected_answer=expected_answer,
+                    validation_text=validation_text,
+                    testcase=testcase,
+                )
+            except Exception as e:
+                logging.error(e)
+                allure.attach(traceback.format_exc(), "UI Exception", allure.attachment_type.TEXT)
+                if not actual_response:
+                    actual_response = "error while fetching ui response"
+                ui_status = "failed"
+                ui_error = str(e)
+        ui_row = {
+            **testcase,
+            "actual_prompt": formatted_prompt,
+            "expected_response": expected_answer,
+            "actual_response": actual_response,
+            "ui_status": ui_status,
+            "ui_error": ui_error,
+            "Response time(secs)": time_taken,
+            "validation_text": validation_text,
+        }
+        rows_accumulator[row_key] = ui_row
+        with allure.step("UI Artifacts"):
+            self._attach_json("UI Row", ui_row)
+            if self._console_logs:
+                allure.attach("\n".join(self._console_logs[-50:]), "Console (last 50)", allure.attachment_type.TEXT)
+        Results.report_event_assert_bool(
+            ui_row["ui_status"] == "passed",
+            f"prompt failed: {formatted_prompt} | {ui_row['ui_error']}",
+            )
+        return ui_row
+
+    def evaluate_testcase(self, ui_row: Dict[str, Any], rows_accumulator: Dict[str, Any]):
+        with allure.step("Evaluate Becca Testcase"):
+
+            if ui_row["ui_status"] != "passed":
+                ui_row.update({
+                    "eval_status": "skipped",
+                    "eval_error": "UI validation failed",
+                    "eval_threshold": "",
+                    "gEval_score": "",
+                    "gEval_reason": "",
+                })
+
+                allure.attach(
+                    "Informational eval: skipped (UI validation failed)",
+                    name="INFO",
+                    attachment_type=allure.attachment_type.TEXT
+                )
+                return ui_row
+
+            threshold = THRESHOLD
+            expected = ui_row.get("expected_response", "").strip()
+
+            payload = {
+                "question": ui_row["actual_prompt"],
+                "llmAnswer": ui_row["actual_response"],
+                "groundAnswer": expected,
+                "contextualPrecision": False,
+                "contextualRecall": False,
+                "faithfulness": False,
+                "gEval": True,
+            }
+
+            data = get_multiple_scores(payload)
+            score = data.get("gEval", {}).get("score", 0)
+            reason = data.get("gEval", {}).get("reason", "")
+
+            eval_status = "passed" if score >= threshold else "failed"
+
+            ui_row.update({
+                "eval_threshold": threshold,
+                "gEval_score": score,
+                "gEval_reason": reason,
+                "eval_status": eval_status,
+                "eval_error": "",
+            })
+
+            allure.attach(
+                f"Eval Threshold: {threshold}",
+                name="INFO",
+                attachment_type=allure.attachment_type.TEXT
+            )
+
+            allure.attach(
+                f"Eval Result: gEval score={score} | reason={reason}",
+                name="INFO",
+                attachment_type=allure.attachment_type.TEXT
+            )
+
+            allure.attach(
+                f"Informational eval: {eval_status}",
+                name="INFO",
+                attachment_type=allure.attachment_type.TEXT
+            )
+
+            return ui_row
+
+    def _attach_json(self, name: str, obj: Dict[str, Any]):
+        try:
+            allure.attach(json.dumps(obj, indent=2, ensure_ascii=False), name, allure.attachment_type.JSON)
+        except Exception:
+            allure.attach(str(obj), name, allure.attachment_type.TEXT)
+
+
+
+few changes i need to make to the allure report 
+1)In evaluate becca test case section i want all the info to be viewable next to info only not on accordion open, it
+2)after logout sections theres sections like paramaters pass prompt failed etc all that i dont want i will attach part of allure report that i dont want
