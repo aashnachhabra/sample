@@ -277,13 +277,6 @@ class BeccaPage(BasePage):
             allure.dynamic.severity(sev if sev in {"blocker","critical","normal","minor","trivial"} else "critical")
         except Exception:
             pass
-        self._attach_json("Parameters", {
-            "id": testcase.get("id"),
-            "prompt": raw_prompt,
-            "formatted_prompt": formatted_prompt,
-            "expected_answer": expected_answer,
-            "validation_text": validation_text
-        })
         actual_response = ""
         time_taken = 0
         ui_status = "failed"
@@ -319,10 +312,6 @@ class BeccaPage(BasePage):
             self._attach_json("UI Row", ui_row)
             if self._console_logs:
                 allure.attach("\n".join(self._console_logs[-50:]), "Console (last 50)", allure.attachment_type.TEXT)
-        Results.report_event_assert_bool(
-            ui_row["ui_status"] == "passed",
-            f"prompt failed: {formatted_prompt} | {ui_row['ui_error']}",
-            )
         return ui_row
 
     def evaluate_testcase(self, ui_row: Dict[str, Any], rows_accumulator: Dict[str, Any]):
@@ -370,26 +359,14 @@ class BeccaPage(BasePage):
                 "eval_status": eval_status,
                 "eval_error": "",
             })
-
-            allure.attach(
-                f"Eval Threshold: {threshold}",
-                name="INFO",
-                attachment_type=allure.attachment_type.TEXT
-            )
-
-            allure.attach(
-                f"Eval Result: gEval score={score} | reason={reason}",
-                name="INFO",
-                attachment_type=allure.attachment_type.TEXT
-            )
-
-            allure.attach(
-                f"Informational eval: {eval_status}",
-                name="INFO",
-                attachment_type=allure.attachment_type.TEXT
-            )
-
-            return ui_row
+            if eval_status != "passed":
+                raise AssertionError(
+                    f"Eval failed | score={score}, threshold={threshold}\nReason: {reason}"
+                )
+            Results.report_event(f"Eval Threshold: {threshold}")
+            Results.report_event(f"Eval Result: gEval score={score} | reason={reason}")
+            Results.report_event(f"Informational eval: {eval_status}")
+        return ui_row
 
     def _attach_json(self, name: str, obj: Dict[str, Any]):
         try:
@@ -398,7 +375,4 @@ class BeccaPage(BasePage):
             allure.attach(str(obj), name, allure.attachment_type.TEXT)
 
 
-
-few changes i need to make to the allure report 
-1)In evaluate becca test case section i want all the info to be viewable next to info only not on accordion open, it
-2)after logout sections theres sections like paramaters pass prompt failed etc all that i dont want i will attach part of allure report that i dont want
+current becca page what to change and exactly where for this
