@@ -1,70 +1,73 @@
-import logging
-import traceback
-import time
-import re
-import json
-from typing import Dict, Any, Tuple
+    def evaluate_astra_testcase(self, ui_row: Dict[str, Any],rows_accumulator):
 
-import allure
-from playwright.sync_api import expect
-from tests.vikings.conftest import THRESHOLD
-from tests.vikings.fw.common.Results import Results
-from tests.vikings.fw.ui.BasePage import BasePage
-from tests.vikings.fw.utils import get_multiple_scores
-
-
-class BeccaPage(BasePage):
-    CHAT_INPUT_SELECTOR = ".input-section textarea[matInput]"
-    SUBMIT_BUTTON_SELECTOR = "button.submit-button"
-    START_NEW_CHAT_SELECTOR = "button:has-text('Start New Chat')"
-    CHAT_MESSAGE_SELECTOR = "div.chat-box app-chat-message"
-
-    GENERATION_TIMEOUT_SECS = 180
-    INPUT_READY_TIMEOUT_MS = 60000
-    ACTION_TIMEOUT_MS = 10000
-
-    def __init__(self, page):
-        super().__init__(page)
-        self._console_logs = []
-        try:
-            self.page.on("console", lambda m: self._console_logs.append(f"[{m.type}] {m.text}"))
-        except Exception:
-            pass
-
-    def open_becca(self):
-        with allure.step("Setup"):
-            self.page.wait_for_load_state("domcontentloaded")
-            self._wait_for_chat_input_ready(timeout=self.INPUT_READY_TIMEOUT_MS)
-            allure.attach(self.page.url, "URL", allure.attachment_type.TEXT)
-            self.attach_screenshot("Setup Screenshot")
-            self.page.wait_for_timeout(1500)
-
-
-    def start_new_chat_if_present(self):
-        with allure.step("Start New Chat"):
-            btn = self.page.locator(self.START_NEW_CHAT_SELECTOR)
+        with allure.step("Evaluate Astra Testcase"):
             try:
-                if btn.count() == 0:
-                    return
-                btn.first.wait_for(state="visible", timeout=3000)
-                btn.first.click()
-                self.page.wait_for_function(
-                    "document.querySelectorAll('app-chat-message').length === 0",
-                    timeout=5000
-                )
-                self.page.wait_for_timeout(1000)
-                self.attach_screenshot("After Start New Chat")
-            except Exception:
-                pass
+                threshold = THRESHOLD
+                if not ui_row.get("expected_response", ""):
+                    ui_row["expected_response"] = ui_row["actual_response"]
+                eval_payload = {
+                    "question": ui_row["actual_prompt"],
+                    "llmAnswer": ui_row["actual_response"],
+                    "groundAnswer": ui_row["expected_response"],
+                    # "contextualPrecision": False,
+                    # "contextualRecall": False,
+                    # "faithfulness": False,
+                    # # "answerRelevancy": True,
+                    # "gEval": True
+                }
+                data = get_multiple_scores_v2(eval_payload, config_path=ASTRA_EVAL_CONFIG_PATH)
+                gEval_score = data.get("gEval", {}).get("score", 0)
+                gEval_reason = data.get("gEval", {}).get("reason", "")
+                # answer_relevancy_score = data.get("answerRelevancy", {}).get("score", 0)
+                # answer_relevancy_reason = data.get("answerRelevancy", {}).get("reason", "")
 
-    def _wait_for_chat_input_ready(self, timeout: int = 60000):
-        """
-        Wait until the chat textarea and submit button are both usable.
-        This is more reliable than only checking `visible`.
-        """
-        input_box = self.page.locator(self.CHAT_INPUT_SELECTOR).first
-        submit_btn = self.page.locator(self.SUBMIT_BUTTON_SELECTOR).first
+                pass_geval = gEval_score >= threshold
+                # pass_answer_rel = answer_relevancy_score >= threshold
 
+                eval_dict_list = [pass_geval]
+                eval_result = {
+                    "eval_threshold": threshold,
+                    "gEval_score": gEval_score,
+                    "gEval_reason": gEval_reason,
+                    "eval_error": ""
+                }
+                # if not ("report" in ui_row["actual_response"].lower() and "download" in ui_row["actual_response"].lower()):
+                #     eval_dict_list.append(pass_answer_rel)
+                #     eval_result["answer_relevancy_score"] = answer_relevancy_score
+                #     eval_result["answer_relevancy_reason"] = answer_relevancy_reason
+                # else:
+                #     eval_result["answer_relevancy_score"] = 0
+                #     eval_result["answer_relevancy_reason"] = ""
+
+                eval_status = "passed" if all(eval_dict_list) else "failed"
+                eval_result["eval_status"] = eval_status
+
+                merged_ui_eval = {**ui_row, **eval_result}
+                # return merged_ui_eval
+            except Exception as e:
+                logging.info(f"Evaluation exception: {e}")
+                allure.attach(traceback.format_exc(), name="Evaluation exception", attachment_type=allure.attachment_type.TEXT)
+                eval_result = {
+                    "eval_threshold": "",
+                    "gEval_score": 0,
+                    "gEval_reason": "evaluation error",
+                    # "answer_relevancy_score": 0,
+                    # "answer_relevancy_reason": "evaluation error",
+                    "eval_status": "failed",
+                    "eval_error": f"{str(e)}"
+                }
+                merged_ui_eval = {**ui_row, **eval_result}
+                # return merged_ui_eval
+            ui_eval_row=merged_ui_eval
+            rows_accumulator[ui_eval_row['actual_prompt']]=ui_eval_row
+            # assert ui_eval_row['eval_status'] == CommonConstants.PASSED, f"eval failed: {ui_eval_row['actual_prompt']}"
+            # Results.report_event(ui_eval_row['eval_status'] == CommonConstants.PASSED,f"eval failed: {ui_eval_row['actual_prompt']}")
+            Results.report_event(f"Eval Threshold: {ui_eval_row['eval_threshold']}")
+            Results.report_event(f"Eval Result: gEval score: {ui_eval_row['gEval_score']}, reason: {ui_eval_row['gEval_reason']}")
+            Results.report_event(f"Informational eval: {ui_eval_row['eval_status']}", Status.INFO)
+            return merged_ui_eval
+
+its not looking correct can u take ref from astra code and then suggest same structure
         try:
             input_box.wait_for(state="attached", timeout=timeout)
             expect(input_box).to_be_visible(timeout=timeout)
