@@ -1,25 +1,412 @@
-@router.get("/api/vajra/jobs/{job_id}")
-async def get_job_status(job_id: str):
-    job = job_status_store.get(job_id)
-    if not job:
-        raise HTTPException(status_code=404, detail="Job not found")
-    return job
+Vajra + Voice Full Flow Diagram (Current Codebase)
+This is a presentation-ready flow aligned with the current implementation.
 
-job_status_store: dict[str, dict[str, Any]] = {}
+1) Full End-to-End Flow (Current)
++--------------------------------------------------------------------------------------------------+
+|                                         USER                                                      |
+|                              Speaks/types request in Voice app                                    |
++----------------------------------------------+---------------------------------------------------+
+                                               |
+                                               v
++--------------------------------------------------------------------------------------------------+
+|                                        VOICE APP                                                  |
+|  UI: captures speech/text -> Backend: chooses tool mode                                           |
+|                                                                                                   |
+|  Modes (current demo pattern):                                                                    |
+|   - ask      -> vajra_ask                                                                         |
+|   - resolve  -> vajra_resolve_service                                                             |
+|   - upgrade  -> vajra_upgrade_library                                                             |
+|   - scan     -> vajra_scan_dependencies                                                           |
++----------------------------------------------+---------------------------------------------------+
+                                               |
+                                               v
++--------------------------------------------------------------------------------------------------+
+|                             MCP JSON-RPC REQUEST TO VAJRA                                         |
+|  POST /mcp                                                                                       |
+|  method: tools/call                                                                              |
+|  params: { name: <tool_name>, arguments: {...} }                                                 |
++----------------------------------------------+---------------------------------------------------+
+                                               |
+                                               v
++--------------------------------------------------------------------------------------------------+
+|                              AGENTIC GATEWAY (PROPOSED PROD PATH)                                |
+|  - AuthN/AuthZ                                                                                    |
+|  - Rate limiting                                                                                  |
+|  - Security guardrails                                                                            |
+|  - Observability (logs/traces)                                                                    |
+|  - Kill-switch / policy controls                                                                  |
++----------------------------------------------+---------------------------------------------------+
+                                               |
+                                               v
++--------------------------------------------------------------------------------------------------+
+|                            VAJRA MCP SERVER (src/mcp_server/vajra_mcp_server.py)                 |
+|                                                                                                   |
+|  JSON-RPC handlers implemented:                                                                   |
+|   - initialize                                                                                    |
+|   - ping                                                                                          |
+|   - tools/list                                                                                    |
+|   - tools/call                                                                                    |
+|                                                                                                   |
+|  Tool dispatcher (currently implemented):                                                         |
+|   1) vajra_ask                  2) vajra_resolve_service                                          |
+|   3) vajra_upgrade_library      4) vajra_scan_dependencies                                        |
++--------------------------+-------------------------------+-----------------------------------------+
+                           |                               |
+                           |                               |
+                (A) Query/Ask path                 (B) Action/Remediation path
+                           |                               |
+                           v                               v
++------------------------------------------------+   +------------------------------------------------+
+| LangGraph Agent                                |   | Existing Vajra service logic                    |
+| (src/langgraph/*)                              |   | (src/endpoints/vajra_routes.py, GitHub service) |
+|                                                |   |                                                |
+| EntryRouter -> RouteService -> ClarifyQuestion |   | resolve_service:                               |
+| -> ToolRouter / Mongo / Docs -> GenerateResp   |   |  - fetch CVEs                                  |
+| -> SuggestNextQueries                           |   |  - filter by severity                          |
+|                                                |   |  - determine upgrades                          |
+| Returns answer + suggestions                    |   |  - update gradle                               |
+|                                                |   |  - create PR / workflow dispatch               |
++--------------------------+---------------------+   +--------------------------+---------------------+
+                           |                                                    |
+                           +----------------------------+-----------------------+
+                                                        |
+                                                        v
++--------------------------------------------------------------------------------------------------+
+|                                 MCP RESPONSE BACK TO VOICE                                        |
+|  result.content[0].text -> parsed JSON                                                           |
+|  Voice shows response, suggestions, PR URL, or action status                                     |
++--------------------------------------------------------------------------------------------------+
+2) Tool-to-Flow Mapping (What exactly runs)
+Tool	Purpose	Internal path in current code
+vajra_ask	Natural-language query/lookup/docs	LangGraph agent via langgraph_app.ainvoke(...)
+vajra_resolve_service	Remediate vulnerabilities for one service	resolve_service(...) from vajra_routes.py
+vajra_upgrade_library	Upgrade one specific dependency + PR	GithubService.specific_lib_upgrade(...)
+vajra_scan_dependencies	Trigger dependency scan workflow	_safe_github_workflow_dispatch(...)
+3) Example Runtime Flows
+A) Query example
+User: "How many critical CVEs for claimshighway?"
 
-@router.post("/api/vajra/resolve-cve")
-async def resolve_cve(body: ResolveCVEBody, background_tasks: BackgroundTasks):
-    job_id = str(uuid.uuid4())
-    job_status_store[job_id] = {
-        "status": "started",
-        "service_name": body.service_name,
-        "cve_id": body.cve_id,
-        "started_at": datetime.now().isoformat()
+Voice -> tools/call(vajra_ask) -> LangGraph query flow -> response + suggestions -> Voice UI
+B) Remediation example
+User: "Fix high vulnerabilities for mes-edps"
+
+Voice -> tools/call(vajra_resolve_service)
+      -> Vajra remediation flow (CVE fetch/filter -> dependency update -> PR)
+      -> response with status/PR link -> Voice UI
+4) Compliance Alignment (Current Architecture Intent)
+This flow is compliant with enterprise architecture intent when routed through Agentic Gateway:
+
+centralized auth and coarse-grained authorization
+guardrails and rate limits at gateway layer
+logs/traces for auditability
+controlled tool invocation path (no direct ad-hoc backend calls)
+5) Changes Needed in Voice (Only)
+MCP client wrapper in backend
+
+Support initialize, tools/list, tools/call
+Parse result.content[0].text payload
+Tool routing policy
+
+Query/info -> vajra_ask
+Service remediation -> vajra_resolve_service
+Single package upgrade -> vajra_upgrade_library
+Repo scan -> vajra_scan_dependencies
+Session handling
+
+Pass stable session_id for multi-turn conversations in vajra_ask
+UI handling
+
+Display answer/status/errors
+Display suggestions if present
+Show confirmation prompt before action tools (recommended)
+Security/config
+
+Use gateway URL + bearer token handling
+Never expose tokens in client logs/UI
+6) What Vajra Agent/Platform Will Handle
+Via vajra_ask (LangGraph)
+intent classification (service/database/docs)
+clarification for ambiguous prompts
+Mongo query/aggregation execution
+document retrieval (when routed to docs)
+response generation and follow-up suggestions
+Via action tools
+service-level remediation orchestration
+dependency upgrade planning and file patching
+PR creation workflow integration
+dependency scan workflow dispatch
+Shared platform handling
+standardized MCP contract for tool invocation
+structured response payloads for Voice consumption
+7) Presentation one-liner
+"Voice handles conversation and experience; Vajra handles security intelligence and remediation execution; Agentic Gateway enforces enterprise controls in between."
+
+8) MCP Payload and Response Contracts (Exact)
+This section shows the exact request/response shapes Voice should expect when calling Vajra via MCP.
+
+8.1 Initialize handshake
+Request:
+
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "initialize",
+  "params": {}
+}
+Response:
+
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "protocolVersion": "2025-03-26",
+    "capabilities": {
+      "tools": {
+        "listChanged": false
+      }
+    },
+    "serverInfo": {
+      "name": "vajra-mcp-server",
+      "version": "1.0.0"
     }
-    background_tasks.add_task(_background_resolve_cve, job_id, body)
-    return {
-        "job_id": job_id,
-        "status": "started",
-        "message": f"CVE resolution for {body.cve_id} has started",
-        "poll_url": f"/api/vajra/jobs/{job_id}"
+  }
+}
+8.2 Tool discovery (tools/list)
+Request:
+
+{
+  "jsonrpc": "2.0",
+  "id": 2,
+  "method": "tools/list",
+  "params": {}
+}
+Response shape:
+
+{
+  "jsonrpc": "2.0",
+  "id": 2,
+  "result": {
+    "tools": [
+      {
+        "name": "vajra_ask",
+        "description": "...",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "prompt": { "type": "string" },
+            "session_id": { "type": "string" }
+          },
+          "required": ["prompt"]
+        }
+      }
+    ]
+  }
+}
+8.3 Tool invocation (tools/call)
+Request template:
+
+{
+  "jsonrpc": "2.0",
+  "id": 3,
+  "method": "tools/call",
+  "params": {
+    "name": "<tool_name>",
+    "arguments": {
+      "...": "..."
     }
+  }
+}
+Response template (success):
+
+{
+  "jsonrpc": "2.0",
+  "id": 3,
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"success\":true,\"response\":\"...\"}"
+      }
+    ],
+    "isError": false
+  }
+}
+Response template (tool-level failure):
+
+{
+  "jsonrpc": "2.0",
+  "id": 3,
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"success\":false,\"error\":\"...\"}"
+      }
+    ],
+    "isError": true
+  }
+}
+Response template (protocol-level failure):
+
+{
+  "jsonrpc": "2.0",
+  "id": 3,
+  "error": {
+    "code": -32601,
+    "message": "Tool not found: <name>. Available: ..."
+  }
+}
+9) Exact Runtime Flows and Expected Payloads
+9.1 vajra_ask (query/chat flow)
+Request example:
+
+{
+  "jsonrpc": "2.0",
+  "id": 10,
+  "method": "tools/call",
+  "params": {
+    "name": "vajra_ask",
+    "arguments": {
+      "prompt": "How many critical CVEs does claimshighway have?",
+      "session_id": "voice-user-123"
+    }
+  }
+}
+Tool payload inside result.content[0].text:
+
+{
+  "success": true,
+  "response": "claimshighway has 0 critical CVEs. Result: **[]**",
+  "suggestions": [
+    {
+      "text": "Count open critical CVEs for claimshighway",
+      "intent": "COUNT",
+      "slots": {
+        "service_name": "claimshighway",
+        "severity": ["critical"],
+        "status": ["NS", "IP"]
+      }
+    }
+  ]
+}
+9.2 vajra_resolve_service (service remediation)
+Request example:
+
+{
+  "jsonrpc": "2.0",
+  "id": 11,
+  "method": "tools/call",
+  "params": {
+    "name": "vajra_resolve_service",
+    "arguments": {
+      "service_name": "mes-edps-temp-data-mgmt-service",
+      "repo_fullname": "uhc-tech-medicare-retiree-medicare/mes-edps-temp-data-mgmt-service",
+      "severity": "high"
+    }
+  }
+}
+Possible tool payload examples:
+
+{
+  "success": true,
+  "result": {
+    "message": "No CVEs found",
+    "service_name": "mes-edps-temp-data-mgmt-service"
+  }
+}
+or
+
+{
+  "success": true,
+  "result": {
+    "message": "PR created",
+    "pr_url": "https://github.com/<owner>/<repo>/pull/<number>",
+    "upgrades": [
+      ["org.springframework:spring-core", "6.1.14"]
+    ]
+  }
+}
+9.3 vajra_upgrade_library (single dependency)
+Request example:
+
+{
+  "jsonrpc": "2.0",
+  "id": 12,
+  "method": "tools/call",
+  "params": {
+    "name": "vajra_upgrade_library",
+    "arguments": {
+      "repo_name": "mes-edps-temp-data-mgmt-service",
+      "lib_name": "org.springframework:spring-core",
+      "version": "6.1.14"
+    }
+  }
+}
+9.4 vajra_scan_dependencies (scan workflow trigger)
+Request example:
+
+{
+  "jsonrpc": "2.0",
+  "id": 13,
+  "method": "tools/call",
+  "params": {
+    "name": "vajra_scan_dependencies",
+    "arguments": {
+      "repo_fullname": "uhc-tech-medicare-retiree-medicare/mes-edps-temp-data-mgmt-service",
+      "branch": "master"
+    }
+  }
+}
+Expected tool payload:
+
+{
+  "success": true,
+  "message": "Dependency scan triggered for uhc-tech-medicare-retiree-medicare/mes-edps-temp-data-mgmt-service@master",
+  "status_code": 204
+}
+10) Voice-Side Implementation Checklist (Exact)
+10.1 Backend checklist
+Build an MCP client wrapper that sends JSON-RPC requests to /mcp.
+Include Authorization: Bearer <token> when using Agentic Gateway.
+Call initialize once at startup/session begin.
+Optionally cache tools/list for UI hints and validation.
+For each user action, call tools/call with {name, arguments}.
+Parse result.content[0].text as JSON.
+If result.isError == true or payload success == false, map to user-safe error message.
+Maintain a stable session_id for vajra_ask multi-turn continuity.
+10.2 Frontend checklist
+Capture voice/text input.
+Display normal answer text from payload.response.
+Render payload.suggestions as clickable follow-ups (if present).
+For action tools, show explicit confirmation before submit (recommended).
+Display long-running statuses clearly (scan triggered, PR created, no CVEs found, failed).
+10.3 Minimal response contract Voice should normalize to
+Voice backend should convert all tool outputs into this internal shape:
+
+{
+  "ok": true,
+  "tool": "vajra_ask",
+  "message": "human readable output",
+  "suggestions": [],
+  "metadata": {}
+}
+This prevents frontend coupling to tool-specific raw payload variations.
+
+11) What Vajra Handles vs What Voice Handles
+Vajra handles
+Intent parsing and clarification for conversational asks (vajra_ask).
+Query execution over CVE data and docs retrieval.
+Remediation orchestration (fix planning, PR creation, scan dispatch).
+Returning structured tool payloads over MCP.
+Voice handles
+User interaction (speech/text UX).
+Tool selection policy and confirmations.
+Session continuity identifier management.
+Parsing MCP response envelopes and rendering outcomes.
+Error UX and retry decisions.
+
+
+this is one approach i used to do agent 2 agent interaction between a tool vajra we created now another team with app named voice wants to have vajra in their app as well so i finalised this approac
+understand everything above clearly and create doc i need to present this idea in a meeting
+make sure flows and diagrams are clear and understandable 
+also after doc creation do share ur feedback of this approach as well
