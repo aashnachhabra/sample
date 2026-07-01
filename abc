@@ -1,105 +1,53 @@
-name: Vulnerability Download
-
-on:
-  schedule:
-    - cron: "0 2 * * *" # once daily at 02:00 UTC
-  workflow_dispatch:
-    inputs:
-      target_env:
-        description: "Environment"
-        required: true
-        default: "uat"
-        type: choice
-        options:
-          - dev
-          - uat
-
-permissions:
-  actions: write
-  contents: write
-
-jobs:
-  download-and-commit:
-    runs-on: uhg-runner
-
-    container:
-      image: mcr.microsoft.com/playwright/python:v1.56.0-noble
-      options: --user root
-
-    env:
-      HEADLESS: "true"
-      PIP_NO_INPUT: "1"
-      PIP_CONFIG_FILE: /dev/null
-      PIP_INDEX_URL: https://pypi.org/simple
-      DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
-      TARGET_ENV: ${{ inputs.target_env }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
-      - name: Log selected environment
-        run: |
-          echo "Running vulnerability download for environment: ${TARGET_ENV:-uat}"
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install --no-input -r requirements.txt
-
-      - name: Install Playwright
-        run: python -m playwright install chromium
-
-      - name: Setup corporate SSL certificate
-        run: |
-          CERT_PATH=$(python -c "import certifi; print(certifi.where())")
-          cat ./certs/standard_trusts.pem >> $CERT_PATH
-
-      - name: Download vulnerability CSVs
-        env:
-          PYTHONPATH: ${{ github.workspace }}
-          SECURITY_USERNAME: ${{ secrets.SECURITY_USERNAME }}
-          SECURITY_PASSWORD: ${{ secrets.SECURITY_PASSWORD }}
-        run: python -m src.tools.run_vuln_pipeline
-
-      - name: Commit CSVs to default branch
-        shell: bash
-        run: |
-          if [ ! -d /tmp/downloads ]; then
-            echo "No /tmp/downloads directory found"
-            exit 1
-          fi
-
-          unset GIT_DIR
-          unset GIT_WORK_TREE
-          cd "$GITHUB_WORKSPACE"
-
-          git config --global --add safe.directory "$GITHUB_WORKSPACE"
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
-
-          git fetch origin "$DEFAULT_BRANCH"
-          git checkout "$DEFAULT_BRANCH"
-
-          mkdir -p artifacts/vulnerability
-          rm -rf artifacts/vulnerability/*
-          cp -R /tmp/downloads/. artifacts/vulnerability/
-
-          git add -A artifacts/vulnerability
-
-          if git diff --cached --quiet; then
-            echo "No changes in vulnerability CSVs — skipping commit and push"
-            exit 0
-          fi
-
-          CSV_COUNT=$(find artifacts/vulnerability -name "*.csv" -type f | wc -l | tr -d ' ')
-          git commit -m "chore: refresh vulnerability CSVs ($CSV_COUNT files, run $GITHUB_RUN_ID)"
-          git remote set-url origin https://x-access-token:${{ secrets.TRIGGER_PAT }}@github.com/${{ github.repository }}
-          git push origin "$DEFAULT_BRANCH"
+Run if [ ! -d /tmp/downloads ]; then
+  if [ ! -d /tmp/downloads ]; then
+    echo "No /tmp/downloads directory found"
+    exit 1
+  fi
   
-
-          echo "Committed $CSV_COUNT CSV files to $DEFAULT_BRANCH"
+  unset GIT_DIR
+  unset GIT_WORK_TREE
+  cd "$GITHUB_WORKSPACE"
+  
+  git config --global --add safe.directory "$GITHUB_WORKSPACE"
+  git config user.name "github-actions"
+  git config user.email "github-actions@github.com"
+  
+  git fetch origin "$DEFAULT_BRANCH"
+  git checkout "$DEFAULT_BRANCH"
+  
+  mkdir -p artifacts/vulnerability
+  rm -rf artifacts/vulnerability/*
+  cp -R /tmp/downloads/. artifacts/vulnerability/
+  
+  git add -A artifacts/vulnerability
+  
+  if git diff --cached --quiet; then
+    echo "No changes in vulnerability CSVs — skipping commit and push"
+    exit 0
+  fi
+  
+  CSV_COUNT=$(find artifacts/vulnerability -name "*.csv" -type f | wc -l | tr -d ' ')
+  git commit -m "chore: refresh vulnerability CSVs ($CSV_COUNT files, run $GITHUB_RUN_ID)"
+  git remote set-url origin ***github.com/uhc-tech-medicare-retiree-medicare/matrix-imap-rag-agent
+  echo "==== Remote URL: ====="
+  git remote -v
+  git push origin "$DEFAULT_BRANCH"
+  
+  
+  echo "Committed $CSV_COUNT CSV files to $DEFAULT_BRANCH"
+  shell: bash --noprofile --norc -e -o pipefail {0}
+  env:
+    HEADLESS: true
+    PIP_NO_INPUT: 1
+    PIP_CONFIG_FILE: /dev/null
+    PIP_INDEX_URL: https://pypi.org/simple
+    DEFAULT_BRANCH: main
+    TARGET_ENV: uat
+    pythonLocation: /__w/_tool/Python/3.11.15/x64
+    PKG_CONFIG_PATH: /__w/_tool/Python/3.11.15/x64/lib/pkgconfig
+    Python_ROOT_DIR: /__w/_tool/Python/3.11.15/x64
+    Python2_ROOT_DIR: /__w/_tool/Python/3.11.15/x64
+    Python3_ROOT_DIR: /__w/_tool/Python/3.11.15/x64
+    LD_LIBRARY_PATH: /__w/_tool/Python/3.11.15/x64/lib
+fatal: could not read Username for 'https://github.com': No such device or address
+Error: Process completed with exit code 128.
