@@ -1,207 +1,105 @@
-name: Deploy
+name: Vulnerability Download
 
 on:
-  workflow_call:
+  schedule:
+    - cron: "0 2 * * *" # once daily at 02:00 UTC
+  workflow_dispatch:
     inputs:
-      environments:
+      target_env:
+        description: "Environment"
         required: true
-        type: string
-      image-tag:
-        required: true
-        type: string
-
+        default: "uat"
+        type: choice
+        options:
+          - dev
+          - uat
 
 permissions:
-  actions: read
+  actions: write
   contents: write
-  pull-requests: read
-  security-events: write
-  checks: write
-  id-token: write
 
-  
 jobs:
-  setup-environments:
-    name: Setup Environments
+  download-and-commit:
     runs-on: uhg-runner
-    outputs:
-      environments: ${{ steps.reframe.outputs.environments }}
-      contains-promotion-environment: ${{ steps.check-prod-environments.outputs.contains_promo }}
-      promotion-environments: ${{ steps.check-prod-environments.outputs.promotion_environments }}
-      docker-image-name: ${{ steps.app-config.outputs.app-name }}
-      jfrog-project-key: ${{ steps.app-config.outputs.jfrog-project-key }}
-      artifactory: ${{ steps.app-config.outputs.artifactory }}
-      container-registry: ${{ steps.app-config.outputs.container-registry }}
+
+    container:
+      image: mcr.microsoft.com/playwright/python:v1.56.0-noble
+      options: --user root
+
+    env:
+      HEADLESS: "true"
+      PIP_NO_INPUT: "1"
+      PIP_CONFIG_FILE: /dev/null
+      PIP_INDEX_URL: https://pypi.org/simple
+      DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+      TARGET_ENV: ${{ inputs.target_env }}
     steps:
-      - name: Checkout Code
+      - name: Checkout
         uses: actions/checkout@v4
-      - name: Load App Config
-        uses: uhc-tech-medicare-retiree-medicare/matrix-workflows/.github/actions/load-app-config@v2
-        id: app-config
-      - name: Check if environments contain any promotion environments
-        id: check-prod-environments
-        shell: bash
-        env:
-          INPUT_ENVIRONMENTS: ${{ inputs.environments }}
-          PROMOTION_ENVIRONMENTS: ${{ steps.app-config.outputs.promotion-environments }}
-          PROD_ENVIRONMENTS: ${{ steps.app-config.outputs.prod-environments }}
-        # Use promotion-environments if exists, otherwise fall back to prod-environments
-        # Collect all input environments that require promotion
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Log selected environment
         run: |
-          IFS=',' read -a input_envs_array <<< "$INPUT_ENVIRONMENTS"
-          
-          # Determine which environments to use for promotion
-          # Priority: promotion-environments > prod-environments
-          if [ -n "$PROMOTION_ENVIRONMENTS" ]; then
-            echo "Using promotion-environments: ${PROMOTION_ENVIRONMENTS}"
-            IFS=',' read -a target_envs_array <<< "$PROMOTION_ENVIRONMENTS"
-          else
-            echo "Falling back to prod-environments: ${PROD_ENVIRONMENTS}"
-            IFS=',' read -a target_envs_array <<< "$PROD_ENVIRONMENTS"
+          echo "Running vulnerability download for environment: ${TARGET_ENV:-uat}"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install --no-input -r requirements.txt
+
+      - name: Install Playwright
+        run: python -m playwright install chromium
+
+      - name: Setup corporate SSL certificate
+        run: |
+          CERT_PATH=$(python -c "import certifi; print(certifi.where())")
+          cat ./certs/standard_trusts.pem >> $CERT_PATH
+
+      - name: Download vulnerability CSVs
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+          SECURITY_USERNAME: ${{ secrets.SECURITY_USERNAME }}
+          SECURITY_PASSWORD: ${{ secrets.SECURITY_PASSWORD }}
+        run: python -m src.tools.run_vuln_pipeline
+
+      - name: Commit CSVs to default branch
+        shell: bash
+        run: |
+          if [ ! -d /tmp/downloads ]; then
+            echo "No /tmp/downloads directory found"
+            exit 1
           fi
-          
-          contains_promo='false'
-          promotion_environments=()
-          
-          # Collect all input environments that match target environments
-          for input_env in "${input_envs_array[@]}"; do
-            input_env=$(echo "$input_env" | xargs)
-            for target_env in "${target_envs_array[@]}"; do
-              target_env=$(echo "$target_env" | xargs)
-              if [[ "$input_env" == "$target_env" ]]; then
-                contains_promo='true'
-                promotion_environments+=("$input_env")
-              fi
-            done
-          done
-          
-          # Convert array to JSON array format for matrix strategy
-          promotion_envs_json=$(printf '%s\n' "${promotion_environments[@]}" | jq -R . | jq -s -c .)
-          
-          echo "contains_promo=${contains_promo}" >> $GITHUB_OUTPUT
-          echo "promotion_environments=${promotion_envs_json}" >> $GITHUB_OUTPUT
-          echo "Contains promotion environment: ${contains_promo}"
-          echo "Promotion environments: ${promotion_environments[*]}"
-      - name: Reframe Environments as JSON array
-        id: reframe
-        # Convert the comma separated environments field to a JSON array 
-        # that can be used as matrix strategy
-        shell: bash
-        env:
-          ENVS_COMMA_SEPARATED: ${{ inputs.environments }}
-        # jq --raw-input reads the input as string instead of json
-        # jq --compact-output outputs the json in a single line
-        run: |
-          echo "Environments: ${ENVS_COMMA_SEPARATED}"
-          environments_json=$(echo "${ENVS_COMMA_SEPARATED}" | jq --raw-input --compact-output 'split(",")')
-          echo "environments_json: ${environments_json}"
-          echo "environments=${environments_json}" >> $GITHUB_OUTPUT
-    
-  promote-azure-cr-image:
-    if: ${{ endsWith(needs.setup-environments.outputs.container-registry, 'azurecr.io') && needs.setup-environments.outputs.contains-promotion-environment == 'true' }}
-    name: Promote Azure Container Registry Image - ${{ matrix.environment }}
-    uses: uhc-tech-medicare-retiree-medicare/matrix-workflows/.github/workflows/promote-azure-cr-image.yaml@v2
-    needs: setup-environments
-    strategy:
-      fail-fast: false
-      matrix:
-        environment: ${{ fromJson(needs.setup-environments.outputs.promotion-environments) }}
-    with:
-      tag: ${{ inputs.image-tag }}
-      environment: ${{ matrix.environment }}
 
-  promote-repo1-image:
-    if: ${{ endsWith(needs.setup-environments.outputs.container-registry, 'repo1.uhc.com') && needs.setup-environments.outputs.contains-promotion-environment == 'true' }}
-    name: Promote Repo1 Image
-    uses: uhc-tech-medicare-retiree-medicare/matrix-workflows/.github/workflows/promote-repo1-image.yaml@v2
-    needs: setup-environments
-    with:
-      tag: ${{ inputs.image-tag }}
-      environment: ${{ fromJson(needs.setup-environments.outputs.promotion-environments)[0] }}
+          unset GIT_DIR
+          unset GIT_WORK_TREE
+          cd "$GITHUB_WORKSPACE"
 
-  promote-jfrog-saas-image:
-    if: ${{ !endsWith(needs.setup-environments.outputs.container-registry, 'azurecr.io') && !endsWith(needs.setup-environments.outputs.container-registry, 'repo1.uhc.com') && needs.setup-environments.outputs.contains-promotion-environment == 'true' }}
-    name: Promote JFrog-Saas Image
-    uses: uhg-pipelines/privileged-workflows/.github/workflows/promote-docker-image.yaml@v2
-    needs: setup-environments
-    with:
-      jfrog-project-key: ${{ needs.setup-environments.outputs.jfrog-project-key }}
-      source-docker-image-name: ${{ needs.setup-environments.outputs.docker-image-name }}
-      source-docker-image-tag: ${{ inputs.image-tag }}
-      promotion-type: release
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
 
-  deploy:
-    runs-on: uhg-runner
-    needs: 
-      - setup-environments
-      - promote-azure-cr-image
-      - promote-repo1-image
-      - promote-jfrog-saas-image
-    # Run if workflow is not cancelled and either:
-    # - contains-promotion-environment is false
-    # - or one of the promote jobs succeeded
-    if: ${{ !cancelled() && (needs.setup-environments.outputs.contains-promotion-environment == 'false' || needs.promote-azure-cr-image.result == 'success' || needs.promote-repo1-image.result == 'success' || needs.promote-jfrog-saas-image.result == 'success') }}
-    strategy:
-      # Failure to deploy to one environment should not cancel other deployments
-      fail-fast: false
-      matrix:
-        environment: ${{ fromJson(needs.setup-environments.outputs.environments) }}
-    name: Deploy to ${{ matrix.environment }}
-    environment: ${{ matrix.environment }}
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
+          git fetch origin "$DEFAULT_BRANCH"
+          git checkout "$DEFAULT_BRANCH"
 
-      - name: Load App Config
-        uses: uhc-tech-medicare-retiree-medicare/matrix-workflows/.github/actions/load-app-config@v2
-        id: app-config
+          mkdir -p artifacts/vulnerability
+          rm -rf artifacts/vulnerability/*
+          cp -R /tmp/downloads/. artifacts/vulnerability/
 
-      - name: Fetch Secrets
-        uses: uhc-tech-medicare-retiree-medicare/matrix-workflows/.github/actions/fetch-secrets@v2
-        with:
-          environment: ${{ matrix.environment }}
+          git add -A artifacts/vulnerability
 
-      - name: Deploy Azure Container App
-        if: ${{ steps.app-config.outputs.deployment-platform == 'azure-container-app' }}  
-        uses: uhc-tech-medicare-retiree-medicare/matrix-workflows/.github/actions/deploy-azure-container-app@v2
-        with:
-          azure-credentials: ${{ env.DS_AZURE_CREDENTIALS }}
-          target-environment: ${{ matrix.environment }}
-          image-tag: ${{ inputs.image-tag }}
+          if git diff --cached --quiet; then
+            echo "No changes in vulnerability CSVs — skipping commit and push"
+            exit 0
+          fi
 
-      - name: Deploy Azure Container App Job
-        if: ${{ steps.app-config.outputs.deployment-platform == 'azure-container-app-job' }}  
-        uses: uhc-tech-medicare-retiree-medicare/matrix-workflows/.github/actions/deploy-azure-container-app-job@v2
-        with:
-          azure-credentials: ${{ env.DS_AZURE_CREDENTIALS }}
-          target-environment: ${{ matrix.environment }}
-          image-tag: ${{ inputs.image-tag }}
+          CSV_COUNT=$(find artifacts/vulnerability -name "*.csv" -type f | wc -l | tr -d ' ')
+          git commit -m "chore: refresh vulnerability CSVs ($CSV_COUNT files, run $GITHUB_RUN_ID)"
+          git remote set-url origin https://x-access-token:${{ secrets.TRIGGER_PAT }}@github.com/${{ github.repository }}
+          git push origin "$DEFAULT_BRANCH"
+  
 
-      - name: Deploy Azure Function App
-        if: ${{ steps.app-config.outputs.deployment-platform == 'azure-function-app' }}
-        uses: uhc-tech-medicare-retiree-medicare/matrix-workflows/.github/actions/deploy-azure-function-app@v2
-        with:
-          azure-credentials: ${{ env.DS_AZURE_CREDENTIALS }}
-          target-environment: ${{ matrix.environment }}
-          image-tag: ${{ inputs.image-tag }}
-
-      - name: Deploy to HCC Kubernetes
-        if: ${{ steps.app-config.outputs.deployment-platform == 'hcc-kubernetes'}}
-        id: deploy-hcc-kubernetes
-        uses: uhc-tech-medicare-retiree-medicare/matrix-workflows/.github/actions/deploy-hcc-kubernetes@v2
-        with:
-          target-environment: ${{ matrix.environment }}
-          image-tag: ${{ inputs.image-tag }}
-          cluster-token: ${{ env.DS_KUBERNETES_TOKEN }}
-          cluster-ca-cert: ${{ env.DS_KUBERNETES_CERT }}
-
-      - name: Deploy to Azure Kubernetes Service
-        if: ${{ steps.app-config.outputs.deployment-platform == 'azure-kubernetes-service' }}
-        id: deploy-aks
-        uses: uhc-tech-medicare-retiree-medicare/matrix-workflows/.github/actions/deploy-to-aks@v2
-        with:
-          azure-credentials: ${{ env.DS_AZURE_CREDENTIALS }}
-          target-environment: ${{ matrix.environment }}
-          image-tag: ${{ inputs.image-tag }}
-          image-name: ${{ needs.setup-environments.outputs.docker-image-name }}
-
+          echo "Committed $CSV_COUNT CSV files to $DEFAULT_BRANCH"
